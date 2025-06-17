@@ -1,1 +1,677 @@
-<h1>Hallo</h1>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Management System - Hoffmann und Voss GmbH</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="company-logo">
+                    <i class="fas fa-industry"></i>
+                    <div class="company-info">
+                        <div class="company-name-container">
+                            <h2 id="companyName" class="editable-company-name" title="Klicken zum Bearbeiten">Hoffmann & Voss</h2>
+                            <button class="edit-company-btn" id="editCompanyBtn" title="Firmennamen bearbeiten">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <p>QHSE Management</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Max Mustermann</span>
+                        <span class="user-role" id="userRole">Geschäftsführung</span>
+                        <button class="edit-profile-btn" id="editProfileBtn" title="Profil bearbeiten">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <ul class="menu-items">
+                    <li class="menu-item active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </li>
+                    <!-- Dynamic areas will be populated by JavaScript -->
+                    <li class="menu-item static-item" data-section="arbeitsanweisungen">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Arbeitsanweisungen</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="verfahrensanweisungen">
+                        <i class="fas fa-cogs"></i>
+                        <span>Verfahrensanweisungen</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="audits" data-roles="geschaeftsfuehrung,qhse,admin,root-admin">
+                        <i class="fas fa-search"></i>
+                        <span>Auditauswertungen</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="kundenzufriedenheit" data-roles="geschaeftsfuehrung,qhse,admin,root-admin">
+                        <i class="fas fa-smile"></i>
+                        <span>Kundenzufriedenheit</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="dokumente" data-roles="geschaeftsfuehrung,qhse,admin,root-admin">
+                        <i class="fas fa-upload"></i>
+                        <span>Dokumente verwalten</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="nutzerverwaltung" data-roles="admin,root-admin">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Nutzerverwaltung</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="bereichsverwaltung" data-roles="admin,root-admin">
+                        <i class="fas fa-cogs"></i>
+                        <span>Bereichsverwaltung</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="abteilungsverwaltung" data-roles="admin,root-admin">
+                        <i class="fas fa-sitemap"></i>
+                        <span>Abteilungsverwaltung</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-selector">
+                    <label for="userSelect">Nutzer wechseln:</label>
+                    <select id="userSelect">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Suchen...">
+                    </div>
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="content-section active">
+                    <div class="dashboard-grid">
+                        <div class="kpi-cards">
+                            <div class="kpi-card safety">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-hard-hat"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h3>Arbeitsschutz</h3>
+                                    <div class="kpi-value">98.5%</div>
+                                    <p>Compliance Rate</p>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card quality">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-medal"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h3>Qualität</h3>
+                                    <div class="kpi-value">99.2%</div>
+                                    <p>Qualitätsrate</p>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card environment">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h3>Umwelt</h3>
+                                    <div class="kpi-value">12</div>
+                                    <p>CO₂ Einsparung (t)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="kpi-card health">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-heartbeat"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <h3>Gesundheit</h3>
+                                    <div class="kpi-value">2.1</div>
+                                    <p>Krankentage (Ø)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-widgets">
+                            <div class="widget audit-status">
+                                <h3>Letzte Audits</h3>
+                                <div class="audit-list">
+                                    <div class="audit-item passed">
+                                        <span class="audit-type">ISO 9001</span>
+                                        <span class="audit-date">15.03.2024</span>
+                                        <span class="audit-result">Bestanden</span>
+                                    </div>
+                                    <div class="audit-item passed">
+                                        <span class="audit-type">ISO 14001</span>
+                                        <span class="audit-date">22.02.2024</span>
+                                        <span class="audit-result">Bestanden</span>
+                                    </div>
+                                    <div class="audit-item pending">
+                                        <span class="audit-type">OHSAS 18001</span>
+                                        <span class="audit-date">05.04.2024</span>
+                                        <span class="audit-result">Geplant</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="widget customer-satisfaction">
+                                <h3>Kundenzufriedenheit</h3>
+                                <div class="satisfaction-score">
+                                    <div class="score-circle">
+                                        <span class="score">4.7</span>
+                                    </div>
+                                    <p>von 5 Sternen</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Arbeitsschutz Section -->
+                <section id="arbeitsschutz-section" class="content-section">
+                    <div class="section-content">
+                        <div class="content-cards">
+                            <div class="content-card">
+                                <h3>Unfallstatistiken</h3>
+                                <div class="stat-item">
+                                    <span>Arbeitsunfälle (2024):</span>
+                                    <strong>0</strong>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Beinahe-Unfälle:</span>
+                                    <strong>3</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="content-card">
+                                <h3>Sicherheitsschulungen</h3>
+                                <div class="training-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 85%"></div>
+                                    </div>
+                                    <p>85% der Mitarbeiter geschult</p>
+                                </div>
+                            </div>
+
+                            <div class="content-card">
+                                <h3>PSA-Verwaltung</h3>
+                                <div class="psa-list">
+                                    <div class="psa-item">Schutzhelme: <span class="status-ok">Aktuell</span></div>
+                                    <div class="psa-item">Sicherheitsschuhe: <span class="status-warning">Prüfung fällig</span></div>
+                                    <div class="psa-item">Handschuhe: <span class="status-ok">Aktuell</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Other sections will be populated by JavaScript -->
+                <section id="qualitaet-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Qualitätsmanagement</h2>
+                        <p>Qualitätskennzahlen und Prozessüberwachung für Kunststoffproduktion</p>
+                    </div>
+                </section>
+
+                <section id="umwelt-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Umweltmanagement</h2>
+                        <p>Umweltkennzahlen und Nachhaltigkeitsmaßnahmen</p>
+                    </div>
+                </section>
+
+                <section id="datenschutz-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Datenschutz</h2>
+                        <p>DSGVO-Compliance und Datenschutzrichtlinien</p>
+                    </div>
+                </section>
+
+                <section id="gesundheit-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Gesundheitsmanagement</h2>
+                        <p>Mitarbeitergesundheit und Präventionsmaßnahmen</p>
+                    </div>
+                </section>
+
+                <section id="arbeitsanweisungen-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Arbeitsanweisungen</h2>
+                        <p>Hier werden alle hochgeladenen Arbeitsanweisungen angezeigt.</p>
+                    </div>
+                </section>
+
+                <section id="verfahrensanweisungen-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Verfahrensanweisungen</h2>
+                        <p>Hier werden alle hochgeladenen Verfahrensanweisungen angezeigt.</p>
+                    </div>
+                </section>
+
+                <section id="audits-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Auditauswertungen</h2>
+                        <div class="audit-overview">
+                            <div class="audit-summary">
+                                <h3>TÜV Zertifizierungen</h3>
+                                <div class="cert-status">
+                                    <div class="cert-item">ISO 9001:2015 - Gültig bis 12/2025</div>
+                                    <div class="cert-item">ISO 14001:2015 - Gültig bis 03/2026</div>
+                                    <div class="cert-item">OHSAS 18001 - Erneuerung 04/2024</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="kundenzufriedenheit-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Kundenzufriedenheit</h2>
+                        <div class="satisfaction-details">
+                            <div class="satisfaction-metrics">
+                                <div class="metric">
+                                    <h4>Produktqualität</h4>
+                                    <div class="rating">★★★★★ 4.8/5</div>
+                                </div>
+                                <div class="metric">
+                                    <h4>Liefertreue</h4>
+                                    <div class="rating">★★★★☆ 4.5/5</div>
+                                </div>
+                                <div class="metric">
+                                    <h4>Service</h4>
+                                    <div class="rating">★★★★★ 4.9/5</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="dokumente-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Dokumentenverwaltung</h2>
+                        <div class="upload-area">
+                            <div class="upload-zone">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Dateien hier ablegen oder klicken zum Hochladen</p>
+                                <input type="file" id="fileUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx">
+                            </div>
+                            <div class="upload-categories">
+                                <select id="documentCategory">
+                                    <option value="">Kategorie wählen</option>
+                                    <option value="arbeitsschutz">Arbeitsschutz</option>
+                                    <option value="qualitaet">Qualität</option>
+                                    <option value="umwelt">Umwelt</option>
+                                    <option value="datenschutz">Datenschutz</option>
+                                    <option value="gesundheit">Gesundheit</option>
+                                </select>
+                                <button id="uploadBtn" class="upload-btn">Hochladen</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="nutzerverwaltung-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Nutzerverwaltung</h2>
+                        <div class="user-management">
+                            <div class="user-actions">
+                                <button id="addUserBtn" class="btn-primary">
+                                    <i class="fas fa-user-plus"></i> Neuen Nutzer hinzufügen
+                                </button>
+                            </div>
+                            <div class="users-list" id="usersList">
+                                <!-- Users will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="bereichsverwaltung-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Bereichsverwaltung</h2>
+                        <div class="area-management">
+                            <div class="area-actions">
+                                <button id="addAreaBtn" class="btn-primary">
+                                    <i class="fas fa-plus"></i> Neuen Bereich hinzufügen
+                                </button>
+                            </div>
+                            <div class="areas-list" id="areasList">
+                                <!-- Areas will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="abteilungsverwaltung-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Abteilungsverwaltung</h2>
+                        <div class="department-management">
+                            <div class="department-actions">
+                                <button id="addDepartmentBtn" class="btn-primary">
+                                    <i class="fas fa-building"></i> Neue Abteilung hinzufügen
+                                </button>
+                            </div>
+                            <div class="departments-list" id="departmentsList">
+                                <!-- Departments will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Document Preview Modal -->
+    <div id="documentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalDocumentTitle">Dokumentenansicht</h2>
+                <span class="close" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="document-details">
+                    <div class="detail-row">
+                        <strong>Dateiname:</strong> <span id="modalFileName"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Kategorie:</strong> <span id="modalCategory"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Hochgeladen von:</strong> <span id="modalUploadedBy"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Hochgeladen am:</strong> <span id="modalUploadDate"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Dateigröße:</strong> <span id="modalFileSize"></span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Revision:</strong> <span id="modalRevision"></span>
+                    </div>
+                </div>
+                <div class="document-preview">
+                    <div id="documentPreviewContent">
+                        <p>Vorschau wird geladen...</p>
+                    </div>
+                </div>
+                <div class="document-history">
+                    <h3>Revisionshistorie</h3>
+                    <div id="revisionHistory"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modalDownloadBtn" class="btn-primary">Herunterladen</button>
+                <button id="modalCloseBtn" class="btn-secondary">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Benutzerprofil bearbeiten</h2>
+                <span class="close" id="closeProfileModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="editUserName">Name:</label>
+                        <input type="text" id="editUserName" name="userName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editUserEmail">E-Mail:</label>
+                        <input type="email" id="editUserEmail" name="userEmail">
+                    </div>
+                    <div class="form-group">
+                        <label for="editUserPhone">Telefon:</label>
+                        <input type="tel" id="editUserPhone" name="userPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="editUserDepartment">Abteilung:</label>
+                        <input type="text" id="editUserDepartment" name="userDepartment">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProfileBtn" class="btn-primary">Speichern</button>
+                <button id="cancelProfileBtn" class="btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management Modal -->
+    <div id="userManagementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="userModalTitle">Nutzer hinzufügen</h2>
+                <span class="close" id="closeUserModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <div class="form-tabs">
+                        <button type="button" class="tab-btn active" data-tab="basic">Grunddaten</button>
+                        <button type="button" class="tab-btn" data-tab="personal">Persönliche Daten</button>
+                        <button type="button" class="tab-btn" data-tab="hierarchy">Hierarchie</button>
+                        <button type="button" class="tab-btn" data-tab="notes">Anmerkungen</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="basic-tab">
+                        <div class="form-group">
+                            <label for="newUserName">Name:</label>
+                            <input type="text" id="newUserName" name="userName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserEmail">E-Mail:</label>
+                            <input type="email" id="newUserEmail" name="userEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserPhone">Telefon:</label>
+                            <input type="tel" id="newUserPhone" name="userPhone">
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserDepartment">Abteilung:</label>
+                            <select id="newUserDepartment" name="userDepartment" required>
+                                <option value="">Abteilung wählen</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserRole">Rolle:</label>
+                            <select id="newUserRole" name="userRole" required>
+                                <option value="">Rolle wählen</option>
+                                <option value="geschaeftsfuehrung">Geschäftsführung</option>
+                                <option value="betriebsleiter">Betriebsleiter</option>
+                                <option value="abteilungsleiter">Abteilungsleiter</option>
+                                <option value="qhse">QHSE-Mitarbeiter</option>
+                                <option value="mitarbeiter">Mitarbeiter</option>
+                                <option value="admin" id="adminOption">Administrator</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="personal-tab">
+                        <div class="form-group">
+                            <label for="newUserBirthdate">Geburtstag:</label>
+                            <input type="date" id="newUserBirthdate" name="userBirthdate">
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserAddress">Anschrift:</label>
+                            <textarea id="newUserAddress" name="userAddress" rows="3" placeholder="Straße, Hausnummer&#10;PLZ Ort"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserMobile">Mobiltelefon:</label>
+                            <input type="tel" id="newUserMobile" name="userMobile">
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserEmergencyContact">Notfallkontakt:</label>
+                            <input type="text" id="newUserEmergencyContact" name="userEmergencyContact" placeholder="Name und Telefonnummer">
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="hierarchy-tab">
+                        <div class="form-group">
+                            <label for="newUserSupervisor">Vorgesetzter:</label>
+                            <select id="newUserSupervisor" name="userSupervisor">
+                                <option value="">Kein Vorgesetzter</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserPosition">Position:</label>
+                            <input type="text" id="newUserPosition" name="userPosition" placeholder="z.B. Produktionsleiter, Sachbearbeiter">
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserStartDate">Eintrittsdatum:</label>
+                            <input type="date" id="newUserStartDate" name="userStartDate">
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="notes-tab">
+                        <div class="form-group">
+                            <label for="newUserNotes">Anmerkungen:</label>
+                            <textarea id="newUserNotes" name="userNotes" rows="8" placeholder="Freitext-Notizen zum Mitarbeiter..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="editUserId" name="userId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveUserBtn" class="btn-primary">Speichern</button>
+                <button id="cancelUserBtn" class="btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Area Management Modal -->
+    <div id="areaManagementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="areaModalTitle">Bereich hinzufügen</h2>
+                <span class="close" id="closeAreaModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="areaForm">
+                    <div class="form-group">
+                        <label for="newAreaName">Bereichsname:</label>
+                        <input type="text" id="newAreaName" name="areaName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newAreaIcon">Icon:</label>
+                        <select id="newAreaIcon" name="areaIcon" required>
+                            <option value="">Icon wählen</option>
+                            <option value="fas fa-hard-hat">🦺 Schutzhelm (fas fa-hard-hat)</option>
+                            <option value="fas fa-medal">🏅 Medaille (fas fa-medal)</option>
+                            <option value="fas fa-leaf">🍃 Blatt (fas fa-leaf)</option>
+                            <option value="fas fa-shield-alt">🛡️ Schild (fas fa-shield-alt)</option>
+                            <option value="fas fa-heartbeat">💓 Herzschlag (fas fa-heartbeat)</option>
+                            <option value="fas fa-cogs">⚙️ Zahnräder (fas fa-cogs)</option>
+                            <option value="fas fa-tools">🔧 Werkzeuge (fas fa-tools)</option>
+                            <option value="fas fa-clipboard-check">📋 Checkliste (fas fa-clipboard-check)</option>
+                            <option value="fas fa-chart-line">📈 Diagramm (fas fa-chart-line)</option>
+                            <option value="fas fa-users">👥 Nutzer (fas fa-users)</option>
+                            <option value="fas fa-building">🏢 Gebäude (fas fa-building)</option>
+                            <option value="fas fa-fire-extinguisher">🧯 Feuerlöscher (fas fa-fire-extinguisher)</option>
+                            <option value="fas fa-recycle">♻️ Recycling (fas fa-recycle)</option>
+                            <option value="fas fa-lock">🔒 Schloss (fas fa-lock)</option>
+                            <option value="fas fa-microscope">🔬 Mikroskop (fas fa-microscope)</option>
+                            <option value="fas fa-atom">⚛️ Atom (fas fa-atom)</option>
+                            <option value="fas fa-industry">🏭 Industrie (fas fa-industry)</option>
+                            <option value="fas fa-database">💾 Datenbank (fas fa-database)</option>
+                            <option value="fas fa-globe">🌍 Globus (fas fa-globe)</option>
+                            <option value="fas fa-graduation-cap">🎓 Abschlusskappe (fas fa-graduation-cap)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newAreaRoles">Zugriffsberechtigte Rollen:</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="areaRoles" value="geschaeftsfuehrung"> Geschäftsführung</label>
+                            <label><input type="checkbox" name="areaRoles" value="betriebsleiter"> Betriebsleiter</label>
+                            <label><input type="checkbox" name="areaRoles" value="abteilungsleiter"> Abteilungsleiter</label>
+                            <label><input type="checkbox" name="areaRoles" value="qhse"> QHSE-Mitarbeiter</label>
+                            <label><input type="checkbox" name="areaRoles" value="mitarbeiter"> Mitarbeiter</label>
+                            <label><input type="checkbox" name="areaRoles" value="admin"> Administrator</label>
+                            <label><input type="checkbox" name="areaRoles" value="root-admin"> Root Administrator</label>
+                        </div>
+                    </div>
+                    <input type="hidden" id="editAreaId" name="areaId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveAreaBtn" class="btn-primary">Speichern</button>
+                <button id="cancelAreaBtn" class="btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Department Management Modal -->
+    <div id="departmentManagementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="departmentModalTitle">Abteilung hinzufügen</h2>
+                <span class="close" id="closeDepartmentModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="departmentForm">
+                    <div class="form-group">
+                        <label for="newDepartmentName">Abteilungsname:</label>
+                        <input type="text" id="newDepartmentName" name="departmentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newDepartmentCode">Abteilungskürzel:</label>
+                        <input type="text" id="newDepartmentCode" name="departmentCode" placeholder="z.B. PROD, VERT, HR" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newDepartmentDescription">Beschreibung:</label>
+                        <textarea id="newDepartmentDescription" name="departmentDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="newDepartmentType">Abteilungstyp:</label>
+                        <select id="newDepartmentType" name="departmentType" required>
+                            <option value="">Typ wählen</option>
+                            <option value="production">Produktion</option>
+                            <option value="administration">Verwaltung</option>
+                            <option value="support">Support/Service</option>
+                            <option value="management">Management</option>
+                            <option value="quality">Qualität/QHSE</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="editDepartmentId" name="departmentId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveDepartmentBtn" class="btn-primary">Speichern</button>
+                <button id="cancelDepartmentBtn" class="btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
