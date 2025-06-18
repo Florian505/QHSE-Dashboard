@@ -78,6 +78,34 @@
                         <i class="fas fa-sitemap"></i>
                         <span>Abteilungsverwaltung</span>
                     </li>
+                    <li class="menu-item static-item" data-section="zeiterfassung" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,mitarbeiter,admin,root-admin">
+                        <i class="fas fa-clock"></i>
+                        <span>Zeiterfassung</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="zeitauswertung" data-roles="admin,root-admin">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Zeitauswertung</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="maschinen" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,techniker,admin,root-admin">
+                        <i class="fas fa-cogs"></i>
+                        <span>Maschinen</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="wartungsplanung" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,techniker,admin,root-admin">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Wartungsplanung</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="stoerungen" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,techniker,admin,root-admin">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Störungen</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="instandhaltung-auswertung" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,admin,root-admin">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Instandhaltungs-Auswertung</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="einstellungen" data-roles="root-admin">
+                        <i class="fas fa-cog"></i>
+                        <span>Einstellungen</span>
+                    </li>
                 </ul>
             </div>
 
@@ -94,7 +122,7 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="content-header">
-                <h1 id="pageTitle">Dashboard</h1>
+                <h1 id="pageTitle">Übersicht</h1>
                 <div class="header-actions">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
@@ -112,7 +140,7 @@
                 <section id="dashboard-section" class="content-section active">
                     <div class="dashboard-grid">
                         <div class="kpi-cards">
-                            <div class="kpi-card safety">
+                            <div class="kpi-card safety expandable-kpi">
                                 <div class="kpi-icon">
                                     <i class="fas fa-hard-hat"></i>
                                 </div>
@@ -120,6 +148,33 @@
                                     <h3>Arbeitsschutz</h3>
                                     <div class="kpi-value">98.5%</div>
                                     <p>Compliance Rate</p>
+                                    <button id="expandSafetyInfoBtn" class="expand-btn" title="Weitere Informationen hinzufügen">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div id="safetyInfoSection" class="expandable-section" style="display: none;">
+                                    <div class="section-header">
+                                        <h4>Arbeitsschutz - Weitere Informationen</h4>
+                                        <button id="editSafetyInfoBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-edit"></i> Bearbeiten
+                                        </button>
+                                    </div>
+                                    <div class="section-content">
+                                        <div id="safetyInfoDisplay" class="info-display">
+                                            <p>Klicken Sie auf "Bearbeiten", um weitere Informationen zum Arbeitsschutz hinzuzufügen.</p>
+                                        </div>
+                                        <div id="safetyInfoEditor" class="info-editor" style="display: none;">
+                                            <textarea id="safetyInfoText" rows="6" placeholder="Arbeitsschutzmaßnahmen, Schulungen, Vorfälle, Verbesserungen..."></textarea>
+                                            <div class="editor-actions">
+                                                <button id="saveSafetyInfoBtn" class="btn-primary btn-sm">
+                                                    <i class="fas fa-save"></i> Speichern
+                                                </button>
+                                                <button id="cancelSafetyInfoBtn" class="btn-secondary btn-sm">
+                                                    <i class="fas fa-times"></i> Abbrechen
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -227,6 +282,40 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Dokumentenliste für Arbeitsschutz -->
+                        <div class="documents-section" data-category="arbeitsschutz">
+                            <h3>Arbeitsschutz Dokumente</h3>
+                            <div id="arbeitsschutz-documents" class="documents-grid">
+                                <!-- Dokumente werden hier dynamisch eingefügt -->
+                            </div>
+                        </div>
+
+                        <!-- QHSE Freitext-Bereich für Arbeitsschutz -->
+                        <div class="qhse-notes-section" data-roles="qhse,admin,root-admin">
+                            <div class="notes-header">
+                                <h3>QHSE-Bereich: Arbeitsschutz Notizen</h3>
+                                <button id="editArbeitsschutzNotesBtn" class="btn-secondary btn-sm">
+                                    <i class="fas fa-edit"></i> Bearbeiten
+                                </button>
+                            </div>
+                            <div class="notes-content">
+                                <div id="arbeitsschutzNotesDisplay" class="notes-display">
+                                    <p>Klicken Sie auf "Bearbeiten", um QHSE-spezifische Informationen für den Arbeitsschutz-Bereich hinzuzufügen.</p>
+                                </div>
+                                <div id="arbeitsschutzNotesEditor" class="notes-editor" style="display: none;">
+                                    <textarea id="arbeitsschutzNotesText" rows="8" placeholder="QHSE-Notizen, Maßnahmen, Beobachtungen, Schulungshinweise, Compliance-Anmerkungen..."></textarea>
+                                    <div class="editor-actions">
+                                        <button id="saveArbeitsschutzNotesBtn" class="btn-primary btn-sm">
+                                            <i class="fas fa-save"></i> Speichern
+                                        </button>
+                                        <button id="cancelArbeitsschutzNotesBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i> Abbrechen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -235,6 +324,40 @@
                     <div class="section-content">
                         <h2>Qualitätsmanagement</h2>
                         <p>Qualitätskennzahlen und Prozessüberwachung für Kunststoffproduktion</p>
+                        
+                        <!-- Dokumentenliste für Qualität -->
+                        <div class="documents-section" data-category="qualitaet">
+                            <h3>Qualitäts-Dokumente</h3>
+                            <div id="qualitaet-documents" class="documents-grid">
+                                <!-- Dokumente werden hier dynamisch eingefügt -->
+                            </div>
+                        </div>
+
+                        <!-- QHSE Freitext-Bereich für Qualität -->
+                        <div class="qhse-notes-section" data-roles="qhse,admin,root-admin">
+                            <div class="notes-header">
+                                <h3>QHSE-Bereich: Qualitäts-Notizen</h3>
+                                <button id="editQualitaetNotesBtn" class="btn-secondary btn-sm">
+                                    <i class="fas fa-edit"></i> Bearbeiten
+                                </button>
+                            </div>
+                            <div class="notes-content">
+                                <div id="qualitaetNotesDisplay" class="notes-display">
+                                    <p>Klicken Sie auf "Bearbeiten", um QHSE-spezifische Informationen für den Qualitäts-Bereich hinzuzufügen.</p>
+                                </div>
+                                <div id="qualitaetNotesEditor" class="notes-editor" style="display: none;">
+                                    <textarea id="qualitaetNotesText" rows="8" placeholder="QHSE-Notizen zu Qualitätsprozessen, Auditbeobachtungen, Verbesserungsmaßnahmen..."></textarea>
+                                    <div class="editor-actions">
+                                        <button id="saveQualitaetNotesBtn" class="btn-primary btn-sm">
+                                            <i class="fas fa-save"></i> Speichern
+                                        </button>
+                                        <button id="cancelQualitaetNotesBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i> Abbrechen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -242,6 +365,40 @@
                     <div class="section-content">
                         <h2>Umweltmanagement</h2>
                         <p>Umweltkennzahlen und Nachhaltigkeitsmaßnahmen</p>
+                        
+                        <!-- Dokumentenliste für Umwelt -->
+                        <div class="documents-section" data-category="umwelt">
+                            <h3>Umwelt-Dokumente</h3>
+                            <div id="umwelt-documents" class="documents-grid">
+                                <!-- Dokumente werden hier dynamisch eingefügt -->
+                            </div>
+                        </div>
+
+                        <!-- QHSE Freitext-Bereich für Umwelt -->
+                        <div class="qhse-notes-section" data-roles="qhse,admin,root-admin">
+                            <div class="notes-header">
+                                <h3>QHSE-Bereich: Umwelt-Notizen</h3>
+                                <button id="editUmweltNotesBtn" class="btn-secondary btn-sm">
+                                    <i class="fas fa-edit"></i> Bearbeiten
+                                </button>
+                            </div>
+                            <div class="notes-content">
+                                <div id="umweltNotesDisplay" class="notes-display">
+                                    <p>Klicken Sie auf "Bearbeiten", um QHSE-spezifische Informationen für den Umwelt-Bereich hinzuzufügen.</p>
+                                </div>
+                                <div id="umweltNotesEditor" class="notes-editor" style="display: none;">
+                                    <textarea id="umweltNotesText" rows="8" placeholder="QHSE-Notizen zu Umweltaspekten, Emissionen, Abfallmanagement, Nachhaltigkeitszielen..."></textarea>
+                                    <div class="editor-actions">
+                                        <button id="saveUmweltNotesBtn" class="btn-primary btn-sm">
+                                            <i class="fas fa-save"></i> Speichern
+                                        </button>
+                                        <button id="cancelUmweltNotesBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i> Abbrechen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -249,6 +406,40 @@
                     <div class="section-content">
                         <h2>Datenschutz</h2>
                         <p>DSGVO-Compliance und Datenschutzrichtlinien</p>
+                        
+                        <!-- Dokumentenliste für Datenschutz -->
+                        <div class="documents-section" data-category="datenschutz">
+                            <h3>Datenschutz-Dokumente</h3>
+                            <div id="datenschutz-documents" class="documents-grid">
+                                <!-- Dokumente werden hier dynamisch eingefügt -->
+                            </div>
+                        </div>
+
+                        <!-- QHSE Freitext-Bereich für Datenschutz -->
+                        <div class="qhse-notes-section" data-roles="qhse,admin,root-admin">
+                            <div class="notes-header">
+                                <h3>QHSE-Bereich: Datenschutz-Notizen</h3>
+                                <button id="editDatenschutzNotesBtn" class="btn-secondary btn-sm">
+                                    <i class="fas fa-edit"></i> Bearbeiten
+                                </button>
+                            </div>
+                            <div class="notes-content">
+                                <div id="datenschutzNotesDisplay" class="notes-display">
+                                    <p>Klicken Sie auf "Bearbeiten", um QHSE-spezifische Informationen für den Datenschutz-Bereich hinzuzufügen.</p>
+                                </div>
+                                <div id="datenschutzNotesEditor" class="notes-editor" style="display: none;">
+                                    <textarea id="datenschutzNotesText" rows="8" placeholder="QHSE-Notizen zu DSGVO-Compliance, Datenschutzfolgeabschätzungen, Schulungen..."></textarea>
+                                    <div class="editor-actions">
+                                        <button id="saveDatenschutzNotesBtn" class="btn-primary btn-sm">
+                                            <i class="fas fa-save"></i> Speichern
+                                        </button>
+                                        <button id="cancelDatenschutzNotesBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i> Abbrechen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -256,6 +447,40 @@
                     <div class="section-content">
                         <h2>Gesundheitsmanagement</h2>
                         <p>Mitarbeitergesundheit und Präventionsmaßnahmen</p>
+                        
+                        <!-- Dokumentenliste für Gesundheit -->
+                        <div class="documents-section" data-category="gesundheit">
+                            <h3>Gesundheits-Dokumente</h3>
+                            <div id="gesundheit-documents" class="documents-grid">
+                                <!-- Dokumente werden hier dynamisch eingefügt -->
+                            </div>
+                        </div>
+
+                        <!-- QHSE Freitext-Bereich für Gesundheit -->
+                        <div class="qhse-notes-section" data-roles="qhse,admin,root-admin">
+                            <div class="notes-header">
+                                <h3>QHSE-Bereich: Gesundheits-Notizen</h3>
+                                <button id="editGesundheitNotesBtn" class="btn-secondary btn-sm">
+                                    <i class="fas fa-edit"></i> Bearbeiten
+                                </button>
+                            </div>
+                            <div class="notes-content">
+                                <div id="gesundheitNotesDisplay" class="notes-display">
+                                    <p>Klicken Sie auf "Bearbeiten", um QHSE-spezifische Informationen für den Gesundheits-Bereich hinzuzufügen.</p>
+                                </div>
+                                <div id="gesundheitNotesEditor" class="notes-editor" style="display: none;">
+                                    <textarea id="gesundheitNotesText" rows="8" placeholder="QHSE-Notizen zu Arbeitsmedizin, Gesundheitsförderung, Präventionsmaßnahmen..."></textarea>
+                                    <div class="editor-actions">
+                                        <button id="saveGesundheitNotesBtn" class="btn-primary btn-sm">
+                                            <i class="fas fa-save"></i> Speichern
+                                        </button>
+                                        <button id="cancelGesundheitNotesBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i> Abbrechen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -263,6 +488,45 @@
                     <div class="section-content">
                         <h2>Arbeitsanweisungen</h2>
                         <p>Hier werden alle hochgeladenen Arbeitsanweisungen angezeigt.</p>
+                        
+                        <!-- Dokumentenliste für Arbeitsanweisungen -->
+                        <div class="documents-section" data-category="arbeitsanweisungen">
+                            <h3>Arbeitsanweisungen Dokumente</h3>
+                            <div id="arbeitsanweisungen-documents" class="documents-grid">
+                                <!-- Dokumente werden hier dynamisch eingefügt -->
+                            </div>
+                        </div>
+
+                        <!-- QHSE Freitext-Bereich für Arbeitsanweisungen -->
+                        <div class="qhse-notes-section" data-roles="qhse,admin,root-admin">
+                            <div class="notes-header">
+                                <h3>QHSE-Bereich: Arbeitsanweisungen Notizen</h3>
+                                <div class="notes-actions">
+                                    <button id="editArbeitsanweisungenNotesBtn" class="btn-secondary btn-sm">
+                                        <i class="fas fa-edit"></i> Bearbeiten
+                                    </button>
+                                    <button id="shareArbeitsanweisungenNotesBtn" class="btn-info btn-sm">
+                                        <i class="fas fa-share"></i> Freigabe
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="notes-content">
+                                <div id="arbeitsanweisungenNotesDisplay" class="notes-display">
+                                    <p>Klicken Sie auf "Bearbeiten", um QHSE-spezifische Informationen für Arbeitsanweisungen hinzuzufügen.</p>
+                                </div>
+                                <div id="arbeitsanweisungenNotesEditor" class="notes-editor" style="display: none;">
+                                    <textarea id="arbeitsanweisungenNotesText" rows="8" placeholder="QHSE-Notizen zu Arbeitsanweisungen, Schulungsstand, Aktualisierungsbedarf, Compliance-Bewertungen..."></textarea>
+                                    <div class="editor-actions">
+                                        <button id="saveArbeitsanweisungenNotesBtn" class="btn-primary btn-sm">
+                                            <i class="fas fa-save"></i> Speichern
+                                        </button>
+                                        <button id="cancelArbeitsanweisungenNotesBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i> Abbrechen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -270,6 +534,40 @@
                     <div class="section-content">
                         <h2>Verfahrensanweisungen</h2>
                         <p>Hier werden alle hochgeladenen Verfahrensanweisungen angezeigt.</p>
+                        
+                        <!-- Dokumentenliste für Verfahrensanweisungen -->
+                        <div class="documents-section" data-category="verfahrensanweisungen">
+                            <h3>Verfahrensanweisungen Dokumente</h3>
+                            <div id="verfahrensanweisungen-documents" class="documents-grid">
+                                <!-- Dokumente werden hier dynamisch eingefügt -->
+                            </div>
+                        </div>
+
+                        <!-- QHSE Freitext-Bereich für Verfahrensanweisungen -->
+                        <div class="qhse-notes-section" data-roles="qhse,admin,root-admin">
+                            <div class="notes-header">
+                                <h3>QHSE-Bereich: Verfahrensanweisungen Notizen</h3>
+                                <button id="editVerfahrensanweisungenNotesBtn" class="btn-secondary btn-sm">
+                                    <i class="fas fa-edit"></i> Bearbeiten
+                                </button>
+                            </div>
+                            <div class="notes-content">
+                                <div id="verfahrensanweisungenNotesDisplay" class="notes-display">
+                                    <p>Klicken Sie auf "Bearbeiten", um QHSE-spezifische Informationen für Verfahrensanweisungen hinzuzufügen.</p>
+                                </div>
+                                <div id="verfahrensanweisungenNotesEditor" class="notes-editor" style="display: none;">
+                                    <textarea id="verfahrensanweisungenNotesText" rows="8" placeholder="QHSE-Notizen zu Verfahrensanweisungen, Prozessoptimierungen, Auditfeststellungen, Normkonformität..."></textarea>
+                                    <div class="editor-actions">
+                                        <button id="saveVerfahrensanweisungenNotesBtn" class="btn-primary btn-sm">
+                                            <i class="fas fa-save"></i> Speichern
+                                        </button>
+                                        <button id="cancelVerfahrensanweisungenNotesBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-times"></i> Abbrechen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -305,6 +603,31 @@
                                 <div class="metric">
                                     <h4>Service</h4>
                                     <div class="rating">★★★★★ 4.9/5</div>
+                                </div>
+                            </div>
+                            
+                            <div class="customer-feedback-section">
+                                <div class="feedback-header">
+                                    <h3>Kundenfeedback & Bemerkungen</h3>
+                                    <button id="editCustomerFeedbackBtn" class="btn-secondary">
+                                        <i class="fas fa-edit"></i> Bearbeiten
+                                    </button>
+                                </div>
+                                <div class="feedback-content">
+                                    <div id="customerFeedbackDisplay" class="feedback-display">
+                                        <p>Klicken Sie auf "Bearbeiten", um Kundenfeedback und Bemerkungen hinzuzufügen.</p>
+                                    </div>
+                                    <div id="customerFeedbackEditor" class="feedback-editor" style="display: none;">
+                                        <textarea id="customerFeedbackText" rows="8" placeholder="Kundenfeedback, Beschwerden, Verbesserungsvorschläge, Maßnahmen..."></textarea>
+                                        <div class="editor-actions">
+                                            <button id="saveCustomerFeedbackBtn" class="btn-primary">
+                                                <i class="fas fa-save"></i> Speichern
+                                            </button>
+                                            <button id="cancelCustomerFeedbackBtn" class="btn-secondary">
+                                                <i class="fas fa-times"></i> Abbrechen
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -378,6 +701,429 @@
                             </div>
                             <div class="departments-list" id="departmentsList">
                                 <!-- Departments will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="einstellungen-section" class="content-section">
+                    <div class="section-content">
+                        <h2>System-Einstellungen</h2>
+                        <div class="settings-management">
+                            <div class="settings-card">
+                                <h3>Firmenname bearbeiten</h3>
+                                <p>Ändern Sie den Firmennamen, der in der Seitenleiste angezeigt wird.</p>
+                                <div class="form-group">
+                                    <label for="settingsCompanyName">Firmenname:</label>
+                                    <input type="text" id="settingsCompanyName" placeholder="Hoffmann & Voss">
+                                </div>
+                                <div class="settings-actions">
+                                    <button id="saveCompanyNameBtn" class="btn-primary">
+                                        <i class="fas fa-save"></i> Speichern
+                                    </button>
+                                    <button id="resetCompanyNameBtn" class="btn-secondary">
+                                        <i class="fas fa-undo"></i> Zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="settings-card">
+                                <h3>Navigation anpassen</h3>
+                                <p>Ändern Sie die Bezeichnungen der Navigationselemente in der Seitenleiste.</p>
+                                <div class="form-group">
+                                    <label for="settingsDashboardName">Dashboard-Bezeichnung:</label>
+                                    <input type="text" id="settingsDashboardName" placeholder="Dashboard">
+                                </div>
+                                <div class="settings-actions">
+                                    <button id="saveDashboardNameBtn" class="btn-primary">
+                                        <i class="fas fa-save"></i> Speichern
+                                    </button>
+                                    <button id="resetDashboardNameBtn" class="btn-secondary">
+                                        <i class="fas fa-undo"></i> Zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Zeiterfassung Section -->
+                <section id="zeiterfassung-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Zeiterfassung</h2>
+                        
+                        <!-- Zeiterfassung Form -->
+                        <div class="time-tracking-form">
+                            <div class="form-card">
+                                <h3>Neue Zeiterfassung</h3>
+                                <form id="timeTrackingForm">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="workDate">Datum:</label>
+                                            <input type="date" id="workDate" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="startTime">Arbeitsbeginn:</label>
+                                            <input type="time" id="startTime" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="endTime">Arbeitsende:</label>
+                                            <input type="time" id="endTime" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="breakTime">Pausenzeit (Minuten):</label>
+                                            <input type="number" id="breakTime" min="0" max="480" placeholder="30">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="workHours">Nettoarbeitszeit:</label>
+                                            <input type="text" id="workHours" readonly class="readonly-field">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="workDescription">Tätigkeitsbeschreibung/Projekt:</label>
+                                        <textarea id="workDescription" rows="3" placeholder="Beschreibung der Tätigkeiten oder Projektbezug..."></textarea>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn-primary">
+                                            <i class="fas fa-save"></i> Speichern
+                                        </button>
+                                        <button type="button" id="clearFormBtn" class="btn-secondary">
+                                            <i class="fas fa-times"></i> Zurücksetzen
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Monatsübersicht -->
+                        <div class="monthly-overview">
+                            <div class="overview-header">
+                                <h3>Monatsübersicht</h3>
+                                <div class="month-selector">
+                                    <button id="prevMonthBtn" class="month-nav-btn">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <span id="currentMonth">Dezember 2024</span>
+                                    <button id="nextMonthBtn" class="month-nav-btn">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="monthly-stats">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="monthlyHours">0</div>
+                                    <div class="stat-label">Gesamtstunden</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="workingDays">0</div>
+                                    <div class="stat-label">Arbeitstage</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="averageHours">0</div>
+                                    <div class="stat-label">Ø Stunden/Tag</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" id="overtime">0</div>
+                                    <div class="stat-label">Überstunden</div>
+                                </div>
+                            </div>
+
+                            <div class="time-entries-list">
+                                <h4>Erfasste Arbeitszeiten</h4>
+                                <div id="timeEntriesList">
+                                    <!-- Zeiteinträge werden dynamisch eingefügt -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Zeitauswertung Section (nur für Admins) -->
+                <section id="zeitauswertung-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Zeitauswertung</h2>
+                        
+                        <div class="evaluation-controls">
+                            <div class="control-group">
+                                <div class="form-group">
+                                    <label for="evalEmployee">Mitarbeiter:</label>
+                                    <select id="evalEmployee">
+                                        <option value="">Alle Mitarbeiter</option>
+                                        <!-- Wird dynamisch gefüllt -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="evalMonth">Monat:</label>
+                                    <input type="month" id="evalMonth">
+                                </div>
+                                <div class="form-group">
+                                    <label for="evalDepartment">Abteilung:</label>
+                                    <select id="evalDepartment">
+                                        <option value="">Alle Abteilungen</option>
+                                        <!-- Wird dynamisch gefüllt -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="action-group">
+                                <button id="generateReportBtn" class="btn-primary">
+                                    <i class="fas fa-chart-line"></i> Auswertung erstellen
+                                </button>
+                                <button id="exportPdfBtn" class="btn-secondary">
+                                    <i class="fas fa-file-pdf"></i> PDF Export
+                                </button>
+                                <button id="exportExcelBtn" class="btn-secondary">
+                                    <i class="fas fa-file-excel"></i> Excel Export
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="evaluation-results" id="evaluationResults">
+                            <!-- Auswertungsergebnisse werden hier angezeigt -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Maschinen Section -->
+                <section id="maschinen-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Maschinenmanagement</h2>
+                        
+                        <div class="machine-actions">
+                            <button id="addMachineBtn" class="btn-primary">
+                                <i class="fas fa-plus"></i> Neue Maschine hinzufügen
+                            </button>
+                        </div>
+
+                        <div class="machines-overview">
+                            <div class="machine-stats">
+                                <div class="stat-card machine-total">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>Gesamt</h3>
+                                        <div class="stat-value" id="totalMachines">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card machine-running">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>In Betrieb</h3>
+                                        <div class="stat-value" id="runningMachines">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card machine-maintenance">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-tools"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>Wartung</h3>
+                                        <div class="stat-value" id="maintenanceMachines">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card machine-issues">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>Störungen</h3>
+                                        <div class="stat-value" id="issueMachines">0</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="machines-list">
+                                <h3>Maschinenübersicht</h3>
+                                <div id="machinesList">
+                                    <!-- Maschinen werden dynamisch eingefügt -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Wartungsplanung Section -->
+                <section id="wartungsplanung-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Wartungsplanung</h2>
+                        
+                        <div class="maintenance-dashboard">
+                            <div class="maintenance-overview">
+                                <div class="overview-card urgent">
+                                    <h3>Überfällige Wartungen</h3>
+                                    <div class="count" id="overdueCount">0</div>
+                                </div>
+                                <div class="overview-card warning">
+                                    <h3>Diese Woche fällig</h3>
+                                    <div class="count" id="weekCount">0</div>
+                                </div>
+                                <div class="overview-card info">
+                                    <h3>Nächste 30 Tage</h3>
+                                    <div class="count" id="monthCount">0</div>
+                                </div>
+                            </div>
+
+                            <div class="maintenance-calendar">
+                                <div class="calendar-header">
+                                    <button id="prevMaintenanceMonth" class="month-nav-btn">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h3 id="maintenanceMonthYear">Dezember 2024</h3>
+                                    <button id="nextMaintenanceMonth" class="month-nav-btn">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div id="maintenanceCalendar" class="calendar-grid">
+                                    <!-- Kalender wird dynamisch generiert -->
+                                </div>
+                            </div>
+
+                            <div class="maintenance-tasks">
+                                <h3>Anstehende Wartungsaufgaben</h3>
+                                <div id="maintenanceTasksList">
+                                    <!-- Wartungsaufgaben werden dynamisch eingefügt -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Störungen Section -->
+                <section id="stoerungen-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Störungsmeldungen</h2>
+                        
+                        <div class="issue-actions">
+                            <button id="reportIssueBtn" class="btn-primary">
+                                <i class="fas fa-plus"></i> Störung melden
+                            </button>
+                        </div>
+
+                        <div class="issues-overview">
+                            <div class="issue-stats">
+                                <div class="stat-card issue-open">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>Offen</h3>
+                                        <div class="stat-value" id="openIssues">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card issue-progress">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-wrench"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>In Bearbeitung</h3>
+                                        <div class="stat-value" id="progressIssues">0</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card issue-resolved">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <h3>Behoben</h3>
+                                        <div class="stat-value" id="resolvedIssues">0</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="issues-list">
+                                <h3>Aktuelle Störungen</h3>
+                                <div class="issue-filters">
+                                    <select id="issueStatusFilter">
+                                        <option value="">Alle Status</option>
+                                        <option value="open">Offen</option>
+                                        <option value="in-progress">In Bearbeitung</option>
+                                        <option value="resolved">Behoben</option>
+                                    </select>
+                                    <select id="issuePriorityFilter">
+                                        <option value="">Alle Prioritäten</option>
+                                        <option value="low">Niedrig</option>
+                                        <option value="medium">Mittel</option>
+                                        <option value="high">Hoch</option>
+                                        <option value="critical">Kritisch</option>
+                                    </select>
+                                </div>
+                                <div id="issuesList">
+                                    <!-- Störungen werden dynamisch eingefügt -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Instandhaltungs-Auswertung Section -->
+                <section id="instandhaltung-auswertung-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Instandhaltungs-Auswertung</h2>
+                        
+                        <div class="analysis-controls">
+                            <div class="control-group">
+                                <div class="form-group">
+                                    <label for="analysisMachine">Maschine:</label>
+                                    <select id="analysisMachine">
+                                        <option value="">Alle Maschinen</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="analysisTimeframe">Zeitraum:</label>
+                                    <select id="analysisTimeframe">
+                                        <option value="month">Letzter Monat</option>
+                                        <option value="quarter">Letztes Quartal</option>
+                                        <option value="year">Letztes Jahr</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button id="generateAnalysisBtn" class="btn-primary">
+                                <i class="fas fa-chart-bar"></i> Analyse erstellen
+                            </button>
+                        </div>
+
+                        <div class="analysis-results">
+                            <div class="kpi-dashboard">
+                                <div class="kpi-card">
+                                    <h4>MTBF (Stunden)</h4>
+                                    <div class="kpi-value" id="mtbfValue">-</div>
+                                    <div class="kpi-description">Mean Time Between Failures</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <h4>MTTR (Stunden)</h4>
+                                    <div class="kpi-value" id="mttrValue">-</div>
+                                    <div class="kpi-description">Mean Time To Repair</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <h4>Verfügbarkeit (%)</h4>
+                                    <div class="kpi-value" id="availabilityValue">-</div>
+                                    <div class="kpi-description">Maschinenverfügbarkeit</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <h4>Wartungskosten (€)</h4>
+                                    <div class="kpi-value" id="costsValue">-</div>
+                                    <div class="kpi-description">Gesamtkosten Zeitraum</div>
+                                </div>
+                            </div>
+
+                            <div class="analysis-charts">
+                                <div class="chart-container">
+                                    <h4>Störungshäufigkeit nach Maschine</h4>
+                                    <div id="issueFrequencyChart" class="chart-placeholder">
+                                        Diagramm wird nach Analyse-Erstellung angezeigt
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <h4>Wartungszeiten Trend</h4>
+                                    <div id="maintenanceTrendChart" class="chart-placeholder">
+                                        Diagramm wird nach Analyse-Erstellung angezeigt
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -672,6 +1418,54 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Time Entry Edit Modal -->
+    <div id="timeEntryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="timeEntryModalTitle">Zeiteintrag bearbeiten</h2>
+                <span class="close" id="closeTimeEntryModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editTimeEntryForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editWorkDate">Datum:</label>
+                            <input type="date" id="editWorkDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editStartTime">Arbeitsbeginn:</label>
+                            <input type="time" id="editStartTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEndTime">Arbeitsende:</label>
+                            <input type="time" id="editEndTime" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editBreakTime">Pausenzeit (Minuten):</label>
+                            <input type="number" id="editBreakTime" min="0" max="480">
+                        </div>
+                        <div class="form-group">
+                            <label for="editWorkHours">Nettoarbeitszeit:</label>
+                            <input type="text" id="editWorkHours" readonly class="readonly-field">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editWorkDescription">Tätigkeitsbeschreibung/Projekt:</label>
+                        <textarea id="editWorkDescription" rows="3"></textarea>
+                    </div>
+                    <input type="hidden" id="editTimeEntryId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveTimeEntryBtn" class="btn-primary">Speichern</button>
+                <button id="deleteTimeEntryBtn" class="btn-danger">Löschen</button>
+                <button id="cancelTimeEntryBtn" class="btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script></script>
 </body>
 </html>
