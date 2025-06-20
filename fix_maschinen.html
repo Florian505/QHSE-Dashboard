@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maschinen Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover { background: #2563eb; }
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            background: #f0f9ff;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Maschinen-Problem Diagnose & Fix</h1>
+        
+        <button onclick="testMachineButton()" class="btn">1. Test Maschinen-Button</button>
+        <button onclick="createMachineDirectly()" class="btn">2. Maschine direkt erstellen</button>
+        <button onclick="initializeDepartments()" class="btn">3. Abteilungen initialisieren</button>
+        <button onclick="openMainSystem()" class="btn">4. Hauptsystem öffnen</button>
+        <button onclick="clearStorage()" class="btn">5. Storage leeren</button>
+        
+        <div id="result" class="test-result" style="display: none;"></div>
+        
+        <h3>Aktuelle Daten:</h3>
+        <div id="currentData"></div>
+        
+        <h3>Problem-Analyse:</h3>
+        <div id="analysis"></div>
+    </div>
+
+    <script>
+        function showResult(title, content, isError = false) {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.className = `test-result ${isError ? 'error' : 'success'}`;
+            result.innerHTML = `<h4>${title}</h4>${content}`;
+        }
+
+        function testMachineButton() {
+            console.log('Testing machine button...');
+            
+            // Test 1: Check if main system has the button
+            const hasButton = !!document.getElementById('addMachineBtn');
+            console.log('Button found in this page:', hasButton);
+            
+            // Test 2: Try to simulate button click in main system
+            try {
+                // Open main system and test
+                window.open('index.html', '_blank');
+                showResult('✅ Test gestartet', 'Hauptsystem in neuem Tab geöffnet. Prüfen Sie dort den "Neue Maschine hinzufügen" Button.');
+            } catch (error) {
+                showResult('❌ Fehler beim Test', error.message, true);
+            }
+        }
+
+        function createMachineDirectly() {
+            console.log('Creating machine directly...');
+            
+            try {
+                // Ensure departments exist
+                initializeDepartments();
+                
+                // Create test machine
+                const testMachine = {
+                    id: Date.now().toString(),
+                    name: 'Test Spritzgussmaschine A1',
+                    type: 'Spritzgussmaschine',
+                    manufacturer: 'Arburg',
+                    model: 'Allrounder 370S',
+                    location: 'Halle 1, Bereich A',
+                    department: 'produktion',
+                    status: 'running',
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'test-user',
+                    // Zusätzliche Parameter für umfassende Maschine
+                    serialNumber: 'ARB-001-2024',
+                    yearBuilt: 2020,
+                    power: 15.5,
+                    weight: 2500,
+                    responsible: 'Max Mustermann',
+                    lastMaintenance: '2024-01-15',
+                    nextMaintenance: '2024-04-15',
+                    maintenanceInterval: 90,
+                    notes: 'Hochmoderne Spritzgussmaschine für Präzisionsteile',
+                    documents: [] // Platz für Dokumente
+                };
+                
+                const machines = JSON.parse(localStorage.getItem('qhse_machines') || '[]');
+                machines.push(testMachine);
+                localStorage.setItem('qhse_machines', JSON.stringify(machines));
+                
+                showResult('✅ Maschine erstellt!', `
+                    <p>Test-Maschine wurde erfolgreich erstellt:</p>
+                    <ul>
+                        <li><strong>Name:</strong> ${testMachine.name}</li>
+                        <li><strong>Typ:</strong> ${testMachine.type}</li>
+                        <li><strong>Hersteller:</strong> ${testMachine.manufacturer}</li>
+                        <li><strong>Standort:</strong> ${testMachine.location}</li>
+                        <li><strong>Abteilung:</strong> ${testMachine.department}</li>
+                    </ul>
+                    <p>Öffnen Sie das Hauptsystem, um die Maschine zu sehen!</p>
+                `);
+                
+                updateData();
+                
+            } catch (error) {
+                showResult('❌ Fehler beim Erstellen', error.message, true);
+            }
+        }
+
+        function initializeDepartments() {
+            console.log('Initializing departments...');
+            
+            const defaultDepartments = [
+                {
+                    id: 'geschaeftsfuehrung',
+                    name: 'Geschäftsführung',
+                    code: 'GF',
+                    description: 'Geschäftsführung und strategische Leitung',
+                    type: 'management',
+                    hierarchyLevel: 1
+                },
+                {
+                    id: 'produktion',
+                    name: 'Produktion',
+                    code: 'PROD',
+                    description: 'Kunststoffproduktion und Fertigung',
+                    type: 'production',
+                    hierarchyLevel: 3
+                },
+                {
+                    id: 'instandhaltung',
+                    name: 'Instandhaltung',
+                    code: 'IH',
+                    description: 'Wartung und Instandhaltung von Maschinen und Anlagen',
+                    type: 'technical',
+                    hierarchyLevel: 3
+                },
+                {
+                    id: 'qhse',
+                    name: 'QHSE Management',
+                    code: 'QHSE',
+                    description: 'Qualität, Gesundheit, Sicherheit, Umwelt',
+                    type: 'quality',
+                    hierarchyLevel: 2
+                }
+            ];
+            
+            localStorage.setItem('qhse_departments', JSON.stringify(defaultDepartments));
+            
+            showResult('✅ Abteilungen initialisiert', `
+                <p>${defaultDepartments.length} Standard-Abteilungen wurden erstellt:</p>
+                <ul>
+                    ${defaultDepartments.map(dept => `<li>${dept.name} (${dept.code})</li>`).join('')}
+                </ul>
+            `);
+            
+            updateData();
+        }
+
+        function openMainSystem() {
+            window.location.href = 'index.html';
+        }
+
+        function clearStorage() {
+            if (confirm('Alle QHSE-Daten löschen?')) {
+                const keys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+                keys.forEach(key => localStorage.removeItem(key));
+                showResult('🗑️ Storage geleert', `${keys.length} QHSE Keys wurden gelöscht.`);
+                updateData();
+            }
+        }
+
+        function updateData() {
+            const dataDiv = document.getElementById('currentData');
+            const analysisDiv = document.getElementById('analysis');
+            
+            const keys = ['qhse_machines', 'qhse_departments', 'qhse_users'];
+            let output = '<ul>';
+            
+            keys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    const count = Array.isArray(parsed) ? parsed.length : 'object';
+                    output += `<li><strong>${key}:</strong> ${count} Einträge</li>`;
+                } else {
+                    output += `<li><strong>${key}:</strong> nicht vorhanden</li>`;
+                }
+            });
+            output += '</ul>';
+            
+            dataDiv.innerHTML = output;
+            
+            // Analysis
+            const machines = localStorage.getItem('qhse_machines');
+            const departments = localStorage.getItem('qhse_departments');
+            
+            let analysis = '<ul>';
+            
+            if (!departments) {
+                analysis += '<li>❌ <strong>Problem:</strong> Keine Abteilungen vorhanden - das verhindert die Maschinen-Erstellung</li>';
+            } else {
+                analysis += '<li>✅ Abteilungen vorhanden</li>';
+            }
+            
+            if (!machines || JSON.parse(machines).length === 0) {
+                analysis += '<li>⚠️ Keine Maschinen vorhanden - Button sollte funktionieren</li>';
+            } else {
+                analysis += '<li>✅ Maschinen vorhanden</li>';
+            }
+            
+            analysis += '</ul>';
+            
+            analysis += '<h4>Lösungsvorschläge:</h4><ol>';
+            analysis += '<li>Klicken Sie auf "Abteilungen initialisieren"</li>';
+            analysis += '<li>Öffnen Sie das Hauptsystem</li>';
+            analysis += '<li>Navigieren Sie zu "Maschinen"</li>';
+            analysis += '<li>Klicken Sie auf "Neue Maschine hinzufügen"</li>';
+            analysis += '</ol>';
+            
+            analysisDiv.innerHTML = analysis;
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            updateData();
+        };
+    </script>
+</body>
+</html>

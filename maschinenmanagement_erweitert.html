@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Rechtssicheres Maschinenmanagement - Hoffmann & Voss</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Erweiterte Styles für rechtssicheres Maschinenmanagement */
+        .compliance-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 2px;
+        }
+        .compliance-ce { background: #dcfce7; color: #166534; }
+        .compliance-uvv { background: #fef3c7; color: #92400e; }
+        .compliance-overdue { background: #fecaca; color: #991b1b; }
+        .compliance-ok { background: #dbeafe; color: #1e40af; }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-active { background: #10b981; }
+        .status-maintenance { background: #f59e0b; }
+        .status-blocked { background: #ef4444; }
+        .status-decommissioned { background: #6b7280; }
+        
+        .machine-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .machine-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .machine-id {
+            font-family: monospace;
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        .audit-trail {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .form-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            background: #fafafa;
+        }
+        .form-section h3 {
+            margin-top: 0;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+        .required-field {
+            color: #ef4444;
+        }
+        .compliance-checkbox {
+            margin: 0.5rem 0;
+            padding: 0.75rem;
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+        }
+        .interval-config {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-content" style="margin-left: 0; padding: 2rem;">
+            <div class="content-header">
+                <h1>🏭 Rechtssicheres Maschinenmanagement</h1>
+                <p>BetrSichV, DGUV, ISO & CE-konform | Vollständige Dokumentation & Audit-Trail</p>
+                <div style="margin: 1rem 0;">
+                    <button onclick="showAddMachineModal()" class="btn-primary">
+                        <i class="fas fa-plus"></i> Neue Maschine registrieren
+                    </button>
+                    <button onclick="showComplianceOverview()" class="btn-secondary">
+                        <i class="fas fa-shield-alt"></i> Compliance-Übersicht
+                    </button>
+                    <button onclick="exportAuditReport()" class="btn-secondary">
+                        <i class="fas fa-file-export"></i> Audit-Report exportieren
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard-Kacheln -->
+            <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                <div class="dashboard-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3><i class="fas fa-cogs text-blue-500"></i> Maschinen Status</h3>
+                    <div id="machineStatusSummary">
+                        <div><span class="status-indicator status-active"></span><span id="activeCount">0</span> Aktiv</div>
+                        <div><span class="status-indicator status-maintenance"></span><span id="maintenanceCount">0</span> Wartung</div>
+                        <div><span class="status-indicator status-blocked"></span><span id="blockedCount">0</span> Gesperrt</div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3><i class="fas fa-exclamation-triangle text-red-500"></i> Fällige Prüfungen</h3>
+                    <div id="upcomingInspections">
+                        <div style="color: #ef4444;"><strong id="overdueCount">0</strong> Überfällig</div>
+                        <div style="color: #f59e0b;"><strong id="dueCount">0</strong> Fällig (30 Tage)</div>
+                        <div style="color: #10b981;"><strong id="okCount">0</strong> Aktuell</div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3><i class="fas fa-certificate text-green-500"></i> Compliance Status</h3>
+                    <div id="complianceStatus">
+                        <div><span class="compliance-badge compliance-ce">CE</span> <span id="ceCompliant">0</span>/<span id="totalMachines">0</span></div>
+                        <div><span class="compliance-badge compliance-uvv">UVV</span> <span id="uvvCompliant">0</span>/<span id="totalMachines2">0</span></div>
+                        <div><span class="compliance-badge compliance-ok">Audit-Ready</span> <span id="auditReady">0</span>%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maschinen-Liste -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Registrierte Maschinen & Betriebsmittel</h2>
+                    <div class="filter-controls" style="display: flex; gap: 1rem; align-items: center;">
+                        <select id="statusFilter" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #d1d5db;">
+                            <option value="">Alle Status</option>
+                            <option value="active">Aktiv</option>
+                            <option value="maintenance">Wartung</option>
+                            <option value="blocked">Gesperrt</option>
+                            <option value="decommissioned">Ausgemustert</option>
+                        </select>
+                        <select id="typeFilter" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #d1d5db;">
+                            <option value="">Alle Typen</option>
+                            <option value="Spritzgussmaschine">Spritzgussmaschinen</option>
+                            <option value="Extruder">Extruder</option>
+                            <option value="Kompressor">Kompressoren</option>
+                        </select>
+                        <input type="text" id="searchFilter" placeholder="Suchen..." style="padding: 0.5rem; border-radius: 4px; border: 1px solid #d1d5db;">
+                    </div>
+                </div>
+                <div id="machinesList" class="machines-container">
+                    <!-- Maschinen werden hier dynamisch geladen -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal für neue Maschine -->
+    <div id="addMachineModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 1200px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>🏭 Neue Maschine/Betriebsmittel registrieren</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="machineForm" onsubmit="event.preventDefault(); saveMachine();">
+                    
+                    <!-- Stammdaten (Rechtssicherheit) -->
+                    <div class="form-section">
+                        <h3>📋 Stammdaten (Rechtssicherheit)</h3>
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Maschinenbezeichnung <span class="required-field">*</span></label>
+                                <input type="text" id="machineName" required placeholder="z.B. Spritzgussmaschine A1">
+                            </div>
+                            <div class="form-group">
+                                <label>Inventarnummer / Eindeutige ID <span class="required-field">*</span></label>
+                                <input type="text" id="inventoryId" required placeholder="z.B. INV-2024-001">
+                            </div>
+                            <div class="form-group">
+                                <label>Anlagentyp / Kategorie <span class="required-field">*</span></label>
+                                <select id="machineType" required>
+                                    <option value="">Typ auswählen</option>
+                                    <option value="Spritzgussmaschine">Spritzgussmaschine</option>
+                                    <option value="Extruder">Extruder</option>
+                                    <option value="Blasformmaschine">Blasformmaschine</option>
+                                    <option value="Kompressor">Kompressor</option>
+                                    <option value="Kran">Kran/Hebezeug</option>
+                                    <option value="Gabelstapler">Gabelstapler</option>
+                                    <option value="Druckbehälter">Druckbehälter</option>
+                                    <option value="Förderband">Förderband</option>
+                                    <option value="Andere">Andere</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Gefährdungsklasse</label>
+                                <select id="hazardClass">
+                                    <option value="">Klasse wählen</option>
+                                    <option value="niedrig">Niedrig</option>
+                                    <option value="mittel">Mittel</option>
+                                    <option value="hoch">Hoch</option>
+                                    <option value="sehr-hoch">Sehr hoch (Ex-Schutz, Druckbehälter)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Hersteller <span class="required-field">*</span></label>
+                                <input type="text" id="manufacturer" required placeholder="z.B. Arburg, Engel">
+                            </div>
+                            <div class="form-group">
+                                <label>Modell / Typbezeichnung <span class="required-field">*</span></label>
+                                <input type="text" id="model" required placeholder="z.B. Allrounder 370S">
+                            </div>
+                            <div class="form-group">
+                                <label>Seriennummer <span class="required-field">*</span></label>
+                                <input type="text" id="serialNumber" required placeholder="Herstellerseriennummer">
+                            </div>
+                            <div class="form-group">
+                                <label>Baujahr <span class="required-field">*</span></label>
+                                <input type="number" id="yearBuilt" required min="1950" max="${new Date().getFullYear()}">
+                            </div>
+                            <div class="form-group">
+                                <label>Anschaffungsdatum</label>
+                                <input type="date" id="purchaseDate">
+                            </div>
+                            <div class="form-group">
+                                <label>Lebenszyklusstatus <span class="required-field">*</span></label>
+                                <select id="lifecycleStatus" required>
+                                    <option value="active">Aktiv (in Betrieb)</option>
+                                    <option value="maintenance">Wartung/Instandsetzung</option>
+                                    <option value="blocked">Gesperrt (Sicherheit)</option>
+                                    <option value="decommissioned">Ausgemustert</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Standort & Verantwortlichkeit -->
+                    <div class="form-section">
+                        <h3>📍 Standort & Verantwortlichkeit</h3>
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Nutzungsort / Standort <span class="required-field">*</span></label>
+                                <input type="text" id="location" required placeholder="z.B. Halle 1, Arbeitsplatz A1">
+                            </div>
+                            <div class="form-group">
+                                <label>Abteilung <span class="required-field">*</span></label>
+                                <select id="department" required>
+                                    <option value="">Abteilung wählen</option>
+                                    <option value="produktion">Produktion</option>
+                                    <option value="instandhaltung">Instandhaltung</option>
+                                    <option value="qualitaet">Qualitätssicherung</option>
+                                    <option value="lager">Lager/Logistik</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Verantwortliche Person <span class="required-field">*</span></label>
+                                <input type="text" id="responsiblePerson" required placeholder="Name des Verantwortlichen">
+                            </div>
+                            <div class="form-group">
+                                <label>Stellvertreter</label>
+                                <input type="text" id="deputy" placeholder="Name des Stellvertreters">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compliance & Rechtssicherheit -->
+                    <div class="form-section">
+                        <h3>🛡️ Compliance & Rechtssicherheit</h3>
+                        <div class="compliance-checkbox">
+                            <label>
+                                <input type="checkbox" id="ceConformity" value="true">
+                                <strong>CE-Konformität vorhanden</strong> (CE-Kennzeichnung, Konformitätserklärung)
+                            </label>
+                        </div>
+                        <div class="compliance-checkbox">
+                            <label>
+                                <input type="checkbox" id="operatingManual" value="true">
+                                <strong>Betriebsanleitung vorhanden</strong> (deutsch, vollständig, aktuell)
+                            </label>
+                        </div>
+                        <div class="compliance-checkbox">
+                            <label>
+                                <input type="checkbox" id="riskAssessment" value="true">
+                                <strong>Gefährdungsbeurteilung durchgeführt</strong> (nach BetrSichV)
+                            </label>
+                        </div>
+                        <div class="compliance-checkbox">
+                            <label>
+                                <input type="checkbox" id="atexDocumentation" value="true">
+                                <strong>ATEX/Ex-Schutz Dokumentation</strong> (falls zutreffend)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Prüf- und Wartungsintervalle -->
+                    <div class="form-section">
+                        <h3>🔧 Prüf- und Wartungsintervalle (Rechtspflichten)</h3>
+                        
+                        <div class="interval-config">
+                            <h4>UVV-Prüfung (Unfallverhütungsvorschrift)</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Intervall (Monate)</label>
+                                    <input type="number" id="uvvInterval" placeholder="12" min="1" max="60">
+                                </div>
+                                <div class="form-group">
+                                    <label>Letzte Prüfung</label>
+                                    <input type="date" id="lastUvvCheck">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nächste Prüfung</label>
+                                    <input type="date" id="nextUvvCheck">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="interval-config">
+                            <h4>Elektrische Sicherheitsprüfung</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Intervall (Monate)</label>
+                                    <input type="number" id="electricalInterval" placeholder="12" min="1" max="60">
+                                </div>
+                                <div class="form-group">
+                                    <label>Letzte Prüfung</label>
+                                    <input type="date" id="lastElectricalCheck">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nächste Prüfung</label>
+                                    <input type="date" id="nextElectricalCheck">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="interval-config">
+                            <h4>Wartung & Instandhaltung</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label>Wartungsintervall (Monate)</label>
+                                    <input type="number" id="maintenanceInterval" placeholder="6" min="1" max="60">
+                                </div>
+                                <div class="form-group">
+                                    <label>Letzte Wartung</label>
+                                    <input type="date" id="lastMaintenance">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nächste Wartung</label>
+                                    <input type="date" id="nextMaintenance">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Technische Daten -->
+                    <div class="form-section">
+                        <h3>⚙️ Technische Daten</h3>
+                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Leistung (kW)</label>
+                                <input type="number" id="power" step="0.1" placeholder="z.B. 15.5">
+                            </div>
+                            <div class="form-group">
+                                <label>Gewicht (kg)</label>
+                                <input type="number" id="weight" placeholder="z.B. 2500">
+                            </div>
+                            <div class="form-group">
+                                <label>Max. Arbeitsdruck (bar)</label>
+                                <input type="number" id="maxPressure" step="0.1" placeholder="z.B. 200">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dokumenten-Upload -->
+                    <div class="form-section">
+                        <h3>📎 Dokumentation (Audit-relevant)</h3>
+                        <div class="form-group">
+                            <label>Dokumente hochladen (PDF, Bilder)</label>
+                            <input type="file" id="documentUpload" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            <small>CE-Konformitätserklärung, Betriebsanleitung, Gefährdungsbeurteilung, Prüfprotokolle</small>
+                        </div>
+                    </div>
+
+                    <!-- Bemerkungen -->
+                    <div class="form-section">
+                        <h3>📝 Bemerkungen & Besonderheiten</h3>
+                        <div class="form-group">
+                            <label>Zusätzliche Informationen</label>
+                            <textarea id="notes" rows="4" placeholder="Besonderheiten, spezielle Prüfanforderungen, Sicherheitshinweise..."></textarea>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="saveMachine()" class="btn-primary">
+                    <i class="fas fa-save"></i> Maschine registrieren
+                </button>
+                <button type="button" onclick="closeModal()" class="btn-secondary">
+                    <i class="fas fa-times"></i> Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Erweiterte Maschinenmanagement-Logik
+        let machines = JSON.parse(localStorage.getItem('compliance_machines') || '[]');
+        let currentMachine = null;
+
+        function showAddMachineModal() {
+            document.getElementById('addMachineModal').style.display = 'block';
+            // Auto-generate inventory ID
+            const nextId = 'INV-' + new Date().getFullYear() + '-' + String(machines.length + 1).padStart(3, '0');
+            document.getElementById('inventoryId').value = nextId;
+        }
+
+        function closeModal() {
+            document.getElementById('addMachineModal').style.display = 'none';
+            document.getElementById('machineForm').reset();
+            currentMachine = null;
+        }
+
+        function saveMachine() {
+            const form = document.getElementById('machineForm');
+            const formData = new FormData(form);
+            
+            const machine = {
+                id: currentMachine?.id || Date.now().toString(),
+                // Stammdaten
+                name: document.getElementById('machineName').value,
+                inventoryId: document.getElementById('inventoryId').value,
+                type: document.getElementById('machineType').value,
+                hazardClass: document.getElementById('hazardClass').value,
+                manufacturer: document.getElementById('manufacturer').value,
+                model: document.getElementById('model').value,
+                serialNumber: document.getElementById('serialNumber').value,
+                yearBuilt: parseInt(document.getElementById('yearBuilt').value),
+                purchaseDate: document.getElementById('purchaseDate').value,
+                lifecycleStatus: document.getElementById('lifecycleStatus').value,
+                
+                // Standort & Verantwortlichkeit
+                location: document.getElementById('location').value,
+                department: document.getElementById('department').value,
+                responsiblePerson: document.getElementById('responsiblePerson').value,
+                deputy: document.getElementById('deputy').value,
+                
+                // Compliance
+                compliance: {
+                    ceConformity: document.getElementById('ceConformity').checked,
+                    operatingManual: document.getElementById('operatingManual').checked,
+                    riskAssessment: document.getElementById('riskAssessment').checked,
+                    atexDocumentation: document.getElementById('atexDocumentation').checked
+                },
+                
+                // Prüfintervalle
+                intervals: {
+                    uvv: {
+                        intervalMonths: parseInt(document.getElementById('uvvInterval').value) || 12,
+                        lastCheck: document.getElementById('lastUvvCheck').value,
+                        nextCheck: document.getElementById('nextUvvCheck').value
+                    },
+                    electrical: {
+                        intervalMonths: parseInt(document.getElementById('electricalInterval').value) || 12,
+                        lastCheck: document.getElementById('lastElectricalCheck').value,
+                        nextCheck: document.getElementById('nextElectricalCheck').value
+                    },
+                    maintenance: {
+                        intervalMonths: parseInt(document.getElementById('maintenanceInterval').value) || 6,
+                        lastCheck: document.getElementById('lastMaintenance').value,
+                        nextCheck: document.getElementById('nextMaintenance').value
+                    }
+                },
+                
+                // Technische Daten
+                technical: {
+                    power: parseFloat(document.getElementById('power').value) || null,
+                    weight: parseFloat(document.getElementById('weight').value) || null,
+                    maxPressure: parseFloat(document.getElementById('maxPressure').value) || null
+                },
+                
+                notes: document.getElementById('notes').value,
+                
+                // Audit-Trail
+                createdAt: currentMachine?.createdAt || new Date().toISOString(),
+                createdBy: 'current-user', // TODO: Echten Benutzer verwenden
+                updatedAt: new Date().toISOString(),
+                updatedBy: 'current-user'
+            };
+
+            // Validierung
+            if (!machine.name || !machine.inventoryId || !machine.type || !machine.manufacturer || 
+                !machine.model || !machine.serialNumber || !machine.yearBuilt || !machine.location || 
+                !machine.department || !machine.responsiblePerson) {
+                alert('Bitte füllen Sie alle Pflichtfelder (*) aus.');
+                return;
+            }
+
+            // Eindeutigkeit der Inventarnummer prüfen
+            if (machines.some(m => m.inventoryId === machine.inventoryId && m.id !== machine.id)) {
+                alert('Diese Inventarnummer ist bereits vergeben.');
+                return;
+            }
+
+            // Speichern
+            if (currentMachine) {
+                const index = machines.findIndex(m => m.id === machine.id);
+                machines[index] = machine;
+            } else {
+                machines.push(machine);
+            }
+
+            localStorage.setItem('compliance_machines', JSON.stringify(machines));
+            
+            closeModal();
+            loadMachines();
+            updateDashboard();
+            
+            alert('Maschine erfolgreich registriert!');
+        }
+
+        function loadMachines() {
+            const container = document.getElementById('machinesList');
+            const statusFilter = document.getElementById('statusFilter')?.value || '';
+            const typeFilter = document.getElementById('typeFilter')?.value || '';
+            const searchFilter = document.getElementById('searchFilter')?.value.toLowerCase() || '';
+            
+            let filteredMachines = machines.filter(machine => {
+                return (!statusFilter || machine.lifecycleStatus === statusFilter) &&
+                       (!typeFilter || machine.type === typeFilter) &&
+                       (!searchFilter || machine.name.toLowerCase().includes(searchFilter) || 
+                        machine.inventoryId.toLowerCase().includes(searchFilter));
+            });
+
+            if (filteredMachines.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">Keine Maschinen gefunden.</div>';
+                return;
+            }
+
+            container.innerHTML = filteredMachines.map(machine => {
+                const statusClass = {
+                    active: 'status-active',
+                    maintenance: 'status-maintenance', 
+                    blocked: 'status-blocked',
+                    decommissioned: 'status-decommissioned'
+                }[machine.lifecycleStatus] || 'status-active';
+
+                const complianceScore = calculateComplianceScore(machine);
+                
+                return `
+                    <div class="machine-card">
+                        <div class="machine-header">
+                            <div>
+                                <h3><span class="status-indicator ${statusClass}"></span>${machine.name}</h3>
+                                <p><span class="machine-id">${machine.inventoryId}</span> | ${machine.type} | ${machine.manufacturer}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div>Compliance: <strong>${complianceScore}%</strong></div>
+                                <button onclick="editMachine('${machine.id}')" class="btn-secondary btn-sm">Bearbeiten</button>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+                            <div><strong>Standort:</strong> ${machine.location}</div>
+                            <div><strong>Verantwortlich:</strong> ${machine.responsiblePerson}</div>
+                            <div><strong>Baujahr:</strong> ${machine.yearBuilt}</div>
+                        </div>
+                        <div style="margin-top: 0.5rem;">
+                            ${machine.compliance.ceConformity ? '<span class="compliance-badge compliance-ce">CE</span>' : ''}
+                            ${isInspectionDue(machine) ? '<span class="compliance-badge compliance-overdue">Prüfung fällig</span>' : '<span class="compliance-badge compliance-ok">Prüfungen aktuell</span>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateComplianceScore(machine) {
+            let score = 0;
+            let maxScore = 0;
+            
+            // Compliance Checkboxes
+            maxScore += 4;
+            if (machine.compliance.ceConformity) score++;
+            if (machine.compliance.operatingManual) score++;
+            if (machine.compliance.riskAssessment) score++;
+            if (machine.compliance.atexDocumentation) score++;
+            
+            // Prüfungen aktuell
+            maxScore += 3;
+            if (!isIntervalOverdue(machine.intervals.uvv)) score++;
+            if (!isIntervalOverdue(machine.intervals.electrical)) score++;
+            if (!isIntervalOverdue(machine.intervals.maintenance)) score++;
+            
+            return Math.round((score / maxScore) * 100);
+        }
+
+        function isInspectionDue(machine) {
+            return isIntervalOverdue(machine.intervals.uvv) || 
+                   isIntervalOverdue(machine.intervals.electrical) || 
+                   isIntervalOverdue(machine.intervals.maintenance);
+        }
+
+        function isIntervalOverdue(interval) {
+            if (!interval.nextCheck) return false;
+            return new Date(interval.nextCheck) < new Date();
+        }
+
+        function updateDashboard() {
+            const statusCounts = machines.reduce((acc, machine) => {
+                acc[machine.lifecycleStatus] = (acc[machine.lifecycleStatus] || 0) + 1;
+                return acc;
+            }, {});
+            
+            document.getElementById('activeCount').textContent = statusCounts.active || 0;
+            document.getElementById('maintenanceCount').textContent = statusCounts.maintenance || 0;
+            document.getElementById('blockedCount').textContent = statusCounts.blocked || 0;
+            
+            const overdueCount = machines.filter(machine => isInspectionDue(machine)).length;
+            document.getElementById('overdueCount').textContent = overdueCount;
+            
+            const ceCompliant = machines.filter(m => m.compliance.ceConformity).length;
+            document.getElementById('ceCompliant').textContent = ceCompliant;
+            document.getElementById('totalMachines').textContent = machines.length;
+            document.getElementById('totalMachines2').textContent = machines.length;
+            
+            const avgCompliance = machines.length > 0 ? 
+                Math.round(machines.reduce((sum, m) => sum + calculateComplianceScore(m), 0) / machines.length) : 0;
+            document.getElementById('auditReady').textContent = avgCompliance;
+        }
+
+        function editMachine(machineId) {
+            currentMachine = machines.find(m => m.id === machineId);
+            if (!currentMachine) return;
+            
+            // Formular mit Daten füllen
+            document.getElementById('machineName').value = currentMachine.name;
+            document.getElementById('inventoryId').value = currentMachine.inventoryId;
+            document.getElementById('machineType').value = currentMachine.type;
+            // ... weitere Felder füllen
+            
+            showAddMachineModal();
+        }
+
+        function showComplianceOverview() {
+            alert('Compliance-Übersicht wird implementiert...');
+        }
+
+        function exportAuditReport() {
+            alert('Audit-Report Export wird implementiert...');
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMachines();
+            updateDashboard();
+            
+            // Filter Event Listeners
+            ['statusFilter', 'typeFilter', 'searchFilter'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', loadMachines);
+                    element.addEventListener('input', loadMachines);
+                }
+            });
+        });
+
+        // Modal schließen bei Klick außerhalb
+        window.onclick = function(event) {
+            const modal = document.getElementById('addMachineModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

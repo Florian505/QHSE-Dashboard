@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Permission System</title>
+</head>
+<body>
+    <h1>Permission System Test</h1>
+    <p>Open the console and run the test functions to verify the permission system is working correctly.</p>
+    
+    <script>
+        // Test the permission logic
+        function testPermissionLogic() {
+            console.log('=== TESTING PERMISSION SYSTEM ===');
+            
+            // Mock user objects for testing
+            const testUsers = [
+                { id: '1', name: 'User with no permissions', role: 'mitarbeiter' },
+                { id: '2', name: 'User with denied access', role: 'mitarbeiter', permissions: { gefahrstoffe: false } },
+                { id: '3', name: 'User with old-style permission', role: 'mitarbeiter', permissions: { gefahrstoffe: true } }
+            ];
+            
+            // Mock module settings
+            const moduleSettings = { gefahrstoffe: true };
+            
+            // Test the userHasGefahrstoffeAccess logic
+            testUsers.forEach(user => {
+                const hasAccess = testUserHasGefahrstoffeAccess(user, moduleSettings);
+                console.log(`${user.name}: ${hasAccess ? 'HAS ACCESS' : 'DENIED ACCESS'}`);
+                console.log(`  - Permissions: ${JSON.stringify(user.permissions || 'none')}`);
+            });
+            
+            console.log('=== EXPECTED RESULTS ===');
+            console.log('User with no permissions: HAS ACCESS (default)');
+            console.log('User with denied access: DENIED ACCESS (explicit denial)');
+            console.log('User with old-style permission: HAS ACCESS (old true value should be treated as no explicit denial)');
+        }
+        
+        // Mock version of userHasGefahrstoffeAccess
+        function testUserHasGefahrstoffeAccess(user, moduleSettings) {
+            const userName = user.name || user.id;
+            
+            // First check if module is globally enabled
+            if (!moduleSettings || moduleSettings.gefahrstoffe !== true) {
+                console.log(`Gefahrstoffe module is globally disabled for user ${userName}`);
+                return false;
+            }
+            
+            // Admin users always have access
+            if (user.role === 'admin' || user.role === 'root-admin') {
+                console.log(`Admin user ${userName} has Gefahrstoffe access`);
+                return true;
+            }
+            
+            // Check if user has been explicitly denied access
+            if (user.permissions && user.permissions.gefahrstoffe === false) {
+                console.log(`User ${userName} has been explicitly denied Gefahrstoffe access`);
+                return false;
+            }
+            
+            // DEFAULT: All users have access unless explicitly denied
+            console.log(`User ${userName} has default Gefahrstoffe access`);
+            return true;
+        }
+        
+        // Make functions available globally
+        window.testPermissionLogic = testPermissionLogic;
+        
+        console.log('Test functions loaded. Run testPermissionLogic() to test the permission system.');
+    </script>
+</body>
+</html>

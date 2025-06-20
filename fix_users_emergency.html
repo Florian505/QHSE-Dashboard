@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notfall-Benutzer-Reparatur</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: #dc3545; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        button { padding: 15px 30px; margin: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-primary { background: #007bff; color: white; }
+        .status { margin: 10px 0; padding: 15px; border-radius: 4px; font-weight: bold; }
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .status.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        .user-list { background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .user-item { padding: 8px; margin: 4px 0; background: white; border-radius: 4px; border-left: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 NOTFALL-BENUTZER-REPARATUR</h1>
+            <p>Vollständige Wiederherstellung aller System-Benutzer</p>
+        </div>
+
+        <div class="card">
+            <h2>⚡ Sofortige Reparatur-Aktionen</h2>
+            <div id="status"></div>
+            
+            <button onclick="emergencyUserRestore()" class="btn-danger">
+                🔥 ALLE BENUTZER SOFORT WIEDERHERSTELLEN
+            </button>
+            
+            <button onclick="checkCurrentUsers()" class="btn-primary">
+                👥 Aktuelle Benutzer prüfen
+            </button>
+            
+            <button onclick="window.open('index.html', '_blank')" class="btn-success">
+                🚀 Hauptanwendung öffnen
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>👥 Standard-Benutzer die wiederhergestellt werden:</h2>
+            <div class="user-list">
+                <div class="user-item">🔧 <strong>System Administrator</strong> - Vollzugriff auf alle Bereiche</div>
+                <div class="user-item">👑 <strong>Dr. Michael Hoffmann</strong> - Geschäftsführung</div>
+                <div class="user-item">🏭 <strong>Peter Müller</strong> - Betriebsleiter</div>
+                <div class="user-item">🛡️ <strong>Sarah Weber</strong> - QHSE-Managerin</div>
+                <div class="user-item">⚙️ <strong>Thomas Schmidt</strong> - Abteilungsleiter Produktion</div>
+                <div class="user-item">👤 <strong>Maria Santos</strong> - Mitarbeiterin Facility</div>
+                <div class="user-item">🔧 <strong>Klaus Fischer</strong> - Techniker</div>
+                <div class="user-item">👨‍💼 <strong>Administrator</strong> - System-Administrator</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML += `<div class="status ${type}">${message}</div>`;
+            statusDiv.scrollTop = statusDiv.scrollHeight;
+        }
+
+        function clearStatus() {
+            document.getElementById('status').innerHTML = '';
+        }
+
+        function emergencyUserRestore() {
+            if (!confirm('⚠️ WARNUNG: Alle bestehenden Benutzer werden gelöscht und vollständig neu erstellt. Dies stellt alle ursprünglichen Benutzer wieder her. Fortfahren?')) {
+                return;
+            }
+
+            clearStatus();
+            showStatus('🚨 NOTFALL-WIEDERHERSTELLUNG GESTARTET...', 'warning');
+
+            try {
+                // Vollständig neue Benutzer-Liste erstellen
+                const completeUserList = [
+                    {
+                        id: 'root-admin',
+                        displayName: 'System Administrator',
+                        name: 'System Administrator',
+                        email: 'admin@hoffmann-voss.de',
+                        phone: '+49 2162 12345-000',
+                        mobile: '+49 171 1234567',
+                        department: 'administration',
+                        position: 'System Administrator',
+                        role: 'root-admin',
+                        isActive: true,
+                        canBeDeleted: false,
+                        startDate: '2020-01-01',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'admin-default',
+                        displayName: 'Administrator',
+                        name: 'Administrator',
+                        email: 'admin@hoffmann-voss.de',
+                        phone: '+49 2162 12345-001',
+                        mobile: '+49 171 1111111',
+                        department: 'administration',
+                        position: 'Administrator',
+                        role: 'admin',
+                        isActive: true,
+                        canBeDeleted: true,
+                        startDate: '2021-01-01',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'gf-default',
+                        displayName: 'Dr. Michael Hoffmann',
+                        name: 'Dr. Michael Hoffmann',
+                        email: 'm.hoffmann@hoffmann-voss.de',
+                        phone: '+49 2162 12345-100',
+                        mobile: '+49 171 2222222',
+                        department: 'geschaeftsfuehrung',
+                        position: 'Geschäftsführer',
+                        role: 'geschaeftsfuehrung',
+                        isActive: true,
+                        canBeDeleted: true,
+                        startDate: '2010-01-01',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'bl-default',
+                        displayName: 'Peter Müller',
+                        name: 'Peter Müller',
+                        email: 'p.mueller@hoffmann-voss.de',
+                        phone: '+49 2162 12345-150',
+                        mobile: '+49 171 2345678',
+                        department: 'betriebsleitung',
+                        position: 'Betriebsleiter',
+                        role: 'betriebsleiter',
+                        isActive: true,
+                        canBeDeleted: true,
+                        startDate: '2015-03-01',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'qhse-default',
+                        displayName: 'Sarah Weber',
+                        name: 'Sarah Weber',
+                        email: 's.weber@hoffmann-voss.de',
+                        phone: '+49 2162 12345-200',
+                        mobile: '+49 171 3333333',
+                        department: 'qhse',
+                        position: 'QHSE-Managerin',
+                        role: 'qhse',
+                        isActive: true,
+                        canBeDeleted: true,
+                        startDate: '2017-09-01',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'al-default',
+                        displayName: 'Thomas Schmidt',
+                        name: 'Thomas Schmidt',
+                        email: 't.schmidt@hoffmann-voss.de',
+                        phone: '+49 2162 12345-300',
+                        mobile: '+49 171 4444444',
+                        department: 'produktion',
+                        position: 'Abteilungsleiter Produktion',
+                        role: 'abteilungsleiter',
+                        isActive: true,
+                        canBeDeleted: true,
+                        startDate: '2016-05-01',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'ma-default',
+                        displayName: 'Maria Santos',
+                        name: 'Maria Santos',
+                        email: 'm.santos@hoffmann-voss.de',
+                        phone: '+49 2162 12345-400',
+                        mobile: '+49 171 3456789',
+                        department: 'facility',
+                        position: 'Facility Management',
+                        role: 'mitarbeiter',
+                        isActive: true,
+                        canBeDeleted: true,
+                        startDate: '2018-06-15',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'tech-default',
+                        displayName: 'Klaus Fischer',
+                        name: 'Klaus Fischer',
+                        email: 'k.fischer@hoffmann-voss.de',
+                        phone: '+49 2162 12345-500',
+                        mobile: '+49 171 5555444',
+                        department: 'instandhaltung',
+                        position: 'Techniker',
+                        role: 'techniker',
+                        isActive: true,
+                        canBeDeleted: true,
+                        startDate: '2019-02-01',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+
+                // Benutzer in localStorage speichern
+                localStorage.setItem('qhse_users', JSON.stringify(completeUserList));
+                
+                // Current user auf root-admin setzen
+                localStorage.setItem('qhse_current_user', 'root-admin');
+
+                showStatus('✅ ALLE BENUTZER ERFOLGREICH WIEDERHERGESTELLT!', 'success');
+                showStatus(`📊 ${completeUserList.length} Benutzer wurden erstellt`, 'success');
+                
+                // Benutzer auflisten
+                completeUserList.forEach(user => {
+                    showStatus(`👤 ${user.displayName} (${user.role})`, 'success');
+                });
+
+                showStatus('🔄 Hauptanwendung wird automatisch geöffnet...', 'warning');
+                
+                setTimeout(() => {
+                    window.open('index.html', '_blank');
+                }, 2000);
+
+            } catch (error) {
+                showStatus(`❌ FEHLER bei der Wiederherstellung: ${error.message}`, 'error');
+            }
+        }
+
+        function checkCurrentUsers() {
+            clearStatus();
+            showStatus('🔍 Überprüfung der aktuellen Benutzer...', 'warning');
+
+            try {
+                const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+                const currentUser = localStorage.getItem('qhse_current_user');
+
+                showStatus(`📊 Gefunden: ${users.length} Benutzer`, users.length > 0 ? 'success' : 'error');
+                showStatus(`👤 Aktueller Benutzer: ${currentUser || 'NICHT GESETZT'}`, currentUser ? 'success' : 'error');
+
+                if (users.length === 0) {
+                    showStatus('❌ PROBLEM: Keine Benutzer gefunden!', 'error');
+                    showStatus('💡 Klicken Sie auf "ALLE BENUTZER SOFORT WIEDERHERSTELLEN"', 'warning');
+                } else {
+                    showStatus('👥 Gefundene Benutzer:', 'success');
+                    users.forEach(user => {
+                        const status = user.isActive ? '✅' : '❌';
+                        showStatus(`${status} ${user.displayName || user.name || 'UNNAMED'} (${user.id})`, user.isActive ? 'success' : 'error');
+                    });
+                }
+
+            } catch (error) {
+                showStatus(`❌ Fehler beim Laden: ${error.message}`, 'error');
+            }
+        }
+
+        // Automatische Überprüfung beim Laden
+        window.onload = checkCurrentUsers;
+    </script>
+</body>
+</html>

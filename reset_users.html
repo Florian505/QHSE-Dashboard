@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Users - QHSE System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: #dc3545; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .status.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚠️ Benutzer zurücksetzen</h1>
+            <p>Dieser Reset erstellt neue Benutzer mit vollständigen Profildaten</p>
+        </div>
+
+        <div class="card">
+            <h2>🔄 Benutzer-Reset</h2>
+            <p>Diese Aktion wird:</p>
+            <ul>
+                <li>Alle bestehenden Benutzer löschen</li>
+                <li>Neue Benutzer mit erweiterten Profildaten erstellen</li>
+                <li>Vollständige Qualifikationen und Sichtbarkeitseinstellungen hinzufügen</li>
+                <li>Das Profilsystem komplett neu initialisieren</li>
+            </ul>
+            
+            <div id="status"></div>
+            
+            <button onclick="resetUsers()" class="btn-danger">🗑️ Benutzer zurücksetzen</button>
+            <button onclick="checkUsers()" class="btn-primary">👥 Benutzer prüfen</button>
+            <button onclick="window.open('index.html', '_blank')" class="btn-success">🚀 Hauptanwendung öffnen</button>
+        </div>
+
+        <div class="card">
+            <h2>📋 Neue Benutzer</h2>
+            <p>Nach dem Reset werden folgende Benutzer mit vollständigen Profilen erstellt:</p>
+            <ul>
+                <li><strong>System Administrator</strong> - Vollzugriff, IT-Zertifizierung</li>
+                <li><strong>Peter Müller (Betriebsleiter)</strong> - Erweiterte Qualifikationen, vollständige Kontaktdaten</li>
+                <li><strong>Sarah Weber (QHSE)</strong> - QHSE-spezifische Zertifizierungen</li>
+                <li><strong>Maria Santos (Mitarbeiter)</strong> - Grundqualifikationen</li>
+                <li><strong>Klaus Fischer (Techniker)</strong> - Technische Zertifizierungen</li>
+                <li>+ weitere Rollen mit spezifischen Profilen</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function resetUsers() {
+            if (!confirm('⚠️ WARNUNG: Alle bestehenden Benutzer werden gelöscht und neu erstellt. Fortfahren?')) {
+                return;
+            }
+
+            try {
+                // Clear existing users and related data
+                localStorage.removeItem('qhse_users');
+                localStorage.removeItem('qhse_current_user');
+                
+                showStatus('✅ Benutzer wurden zurückgesetzt. Die Hauptanwendung wird neue Benutzer mit vollständigen Profilen erstellen.', 'success');
+                
+                setTimeout(() => {
+                    showStatus('🔄 Automatisches Neuladen der Hauptanwendung...', 'warning');
+                    // Auto-open main application
+                    window.open('index.html', '_blank');
+                }, 2000);
+                
+            } catch (error) {
+                showStatus('❌ Fehler beim Zurücksetzen: ' + error.message, 'warning');
+            }
+        }
+
+        function checkUsers() {
+            try {
+                const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+                
+                if (users.length === 0) {
+                    showStatus('ℹ️ Keine Benutzer gefunden. Öffnen Sie die Hauptanwendung, um Benutzer zu erstellen.', 'warning');
+                    return;
+                }
+
+                let statusText = `👥 ${users.length} Benutzer gefunden:<br><br>`;
+                users.forEach(user => {
+                    const hasExtendedProfile = user.mobile || user.position || user.qualifications;
+                    const profileStatus = hasExtendedProfile ? '✅ Erweitert' : '⚠️ Basic';
+                    statusText += `• <strong>${user.displayName}</strong> (${user.role}) - ${profileStatus}<br>`;
+                });
+
+                showStatus(statusText, 'success');
+                
+            } catch (error) {
+                showStatus('❌ Fehler beim Prüfen: ' + error.message, 'warning');
+            }
+        }
+
+        // Auto-check users on load
+        window.onload = checkUsers;
+    </script>
+</body>
+</html>

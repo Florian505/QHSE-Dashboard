@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Maschine hinzufügen</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; border-left: 4px solid #f44336; }
+        .success { background: #e8f5e8; border-left: 4px solid #4caf50; }
+        button { padding: 10px 20px; margin: 5px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #1976d2; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Debug: Maschine hinzufügen</h1>
+    
+    <div class="debug">
+        <h3>System-Check:</h3>
+        <button onclick="checkSystem()">System überprüfen</button>
+        <div id="systemCheck"></div>
+    </div>
+
+    <div class="debug">
+        <h3>Test-Formular:</h3>
+        <form id="testForm">
+            <div class="form-group">
+                <label for="machineName">Maschinenname:</label>
+                <input type="text" id="machineName" value="Test Maschine" required>
+            </div>
+            <div class="form-group">
+                <label for="machineType">Typ:</label>
+                <select id="machineType" required>
+                    <option value="">Auswählen</option>
+                    <option value="Spritzgussmaschine">Spritzgussmaschine</option>
+                    <option value="Extruder">Extruder</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="machineLocation">Standort:</label>
+                <input type="text" id="machineLocation" value="Halle 1" required>
+            </div>
+            <div class="form-group">
+                <label for="machineDepartment">Abteilung:</label>
+                <select id="machineDepartment" required>
+                    <option value="">Auswählen</option>
+                    <option value="produktion">Produktion</option>
+                    <option value="instandhaltung">Instandhaltung</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="machineStatus">Status:</label>
+                <select id="machineStatus" required>
+                    <option value="running">In Betrieb</option>
+                    <option value="maintenance">Wartung</option>
+                </select>
+            </div>
+        </form>
+        
+        <button onclick="testMachineCreation()">Test Maschine erstellen</button>
+        <button onclick="showFormData()">Formular-Daten anzeigen</button>
+    </div>
+
+    <div class="debug">
+        <h3>LocalStorage:</h3>
+        <button onclick="showLocalStorage()">LocalStorage anzeigen</button>
+        <button onclick="clearLocalStorage()">LocalStorage leeren</button>
+        <div id="storageContent"></div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `debug ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function checkSystem() {
+            const check = document.getElementById('systemCheck');
+            let html = '<ul>';
+            
+            // Check if localStorage works
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                html += '<li>✅ LocalStorage funktioniert</li>';
+            } catch (e) {
+                html += '<li>❌ LocalStorage Fehler: ' + e.message + '</li>';
+            }
+            
+            // Check existing data
+            const machines = localStorage.getItem('qhse_machines');
+            const departments = localStorage.getItem('qhse_departments');
+            const users = localStorage.getItem('qhse_users');
+            
+            html += `<li>qhse_machines: ${machines ? JSON.parse(machines).length + ' Einträge' : 'Nicht vorhanden'}</li>`;
+            html += `<li>qhse_departments: ${departments ? JSON.parse(departments).length + ' Einträge' : 'Nicht vorhanden'}</li>`;
+            html += `<li>qhse_users: ${users ? JSON.parse(users).length + ' Einträge' : 'Nicht vorhanden'}</li>`;
+            
+            html += '</ul>';
+            check.innerHTML = html;
+        }
+
+        function showFormData() {
+            const formData = {
+                name: document.getElementById('machineName').value,
+                type: document.getElementById('machineType').value,
+                location: document.getElementById('machineLocation').value,
+                department: document.getElementById('machineDepartment').value,
+                status: document.getElementById('machineStatus').value
+            };
+            
+            log('Formular-Daten: ' + JSON.stringify(formData, null, 2));
+            
+            // Validate required fields
+            const required = ['name', 'type', 'location', 'department', 'status'];
+            const missing = required.filter(field => !formData[field]);
+            
+            if (missing.length > 0) {
+                log('❌ Fehlende Pflichtfelder: ' + missing.join(', '), 'error');
+            } else {
+                log('✅ Alle Pflichtfelder ausgefüllt', 'success');
+            }
+        }
+
+        function testMachineCreation() {
+            try {
+                log('Starte Maschinen-Erstellung...');
+                
+                // Get form data
+                const machineData = {
+                    id: Date.now().toString(),
+                    name: document.getElementById('machineName').value.trim(),
+                    type: document.getElementById('machineType').value,
+                    location: document.getElementById('machineLocation').value.trim(),
+                    department: document.getElementById('machineDepartment').value,
+                    status: document.getElementById('machineStatus').value,
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'debug-user'
+                };
+                
+                log('Maschinen-Daten: ' + JSON.stringify(machineData, null, 2));
+                
+                // Validate
+                if (!machineData.name || !machineData.type || !machineData.location || !machineData.department) {
+                    throw new Error('Pflichtfelder fehlen');
+                }
+                
+                // Get existing machines
+                const existingMachines = JSON.parse(localStorage.getItem('qhse_machines') || '[]');
+                log(`Gefundene Maschinen: ${existingMachines.length}`);
+                
+                // Add new machine
+                existingMachines.push(machineData);
+                
+                // Save to localStorage
+                localStorage.setItem('qhse_machines', JSON.stringify(existingMachines));
+                log('✅ Maschine in LocalStorage gespeichert', 'success');
+                
+                // Verify
+                const saved = JSON.parse(localStorage.getItem('qhse_machines'));
+                log(`✅ Verifikation: ${saved.length} Maschinen gespeichert`, 'success');
+                
+                showLocalStorage();
+                
+            } catch (error) {
+                log('❌ Fehler: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        function showLocalStorage() {
+            const storage = document.getElementById('storageContent');
+            const keys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+            
+            let html = '<h4>QHSE LocalStorage Inhalte:</h4>';
+            
+            if (keys.length === 0) {
+                html += '<p>Keine QHSE Daten gefunden</p>';
+            } else {
+                html += '<ul>';
+                keys.forEach(key => {
+                    const data = localStorage.getItem(key);
+                    try {
+                        const parsed = JSON.parse(data);
+                        const count = Array.isArray(parsed) ? parsed.length : 'object';
+                        html += `<li><strong>${key}:</strong> ${count} Einträge</li>`;
+                        
+                        if (key === 'qhse_machines' && Array.isArray(parsed)) {
+                            html += '<ul>';
+                            parsed.forEach((machine, index) => {
+                                html += `<li>Maschine ${index + 1}: ${machine.name} (${machine.type})</li>`;
+                            });
+                            html += '</ul>';
+                        }
+                        
+                    } catch (e) {
+                        html += `<li><strong>${key}:</strong> Fehler beim Parsen</li>`;
+                    }
+                });
+                html += '</ul>';
+            }
+            
+            storage.innerHTML = html;
+        }
+
+        function clearLocalStorage() {
+            if (confirm('Alle QHSE Daten löschen?')) {
+                const keys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+                keys.forEach(key => localStorage.removeItem(key));
+                log('🗑️ LocalStorage geleert');
+                showLocalStorage();
+            }
+        }
+
+        // Initial check
+        window.onload = function() {
+            checkSystem();
+            showLocalStorage();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Users - QHSE System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: #3b82f6; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; font-family: monospace; }
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .status.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Benutzer-Debug Tool</h1>
+            <p>Diagnose der Benutzer-Dropdown-Probleme</p>
+        </div>
+
+        <div class="card">
+            <h2>📊 Debug-Aktionen</h2>
+            <button onclick="checkUsers()" class="btn-primary">👥 Benutzer prüfen</button>
+            <button onclick="checkLocalStorage()" class="btn-primary">💾 LocalStorage prüfen</button>
+            <button onclick="reinitializeUsers()" class="btn-danger">🔄 Benutzer neu initialisieren</button>
+            <button onclick="clearAllData()" class="btn-danger">🗑️ Alle Daten löschen</button>
+            <button onclick="window.open('index.html', '_blank')" class="btn-success">🚀 Hauptanwendung öffnen</button>
+        </div>
+
+        <div class="card">
+            <h2>📋 Debug-Ausgabe</h2>
+            <div id="debugOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        function showOutput(message, type = 'success') {
+            const output = document.getElementById('debugOutput');
+            output.innerHTML += `<div class="status ${type}">${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('debugOutput').innerHTML = '';
+        }
+
+        function checkUsers() {
+            clearOutput();
+            showOutput('🔍 Überprüfung der Benutzer-Daten...', 'warning');
+            
+            try {
+                const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+                showOutput(`✅ Gefunden: ${users.length} Benutzer in localStorage`, 'success');
+                
+                if (users.length === 0) {
+                    showOutput('⚠️ PROBLEM: Keine Benutzer gefunden!', 'error');
+                    showOutput('💡 Lösung: Klicken Sie auf "Benutzer neu initialisieren"', 'warning');
+                    return;
+                }
+
+                let activeCount = 0;
+                let hasDisplayName = 0;
+                let hasRootAdmin = false;
+
+                users.forEach((user, index) => {
+                    const status = [];
+                    if (user.isActive) activeCount++;
+                    if (user.displayName) hasDisplayName++;
+                    if (user.id === 'root-admin') hasRootAdmin = true;
+
+                    if (!user.isActive) status.push('INAKTIV');
+                    if (!user.displayName) status.push('KEIN_NAME');
+                    if (!user.id) status.push('KEINE_ID');
+
+                    const statusText = status.length > 0 ? ` [${status.join(', ')}]` : ' [OK]';
+                    showOutput(`${index + 1}. ${user.displayName || 'UNNAMED'} (${user.id || 'NO_ID'})${statusText}`, 
+                              status.length > 0 ? 'error' : 'success');
+                });
+
+                showOutput(`📊 Zusammenfassung:`, 'warning');
+                showOutput(`• Aktive Benutzer: ${activeCount}/${users.length}`, activeCount === users.length ? 'success' : 'error');
+                showOutput(`• Mit DisplayName: ${hasDisplayName}/${users.length}`, hasDisplayName === users.length ? 'success' : 'error');
+                showOutput(`• Root Admin vorhanden: ${hasRootAdmin ? 'JA' : 'NEIN'}`, hasRootAdmin ? 'success' : 'error');
+
+                // Check dropdown filter logic
+                const filteredUsers = users.filter(user => user && user.isActive && user.id && user.displayName);
+                showOutput(`🎯 Benutzer für Dropdown: ${filteredUsers.length}`, filteredUsers.length > 0 ? 'success' : 'error');
+
+                if (filteredUsers.length === 0) {
+                    showOutput('❌ HAUPTPROBLEM: Keine Benutzer erfüllen die Dropdown-Filter-Kriterien!', 'error');
+                    showOutput('🔧 Benötigt: isActive=true, id vorhanden, displayName vorhanden', 'warning');
+                }
+
+            } catch (error) {
+                showOutput(`❌ Fehler beim Laden der Benutzer: ${error.message}`, 'error');
+            }
+        }
+
+        function checkLocalStorage() {
+            clearOutput();
+            showOutput('💾 LocalStorage-Analyse...', 'warning');
+            
+            const keys = [
+                'qhse_users',
+                'qhse_current_user',
+                'qhse_areas',
+                'qhse_departments',
+                'qhse_documents'
+            ];
+
+            keys.forEach(key => {
+                try {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        const size = new Blob([data]).size;
+                        showOutput(`✅ ${key}: ${Array.isArray(parsed) ? parsed.length + ' items' : 'object'} (${size} bytes)`, 'success');
+                    } else {
+                        showOutput(`⚠️ ${key}: Nicht vorhanden`, 'warning');
+                    }
+                } catch (error) {
+                    showOutput(`❌ ${key}: Fehler beim Parsen - ${error.message}`, 'error');
+                }
+            });
+        }
+
+        function reinitializeUsers() {
+            if (!confirm('⚠️ WARNUNG: Alle bestehenden Benutzer werden gelöscht und neu erstellt. Fortfahren?')) {
+                return;
+            }
+
+            clearOutput();
+            showOutput('🔄 Benutzer werden neu initialisiert...', 'warning');
+
+            try {
+                // Clear existing users
+                localStorage.removeItem('qhse_users');
+                localStorage.removeItem('qhse_current_user');
+                
+                showOutput('✅ Alte Benutzerdaten gelöscht', 'success');
+                
+                // Force the main application to reinitialize users
+                showOutput('🔄 Hauptanwendung wird geöffnet um neue Benutzer zu erstellen...', 'warning');
+                
+                setTimeout(() => {
+                    window.open('index.html', '_blank');
+                    showOutput('✅ Hauptanwendung geöffnet. Prüfen Sie dort die Benutzerliste.', 'success');
+                }, 1000);
+                
+            } catch (error) {
+                showOutput(`❌ Fehler bei der Neuinitialisierung: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAllData() {
+            if (!confirm('⚠️ EXTREM GEFÄHRLICH: Alle QHSE-Daten werden unwiderruflich gelöscht! Fortfahren?')) {
+                return;
+            }
+
+            clearOutput();
+            showOutput('🗑️ Alle Daten werden gelöscht...', 'error');
+
+            try {
+                const qhseKeys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+                qhseKeys.forEach(key => {
+                    localStorage.removeItem(key);
+                    showOutput(`🗑️ Gelöscht: ${key}`, 'warning');
+                });
+                
+                showOutput('✅ Alle QHSE-Daten wurden gelöscht', 'success');
+                showOutput('🔄 Öffnen Sie die Hauptanwendung um das System neu zu initialisieren', 'warning');
+                
+            } catch (error) {
+                showOutput(`❌ Fehler beim Löschen: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check on load
+        window.onload = () => {
+            showOutput('🔍 Automatische Benutzer-Überprüfung beim Start...', 'warning');
+            checkUsers();
+        };
+    </script>
+</body>
+</html>

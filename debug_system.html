@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Debug - Maschinen Problem</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .debug-section { 
+            background: #f9f9f9; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 5px; 
+            border-left: 4px solid #2196f3;
+        }
+        .error { 
+            background: #ffebee; 
+            border-left-color: #f44336; 
+        }
+        .success { 
+            background: #e8f5e8; 
+            border-left-color: #4caf50; 
+        }
+        .warning {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+        button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            background: #2196f3; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        button:hover { background: #1976d2; }
+        .btn-success { background: #4caf50; }
+        .btn-success:hover { background: #388e3c; }
+        .btn-danger { background: #f44336; }
+        .btn-danger:hover { background: #d32f2f; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            box-sizing: border-box;
+        }
+        .step-indicator {
+            font-weight: bold;
+            color: #1976d2;
+            margin: 10px 0;
+        }
+        .data-display {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 System Debug: Maschinen Problem</h1>
+        <p>Diese Seite hilft dabei herauszufinden, warum das Hinzufügen von Maschinen nicht funktioniert.</p>
+        
+        <!-- Step 1: System Check -->
+        <div class="debug-section">
+            <h3>Schritt 1: System-Überprüfung</h3>
+            <button onclick="runSystemCheck()">System überprüfen</button>
+            <div id="systemCheckResults"></div>
+        </div>
+
+        <!-- Step 2: Department Check -->
+        <div class="debug-section">
+            <h3>Schritt 2: Abteilungen überprüfen</h3>
+            <button onclick="checkDepartments()">Abteilungen prüfen</button>
+            <button onclick="initializeDepartments()">Abteilungen initialisieren</button>
+            <div id="departmentResults"></div>
+        </div>
+
+        <!-- Step 3: Manual Machine Creation -->
+        <div class="debug-section">
+            <h3>Schritt 3: Manuelle Maschinen-Erstellung</h3>
+            <form id="debugMachineForm">
+                <div class="form-group">
+                    <label>Maschinenname:</label>
+                    <input type="text" id="testMachineName" value="Debug Test Maschine">
+                </div>
+                <div class="form-group">
+                    <label>Typ:</label>
+                    <select id="testMachineType">
+                        <option value="Spritzgussmaschine">Spritzgussmaschine</option>
+                        <option value="Extruder">Extruder</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Standort:</label>
+                    <input type="text" id="testMachineLocation" value="Halle 1">
+                </div>
+                <div class="form-group">
+                    <label>Abteilung:</label>
+                    <select id="testMachineDepartment">
+                        <option value="">Wird geladen...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select id="testMachineStatus">
+                        <option value="running">In Betrieb</option>
+                        <option value="maintenance">Wartung</option>
+                    </select>
+                </div>
+            </form>
+            <button onclick="testMachineCreation()">Maschine erstellen (Debug)</button>
+            <div id="machineCreationResults"></div>
+        </div>
+
+        <!-- Step 4: Main System Test -->
+        <div class="debug-section">
+            <h3>Schritt 4: Hauptsystem testen</h3>
+            <button onclick="openMainSystem()">Hauptsystem öffnen</button>
+            <button onclick="simulateMainSystemAdd()">Hauptsystem-Funktion simulieren</button>
+            <div id="mainSystemResults"></div>
+        </div>
+
+        <!-- Step 5: Data Management -->
+        <div class="debug-section">
+            <h3>Schritt 5: Daten-Management</h3>
+            <button onclick="showAllData()">Alle Daten anzeigen</button>
+            <button onclick="clearAllData()" class="btn-danger">Alle Daten löschen</button>
+            <div id="dataResults"></div>
+        </div>
+
+        <!-- Results -->
+        <div id="allResults"></div>
+    </div>
+
+    <script>
+        let debugLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+            console.log(`[DEBUG] ${message}`);
+        }
+
+        function showResults(containerId, title, content, type = 'info') {
+            const container = document.getElementById(containerId);
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            container.innerHTML = `
+                <div class="debug-section ${className}">
+                    <h4>${title}</h4>
+                    ${content}
+                </div>
+            `;
+        }
+
+        function runSystemCheck() {
+            log('Starte System-Check');
+            let results = '<ul>';
+            
+            // LocalStorage Test
+            try {
+                localStorage.setItem('debug_test', 'test');
+                localStorage.removeItem('debug_test');
+                results += '<li>✅ LocalStorage funktioniert</li>';
+                log('LocalStorage Test erfolgreich');
+            } catch (e) {
+                results += `<li>❌ LocalStorage Fehler: ${e.message}</li>`;
+                log(`LocalStorage Fehler: ${e.message}`, 'error');
+            }
+
+            // Check existing QHSE data
+            const qhseKeys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+            results += `<li>QHSE Keys gefunden: ${qhseKeys.length} (${qhseKeys.join(', ')})</li>`;
+            log(`QHSE Keys: ${qhseKeys.join(', ')}`);
+
+            // Check specific data
+            const machines = localStorage.getItem('qhse_machines');
+            const departments = localStorage.getItem('qhse_departments');
+            const users = localStorage.getItem('qhse_users');
+
+            results += `<li>qhse_machines: ${machines ? JSON.parse(machines).length + ' Einträge' : 'Nicht vorhanden'}</li>`;
+            results += `<li>qhse_departments: ${departments ? JSON.parse(departments).length + ' Einträge' : 'Nicht vorhanden'}</li>`;
+            results += `<li>qhse_users: ${users ? JSON.parse(users).length + ' Einträge' : 'Nicht vorhanden'}</li>`;
+
+            results += '</ul>';
+            showResults('systemCheckResults', 'System-Check Ergebnisse', results, 'info');
+            updateDepartmentDropdown();
+        }
+
+        function checkDepartments() {
+            log('Überprüfe Abteilungen');
+            const departments = localStorage.getItem('qhse_departments');
+            
+            if (!departments) {
+                showResults('departmentResults', 'Abteilungen-Check', 
+                    '<p class="warning">❌ Keine Abteilungen in LocalStorage gefunden!</p>' +
+                    '<p>Dies könnte das Problem sein. Versuchen Sie "Abteilungen initialisieren".</p>', 'warning');
+                log('Keine Abteilungen gefunden', 'warning');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(departments);
+                let content = `<p>✅ ${parsed.length} Abteilungen gefunden:</p><ul>`;
+                parsed.forEach(dept => {
+                    content += `<li><strong>${dept.id}:</strong> ${dept.name}</li>`;
+                });
+                content += '</ul>';
+                showResults('departmentResults', 'Abteilungen-Check', content, 'success');
+                log(`${parsed.length} Abteilungen gefunden`);
+                updateDepartmentDropdown();
+            } catch (e) {
+                showResults('departmentResults', 'Abteilungen-Check', 
+                    `<p class="error">❌ Fehler beim Parsen der Abteilungen: ${e.message}</p>`, 'error');
+                log(`Abteilungen Parse-Fehler: ${e.message}`, 'error');
+            }
+        }
+
+        function initializeDepartments() {
+            log('Initialisiere Standard-Abteilungen');
+            const defaultDepartments = [
+                {
+                    id: 'produktion',
+                    name: 'Produktion',
+                    code: 'PROD',
+                    description: 'Kunststoffproduktion und Fertigung',
+                    type: 'production',
+                    hierarchyLevel: 3
+                },
+                {
+                    id: 'instandhaltung',
+                    name: 'Instandhaltung',
+                    code: 'IH',
+                    description: 'Wartung und Instandhaltung von Maschinen und Anlagen',
+                    type: 'technical',
+                    hierarchyLevel: 3
+                },
+                {
+                    id: 'qhse',
+                    name: 'QHSE Management',
+                    code: 'QHSE',
+                    description: 'Qualität, Gesundheit, Sicherheit, Umwelt',
+                    type: 'quality',
+                    hierarchyLevel: 2
+                }
+            ];
+
+            localStorage.setItem('qhse_departments', JSON.stringify(defaultDepartments));
+            showResults('departmentResults', 'Abteilungen initialisiert', 
+                `<p class="success">✅ ${defaultDepartments.length} Standard-Abteilungen erstellt</p>`, 'success');
+            log('Standard-Abteilungen erfolgreich erstellt');
+            updateDepartmentDropdown();
+        }
+
+        function updateDepartmentDropdown() {
+            const dropdown = document.getElementById('testMachineDepartment');
+            const departments = localStorage.getItem('qhse_departments');
+            
+            if (!departments) {
+                dropdown.innerHTML = '<option value="">Keine Abteilungen verfügbar</option>';
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(departments);
+                dropdown.innerHTML = '<option value="">Abteilung auswählen</option>' +
+                    parsed.map(dept => `<option value="${dept.id}">${dept.name}</option>`).join('');
+                log('Abteilungs-Dropdown aktualisiert');
+            } catch (e) {
+                dropdown.innerHTML = '<option value="">Fehler beim Laden</option>';
+                log(`Dropdown Update Fehler: ${e.message}`, 'error');
+            }
+        }
+
+        function testMachineCreation() {
+            log('Starte Maschinen-Erstellung Test');
+            
+            try {
+                // Collect form data
+                const machineData = {
+                    id: Date.now().toString(),
+                    name: document.getElementById('testMachineName').value.trim(),
+                    type: document.getElementById('testMachineType').value,
+                    location: document.getElementById('testMachineLocation').value.trim(),
+                    department: document.getElementById('testMachineDepartment').value,
+                    status: document.getElementById('testMachineStatus').value,
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'debug-user'
+                };
+
+                log(`Maschinen-Daten: ${JSON.stringify(machineData, null, 2)}`);
+
+                // Validate
+                const required = ['name', 'type', 'location', 'department', 'status'];
+                const missing = required.filter(field => !machineData[field]);
+                
+                if (missing.length > 0) {
+                    throw new Error(`Fehlende Felder: ${missing.join(', ')}`);
+                }
+
+                // Get existing machines
+                const existingMachines = JSON.parse(localStorage.getItem('qhse_machines') || '[]');
+                log(`Bestehende Maschinen: ${existingMachines.length}`);
+
+                // Add new machine
+                existingMachines.push(machineData);
+
+                // Save
+                localStorage.setItem('qhse_machines', JSON.stringify(existingMachines));
+                log('Maschine erfolgreich gespeichert');
+
+                // Verify
+                const verification = JSON.parse(localStorage.getItem('qhse_machines'));
+                log(`Verifikation: ${verification.length} Maschinen im Storage`);
+
+                showResults('machineCreationResults', 'Maschinen-Erstellung erfolgreich!', 
+                    `<p class="success">✅ Maschine "${machineData.name}" wurde erfolgreich erstellt!</p>` +
+                    `<p>Gesamt Maschinen: ${verification.length}</p>` +
+                    `<div class="data-display">${JSON.stringify(machineData, null, 2)}</div>`, 'success');
+
+            } catch (error) {
+                log(`Maschinen-Erstellung Fehler: ${error.message}`, 'error');
+                showResults('machineCreationResults', 'Maschinen-Erstellung fehlgeschlagen', 
+                    `<p class="error">❌ Fehler: ${error.message}</p>`, 'error');
+            }
+        }
+
+        function simulateMainSystemAdd() {
+            log('Simuliere Hauptsystem addMachine()');
+            
+            // This simulates the exact logic from the main system
+            try {
+                const requiredFields = ['testMachineName', 'testMachineType', 'testMachineLocation', 'testMachineDepartment', 'testMachineStatus'];
+                const missingFields = requiredFields.filter(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    const value = field ? field.value.trim() : '';
+                    log(`Field ${fieldId}: Element gefunden=${!!field}, Wert='${value}'`);
+                    return !field || !value;
+                });
+
+                if (missingFields.length > 0) {
+                    throw new Error(`Fehlende Felder: ${missingFields.join(', ')}`);
+                }
+
+                const machine = {
+                    id: Date.now().toString(),
+                    name: document.getElementById('testMachineName').value.trim(),
+                    type: document.getElementById('testMachineType').value,
+                    location: document.getElementById('testMachineLocation').value.trim(),
+                    department: document.getElementById('testMachineDepartment').value,
+                    status: document.getElementById('testMachineStatus').value,
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'debug-user'
+                };
+
+                log(`Simulierte Maschine: ${JSON.stringify(machine, null, 2)}`);
+
+                // Simulate machine array operations
+                let machines = JSON.parse(localStorage.getItem('qhse_machines') || '[]');
+                if (!Array.isArray(machines)) {
+                    machines = [];
+                    log('Machines Array initialisiert');
+                }
+
+                machines.push(machine);
+                log(`Maschine zu Array hinzugefügt. Anzahl: ${machines.length}`);
+
+                localStorage.setItem('qhse_machines', JSON.stringify(machines));
+                log('Maschinen in LocalStorage gespeichert');
+
+                showResults('mainSystemResults', 'Hauptsystem-Simulation erfolgreich!', 
+                    `<p class="success">✅ Hauptsystem-Logik funktioniert korrekt!</p>` +
+                    `<p>Die Maschine wurde erfolgreich erstellt und gespeichert.</p>`, 'success');
+
+            } catch (error) {
+                log(`Hauptsystem-Simulation Fehler: ${error.message}`, 'error');
+                showResults('mainSystemResults', 'Hauptsystem-Simulation fehlgeschlagen', 
+                    `<p class="error">❌ Fehler in Hauptsystem-Logik: ${error.message}</p>`, 'error');
+            }
+        }
+
+        function openMainSystem() {
+            window.open('index.html', '_blank');
+        }
+
+        function showAllData() {
+            log('Zeige alle QHSE Daten');
+            const qhseKeys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+            let content = '<h4>Aktuelle QHSE Daten:</h4>';
+            
+            if (qhseKeys.length === 0) {
+                content += '<p>Keine QHSE Daten gefunden.</p>';
+            } else {
+                qhseKeys.forEach(key => {
+                    const data = localStorage.getItem(key);
+                    try {
+                        const parsed = JSON.parse(data);
+                        const count = Array.isArray(parsed) ? parsed.length : 'object';
+                        content += `<h5>${key}: ${count} Einträge</h5>`;
+                        content += `<div class="data-display">${JSON.stringify(parsed, null, 2)}</div>`;
+                    } catch (e) {
+                        content += `<h5>${key}: Parse-Fehler</h5>`;
+                        content += `<div class="data-display">Rohdaten: ${data}</div>`;
+                    }
+                });
+            }
+
+            content += '<h4>Debug Log:</h4>';
+            content += `<div class="data-display">${debugLog.join('\n')}</div>`;
+
+            showResults('dataResults', 'Alle QHSE Daten', content, 'info');
+        }
+
+        function clearAllData() {
+            if (confirm('Alle QHSE-Daten wirklich löschen?')) {
+                const qhseKeys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+                qhseKeys.forEach(key => localStorage.removeItem(key));
+                log(`${qhseKeys.length} QHSE Keys gelöscht`);
+                showResults('dataResults', 'Daten gelöscht', 
+                    `<p class="success">✅ Alle QHSE-Daten wurden gelöscht (${qhseKeys.length} Keys)</p>`, 'success');
+                updateDepartmentDropdown();
+            }
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            log('Debug-System gestartet');
+            runSystemCheck();
+        };
+    </script>
+</body>
+</html>

@@ -2220,7 +2220,6 @@ PLZ Ort">${user.address || ''}</textarea>
             if (section === 'gefahrstoffe') {
                 // Special handling for Gefahrstoffe module
                 hasAccess = this.userHasGefahrstoffeAccess(currentUser, moduleSettings);
-                console.log(`Gefahrstoffe menu access for ${currentUser.displayName}: ${hasAccess}`);
             } else {
                 // Standard access check for other sections
                 hasAccess = this.userHasAccessToSection(currentUser, section, allAllowedSections);
@@ -2228,14 +2227,8 @@ PLZ Ort">${user.address || ''}</textarea>
             
             if (hasAccess) {
                 item.classList.remove('hidden');
-                if (section === 'gefahrstoffe') {
-                    console.log('Gefahrstoffe menu item made visible');
-                }
             } else {
                 item.classList.add('hidden');
-                if (section === 'gefahrstoffe') {
-                    console.log('Gefahrstoffe menu item hidden');
-                }
             }
         });
     }
@@ -2378,10 +2371,6 @@ PLZ Ort">${user.address || ''}</textarea>
     userHasGefahrstoffeAccess(user, moduleSettings) {
         const userName = user.displayName || user.name || user.id;
         
-        console.log(`=== CHECKING GEFAHRSTOFFE ACCESS FOR ${userName} ===`);
-        console.log('User object:', user);
-        console.log('Module settings:', moduleSettings);
-        
         // First check if module is globally enabled
         if (!moduleSettings || moduleSettings.gefahrstoffe !== true) {
             console.log(`Gefahrstoffe module is globally disabled for user ${userName}`);
@@ -2390,7 +2379,6 @@ PLZ Ort">${user.address || ''}</textarea>
         
         // Admin users always have access
         if (user.role === 'admin' || user.role === 'root-admin') {
-            console.log(`Admin user ${userName} has Gefahrstoffe access`);
             return true;
         }
         
@@ -2401,8 +2389,6 @@ PLZ Ort">${user.address || ''}</textarea>
         }
         
         // DEFAULT: All users have access unless explicitly denied
-        console.log(`User ${userName} has default Gefahrstoffe access`);
-        console.log(`=== ACCESS GRANTED TO ${userName} ===`);
         return true;
     }
 
@@ -12317,36 +12303,67 @@ PLZ Ort">${user.address || ''}</textarea>
         if (fileName) fileName.textContent = document.name;
         if (fileSize) fileSize.textContent = `${(document.size / 1024).toFixed(1)} KB`;
         
-        // Set PDF source with error handling
+        // Set PDF source with enhanced error handling
         try {
-            // Try to set PDF source with fallback
+            console.log('Setting PDF source for document:', document.name);
+            console.log('PDF data starts with:', document.fileData ? document.fileData.substring(0, 50) : 'NO DATA');
+            
             if (document.fileData && document.fileData.startsWith('data:application/pdf')) {
-                pdfFrame.src = document.fileData;
+                // Clear any previous content
+                pdfFrame.src = '';
                 
-                // Add error handler for PDF loading
-                pdfFrame.onerror = () => {
-                    console.error('Error loading PDF in iframe');
-                    this.showPdfErrorMessage(pdfFrame, document.id);
+                // Set a loading message
+                const pdfContent = window.document.getElementById('pdfContent');
+                if (pdfContent) {
+                    pdfContent.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column;">
+                            <div style="margin-bottom: 1rem;">
+                                <i class="fas fa-spinner fa-spin fa-2x" style="color: #3b82f6;"></i>
+                            </div>
+                            <p style="color: #64748b;">PDF wird geladen...</p>
+                        </div>
+                        <iframe id="pdfFrame" style="width: 100%; height: 100%; border: none; display: none;"></iframe>
+                    `;
+                }
+                
+                // Get the iframe again since we replaced the content
+                const newPdfFrame = window.document.getElementById('pdfFrame');
+                
+                // Add load handler to show iframe when loaded
+                newPdfFrame.onload = () => {
+                    console.log('PDF loaded successfully');
+                    newPdfFrame.style.display = 'block';
+                    // Hide loading message
+                    const loadingDiv = pdfContent.querySelector('div');
+                    if (loadingDiv) loadingDiv.style.display = 'none';
                 };
                 
-                // Also add a timeout fallback in case PDF doesn't load
+                // Add error handler for PDF loading
+                newPdfFrame.onerror = () => {
+                    console.error('Error loading PDF in iframe');
+                    this.showPdfErrorMessage(pdfContent, document);
+                };
+                
+                // Set the PDF source
                 setTimeout(() => {
-                    try {
-                        if (pdfFrame.src && !pdfFrame.contentDocument) {
-                            console.warn('PDF may not have loaded properly');
-                        }
-                    } catch (e) {
-                        // Ignore security errors on contentDocument access
-                        console.log('PDF loaded (security restriction on contentDocument access is normal)');
+                    newPdfFrame.src = document.fileData;
+                }, 100);
+                
+                // Add timeout fallback
+                setTimeout(() => {
+                    if (newPdfFrame.style.display === 'none') {
+                        console.warn('PDF may not have loaded properly after timeout');
+                        this.showPdfErrorMessage(pdfContent, document);
                     }
-                }, 3000);
+                }, 5000);
+                
             } else {
-                console.error('Invalid PDF data format');
-                this.showPdfErrorMessage(pdfFrame, document.id);
+                console.error('Invalid PDF data format:', document.fileData ? 'Data exists but wrong format' : 'No data');
+                this.showPdfErrorMessage(window.document.getElementById('pdfContent'), document);
             }
         } catch (error) {
             console.error('Error setting PDF source:', error);
-            alert('Fehler beim Laden der PDF-Datei.');
+            this.showPdfErrorMessage(window.document.getElementById('pdfContent'), document);
         }
         
         // Setup download button
@@ -12395,6 +12412,64 @@ PLZ Ort">${user.address || ''}</textarea>
         } catch (error) {
             console.error('Error in PDF viewer:', error);
             alert('Fehler beim Öffnen des PDF-Viewers. Bitte laden Sie die Datei herunter.');
+        }
+    }
+    
+    showPdfErrorMessage(container, document) {
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; padding: 2rem; text-align: center;">
+                <div style="margin-bottom: 2rem;">
+                    <i class="fas fa-exclamation-triangle fa-3x" style="color: #f59e0b;"></i>
+                </div>
+                <h3 style="margin-bottom: 1rem; color: #374151;">PDF kann nicht angezeigt werden</h3>
+                <p style="color: #64748b; margin-bottom: 2rem; max-width: 400px;">
+                    Das PDF-Dokument "${document.name}" kann nicht direkt im Browser angezeigt werden. 
+                    Dies kann aufgrund von Sicherheitseinstellungen oder dem PDF-Format auftreten.
+                </p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                    <button onclick="window.qhseDashboard.downloadSubstanceDocument('${document.id}')" 
+                            style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-download"></i> Herunterladen
+                    </button>
+                    <button onclick="window.qhseDashboard.openPdfInNewTab('${document.id}')" 
+                            style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-external-link-alt"></i> Neuer Tab
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    openPdfInNewTab(docId) {
+        const document = this.findSubstanceDocument(docId);
+        if (!document || !document.fileData) {
+            alert('Dokument nicht verfügbar.');
+            return;
+        }
+        
+        try {
+            // Open PDF in new tab/window
+            const newWindow = window.open();
+            newWindow.document.write(`
+                <html>
+                    <head>
+                        <title>${document.name}</title>
+                        <style>
+                            body { margin: 0; padding: 0; background: #f3f4f6; }
+                            iframe { width: 100%; height: 100vh; border: none; }
+                        </style>
+                    </head>
+                    <body>
+                        <iframe src="${document.fileData}" title="${document.name}"></iframe>
+                    </body>
+                </html>
+            `);
+            newWindow.document.close();
+        } catch (error) {
+            console.error('Error opening PDF in new tab:', error);
+            alert('Fehler beim Öffnen in neuem Tab. Bitte laden Sie die Datei herunter.');
         }
     }
     

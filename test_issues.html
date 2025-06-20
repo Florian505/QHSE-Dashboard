@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Störungsmeldungen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #2563eb;
+        }
+        .btn-success {
+            background: #10b981;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            background: #f0f9ff;
+        }
+        .data-section {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test: Störungsmeldungen</h1>
+        
+        <div class="data-section">
+            <h3>Aktuelle Daten:</h3>
+            <div id="currentData"></div>
+        </div>
+        
+        <button class="btn" onclick="createTestMachine()">1. Test-Maschine erstellen</button>
+        <button class="btn" onclick="createTestIssue()">2. Test-Störung erstellen</button>
+        <button class="btn btn-success" onclick="showMainSystem()">Hauptsystem öffnen</button>
+        <button class="btn" onclick="clearStorage()">LocalStorage leeren</button>
+        
+        <div id="result" class="test-result" style="display: none;"></div>
+    </div>
+
+    <script>
+        function createTestMachine() {
+            try {
+                // Erst eine Test-Maschine erstellen
+                const machines = JSON.parse(localStorage.getItem('qhse_machines') || '[]');
+                
+                if (machines.length === 0) {
+                    const testMachine = {
+                        id: 'test-machine-1',
+                        name: 'Test Spritzgussmaschine A1',
+                        type: 'Spritzgussmaschine',
+                        manufacturer: 'Arburg',
+                        model: 'Allrounder 370S',
+                        location: 'Halle 1, Bereich A',
+                        department: 'produktion',
+                        status: 'running',
+                        createdAt: new Date().toISOString(),
+                        createdBy: 'test-user'
+                    };
+                    
+                    machines.push(testMachine);
+                    localStorage.setItem('qhse_machines', JSON.stringify(machines));
+                    
+                    showResult('✅ Test-Maschine erstellt!', `
+                        <p>Maschine "${testMachine.name}" wurde erstellt.</p>
+                        <p>Jetzt können Sie Störungen für diese Maschine melden.</p>
+                    `);
+                } else {
+                    showResult('ℹ️ Maschine bereits vorhanden', `
+                        <p>Es existiert bereits eine Maschine: ${machines[0].name}</p>
+                    `);
+                }
+                
+                showCurrentData();
+                
+            } catch (error) {
+                showResult('❌ Fehler beim Erstellen der Test-Maschine', error.message, true);
+            }
+        }
+        
+        function createTestIssue() {
+            try {
+                const machines = JSON.parse(localStorage.getItem('qhse_machines') || '[]');
+                
+                if (machines.length === 0) {
+                    showResult('⚠️ Keine Maschinen verfügbar', 'Bitte erstellen Sie zuerst eine Test-Maschine.', true);
+                    return;
+                }
+                
+                const issues = JSON.parse(localStorage.getItem('qhse_issues') || '[]');
+                
+                const testIssue = {
+                    id: Date.now().toString(),
+                    machineId: machines[0].id,
+                    priority: 'high',
+                    title: 'Test-Störung: Hydraulikdruck zu niedrig',
+                    description: 'Dies ist eine Test-Störung zur Überprüfung des Systems. Die Hydraulikpumpe zeigt einen zu niedrigen Druck an.',
+                    photo: null,
+                    status: 'open',
+                    reportedAt: new Date().toISOString(),
+                    reportedBy: 'test-user',
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: 'test-user'
+                };
+                
+                issues.push(testIssue);
+                localStorage.setItem('qhse_issues', JSON.stringify(issues));
+                
+                showResult('✅ Test-Störung erstellt!', `
+                    <p><strong>Titel:</strong> ${testIssue.title}</p>
+                    <p><strong>Maschine:</strong> ${machines[0].name}</p>
+                    <p><strong>Priorität:</strong> ${testIssue.priority}</p>
+                    <p><strong>Status:</strong> ${testIssue.status}</p>
+                `);
+                
+                showCurrentData();
+                
+            } catch (error) {
+                showResult('❌ Fehler beim Erstellen der Test-Störung', error.message, true);
+            }
+        }
+        
+        function showMainSystem() {
+            window.location.href = 'index.html';
+        }
+        
+        function clearStorage() {
+            if (confirm('Alle QHSE-Daten löschen?')) {
+                const keys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+                keys.forEach(key => localStorage.removeItem(key));
+                showCurrentData();
+                showResult('🗑️ LocalStorage geleert!', 'Alle Daten wurden entfernt.');
+            }
+        }
+        
+        function showResult(title, content, isError = false) {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.style.borderLeftColor = isError ? '#ef4444' : '#3b82f6';
+            result.style.backgroundColor = isError ? '#fef2f2' : '#f0f9ff';
+            result.innerHTML = `
+                <h4>${title}</h4>
+                ${content}
+            `;
+        }
+        
+        function showCurrentData() {
+            const dataDiv = document.getElementById('currentData');
+            const keys = [
+                'qhse_machines',
+                'qhse_issues',
+                'qhse_users',
+                'qhse_departments'
+            ];
+            
+            let output = '<ul>';
+            keys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    const count = Array.isArray(parsed) ? parsed.length : 'object';
+                    output += `<li><strong>${key}:</strong> ${count} Einträge</li>`;
+                } else {
+                    output += `<li><strong>${key}:</strong> nicht vorhanden</li>`;
+                }
+            });
+            output += '</ul>';
+            
+            // Zeige Details der Issues
+            const issues = JSON.parse(localStorage.getItem('qhse_issues') || '[]');
+            if (issues.length > 0) {
+                output += '<h4>Vorhandene Störungen:</h4><ul>';
+                issues.forEach((issue, index) => {
+                    output += `<li>#${index + 1}: ${issue.title} (${issue.status})</li>`;
+                });
+                output += '</ul>';
+            }
+            
+            dataDiv.innerHTML = output;
+        }
+        
+        // Beim Laden anzeigen
+        showCurrentData();
+    </script>
+</body>
+</html>

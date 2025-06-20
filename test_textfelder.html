@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Textfelder funktionieren</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #2563eb; }
+        .btn-secondary {
+            background: #6b7280;
+        }
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* Kopiere die Styles aus der Haupt-CSS */
+        .expandable-kpi {
+            position: relative;
+            transition: all 0.3s ease;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .expand-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .expand-btn:hover {
+            background: rgba(100, 116, 139, 0.1);
+            color: #374151;
+        }
+        .expand-btn.rotated {
+            transform: rotate(180deg);
+        }
+        .expandable-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .info-display, .feedback-display {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            min-height: 60px;
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.5;
+        }
+        .info-editor, .feedback-editor {
+            margin-top: 8px;
+        }
+        .info-editor textarea, .feedback-editor textarea {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            background: white;
+            box-sizing: border-box;
+        }
+        .editor-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: flex-end;
+        }
+        .customer-feedback-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test: Textfelder Funktionalität</h1>
+        <p>Diese Seite testet isoliert die neuen Textfeld-Features.</p>
+        
+        <!-- Test 1: Arbeitsschutz Expandable -->
+        <div class="test-section">
+            <h2>Test 1: Arbeitsschutz Erweiterung</h2>
+            <div class="expandable-kpi">
+                <h3>Arbeitsschutz</h3>
+                <div class="kpi-value">98.5%</div>
+                <p>Compliance Rate</p>
+                <button id="expandSafetyInfoBtn" class="expand-btn" title="Weitere Informationen">
+                    <i class="fas fa-chevron-down">▼</i>
+                </button>
+                
+                <div id="safetyInfoSection" class="expandable-section" style="display: none;">
+                    <div class="section-header">
+                        <h4>Arbeitsschutz - Weitere Informationen</h4>
+                        <button id="editSafetyInfoBtn" class="btn btn-secondary btn-sm">
+                            ✏️ Bearbeiten
+                        </button>
+                    </div>
+                    <div class="section-content">
+                        <div id="safetyInfoDisplay" class="info-display">
+                            <p>Klicken Sie auf "Bearbeiten", um weitere Informationen zum Arbeitsschutz hinzuzufügen.</p>
+                        </div>
+                        <div id="safetyInfoEditor" class="info-editor" style="display: none;">
+                            <textarea id="safetyInfoText" rows="6" placeholder="Arbeitsschutzmaßnahmen, Schulungen, Vorfälle, Verbesserungen..."></textarea>
+                            <div class="editor-actions">
+                                <button id="saveSafetyInfoBtn" class="btn btn-sm">
+                                    💾 Speichern
+                                </button>
+                                <button id="cancelSafetyInfoBtn" class="btn btn-secondary btn-sm">
+                                    ❌ Abbrechen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test 2: Kundenfeedback -->
+        <div class="test-section">
+            <h2>Test 2: Kundenzufriedenheit Textfeld</h2>
+            <div class="customer-feedback-section">
+                <div class="feedback-header">
+                    <h3>Kundenfeedback & Bemerkungen</h3>
+                    <button id="editCustomerFeedbackBtn" class="btn btn-secondary">
+                        ✏️ Bearbeiten
+                    </button>
+                </div>
+                <div class="feedback-content">
+                    <div id="customerFeedbackDisplay" class="feedback-display">
+                        <p>Klicken Sie auf "Bearbeiten", um Kundenfeedback und Bemerkungen hinzuzufügen.</p>
+                    </div>
+                    <div id="customerFeedbackEditor" class="feedback-editor" style="display: none;">
+                        <textarea id="customerFeedbackText" rows="8" placeholder="Kundenfeedback, Beschwerden, Verbesserungsvorschläge, Maßnahmen..."></textarea>
+                        <div class="editor-actions">
+                            <button id="saveCustomerFeedbackBtn" class="btn">
+                                💾 Speichern
+                            </button>
+                            <button id="cancelCustomerFeedbackBtn" class="btn btn-secondary">
+                                ❌ Abbrechen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug Info -->
+        <div class="test-section">
+            <h3>🔧 Debug Informationen</h3>
+            <button onclick="showDebugInfo()" class="btn">Debug Info anzeigen</button>
+            <button onclick="clearStoredData()" class="btn btn-secondary">Gespeicherte Daten löschen</button>
+            <div id="debugOutput" style="margin-top: 15px; background: #f0f0f0; padding: 10px; border-radius: 4px; font-family: monospace; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Test-Implementation der Features
+        class TextFieldTest {
+            constructor() {
+                this.setupExpandableInfo();
+                this.setupCustomerFeedback();
+                this.loadData();
+            }
+
+            setupExpandableInfo() {
+                const expandBtn = document.getElementById('expandSafetyInfoBtn');
+                const safetySection = document.getElementById('safetyInfoSection');
+                const editBtn = document.getElementById('editSafetyInfoBtn');
+                const saveBtn = document.getElementById('saveSafetyInfoBtn');
+                const cancelBtn = document.getElementById('cancelSafetyInfoBtn');
+                const display = document.getElementById('safetyInfoDisplay');
+                const editor = document.getElementById('safetyInfoEditor');
+                const textarea = document.getElementById('safetyInfoText');
+
+                console.log('Setup Expandable Info...');
+
+                if (expandBtn && safetySection) {
+                    expandBtn.addEventListener('click', () => {
+                        console.log('Expand button clicked');
+                        const isVisible = safetySection.style.display !== 'none';
+                        if (isVisible) {
+                            safetySection.style.display = 'none';
+                            expandBtn.classList.remove('rotated');
+                            console.log('Section collapsed');
+                        } else {
+                            safetySection.style.display = 'block';
+                            expandBtn.classList.add('rotated');
+                            this.loadSafetyInfo();
+                            console.log('Section expanded');
+                        }
+                    });
+                }
+
+                if (editBtn && display && editor) {
+                    editBtn.addEventListener('click', () => {
+                        console.log('Edit button clicked');
+                        display.style.display = 'none';
+                        editor.style.display = 'block';
+                        textarea.focus();
+                    });
+                }
+
+                if (saveBtn && display && editor && textarea) {
+                    saveBtn.addEventListener('click', () => {
+                        console.log('Save button clicked');
+                        const content = textarea.value.trim();
+                        this.saveSafetyInfo(content);
+                        this.displaySafetyInfo(content);
+                        editor.style.display = 'none';
+                        display.style.display = 'block';
+                        console.log('Safety info saved:', content);
+                    });
+                }
+
+                if (cancelBtn && display && editor) {
+                    cancelBtn.addEventListener('click', () => {
+                        console.log('Cancel button clicked');
+                        editor.style.display = 'none';
+                        display.style.display = 'block';
+                        this.loadSafetyInfo();
+                    });
+                }
+            }
+
+            setupCustomerFeedback() {
+                const editBtn = document.getElementById('editCustomerFeedbackBtn');
+                const saveBtn = document.getElementById('saveCustomerFeedbackBtn');
+                const cancelBtn = document.getElementById('cancelCustomerFeedbackBtn');
+                const display = document.getElementById('customerFeedbackDisplay');
+                const editor = document.getElementById('customerFeedbackEditor');
+                const textarea = document.getElementById('customerFeedbackText');
+
+                console.log('Setup Customer Feedback...');
+
+                if (editBtn && display && editor) {
+                    editBtn.addEventListener('click', () => {
+                        console.log('Customer feedback edit button clicked');
+                        display.style.display = 'none';
+                        editor.style.display = 'block';
+                        textarea.focus();
+                    });
+                }
+
+                if (saveBtn && display && editor && textarea) {
+                    saveBtn.addEventListener('click', () => {
+                        console.log('Customer feedback save button clicked');
+                        const content = textarea.value.trim();
+                        this.saveCustomerFeedback(content);
+                        this.displayCustomerFeedback(content);
+                        editor.style.display = 'none';
+                        display.style.display = 'block';
+                        console.log('Customer feedback saved:', content);
+                    });
+                }
+
+                if (cancelBtn && display && editor) {
+                    cancelBtn.addEventListener('click', () => {
+                        console.log('Customer feedback cancel button clicked');
+                        editor.style.display = 'none';
+                        display.style.display = 'block';
+                        this.loadCustomerFeedback();
+                    });
+                }
+            }
+
+            loadData() {
+                this.loadSafetyInfo();
+                this.loadCustomerFeedback();
+            }
+
+            loadSafetyInfo() {
+                const saved = localStorage.getItem('test_safety_info');
+                const textarea = document.getElementById('safetyInfoText');
+                if (textarea && saved) {
+                    textarea.value = saved;
+                }
+                this.displaySafetyInfo(saved);
+            }
+
+            displaySafetyInfo(content) {
+                const display = document.getElementById('safetyInfoDisplay');
+                if (display) {
+                    if (content && content.trim()) {
+                        display.innerHTML = `<div style="white-space: pre-wrap; color: #374151;">${content.trim()}</div>`;
+                    } else {
+                        display.innerHTML = '<p>Klicken Sie auf "Bearbeiten", um weitere Informationen zum Arbeitsschutz hinzuzufügen.</p>';
+                    }
+                }
+            }
+
+            saveSafetyInfo(content) {
+                localStorage.setItem('test_safety_info', content);
+            }
+
+            loadCustomerFeedback() {
+                const saved = localStorage.getItem('test_customer_feedback');
+                const textarea = document.getElementById('customerFeedbackText');
+                if (textarea && saved) {
+                    textarea.value = saved;
+                }
+                this.displayCustomerFeedback(saved);
+            }
+
+            displayCustomerFeedback(content) {
+                const display = document.getElementById('customerFeedbackDisplay');
+                if (display) {
+                    if (content && content.trim()) {
+                        display.innerHTML = `<div style="white-space: pre-wrap; color: #374151;">${content.trim()}</div>`;
+                    } else {
+                        display.innerHTML = '<p>Klicken Sie auf "Bearbeiten", um Kundenfeedback und Bemerkungen hinzuzufügen.</p>';
+                    }
+                }
+            }
+
+            saveCustomerFeedback(content) {
+                localStorage.setItem('test_customer_feedback', content);
+            }
+        }
+
+        function showDebugInfo() {
+            const debug = document.getElementById('debugOutput');
+            const safetyInfo = localStorage.getItem('test_safety_info');
+            const customerFeedback = localStorage.getItem('test_customer_feedback');
+            
+            debug.textContent = `Debug Informationen:
+            
+Arbeitsschutz Info: ${safetyInfo || 'Nicht vorhanden'}
+
+Kundenfeedback: ${customerFeedback || 'Nicht vorhanden'}
+
+LocalStorage Keys: ${Object.keys(localStorage).filter(k => k.startsWith('test_')).join(', ')}
+
+Buttons gefunden:
+- expandSafetyInfoBtn: ${!!document.getElementById('expandSafetyInfoBtn')}
+- editSafetyInfoBtn: ${!!document.getElementById('editSafetyInfoBtn')}
+- editCustomerFeedbackBtn: ${!!document.getElementById('editCustomerFeedbackBtn')}`;
+        }
+
+        function clearStoredData() {
+            localStorage.removeItem('test_safety_info');
+            localStorage.removeItem('test_customer_feedback');
+            location.reload();
+        }
+
+        // Initialize test
+        window.onload = function() {
+            console.log('Starting text field test...');
+            new TextFieldTest();
+            showDebugInfo();
+        };
+    </script>
+</body>
+</html>

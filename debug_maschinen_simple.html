@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Maschinen Debug - Einfach</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover { background: #2563eb; }
+        .btn-success { background: #10b981; }
+        .btn-danger { background: #ef4444; }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f0f9ff;
+            border: 1px solid #3b82f6;
+        }
+        .error { background: #fef2f2; border-color: #ef4444; }
+        .success { background: #f0fdf4; border-color: #10b981; }
+        pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Maschinen-Debug Tool</h1>
+        <p>Bitte führen Sie diese Tests der Reihe nach aus:</p>
+        
+        <button onclick="test1_checkSystem()" class="btn">1. System prüfen</button>
+        <button onclick="test2_openMainSystem()" class="btn">2. Hauptsystem öffnen</button>
+        <button onclick="test3_createMachineDirectly()" class="btn btn-success">3. Maschine direkt erstellen (TEST)</button>
+        <button onclick="test4_clearData()" class="btn btn-danger">4. Alle Daten löschen</button>
+        
+        <div id="results"></div>
+        
+        <h3>Anweisungen:</h3>
+        <ol>
+            <li><strong>Klicken Sie auf "1. System prüfen"</strong> - zeigt aktuellen Status</li>
+            <li><strong>Klicken Sie auf "2. Hauptsystem öffnen"</strong> - öffnet index.html</li>
+            <li><strong>Im Hauptsystem:</strong> Gehen Sie zu "Maschinen" → "Neue Maschine hinzufügen"</li>
+            <li><strong>Wenn das nicht funktioniert:</strong> Kommen Sie zurück und klicken "3. Maschine direkt erstellen"</li>
+        </ol>
+        
+        <h3>Aktueller Status:</h3>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function showResult(title, content, type = 'info') {
+            const results = document.getElementById('results');
+            const className = type === 'error' ? 'result error' : 
+                            type === 'success' ? 'result success' : 'result';
+            results.innerHTML = `<div class="${className}"><h4>${title}</h4>${content}</div>`;
+        }
+
+        function test1_checkSystem() {
+            console.log('=== SYSTEM CHECK ===');
+            
+            let report = '<h4>System Status:</h4><ul>';
+            
+            // Check localStorage
+            const machines = localStorage.getItem('qhse_machines');
+            const departments = localStorage.getItem('qhse_departments');
+            const users = localStorage.getItem('qhse_users');
+            
+            report += `<li><strong>Maschinen:</strong> ${machines ? JSON.parse(machines).length : 0} gefunden</li>`;
+            report += `<li><strong>Abteilungen:</strong> ${departments ? JSON.parse(departments).length : 0} gefunden</li>`;
+            report += `<li><strong>Benutzer:</strong> ${users ? JSON.parse(users).length : 0} gefunden</li>`;
+            
+            // Check if index.html exists
+            report += `<li><strong>Hauptsystem:</strong> <a href="index.html" target="_blank">index.html öffnen</a></li>`;
+            
+            report += '</ul>';
+            
+            // Show data details
+            if (machines) {
+                const machineData = JSON.parse(machines);
+                report += `<h4>Vorhandene Maschinen:</h4><pre>${JSON.stringify(machineData, null, 2)}</pre>`;
+            }
+            
+            if (departments) {
+                const deptData = JSON.parse(departments);
+                report += `<h4>Vorhandene Abteilungen:</h4><pre>${JSON.stringify(deptData, null, 2)}</pre>`;
+            }
+            
+            showResult('✅ System Check abgeschlossen', report, 'success');
+            updateStatus();
+        }
+
+        function test2_openMainSystem() {
+            window.open('index.html', '_blank');
+            showResult('🌐 Hauptsystem geöffnet', 'Das Hauptsystem wurde in einem neuen Tab geöffnet. Gehen Sie zu "Maschinen" und versuchen Sie eine neue Maschine hinzuzufügen.');
+        }
+
+        function test3_createMachineDirectly() {
+            console.log('=== CREATING TEST MACHINE ===');
+            
+            try {
+                // Ensure departments exist
+                let departments = JSON.parse(localStorage.getItem('qhse_departments') || '[]');
+                if (departments.length === 0) {
+                    departments = [
+                        {
+                            id: 'produktion',
+                            name: 'Produktion',
+                            code: 'PROD',
+                            description: 'Kunststoffproduktion und Fertigung',
+                            type: 'production',
+                            hierarchyLevel: 3
+                        },
+                        {
+                            id: 'instandhaltung',
+                            name: 'Instandhaltung', 
+                            code: 'IH',
+                            description: 'Wartung und Instandhaltung von Maschinen',
+                            type: 'technical',
+                            hierarchyLevel: 3
+                        }
+                    ];
+                    localStorage.setItem('qhse_departments', JSON.stringify(departments));
+                    console.log('Abteilungen erstellt:', departments);
+                }
+                
+                // Create test machine
+                const testMachine = {
+                    id: Date.now().toString(),
+                    name: 'TEST Spritzgussmaschine #' + Date.now(),
+                    type: 'Spritzgussmaschine',
+                    manufacturer: 'Arburg',
+                    model: 'Allrounder 370S',
+                    location: 'Halle 1, Bereich A - TEST',
+                    department: 'produktion',
+                    status: 'running',
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'debug-tool',
+                    responsible: 'Test Benutzer'
+                };
+                
+                // Add to machines
+                const machines = JSON.parse(localStorage.getItem('qhse_machines') || '[]');
+                machines.push(testMachine);
+                localStorage.setItem('qhse_machines', JSON.stringify(machines));
+                
+                console.log('Test-Maschine erstellt:', testMachine);
+                
+                showResult('✅ Test-Maschine erstellt!', `
+                    <p><strong>Erfolgreich erstellt:</strong></p>
+                    <ul>
+                        <li><strong>Name:</strong> ${testMachine.name}</li>
+                        <li><strong>Typ:</strong> ${testMachine.type}</li>
+                        <li><strong>Standort:</strong> ${testMachine.location}</li>
+                        <li><strong>Abteilung:</strong> ${testMachine.department}</li>
+                        <li><strong>Status:</strong> ${testMachine.status}</li>
+                    </ul>
+                    <p><strong>➡️ Öffnen Sie jetzt das Hauptsystem und gehen Sie zu "Maschinen" - die Test-Maschine sollte dort sichtbar sein!</strong></p>
+                `, 'success');
+                
+                updateStatus();
+                
+            } catch (error) {
+                console.error('Fehler beim Erstellen der Test-Maschine:', error);
+                showResult('❌ Fehler beim Erstellen', `
+                    <p>Fehler: ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `, 'error');
+            }
+        }
+
+        function test4_clearData() {
+            if (confirm('⚠️ WARNUNG: Alle QHSE-Daten werden gelöscht!\n\nDies löscht:\n- Alle Maschinen\n- Alle Abteilungen\n- Alle Benutzer\n- Alle Zeiterfassungen\n\nFortfahren?')) {
+                const keys = Object.keys(localStorage).filter(key => key.startsWith('qhse_'));
+                keys.forEach(key => localStorage.removeItem(key));
+                
+                showResult('🗑️ Daten gelöscht', `${keys.length} QHSE-Einträge wurden gelöscht:<br>${keys.join('<br>')}`, 'success');
+                updateStatus();
+            }
+        }
+
+        function updateStatus() {
+            const status = document.getElementById('status');
+            const machines = localStorage.getItem('qhse_machines');
+            const departments = localStorage.getItem('qhse_departments');
+            
+            const machineCount = machines ? JSON.parse(machines).length : 0;
+            const deptCount = departments ? JSON.parse(departments).length : 0;
+            
+            status.innerHTML = `
+                <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <strong>📊 Aktuelle Daten:</strong><br>
+                    🔧 Maschinen: ${machineCount}<br>
+                    🏢 Abteilungen: ${deptCount}<br>
+                    📅 Letzte Aktualisierung: ${new Date().toLocaleString('de-DE')}
+                </div>
+            `;
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            updateStatus();
+            
+            // Show helpful info
+            showResult('🔧 Debug Tool bereit', `
+                <p>Dieses Tool hilft beim Debuggen der Maschinen-Funktionalität.</p>
+                <p><strong>Beginnen Sie mit "1. System prüfen"</strong></p>
+            `);
+        };
+    </script>
+</body>
+</html>

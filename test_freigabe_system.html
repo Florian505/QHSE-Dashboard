@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: QHSE Freigabe-System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 3px;
+            font-size: 12px;
+        }
+        .btn:hover { background: #2563eb; }
+        .btn-secondary { background: #6b7280; }
+        .btn-secondary:hover { background: #4b5563; }
+        .btn-info { background: #0ea5e9; }
+        .btn-info:hover { background: #0284c7; }
+        .btn-sm { padding: 4px 8px; font-size: 11px; }
+        
+        /* QHSE Notes Sections */
+        .qhse-notes-section {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .notes-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .notes-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+        .notes-display {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.75rem;
+            min-height: 60px;
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.5;
+        }
+        .sharing-info {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: #e0f2fe;
+            border: 1px solid #0ea5e9;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+        }
+        .shared-users-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        .shared-user-tag {
+            background: #0ea5e9;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+        .read-only-view {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .read-only-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .user-role-selector {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e0f2fe;
+            border-radius: 8px;
+        }
+        .role-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .current-user {
+            font-weight: bold;
+            color: #0ea5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Test: QHSE Freigabe-System</h1>
+        <p>Testet die Freigabe-Funktionalität für QHSE-Notizen mit verschiedenen Nutzerrollen.</p>
+        
+        <!-- User Role Selector -->
+        <div class="user-role-selector">
+            <h3>Aktuelle Rolle: <span id="currentRole" class="current-user">QHSE</span></h3>
+            <p>Wechseln Sie die Rolle, um die verschiedenen Ansichten zu testen:</p>
+            <div class="role-buttons">
+                <button onclick="switchRole('qhse')" class="btn btn-info">QHSE-Mitarbeiter</button>
+                <button onclick="switchRole('mitarbeiter')" class="btn">Mitarbeiter</button>
+                <button onclick="switchRole('admin')" class="btn">Administrator</button>
+            </div>
+        </div>
+        
+        <button onclick="clearTestData()" class="btn btn-secondary">🗑️ Test-Daten löschen</button>
+        <button onclick="showStoredData()" class="btn">📊 Gespeicherte Daten anzeigen</button>
+        
+        <div id="status"></div>
+        
+        <!-- Test: Arbeitsschutz mit Freigabe -->
+        <div class="test-section">
+            <h2>Arbeitsschutz (mit Freigabe-System)</h2>
+            <div class="qhse-notes-section" id="arbeitsschutzSection">
+                <div class="notes-header">
+                    <h3>📝 QHSE-Bereich: Arbeitsschutz Notizen</h3>
+                    <div class="notes-actions">
+                        <button onclick="editNotes('arbeitsschutz')" class="btn btn-secondary btn-sm" id="editArbeitsschutzBtn">✏️ Bearbeiten</button>
+                        <button onclick="openShareModal('arbeitsschutz')" class="btn btn-info btn-sm" id="shareArbeitsschutzBtn">👥 Freigabe</button>
+                    </div>
+                </div>
+                <div class="notes-content">
+                    <div id="arbeitsschutzNotesDisplay" class="notes-display">
+                        <p>Beispiel-Text: Hier stehen wichtige Arbeitsschutz-Informationen...</p>
+                    </div>
+                    <div id="arbeitsschutzSharingInfo"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test: Qualität mit Freigabe -->
+        <div class="test-section">
+            <h2>Qualität (mit Freigabe-System)</h2>
+            <div class="qhse-notes-section" id="qualitaetSection">
+                <div class="notes-header">
+                    <h3>📝 QHSE-Bereich: Qualitäts-Notizen</h3>
+                    <div class="notes-actions">
+                        <button onclick="editNotes('qualitaet')" class="btn btn-secondary btn-sm" id="editQualitaetBtn">✏️ Bearbeiten</button>
+                        <button onclick="openShareModal('qualitaet')" class="btn btn-info btn-sm" id="shareQualitaetBtn">👥 Freigabe</button>
+                    </div>
+                </div>
+                <div class="notes-content">
+                    <div id="qualitaetNotesDisplay" class="notes-display">
+                        <p>Beispiel-Text: Hier stehen wichtige Qualitäts-Informationen...</p>
+                    </div>
+                    <div id="qualitaetSharingInfo"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Debug Info -->
+        <div class="test-section">
+            <h3>🔧 System-Status</h3>
+            <div id="results" style="margin-top: 15px; background: #f0f0f0; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+    <!-- Share Modal (wird dynamisch erstellt) -->
+
+    <script>
+        let currentRole = 'qhse';
+        
+        // Mock-Benutzerdaten für Test
+        const mockUsers = [
+            { id: 'user1', displayName: 'Max Mustermann', role: 'mitarbeiter' },
+            { id: 'user2', displayName: 'Anna Schmidt', role: 'mitarbeiter' },
+            { id: 'user3', displayName: 'Tom Weber', role: 'abteilungsleiter' },
+            { id: 'qhse1', displayName: 'Sarah QHSE', role: 'qhse' }
+        ];
+
+        function switchRole(role) {
+            currentRole = role;
+            document.getElementById('currentRole').textContent = role.toUpperCase();
+            updateUIForRole();
+            showStatus(`Rolle gewechselt zu: ${role}`, 'info');
+        }
+
+        function updateUIForRole() {
+            const categories = ['arbeitsschutz', 'qualitaet'];
+            
+            categories.forEach(category => {
+                const section = document.getElementById(`${category}Section`);
+                const editBtn = document.getElementById(`edit${category.charAt(0).toUpperCase() + category.slice(1)}Btn`);
+                const shareBtn = document.getElementById(`share${category.charAt(0).toUpperCase() + category.slice(1)}Btn`);
+                const notesContent = section.querySelector('.notes-content');
+                
+                if (currentRole === 'qhse' || currentRole === 'admin') {
+                    // QHSE kann alles sehen und bearbeiten
+                    section.style.display = 'block';
+                    editBtn.style.display = 'inline-block';
+                    shareBtn.style.display = 'inline-block';
+                    
+                    // Entferne Read-Only View
+                    const readOnlyView = notesContent.querySelector('.read-only-view');
+                    if (readOnlyView) readOnlyView.remove();
+                    
+                } else {
+                    // Prüfe, ob Mitarbeiter Freigabe hat
+                    const sharedUsers = getSharedUsers(category);
+                    const hasAccess = sharedUsers.includes('user1'); // Mock current user
+                    
+                    if (hasAccess) {
+                        section.style.display = 'block';
+                        editBtn.style.display = 'none';
+                        shareBtn.style.display = 'none';
+                        
+                        // Zeige Read-Only View
+                        showReadOnlyView(category);
+                    } else {
+                        section.style.display = 'none';
+                    }
+                }
+                
+                updateSharingInfo(category);
+            });
+        }
+
+        function showReadOnlyView(category) {
+            const notesContent = document.querySelector(`#${category}Section .notes-content`);
+            
+            // Entferne vorherige Read-Only View
+            const existingReadOnly = notesContent.querySelector('.read-only-view');
+            if (existingReadOnly) existingReadOnly.remove();
+            
+            const readOnlyHtml = `
+                <div class="read-only-view">
+                    <div class="read-only-header">
+                        👁️ Nur-Lese-Zugriff (von QHSE freigegeben)
+                    </div>
+                    <div class="read-only-content">Diese Informationen wurden von der QHSE-Abteilung für Sie freigegeben.</div>
+                </div>
+            `;
+            
+            notesContent.insertAdjacentHTML('beforeend', readOnlyHtml);
+        }
+
+        function editNotes(category) {
+            if (currentRole !== 'qhse' && currentRole !== 'admin') {
+                showStatus('❌ Keine Berechtigung zum Bearbeiten', 'error');
+                return;
+            }
+            showStatus(`✏️ ${category} Notizen bearbeiten`, 'success');
+        }
+
+        function openShareModal(category) {
+            if (currentRole !== 'qhse' && currentRole !== 'admin') {
+                showStatus('❌ Keine Berechtigung für Freigaben', 'error');
+                return;
+            }
+            
+            // Entferne vorherige Modals
+            const existingModal = document.querySelector('.share-modal');
+            if (existingModal) existingModal.remove();
+            
+            const modalHtml = `
+                <div class="share-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+                    <div style="background: white; border-radius: 8px; padding: 2rem; max-width: 500px; width: 90%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
+                            <h3 style="margin: 0;">Freigabe: ${category} Notizen</h3>
+                            <button onclick="this.closest('.share-modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4>Mitarbeiter auswählen:</h4>
+                            <div id="usersGrid" style="border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.75rem; max-height: 150px; overflow-y: auto;">
+                                ${renderUserCheckboxes(category)}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4>Aktuell freigegeben:</h4>
+                            <div id="currentShares">
+                                ${renderCurrentShares(category)}
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                            <button onclick="saveSharing('${category}')" class="btn">💾 Speichern</button>
+                            <button onclick="this.closest('.share-modal').remove()" class="btn btn-secondary">❌ Abbrechen</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function renderUserCheckboxes(category) {
+            const regularUsers = mockUsers.filter(user => user.role === 'mitarbeiter' || user.role === 'abteilungsleiter');
+            const sharedUsers = getSharedUsers(category);
+            
+            return regularUsers.map(user => `
+                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; cursor: pointer;" onclick="this.querySelector('input').click()">
+                    <input type="checkbox" value="${user.id}" ${sharedUsers.includes(user.id) ? 'checked' : ''}>
+                    <label style="cursor: pointer; margin: 0;">${user.displayName}</label>
+                </div>
+            `).join('');
+        }
+
+        function renderCurrentShares(category) {
+            const sharedUsers = getSharedUsers(category);
+            
+            if (sharedUsers.length === 0) {
+                return '<p style="color: #9ca3af; font-style: italic;">Noch keine Freigaben</p>';
+            }
+            
+            return sharedUsers.map(userId => {
+                const user = mockUsers.find(u => u.id === userId);
+                return user ? `<span class="shared-user-tag">${user.displayName}</span>` : '';
+            }).join(' ');
+        }
+
+        function saveSharing(category) {
+            const checkboxes = document.querySelectorAll('#usersGrid input[type="checkbox"]:checked');
+            const selectedUsers = Array.from(checkboxes).map(cb => cb.value);
+            
+            setSharedUsers(category, selectedUsers);
+            
+            // Update modal
+            const currentSharesDiv = document.getElementById('currentShares');
+            if (currentSharesDiv) {
+                currentSharesDiv.innerHTML = renderCurrentShares(category);
+            }
+            
+            // Update main UI
+            updateUIForRole();
+            
+            showStatus(`✅ Freigaben für ${category} gespeichert!`, 'success');
+            document.querySelector('.share-modal').remove();
+        }
+
+        function getSharedUsers(category) {
+            const sharing = localStorage.getItem(`test_qhse_sharing_${category}`);
+            return sharing ? JSON.parse(sharing) : [];
+        }
+
+        function setSharedUsers(category, userIds) {
+            localStorage.setItem(`test_qhse_sharing_${category}`, JSON.stringify(userIds));
+        }
+
+        function updateSharingInfo(category) {
+            const sharedUsers = getSharedUsers(category);
+            const sharingInfoDiv = document.getElementById(`${category}SharingInfo`);
+            
+            if (sharedUsers.length > 0 && (currentRole === 'qhse' || currentRole === 'admin')) {
+                const userNames = sharedUsers.map(userId => {
+                    const user = mockUsers.find(u => u.id === userId);
+                    return user ? user.displayName : 'Unbekannt';
+                });
+                
+                sharingInfoDiv.innerHTML = `
+                    <div class="sharing-info">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #0c4a6e;">👥 Freigegeben für:</h4>
+                        <div class="shared-users-list">
+                            ${userNames.map(name => `<span class="shared-user-tag">${name}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                sharingInfoDiv.innerHTML = '';
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            const colors = {
+                success: '#dcfce7',
+                error: '#fef2f2',
+                info: '#f0f9ff'
+            };
+            status.innerHTML = `<div style="margin: 10px 0; padding: 10px; border-radius: 4px; background: ${colors[type]};">${message}</div>`;
+            setTimeout(() => status.innerHTML = '', 3000);
+        }
+
+        function clearTestData() {
+            if (confirm('Alle Test-Freigaben löschen?')) {
+                localStorage.removeItem('test_qhse_sharing_arbeitsschutz');
+                localStorage.removeItem('test_qhse_sharing_qualitaet');
+                updateUIForRole();
+                showStatus('🗑️ Test-Daten gelöscht', 'info');
+            }
+        }
+
+        function showStoredData() {
+            const results = document.getElementById('results');
+            const data = {
+                arbeitsschutz: getSharedUsers('arbeitsschutz'),
+                qualitaet: getSharedUsers('qualitaet')
+            };
+            
+            results.textContent = `Freigabe-Status:\n\nArbeitsschutz: ${data.arbeitsschutz.length} Nutzer\nQualität: ${data.qualitaet.length} Nutzer\n\nDetails:\n${JSON.stringify(data, null, 2)}`;
+        }
+
+        // Initialize
+        window.onload = function() {
+            updateUIForRole();
+            showStatus('🔐 Freigabe-System Test gestartet', 'info');
+        };
+    </script>
+</body>
+</html>

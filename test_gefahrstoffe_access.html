@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Gefahrstoffe Access</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .pass { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .fail { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        button { padding: 10px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Gefahrstoffe Access Test</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="runTests()">Tests ausführen</button>
+    <button onclick="resetAllPermissions()">Alle Berechtigungen zurücksetzen</button>
+    <button onclick="grantAllAccess()">Allen Zugriff gewähren</button>
+    
+    <script>
+        function runTests() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Test Ergebnisse:</h2>';
+            
+            // Test 1: Module Settings
+            const moduleSettings = JSON.parse(localStorage.getItem('qhse_module_settings') || '{"gefahrstoffe": true}');
+            addTestResult(`Modul global aktiviert: ${moduleSettings.gefahrstoffe}`, moduleSettings.gefahrstoffe);
+            
+            // Test 2: Users exist
+            const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+            addTestResult(`Benutzer im System: ${users.length}`, users.length > 0);
+            
+            // Test 3: Check each user's access
+            const nonAdminUsers = users.filter(u => u.role !== 'admin' && u.role !== 'root-admin');
+            addTestResult(`Nicht-Admin Benutzer: ${nonAdminUsers.length}`, nonAdminUsers.length > 0);
+            
+            nonAdminUsers.forEach(user => {
+                const hasAccess = checkUserGefahrstoffeAccess(user, moduleSettings);
+                const userName = user.displayName || user.name || user.id;
+                const permissionStatus = user.permissions?.gefahrstoffe;
+                addTestResult(
+                    `${userName} (${user.role}) - Zugriff: ${hasAccess} (Permission: ${permissionStatus})`, 
+                    hasAccess
+                );
+            });
+        }
+        
+        function checkUserGefahrstoffeAccess(user, moduleSettings) {
+            // Replicate the logic from the main app
+            if (!moduleSettings || moduleSettings.gefahrstoffe !== true) {
+                return false;
+            }
+            
+            if (user.role === 'admin' || user.role === 'root-admin') {
+                return true;
+            }
+            
+            if (user.permissions && user.permissions.gefahrstoffe === false) {
+                return false;
+            }
+            
+            return true; // Default access
+        }
+        
+        function addTestResult(message, passed) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.textContent = `${passed ? '✓' : '✗'} ${message}`;
+            results.appendChild(div);
+        }
+        
+        function resetAllPermissions() {
+            const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+            users.forEach(user => {
+                if (user.permissions) {
+                    delete user.permissions.gefahrstoffe;
+                    if (Object.keys(user.permissions).length === 0) {
+                        delete user.permissions;
+                    }
+                }
+            });
+            localStorage.setItem('qhse_users', JSON.stringify(users));
+            alert('Alle Gefahrstoffe-Berechtigungen zurückgesetzt. Alle Benutzer haben jetzt Standardzugriff.');
+            runTests();
+        }
+        
+        function grantAllAccess() {
+            // Enable module globally
+            const moduleSettings = { gefahrstoffe: true };
+            localStorage.setItem('qhse_module_settings', JSON.stringify(moduleSettings));
+            
+            // Remove any explicit denials
+            const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+            users.forEach(user => {
+                if (user.permissions && user.permissions.gefahrstoffe === false) {
+                    delete user.permissions.gefahrstoffe;
+                    if (Object.keys(user.permissions).length === 0) {
+                        delete user.permissions;
+                    }
+                }
+            });
+            localStorage.setItem('qhse_users', JSON.stringify(users));
+            
+            alert('Gefahrstoffe-Modul aktiviert und allen Benutzern Zugriff gewährt.');
+            runTests();
+        }
+        
+        // Auto-run tests on load
+        window.onload = runTests;
+    </script>
+</body>
+</html>

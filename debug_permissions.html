@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Permissions</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .user-info { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+        button { padding: 10px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>QHSE Permission Debug Tool</h1>
+    
+    <div class="debug-section">
+        <h2>Current State</h2>
+        <button onclick="debugCurrentState()">Debug Current State</button>
+        <div id="currentState"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>All Users</h2>
+        <button onclick="listAllUsers()">List All Users</button>
+        <div id="allUsers"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Module Settings</h2>
+        <button onclick="showModuleSettings()">Show Module Settings</button>
+        <div id="moduleSettings"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Grant Permissions</h2>
+        <button onclick="grantGefahrstoffeToAll()">Grant Gefahrstoffe to All Non-Admin Users</button>
+        <button onclick="enableGefahrstoffeModule()">Enable Gefahrstoffe Module</button>
+        <div id="grantResults"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Reset Data</h2>
+        <button onclick="resetUsers()">Reset Users</button>
+        <button onclick="clearAllData()">Clear All Data</button>
+    </div>
+
+    <script>
+        function debugCurrentState() {
+            const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+            const moduleSettings = JSON.parse(localStorage.getItem('qhse_module_settings') || '{"gefahrstoffe": true}');
+            const currentUserId = localStorage.getItem('qhse_current_user') || 'root-admin';
+            const currentUser = users.find(u => u.id === currentUserId);
+            
+            document.getElementById('currentState').innerHTML = `
+                <h3>Current User: ${currentUser ? currentUser.displayName : 'Not found'} (${currentUserId})</h3>
+                <p>Role: ${currentUser ? currentUser.role : 'Unknown'}</p>
+                <p>Permissions: ${JSON.stringify(currentUser?.permissions || {})}</p>
+                <p>Gefahrstoffe Module Enabled: ${moduleSettings.gefahrstoffe}</p>
+                <p>Total Users: ${users.length}</p>
+            `;
+        }
+        
+        function listAllUsers() {
+            const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+            let html = '<h3>All Users:</h3>';
+            users.forEach(user => {
+                html += `
+                    <div class="user-info">
+                        <strong>${user.displayName || user.name || 'Unknown'}</strong> (${user.id})<br>
+                        Role: ${user.role}<br>
+                        Active: ${user.isActive}<br>
+                        Permissions: ${JSON.stringify(user.permissions || {})}<br>
+                        Department: ${user.department}
+                    </div>
+                `;
+            });
+            document.getElementById('allUsers').innerHTML = html;
+        }
+        
+        function showModuleSettings() {
+            const moduleSettings = JSON.parse(localStorage.getItem('qhse_module_settings') || '{"gefahrstoffe": true}');
+            document.getElementById('moduleSettings').innerHTML = `
+                <h3>Module Settings:</h3>
+                <pre>${JSON.stringify(moduleSettings, null, 2)}</pre>
+            `;
+        }
+        
+        function grantGefahrstoffeToAll() {
+            const users = JSON.parse(localStorage.getItem('qhse_users') || '[]');
+            let updated = 0;
+            
+            users.forEach(user => {
+                if (user.role !== 'admin' && user.role !== 'root-admin') {
+                    if (!user.permissions) user.permissions = {};
+                    user.permissions.gefahrstoffe = true;
+                    updated++;
+                }
+            });
+            
+            localStorage.setItem('qhse_users', JSON.stringify(users));
+            document.getElementById('grantResults').innerHTML = `
+                <p>Updated ${updated} users with Gefahrstoffe permissions</p>
+            `;
+        }
+        
+        function enableGefahrstoffeModule() {
+            const moduleSettings = { gefahrstoffe: true };
+            localStorage.setItem('qhse_module_settings', JSON.stringify(moduleSettings));
+            document.getElementById('grantResults').innerHTML = `
+                <p>Gefahrstoffe module enabled globally</p>
+            `;
+        }
+        
+        function resetUsers() {
+            localStorage.removeItem('qhse_users');
+            document.getElementById('grantResults').innerHTML = `
+                <p>Users reset. Reload the main app to recreate default users.</p>
+            `;
+        }
+        
+        function clearAllData() {
+            if (confirm('This will clear ALL data. Are you sure?')) {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('qhse_')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                document.getElementById('grantResults').innerHTML = `
+                    <p>All QHSE data cleared. Reload the main app to start fresh.</p>
+                `;
+            }
+        }
+        
+        // Auto-run on load
+        window.onload = function() {
+            debugCurrentState();
+            listAllUsers();
+            showModuleSettings();
+        };
+    </script>
+</body>
+</html>
