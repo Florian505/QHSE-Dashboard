@@ -52,6 +52,10 @@ class QHSEDashboard {
         this.setupHazardousSubstances();
         this.setupUserProfiles();
         this.loadCustomLabels();
+        
+        // Make dashboard globally available for onclick handlers
+        window.qhseDashboard = this;
+        
         this.updateUIForUser();
         this.renderDocumentsInSections();
         this.renderUsersList();
@@ -490,6 +494,786 @@ PLZ Ort">${user.address || ''}</textarea>
         }
     }
 
+    // Roles Editor
+    openRolesEditor(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+
+        const currentUser = this.getCurrentUser();
+        const canEditRoles = currentUser && (currentUser.role === 'root-admin' || currentUser.role === 'admin');
+        
+        const modal = this.createSubModal('rolesEditor', 'Rollen & Berechtigungen verwalten');
+        modal.querySelector('.modal-body').innerHTML = `
+            <div class="roles-editor">
+                <div class="current-role-section">
+                    <h4><i class="fas fa-user-tag"></i> Aktuelle Systemrolle</h4>
+                    <div class="role-display">
+                        <div class="role-info">
+                            <h5>${this.getRoleDisplayName(user.role)}</h5>
+                            <p><strong>Systemrolle:</strong> <code>${user.role}</code></p>
+                            <p><strong>Status:</strong> <span class="status-badge ${user.isActive ? 'valid' : 'inactive'}">${user.isActive ? 'Aktiv' : 'Inaktiv'}</span></p>
+                        </div>
+                        ${canEditRoles ? `
+                            <div class="role-actions">
+                                <button onclick="window.qhseDashboard.showRoleChangeForm()" class="btn-primary">
+                                    <i class="fas fa-exchange-alt"></i> Rolle ändern
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                ${canEditRoles ? `
+                    <div id="roleChangeForm" style="display: none;">
+                        <h4>Rolle ändern</h4>
+                        <div class="form-group">
+                            <label>Neue Rolle wählen:</label>
+                            <select id="newUserRole">
+                                ${Object.entries(this.roleDefinitions).map(([roleKey, roleDef]) => `
+                                    <option value="${roleKey}" ${roleKey === user.role ? 'selected' : ''}>${roleDef.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button onclick="window.qhseDashboard.saveRoleChange('${userId}')" class="btn-primary">
+                                <i class="fas fa-save"></i> Rolle speichern
+                            </button>
+                            <button onclick="window.qhseDashboard.hideRoleChangeForm()" class="btn-secondary">
+                                Abbrechen
+                            </button>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="permissions-section">
+                    <h4><i class="fas fa-key"></i> Berechtigungen</h4>
+                    <div class="permissions-display">
+                        ${this.renderUserPermissions(user)}
+                    </div>
+                </div>
+
+                <div class="special-permissions-section">
+                    <h4><i class="fas fa-star"></i> Spezielle Modulberechtigungen</h4>
+                    <div class="special-permissions-display">
+                        ${this.renderSpecialPermissions(user, canEditRoles)}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modal.querySelector('.modal-footer').innerHTML = `
+            <button onclick="window.qhseDashboard.closeSubModal('rolesEditor')" class="btn-secondary">
+                Schließen
+            </button>
+        `;
+
+        modal.style.display = 'block';
+    }
+
+    renderUserPermissions(user) {
+        const roleDefinition = this.roleDefinitions[user.role];
+        const allowedSections = roleDefinition ? roleDefinition.allowedSections || [] : [];
+        
+        return `
+            <div class="permissions-grid">
+                ${allowedSections.map(section => `
+                    <div class="permission-item granted">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${this.getSectionDisplayName(section)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    renderSpecialPermissions(user, canEdit) {
+        const permissions = user.permissions || {};
+        const modules = ['gefahrstoffe', 'zeitauswertung', 'maschinen-verwaltung'];
+        
+        return `
+            <div class="special-permissions-list">
+                ${modules.map(module => {
+                    const hasAccess = permissions[module] !== false; // Default true unless explicitly denied
+                    return `
+                        <div class="special-permission-item">
+                            <div class="permission-info">
+                                <h5>${this.getModuleDisplayName(module)}</h5>
+                                <span class="permission-status ${hasAccess ? 'granted' : 'denied'}">
+                                    <i class="fas ${hasAccess ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                    ${hasAccess ? 'Erlaubt' : 'Verweigert'}
+                                </span>
+                            </div>
+                            ${canEdit ? `
+                                <div class="permission-actions">
+                                    <button onclick="window.qhseDashboard.toggleModulePermission('${user.id}', '${module}')" 
+                                            class="btn-small ${hasAccess ? 'btn-danger' : 'btn-success'}">
+                                        ${hasAccess ? 'Entziehen' : 'Gewähren'}
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    showRoleChangeForm() {
+        document.getElementById('roleChangeForm').style.display = 'block';
+    }
+
+    hideRoleChangeForm() {
+        document.getElementById('roleChangeForm').style.display = 'none';
+    }
+
+    saveRoleChange(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+
+        const newRole = document.getElementById('newUserRole').value;
+        if (!newRole || newRole === user.role) {
+            alert('Keine Änderung vorgenommen.');
+            return;
+        }
+
+        if (confirm(`Möchten Sie die Rolle von "${this.getRoleDisplayName(user.role)}" zu "${this.getRoleDisplayName(newRole)}" ändern?`)) {
+            user.role = newRole;
+            this.saveUsersToStorage();
+            
+            // Refresh the editor
+            this.openRolesEditor(userId);
+            
+            // Update main UI if it's the current user
+            if (userId === this.currentUserId) {
+                this.updateUIForUser();
+            }
+            
+            alert('Rolle erfolgreich geändert!');
+        }
+    }
+
+    toggleModulePermission(userId, module) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+
+        if (!user.permissions) {
+            user.permissions = {};
+        }
+
+        const currentAccess = user.permissions[module] !== false;
+        user.permissions[module] = !currentAccess;
+        
+        this.saveUsersToStorage();
+        
+        // Refresh the editor
+        this.openRolesEditor(userId);
+        
+        const action = currentAccess ? 'entzogen' : 'gewährt';
+        alert(`Berechtigung für ${this.getModuleDisplayName(module)} wurde ${action}.`);
+    }
+
+    getModuleDisplayName(module) {
+        const moduleNames = {
+            'gefahrstoffe': 'Gefahrstoffverzeichnis',
+            'zeitauswertung': 'Zeitauswertung',
+            'maschinen-verwaltung': 'Maschinenmanagement'
+        };
+        return moduleNames[module] || module;
+    }
+
+    // Responsibilities Editor
+    openResponsibilitiesEditor(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+        
+        const modal = this.createSubModal('responsibilitiesEditor', 'Verantwortlichkeiten verwalten');
+        modal.querySelector('.modal-body').innerHTML = `
+            <div class="responsibilities-editor">
+                <div class="resp-summary">
+                    <h4><i class="fas fa-tasks"></i> Verantwortlichkeiten Übersicht</h4>
+                    <div class="resp-stats">
+                        <div class="resp-stat">
+                            <span class="stat-number">${this.getMachineResponsibilitiesCount(user)}</span>
+                            <span class="stat-label">Maschinen</span>
+                        </div>
+                        <div class="resp-stat">
+                            <span class="stat-number">${this.getSubstanceResponsibilitiesCount(user)}</span>
+                            <span class="stat-label">Gefahrstoffe</span>
+                        </div>
+                        <div class="resp-stat">
+                            <span class="stat-number">${this.getAuditResponsibilitiesCount(user)}</span>
+                            <span class="stat-label">Prüfungen</span>
+                        </div>
+                        <div class="resp-stat">
+                            <span class="stat-number">${this.getStaffResponsibilitiesCount(user)}</span>
+                            <span class="stat-label">Mitarbeiter</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resp-categories">
+                    <div class="resp-category-editor">
+                        <h4><i class="fas fa-cogs"></i> Maschinen & Anlagen</h4>
+                        <div class="resp-content">
+                            ${this.renderMachineResponsibilitiesEditor(user)}
+                        </div>
+                    </div>
+                    
+                    <div class="resp-category-editor">
+                        <h4><i class="fas fa-flask"></i> Gefahrstoffe</h4>
+                        <div class="resp-content">
+                            ${this.renderSubstanceResponsibilitiesEditor(user)}
+                        </div>
+                    </div>
+                    
+                    <div class="resp-category-editor">
+                        <h4><i class="fas fa-clipboard-check"></i> Prüfungen & Audits</h4>
+                        <div class="resp-content">
+                            ${this.renderAuditResponsibilitiesEditor(user)}
+                        </div>
+                    </div>
+                    
+                    <div class="resp-category-editor">
+                        <h4><i class="fas fa-users"></i> Mitarbeiterverantwortung</h4>
+                        <div class="resp-content">
+                            ${this.renderStaffResponsibilitiesEditor(user)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modal.querySelector('.modal-footer').innerHTML = `
+            <button onclick="window.qhseDashboard.closeSubModal('responsibilitiesEditor')" class="btn-secondary">
+                Schließen
+            </button>
+        `;
+
+        modal.style.display = 'block';
+    }
+
+    getMachineResponsibilitiesCount(user) {
+        // Count machines assigned to this user
+        const machines = this.machines || [];
+        return machines.filter(machine => machine.responsiblePerson === user.id).length;
+    }
+
+    getSubstanceResponsibilitiesCount(user) {
+        // Count hazardous substances assigned to this user
+        const substances = this.hazardousSubstances || [];
+        return substances.filter(substance => substance.responsiblePerson === user.id).length;
+    }
+
+    getAuditResponsibilitiesCount(user) {
+        // Count audits assigned to this user (simplified)
+        return user.assignedAudits ? user.assignedAudits.length : 0;
+    }
+
+    getStaffResponsibilitiesCount(user) {
+        // Count staff under this user's supervision
+        const subordinates = this.users.filter(u => u.supervisor === user.id);
+        return subordinates.length;
+    }
+
+    renderMachineResponsibilitiesEditor(user) {
+        const machines = this.machines || [];
+        const userMachines = machines.filter(machine => machine.responsiblePerson === user.id);
+        
+        return `
+            <div class="responsibility-section">
+                ${userMachines.length === 0 ? 
+                    '<p class="no-data">Keine Maschinenverantwortlichkeiten zugewiesen.</p>' :
+                    `<div class="responsibility-list">
+                        ${userMachines.map(machine => `
+                            <div class="responsibility-item">
+                                <div class="item-info">
+                                    <h5>${machine.name}</h5>
+                                    <p>Seriennummer: ${machine.serialNumber || 'Nicht angegeben'}</p>
+                                    <span class="status-badge ${machine.status}">${machine.status || 'Unbekannt'}</span>
+                                </div>
+                                <div class="item-actions">
+                                    <button onclick="window.qhseDashboard.viewMachineDetails('${machine.id}')" class="btn-small btn-secondary">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`
+                }
+            </div>
+        `;
+    }
+
+    renderSubstanceResponsibilitiesEditor(user) {
+        const substances = this.hazardousSubstances || [];
+        const userSubstances = substances.filter(substance => substance.responsiblePerson === user.id);
+        
+        return `
+            <div class="responsibility-section">
+                ${userSubstances.length === 0 ? 
+                    '<p class="no-data">Keine Gefahrstoff-Verantwortlichkeiten zugewiesen.</p>' :
+                    `<div class="responsibility-list">
+                        ${userSubstances.map(substance => `
+                            <div class="responsibility-item">
+                                <div class="item-info">
+                                    <h5>${substance.name}</h5>
+                                    <p>CAS-Nr.: ${substance.casNumber || 'Nicht angegeben'}</p>
+                                    <span class="hazard-class">${substance.hazardClass || 'Unbekannt'}</span>
+                                </div>
+                                <div class="item-actions">
+                                    <button onclick="window.qhseDashboard.viewSubstanceDetails('${substance.id}')" class="btn-small btn-secondary">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`
+                }
+            </div>
+        `;
+    }
+
+    renderAuditResponsibilitiesEditor(user) {
+        const assignedAudits = user.assignedAudits || [];
+        
+        return `
+            <div class="responsibility-section">
+                ${assignedAudits.length === 0 ? 
+                    '<p class="no-data">Keine Audit-Verantwortlichkeiten zugewiesen.</p>' :
+                    `<div class="responsibility-list">
+                        ${assignedAudits.map(audit => `
+                            <div class="responsibility-item">
+                                <div class="item-info">
+                                    <h5>${audit.title}</h5>
+                                    <p>Fällig: ${audit.dueDate ? new Date(audit.dueDate).toLocaleDateString('de-DE') : 'Nicht angegeben'}</p>
+                                    <span class="status-badge ${audit.status}">${audit.status || 'Offen'}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`
+                }
+                <div class="add-responsibility">
+                    <button onclick="window.qhseDashboard.showAddAuditForm('${user.id}')" class="btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Prüfung zuweisen
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    renderStaffResponsibilitiesEditor(user) {
+        const subordinates = this.users.filter(u => u.supervisor === user.id);
+        
+        return `
+            <div class="responsibility-section">
+                ${subordinates.length === 0 ? 
+                    '<p class="no-data">Keine Mitarbeiter unter Ihrer Aufsicht.</p>' :
+                    `<div class="responsibility-list">
+                        ${subordinates.map(subordinate => `
+                            <div class="responsibility-item">
+                                <div class="item-info">
+                                    <h5>${subordinate.displayName}</h5>
+                                    <p>Rolle: ${this.getRoleDisplayName(subordinate.role)}</p>
+                                    <p>Abteilung: ${subordinate.department || 'Nicht angegeben'}</p>
+                                </div>
+                                <div class="item-actions">
+                                    <button onclick="window.qhseDashboard.viewEmployeeProfile('${subordinate.id}')" class="btn-small btn-secondary">
+                                        <i class="fas fa-user"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`
+                }
+            </div>
+        `;
+    }
+
+    // Activity Editor
+    openActivityEditor(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+        
+        const activities = this.getUserActivities(userId);
+        
+        const modal = this.createSubModal('activityEditor', 'Aktivitätsverlauf verwalten');
+        modal.querySelector('.modal-body').innerHTML = `
+            <div class="activity-editor">
+                <div class="activity-summary">
+                    <h4><i class="fas fa-chart-bar"></i> Aktivitäts-Statistiken</h4>
+                    <div class="activity-stats">
+                        <div class="stat-card">
+                            <h5>${activities.length}</h5>
+                            <p>Gesamt-Aktivitäten</p>
+                        </div>
+                        <div class="stat-card">
+                            <h5>${activities.filter(a => a.timestamp > Date.now() - 7*24*60*60*1000).length}</h5>
+                            <p>Diese Woche</p>
+                        </div>
+                        <div class="stat-card">
+                            <h5>${activities.filter(a => a.timestamp > Date.now() - 30*24*60*60*1000).length}</h5>
+                            <p>Letzten 30 Tage</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="activity-management">
+                    <div class="activity-controls">
+                        <h4><i class="fas fa-filter"></i> Filter & Einstellungen</h4>
+                        <div class="control-row">
+                            <select id="activityTypeFilter">
+                                <option value="all">Alle Aktivitäten</option>
+                                <option value="documents">Dokumente</option>
+                                <option value="audits">Prüfungen</option>
+                                <option value="machines">Maschinen</option>
+                                <option value="substances">Gefahrstoffe</option>
+                                <option value="profile">Profil-Änderungen</option>
+                            </select>
+                            <button onclick="window.qhseDashboard.filterActivities()" class="btn-secondary">
+                                <i class="fas fa-search"></i> Filtern
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="activity-settings">
+                        <h4><i class="fas fa-cog"></i> Aktivitäts-Einstellungen</h4>
+                        <div class="setting-group">
+                            <label>
+                                <input type="checkbox" id="trackDocumentActivity" ${user.activitySettings?.trackDocuments !== false ? 'checked' : ''}>
+                                Dokument-Aktivitäten verfolgen
+                            </label>
+                        </div>
+                        <div class="setting-group">
+                            <label>
+                                <input type="checkbox" id="trackProfileActivity" ${user.activitySettings?.trackProfile !== false ? 'checked' : ''}>
+                                Profil-Änderungen verfolgen
+                            </label>
+                        </div>
+                        <div class="setting-actions">
+                            <button onclick="window.qhseDashboard.saveActivitySettings('${userId}')" class="btn-primary">
+                                <i class="fas fa-save"></i> Einstellungen speichern
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modal.querySelector('.modal-footer').innerHTML = `
+            <button onclick="window.qhseDashboard.closeSubModal('activityEditor')" class="btn-secondary">
+                Schließen
+            </button>
+        `;
+
+        modal.style.display = 'block';
+    }
+
+    saveActivitySettings(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+
+        if (!user.activitySettings) {
+            user.activitySettings = {};
+        }
+
+        user.activitySettings.trackDocuments = document.getElementById('trackDocumentActivity').checked;
+        user.activitySettings.trackProfile = document.getElementById('trackProfileActivity').checked;
+
+        this.saveUsersToStorage();
+        alert('Aktivitäts-Einstellungen gespeichert!');
+    }
+
+    // Visibility Editor
+    openVisibilityEditor(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+        
+        const visibility = user.profileVisibility || {
+            name: true,
+            department: true,
+            position: true,
+            phone: false,
+            email: false,
+            responsibilities: true,
+            qualifications: true
+        };
+        
+        const modal = this.createSubModal('visibilityEditor', 'Profilsichtbarkeit verwalten');
+        modal.querySelector('.modal-body').innerHTML = `
+            <div class="visibility-editor">
+                <div class="visibility-preview">
+                    <h4><i class="fas fa-eye"></i> Sichtbarkeits-Vorschau</h4>
+                    <p class="section-description">So sehen andere Benutzer Ihr Profil</p>
+                    
+                    <div class="preview-profile">
+                        <div class="preview-header">
+                            <h5>${user.displayName}</h5>
+                            <p class="preview-role">${this.getRoleDisplayName(user.role)}</p>
+                        </div>
+                        <div class="preview-fields" id="visibilityPreview">
+                            ${this.renderVisibilityPreview(user, visibility)}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visibility-controls">
+                    <h4><i class="fas fa-sliders-h"></i> Sichtbarkeits-Einstellungen</h4>
+                    <div class="visibility-options">
+                        ${Object.entries(visibility).map(([field, visible]) => `
+                            <div class="visibility-option">
+                                <label class="toggle-label">
+                                    <input type="checkbox" id="visibility_${field}" ${visible ? 'checked' : ''} 
+                                           onchange="window.qhseDashboard.updateVisibilityPreview()">
+                                    <span class="toggle-switch"></span>
+                                    <div class="option-info">
+                                        <h5>${this.getFieldDisplayName(field)}</h5>
+                                        <p class="field-description">${this.getFieldDescription(field)}</p>
+                                    </div>
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="gdpr-notice">
+                    <i class="fas fa-balance-scale"></i>
+                    <p><strong>DSGVO-Hinweis:</strong> Sie können Ihre Sichtbarkeitseinstellungen jederzeit ändern.</p>
+                </div>
+            </div>
+        `;
+
+        modal.querySelector('.modal-footer').innerHTML = `
+            <button onclick="window.qhseDashboard.saveVisibilitySettings('${userId}')" class="btn-primary">
+                <i class="fas fa-save"></i> Einstellungen speichern
+            </button>
+            <button onclick="window.qhseDashboard.closeSubModal('visibilityEditor')" class="btn-secondary">
+                Schließen
+            </button>
+        `;
+
+        modal.style.display = 'block';
+    }
+
+    renderVisibilityPreview(user, visibility) {
+        return `
+            ${visibility.name ? `<div class="preview-field"><strong>Name:</strong> ${user.displayName}</div>` : ''}
+            ${visibility.department ? `<div class="preview-field"><strong>Abteilung:</strong> ${user.department || 'Nicht angegeben'}</div>` : ''}
+            ${visibility.position ? `<div class="preview-field"><strong>Position:</strong> ${user.position || 'Nicht angegeben'}</div>` : ''}
+            ${visibility.phone ? `<div class="preview-field"><strong>Telefon:</strong> ${user.phone || 'Nicht angegeben'}</div>` : ''}
+            ${visibility.email ? `<div class="preview-field"><strong>E-Mail:</strong> ${user.email || 'Nicht angegeben'}</div>` : ''}
+            ${visibility.responsibilities ? `<div class="preview-field"><strong>Verantwortlichkeiten:</strong> Sichtbar</div>` : ''}
+            ${visibility.qualifications ? `<div class="preview-field"><strong>Qualifikationen:</strong> Sichtbar</div>` : ''}
+        `;
+    }
+
+    updateVisibilityPreview() {
+        const visibilityInputs = document.querySelectorAll('[id^="visibility_"]');
+        const newVisibility = {};
+        
+        visibilityInputs.forEach(input => {
+            const field = input.id.replace('visibility_', '');
+            newVisibility[field] = input.checked;
+        });
+
+        const currentUser = this.getCurrentUser();
+        const previewContainer = document.getElementById('visibilityPreview');
+        if (previewContainer) {
+            previewContainer.innerHTML = this.renderVisibilityPreview(currentUser, newVisibility);
+        }
+    }
+
+    saveVisibilitySettings(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (!user) return;
+
+        const visibilityInputs = document.querySelectorAll('[id^="visibility_"]');
+        const newVisibility = {};
+        
+        visibilityInputs.forEach(input => {
+            const field = input.id.replace('visibility_', '');
+            newVisibility[field] = input.checked;
+        });
+
+        user.profileVisibility = newVisibility;
+        this.saveUsersToStorage();
+        
+        alert('Sichtbarkeits-Einstellungen erfolgreich gespeichert!');
+        this.closeSubModal('visibilityEditor');
+    }
+
+    // Helper methods for profile functionality
+    getUserActivities(userId) {
+        // Simple placeholder for now - in a real system this would come from a database
+        const activities = [
+            {
+                id: '1',
+                type: 'profile',
+                title: 'Profil aktualisiert',
+                description: 'Persönliche Daten wurden geändert',
+                timestamp: Date.now() - 2*24*60*60*1000,
+                details: 'Telefonnummer aktualisiert'
+            },
+            {
+                id: '2',
+                type: 'documents',
+                title: 'Dokument hochgeladen',
+                description: 'Neues Sicherheitsdokument hinzugefügt',
+                timestamp: Date.now() - 5*24*60*60*1000,
+                details: 'Arbeitsschutz-Richtlinie.pdf'
+            },
+            {
+                id: '3',
+                type: 'qualifications',
+                title: 'Qualifikation hinzugefügt',
+                description: 'Neue Schulung abgeschlossen',
+                timestamp: Date.now() - 10*24*60*60*1000,
+                details: 'Brandschutz-Schulung'
+            }
+        ];
+        return activities;
+    }
+
+    getActivityIcon(type) {
+        const icons = {
+            'profile': 'fas fa-user',
+            'documents': 'fas fa-file',
+            'audits': 'fas fa-clipboard-check',
+            'machines': 'fas fa-cogs',
+            'substances': 'fas fa-flask',
+            'qualifications': 'fas fa-certificate',
+            'system': 'fas fa-computer'
+        };
+        return icons[type] || 'fas fa-info-circle';
+    }
+
+    getFieldDisplayName(field) {
+        const fieldNames = {
+            'name': 'Name',
+            'department': 'Abteilung',
+            'position': 'Position',
+            'phone': 'Telefon',
+            'email': 'E-Mail',
+            'responsibilities': 'Verantwortlichkeiten',
+            'qualifications': 'Qualifikationen'
+        };
+        return fieldNames[field] || field;
+    }
+
+    getFieldDescription(field) {
+        const descriptions = {
+            'name': 'Ihr vollständiger Name wird anderen Benutzern angezeigt',
+            'department': 'Ihre Abteilungszugehörigkeit ist für andere sichtbar',
+            'position': 'Ihre Berufsbezeichnung wird in der Benutzerliste angezeigt',
+            'phone': 'Ihre Telefonnummer kann von anderen Benutzern eingesehen werden',
+            'email': 'Ihre E-Mail-Adresse ist für andere Benutzer sichtbar',
+            'responsibilities': 'Ihre Verantwortlichkeiten werden in Ihrem Profil angezeigt',
+            'qualifications': 'Ihre Qualifikationen sind für andere Benutzer einsehbar'
+        };
+        return descriptions[field] || 'Beschreibung nicht verfügbar';
+    }
+
+    getSectionDisplayName(section) {
+        const sectionNames = {
+            'dashboard': 'Dashboard',
+            'arbeitsschutz': 'Arbeitsschutz',
+            'qualitaet': 'Qualität',
+            'umwelt': 'Umwelt',
+            'datenschutz': 'Datenschutz',
+            'gesundheit': 'Gesundheit',
+            'audits': 'Audits',
+            'kundenzufriedenheit': 'Kundenzufriedenheit',
+            'dokumente': 'Dokumentenverwaltung',
+            'nutzerverwaltung': 'Nutzerverwaltung',
+            'einstellungen': 'Einstellungen',
+            'zeiterfassung': 'Zeiterfassung',
+            'maschinen': 'Maschinenmanagement',
+            'gefahrstoffe': 'Gefahrstoffverzeichnis'
+        };
+        return sectionNames[section] || section;
+    }
+
+    renderMachineResponsibilities(user) {
+        const machines = this.machines || [];
+        const userMachines = machines.filter(machine => machine.responsiblePerson === user.id);
+        
+        if (userMachines.length === 0) {
+            return '<p class="no-data">Keine Maschinenverantwortlichkeiten zugewiesen.</p>';
+        }
+
+        return `
+            <div class="responsibility-list">
+                ${userMachines.slice(0, 3).map(machine => `
+                    <div class="responsibility-item-compact">
+                        <span class="item-name">${machine.name}</span>
+                        <span class="item-status status-badge ${machine.status}">${machine.status || 'Unbekannt'}</span>
+                    </div>
+                `).join('')}
+                ${userMachines.length > 3 ? `<p class="more-items">und ${userMachines.length - 3} weitere...</p>` : ''}
+            </div>
+        `;
+    }
+
+    renderHazardousSubstanceResponsibilities(user) {
+        const substances = this.hazardousSubstances || [];
+        const userSubstances = substances.filter(substance => substance.responsiblePerson === user.id);
+        
+        if (userSubstances.length === 0) {
+            return '<p class="no-data">Keine Gefahrstoff-Verantwortlichkeiten zugewiesen.</p>';
+        }
+
+        return `
+            <div class="responsibility-list">
+                ${userSubstances.slice(0, 3).map(substance => `
+                    <div class="responsibility-item-compact">
+                        <span class="item-name">${substance.name}</span>
+                        <span class="item-hazard">${substance.hazardClass || 'Unbekannt'}</span>
+                    </div>
+                `).join('')}
+                ${userSubstances.length > 3 ? `<p class="more-items">und ${userSubstances.length - 3} weitere...</p>` : ''}
+            </div>
+        `;
+    }
+
+    renderAuditResponsibilities(user) {
+        const assignedAudits = user.assignedAudits || [];
+        
+        if (assignedAudits.length === 0) {
+            return '<p class="no-data">Keine Audit-Verantwortlichkeiten zugewiesen.</p>';
+        }
+
+        return `
+            <div class="responsibility-list">
+                ${assignedAudits.slice(0, 3).map(audit => `
+                    <div class="responsibility-item-compact">
+                        <span class="item-name">${audit.title}</span>
+                        <span class="item-status status-badge ${audit.status}">${audit.status || 'Offen'}</span>
+                    </div>
+                `).join('')}
+                ${assignedAudits.length > 3 ? `<p class="more-items">und ${assignedAudits.length - 3} weitere...</p>` : ''}
+            </div>
+        `;
+    }
+
+    renderStaffResponsibilities(user) {
+        const subordinates = this.users.filter(u => u.supervisor === user.id);
+        
+        if (subordinates.length === 0) {
+            return '<p class="no-data">Keine Mitarbeiter unter Ihrer Aufsicht.</p>';
+        }
+
+        return `
+            <div class="responsibility-list">
+                ${subordinates.slice(0, 3).map(subordinate => `
+                    <div class="responsibility-item-compact">
+                        <span class="item-name">${subordinate.displayName}</span>
+                        <span class="item-role">${this.getRoleDisplayName(subordinate.role)}</span>
+                    </div>
+                `).join('')}
+                ${subordinates.length > 3 ? `<p class="more-items">und ${subordinates.length - 3} weitere...</p>` : ''}
+            </div>
+        `;
+    }
+
     renderRolesTab(user, editMode) {
         const roleDefinition = this.roleDefinitions[user.role];
         const allowedSections = roleDefinition ? roleDefinition.allowedSections || [] : [];
@@ -901,47 +1685,31 @@ PLZ Ort">${user.address || ''}</textarea>
             qualifications: true
         };
         
-        if (!editMode) {
-            return `
-                <div class="visibility-section">
-                    <div class="section-header">
-                        <h4><i class="fas fa-eye"></i> Profilsichtbarkeit</h4>
-                        <p>Diese Einstellungen bestimmen, welche Informationen andere Benutzer in Ihrem öffentlichen Profil sehen können.</p>
-                    </div>
-                    
-                    <div class="visibility-preview">
-                        <h5>Aktuelle Sichtbarkeitseinstellungen:</h5>
-                        <div class="visibility-grid">
-                            ${Object.entries(visibility).map(([field, visible]) => `
-                                <div class="visibility-item ${visible ? 'visible' : 'hidden'}">
-                                    <i class="fas ${visible ? 'fa-eye' : 'fa-eye-slash'}"></i>
-                                    ${this.getFieldDisplayName(field)}: ${visible ? 'Sichtbar' : 'Verborgen'}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
         return `
-            <div class="visibility-section">
-                <div class="section-header">
-                    <h4><i class="fas fa-eye"></i> Profilsichtbarkeit bearbeiten</h4>
-                    <p>Bestimmen Sie, welche Informationen andere Benutzer in Ihrem öffentlichen Profil sehen können.</p>
-                </div>
-                
-                <div class="visibility-controls">
-                    <h5>Sichtbare Felder auswählen:</h5>
-                    <div class="visibility-options">
+            <div class="tab-content-header">
+                <h3><i class="fas fa-eye"></i> Profilsichtbarkeit</h3>
+                <button class="btn-primary tab-edit-btn" onclick="window.qhseDashboard.openVisibilityEditor('${user.id}')">
+                    <i class="fas fa-edit"></i> Bearbeiten
+                </button>
+            </div>
+            
+            <div class="visibility-display">
+                <div class="visibility-preview">
+                    <h4>Aktuelle Sichtbarkeitseinstellungen</h4>
+                    <p class="section-description">Diese Einstellungen bestimmen, welche Informationen andere Benutzer in Ihrem öffentlichen Profil sehen können.</p>
+                    
+                    <div class="visibility-grid">
                         ${Object.entries(visibility).map(([field, visible]) => `
-                            <div class="visibility-option">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="visibility_${field}" ${visible ? 'checked' : ''}>
-                                    <span class="checkmark"></span>
-                                    ${this.getFieldDisplayName(field)}
-                                </label>
-                                <span class="field-description">${this.getFieldDescription(field)}</span>
+                            <div class="visibility-item ${visible ? 'visible' : 'hidden'}">
+                                <div class="visibility-icon">
+                                    <i class="fas ${visible ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                                </div>
+                                <div class="visibility-content">
+                                    <h5>${this.getFieldDisplayName(field)}</h5>
+                                    <p class="visibility-status ${visible ? 'visible' : 'hidden'}">
+                                        ${visible ? 'Für andere Benutzer sichtbar' : 'Vor anderen Benutzern verborgen'}
+                                    </p>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -949,7 +1717,7 @@ PLZ Ort">${user.address || ''}</textarea>
                 
                 <div class="privacy-note">
                     <i class="fas fa-info-circle"></i>
-                    <p><strong>Hinweis:</strong> Administratoren können immer alle Profilinformationen einsehen. Diese Einstellungen gelten nur für andere Benutzer.</p>
+                    <p><strong>Hinweis:</strong> Administratoren können immer alle Profilinformationen einsehen. Diese Einstellungen gelten nur für andere Benutzer und die öffentliche Profilansicht.</p>
                 </div>
             </div>
         `;
@@ -1452,6 +2220,7 @@ PLZ Ort">${user.address || ''}</textarea>
             if (section === 'gefahrstoffe') {
                 // Special handling for Gefahrstoffe module
                 hasAccess = this.userHasGefahrstoffeAccess(currentUser, moduleSettings);
+                console.log(`Gefahrstoffe menu access for ${currentUser.displayName}: ${hasAccess}`);
             } else {
                 // Standard access check for other sections
                 hasAccess = this.userHasAccessToSection(currentUser, section, allAllowedSections);
@@ -1459,8 +2228,14 @@ PLZ Ort">${user.address || ''}</textarea>
             
             if (hasAccess) {
                 item.classList.remove('hidden');
+                if (section === 'gefahrstoffe') {
+                    console.log('Gefahrstoffe menu item made visible');
+                }
             } else {
                 item.classList.add('hidden');
+                if (section === 'gefahrstoffe') {
+                    console.log('Gefahrstoffe menu item hidden');
+                }
             }
         });
     }
@@ -1603,6 +2378,10 @@ PLZ Ort">${user.address || ''}</textarea>
     userHasGefahrstoffeAccess(user, moduleSettings) {
         const userName = user.displayName || user.name || user.id;
         
+        console.log(`=== CHECKING GEFAHRSTOFFE ACCESS FOR ${userName} ===`);
+        console.log('User object:', user);
+        console.log('Module settings:', moduleSettings);
+        
         // First check if module is globally enabled
         if (!moduleSettings || moduleSettings.gefahrstoffe !== true) {
             console.log(`Gefahrstoffe module is globally disabled for user ${userName}`);
@@ -1623,6 +2402,7 @@ PLZ Ort">${user.address || ''}</textarea>
         
         // DEFAULT: All users have access unless explicitly denied
         console.log(`User ${userName} has default Gefahrstoffe access`);
+        console.log(`=== ACCESS GRANTED TO ${userName} ===`);
         return true;
     }
 
@@ -10317,13 +11097,13 @@ PLZ Ort">${user.address || ''}</textarea>
                 <td>${substance.lastUpdated ? new Date(substance.lastUpdated).toLocaleDateString('de-DE') : '-'}</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon" onclick="dashboard.viewSubstanceDetails('${substance.id}')" title="Details anzeigen">
+                        <button class="btn-icon" onclick="window.qhseDashboard.viewSubstanceDetails('${substance.id}')" title="Details anzeigen">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn-icon" onclick="dashboard.editSubstance('${substance.id}')" title="Bearbeiten">
+                        <button class="btn-icon" onclick="window.qhseDashboard.editSubstance('${substance.id}')" title="Bearbeiten">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-icon danger" onclick="dashboard.deleteSubstance('${substance.id}')" title="Löschen">
+                        <button class="btn-icon danger" onclick="window.qhseDashboard.deleteSubstance('${substance.id}')" title="Löschen">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -10957,11 +11737,11 @@ PLZ Ort">${user.address || ''}</textarea>
                         </div>
                         <div class="doc-actions">
                             ${doc.mimeType === 'application/pdf' ? `
-                                <button class="btn-icon" onclick="dashboard.viewSubstanceDocument('${doc.id}')" title="PDF anzeigen">
+                                <button class="btn-icon" onclick="window.qhseDashboard.viewSubstanceDocument('${doc.id}')" title="PDF anzeigen">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             ` : ''}
-                            <button class="btn-icon" onclick="dashboard.downloadSubstanceDocument('${doc.id}')" title="Herunterladen">
+                            <button class="btn-icon" onclick="window.qhseDashboard.downloadSubstanceDocument('${doc.id}')" title="Herunterladen">
                                 <i class="fas fa-download"></i>
                             </button>
                         </div>
@@ -11428,14 +12208,14 @@ PLZ Ort">${user.address || ''}</textarea>
                         </div>
                         <div class="file-actions">
                             ${doc.mimeType === 'application/pdf' ? `
-                                <button class="btn-icon" onclick="dashboard.viewSubstanceDocument('${doc.id}')" title="PDF anzeigen">
+                                <button class="btn-icon" onclick="window.qhseDashboard.viewSubstanceDocument('${doc.id}')" title="PDF anzeigen">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             ` : ''}
-                            <button class="btn-icon" onclick="dashboard.downloadSubstanceDocument('${doc.id}')" title="Herunterladen">
+                            <button class="btn-icon" onclick="window.qhseDashboard.downloadSubstanceDocument('${doc.id}')" title="Herunterladen">
                                 <i class="fas fa-download"></i>
                             </button>
-                            <button class="btn-icon danger" onclick="dashboard.removeUploadedDocument('${doc.id}')" title="Entfernen">
+                            <button class="btn-icon danger" onclick="window.qhseDashboard.removeUploadedDocument('${doc.id}')" title="Entfernen">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
