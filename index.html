@@ -338,13 +338,13 @@
                                     <h4>Einstellungen</h4>
                                     <div class="profile-form">
                                         <div class="form-group">
-                                            <label>
+                                            <label for="emailNotifications">
                                                 <input type="checkbox" id="emailNotifications"> 
                                                 E-Mail-Benachrichtigungen erhalten
                                             </label>
                                         </div>
                                         <div class="form-group">
-                                            <label>
+                                            <label for="systemNotifications">
                                                 <input type="checkbox" id="systemNotifications"> 
                                                 System-Benachrichtigungen erhalten
                                             </label>
@@ -964,8 +964,8 @@
                                     
                                     <!-- Benutzerauswahl -->
                                     <div class="form-group">
-                                        <label>Sichtbar für folgende Mitarbeiter:</label>
-                                        <div class="user-selection-grid" id="announcementUserSelection">
+                                        <label id="announcementUserSelectionLabel">Sichtbar für folgende Mitarbeiter:</label>
+                                        <div class="user-selection-grid" id="announcementUserSelection" role="group" aria-labelledby="announcementUserSelectionLabel">
                                             <!-- Mitarbeiterauswahl wird dynamisch gefüllt -->
                                         </div>
                                         <div class="selection-actions">
@@ -2039,15 +2039,15 @@
                     </div>
                     <div class="form-group">
                         <label for="editUserEmail">E-Mail:</label>
-                        <input type="email" id="editUserEmail" name="userEmail">
+                        <input type="email" id="editUserEmail" name="userEmail" autocomplete="email">
                     </div>
                     <div class="form-group">
                         <label for="editUserPhone">Telefon:</label>
-                        <input type="tel" id="editUserPhone" name="userPhone">
+                        <input type="tel" id="editUserPhone" name="userPhone" autocomplete="tel">
                     </div>
                     <div class="form-group">
                         <label for="editUserDepartment">Abteilung:</label>
-                        <input type="text" id="editUserDepartment" name="userDepartment">
+                        <input type="text" id="editUserDepartment" name="userDepartment" autocomplete="organization">
                     </div>
                 </form>
             </div>
@@ -2078,15 +2078,15 @@
                     <div class="tab-content active" id="basic-tab">
                         <div class="form-group">
                             <label for="newUserName">Name:</label>
-                            <input type="text" id="newUserName" name="userName" required>
+                            <input type="text" id="newUserName" name="userName" required autocomplete="name">
                         </div>
                         <div class="form-group">
                             <label for="newUserEmail">E-Mail:</label>
-                            <input type="email" id="newUserEmail" name="userEmail" required>
+                            <input type="email" id="newUserEmail" name="userEmail" required autocomplete="email">
                         </div>
                         <div class="form-group">
                             <label for="newUserPhone">Telefon:</label>
-                            <input type="tel" id="newUserPhone" name="userPhone">
+                            <input type="tel" id="newUserPhone" name="userPhone" autocomplete="tel">
                         </div>
                         <div class="form-group">
                             <label for="newUserDepartment">Abteilung:</label>
@@ -2112,15 +2112,15 @@
                     <div class="tab-content" id="personal-tab">
                         <div class="form-group">
                             <label for="newUserBirthdate">Geburtstag:</label>
-                            <input type="date" id="newUserBirthdate" name="userBirthdate">
+                            <input type="date" id="newUserBirthdate" name="userBirthdate" autocomplete="bday">
                         </div>
                         <div class="form-group">
                             <label for="newUserAddress">Anschrift:</label>
-                            <textarea id="newUserAddress" name="userAddress" rows="3" placeholder="Straße, Hausnummer&#10;PLZ Ort"></textarea>
+                            <textarea id="newUserAddress" name="userAddress" rows="3" placeholder="Straße, Hausnummer&#10;PLZ Ort" autocomplete="street-address"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="newUserMobile">Mobiltelefon:</label>
-                            <input type="tel" id="newUserMobile" name="userMobile">
+                            <input type="tel" id="newUserMobile" name="userMobile" autocomplete="tel">
                         </div>
                         <div class="form-group">
                             <label for="newUserEmergencyContact">Notfallkontakt:</label>
@@ -2148,14 +2148,14 @@
                     
                     <div class="tab-content" id="permissions-tab">
                         <div class="form-group">
-                            <label>Zusätzliche Berechtigungen:</label>
+                            <label id="additionalPermissionsLabel">Zusätzliche Berechtigungen:</label>
                             <p class="permission-info">
                                 Diese Berechtigungen ergänzen die rollenbasierten Zugriffsrechte.
                                 Root-Admin und Admin haben automatisch Zugriff auf alle Bereiche.
                             </p>
-                            <div class="permissions-grid">
+                            <div class="permissions-grid" role="group" aria-labelledby="additionalPermissionsLabel">
                                 <div class="permission-item">
-                                    <label class="permission-label">
+                                    <label class="permission-label" for="newUserGefahrstoffeAccess">
                                         <input type="checkbox" id="newUserGefahrstoffeAccess" name="userGefahrstoffeAccess">
                                         <div class="permission-details">
                                             <strong>Gefahrstoffverzeichnis - Zugriff verweigern</strong>
