@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Gefahrstoff Reports</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: #3b82f6; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; font-family: monospace; }
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .status.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Gefahrstoff Reports Test</h1>
+            <p>Funktionalitätstest für die Berichte-Funktion</p>
+        </div>
+
+        <div class="card">
+            <h2>🔧 Test Aktionen</h2>
+            <button onclick="testReportsButton()" class="btn-primary">🧪 Reports Button testen</button>
+            <button onclick="testSubstanceData()" class="btn-primary">📊 Gefahrstoff-Daten prüfen</button>
+            <button onclick="testDirectFunction()" class="btn-primary">🎯 Direkte Funktion testen</button>
+            <button onclick="window.open('index.html', '_blank')" class="btn-success">🚀 Hauptanwendung öffnen</button>
+        </div>
+
+        <div class="card">
+            <h2>📋 Test-Ergebnisse</h2>
+            <div id="testOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        function showOutput(message, type = 'success') {
+            const output = document.getElementById('testOutput');
+            output.innerHTML += `<div class="status ${type}">${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('testOutput').innerHTML = '';
+        }
+
+        function testReportsButton() {
+            clearOutput();
+            showOutput('🔍 Teste Reports Button im Hauptfenster...', 'warning');
+            
+            // Open main application and test button
+            const mainWindow = window.open('index.html', 'main');
+            
+            setTimeout(() => {
+                try {
+                    const button = mainWindow.document.getElementById('substanceReportsBtn');
+                    if (button) {
+                        showOutput('✅ Button gefunden: ' + button.outerHTML, 'success');
+                        
+                        // Test if button is clickable
+                        if (button.onclick || button.addEventListener) {
+                            showOutput('✅ Button ist interaktiv', 'success');
+                        } else {
+                            showOutput('⚠️ Button hat keine Event Listener', 'warning');
+                        }
+                        
+                        // Try to click it
+                        showOutput('🖱️ Versuche Button zu klicken...', 'warning');
+                        button.click();
+                        showOutput('✅ Button wurde geklickt', 'success');
+                        
+                    } else {
+                        showOutput('❌ Button nicht gefunden!', 'error');
+                    }
+                } catch (error) {
+                    showOutput(`❌ Fehler beim Zugriff auf Hauptfenster: ${error.message}`, 'error');
+                    showOutput('💡 Öffnen Sie die Hauptanwendung und testen Sie den Button manuell', 'warning');
+                }
+            }, 2000);
+        }
+
+        function testSubstanceData() {
+            clearOutput();
+            showOutput('📊 Überprüfe Gefahrstoff-Daten...', 'warning');
+            
+            try {
+                const substances = JSON.parse(localStorage.getItem('qhse_hazardous_substances') || '[]');
+                showOutput(`✅ Gefahrstoffe gefunden: ${substances.length}`, substances.length > 0 ? 'success' : 'warning');
+                
+                if (substances.length === 0) {
+                    showOutput('⚠️ Keine Gefahrstoffe vorhanden - Reports können leer sein', 'warning');
+                    showOutput('💡 Fügen Sie erst Gefahrstoffe hinzu um Reports zu testen', 'warning');
+                } else {
+                    showOutput('📋 Erste 3 Gefahrstoffe:', 'success');
+                    substances.slice(0, 3).forEach((substance, index) => {
+                        showOutput(`${index + 1}. ${substance.name || 'UNNAMED'} (${substance.id || 'NO_ID'})`, 'success');
+                    });
+                }
+
+                // Check departments
+                const departments = JSON.parse(localStorage.getItem('qhse_departments') || '[]');
+                showOutput(`✅ Abteilungen gefunden: ${departments.length}`, 'success');
+                
+            } catch (error) {
+                showOutput(`❌ Fehler beim Laden der Daten: ${error.message}`, 'error');
+            }
+        }
+
+        function testDirectFunction() {
+            clearOutput();
+            showOutput('🎯 Teste direkte Funktionsausführung...', 'warning');
+            
+            // Open main window and try to call function directly
+            const mainWindow = window.open('index.html', 'main');
+            
+            setTimeout(() => {
+                try {
+                    if (mainWindow.qhseDashboard) {
+                        showOutput('✅ qhseDashboard gefunden im Hauptfenster', 'success');
+                        
+                        // Test if openSubstanceReports function exists
+                        if (typeof mainWindow.qhseDashboard.openSubstanceReports === 'function') {
+                            showOutput('✅ openSubstanceReports Funktion gefunden', 'success');
+                            
+                            // Try to call it directly
+                            showOutput('🚀 Rufe openSubstanceReports direkt auf...', 'warning');
+                            mainWindow.qhseDashboard.openSubstanceReports();
+                            showOutput('✅ Funktion wurde aufgerufen', 'success');
+                            
+                        } else {
+                            showOutput('❌ openSubstanceReports Funktion nicht gefunden', 'error');
+                        }
+                    } else {
+                        showOutput('❌ qhseDashboard nicht verfügbar im Hauptfenster', 'error');
+                        showOutput('⏳ Das Dashboard wird möglicherweise noch geladen...', 'warning');
+                    }
+                } catch (error) {
+                    showOutput(`❌ Fehler beim Funktionstest: ${error.message}`, 'error');
+                }
+            }, 3000);
+        }
+
+        // Auto-run basic tests
+        window.onload = () => {
+            showOutput('🔍 Automatische Tests beim Start...', 'warning');
+            testSubstanceData();
+        };
+    </script>
+</body>
+</html>

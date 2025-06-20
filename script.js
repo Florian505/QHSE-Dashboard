@@ -3578,6 +3578,1222 @@ PLZ Ort">${user.address || ''}</textarea>
                 document.getElementById('userManagementModal').style.display = 'none';
             });
         });
+
+        // New profile overview and reports buttons
+        const userProfilesOverviewBtn = document.getElementById('userProfilesOverviewBtn');
+        const userReportsBtn = document.getElementById('userReportsBtn');
+
+        if (userProfilesOverviewBtn) {
+            console.log('👥 DEBUGGING: Setting up user profiles overview button listener');
+            userProfilesOverviewBtn.addEventListener('click', () => {
+                console.log('👥 DEBUGGING: User profiles overview button clicked!');
+                this.showUserProfilesOverview();
+            });
+        } else {
+            console.error('👥 DEBUGGING: userProfilesOverviewBtn not found in DOM!');
+        }
+
+        if (userReportsBtn) {
+            console.log('📊 DEBUGGING: Setting up user reports button listener');
+            userReportsBtn.addEventListener('click', () => {
+                console.log('📊 DEBUGGING: User reports button clicked!');
+                this.showUserReports();
+            });
+        } else {
+            console.error('📊 DEBUGGING: userReportsBtn not found in DOM!');
+        }
+    }
+
+    showUserProfilesOverview() {
+        console.log('👥 DEBUGGING: Opening user profiles overview modal...');
+        console.log('👥 DEBUGGING: Users data:', this.users);
+        console.log('👥 DEBUGGING: Departments data:', this.departments);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2><i class="fas fa-users"></i> Mitarbeiter-Profile Übersicht</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="profile-overview-controls">
+                        <div class="control-group">
+                            <div class="form-group">
+                                <label for="profileViewType">Ansicht:</label>
+                                <select id="profileViewType">
+                                    <option value="cards">Karten-Ansicht</option>
+                                    <option value="table">Tabellen-Ansicht</option>
+                                    <option value="detailed">Detaillierte Ansicht</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileDepartmentFilter">Abteilung:</label>
+                                <select id="profileDepartmentFilter">
+                                    <option value="">Alle Abteilungen</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileRoleFilter">Rolle:</label>
+                                <select id="profileRoleFilter">
+                                    <option value="">Alle Rollen</option>
+                                    <option value="root-admin">System Administrator</option>
+                                    <option value="admin">Administrator</option>
+                                    <option value="geschaeftsfuehrung">Geschäftsführung</option>
+                                    <option value="betriebsleiter">Betriebsleiter</option>
+                                    <option value="abteilungsleiter">Abteilungsleiter</option>
+                                    <option value="qhse">QHSE-Manager</option>
+                                    <option value="mitarbeiter">Mitarbeiter</option>
+                                    <option value="techniker">Techniker</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileStatusFilter">Status:</label>
+                                <select id="profileStatusFilter">
+                                    <option value="">Alle Status</option>
+                                    <option value="active">Aktiv</option>
+                                    <option value="inactive">Inaktiv</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="profile-actions">
+                            <button id="refreshProfilesBtn" class="btn-primary">
+                                <i class="fas fa-sync"></i> Aktualisieren
+                            </button>
+                            <button id="exportProfilesBtn" class="btn-secondary">
+                                <i class="fas fa-download"></i> Exportieren
+                            </button>
+                            <button id="printProfilesBtn" class="btn-secondary">
+                                <i class="fas fa-print"></i> Drucken
+                            </button>
+                        </div>
+                    </div>
+                    <div class="profile-overview-content" id="profileOverviewContent">
+                        <!-- Profile content will be populated here -->
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        console.log('👥 DEBUGGING: Modal added to DOM');
+        
+        this.populateProfileDepartmentFilter();
+        console.log('👥 DEBUGGING: Department filter populated');
+        
+        // Event listeners
+        const closeBtn = modal.querySelector('.close-modal');
+        const refreshBtn = modal.querySelector('#refreshProfilesBtn');
+        const exportBtn = modal.querySelector('#exportProfilesBtn');
+        const printBtn = modal.querySelector('#printProfilesBtn');
+        
+        const viewTypeSelect = modal.querySelector('#profileViewType');
+        const departmentFilter = modal.querySelector('#profileDepartmentFilter');
+        const roleFilter = modal.querySelector('#profileRoleFilter');
+        const statusFilter = modal.querySelector('#profileStatusFilter');
+        
+        closeBtn.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        refreshBtn.addEventListener('click', () => {
+            console.log('👥 DEBUGGING: Refresh profiles clicked');
+            this.renderProfileOverview();
+        });
+        
+        exportBtn.addEventListener('click', () => {
+            console.log('👥 DEBUGGING: Export profiles clicked');
+            this.exportUserProfiles();
+        });
+        
+        printBtn.addEventListener('click', () => {
+            console.log('👥 DEBUGGING: Print profiles clicked');
+            this.printUserProfiles();
+        });
+        
+        // Filter change listeners
+        [viewTypeSelect, departmentFilter, roleFilter, statusFilter].forEach(select => {
+            select.addEventListener('change', () => {
+                console.log('👥 DEBUGGING: Filter changed');
+                this.renderProfileOverview();
+            });
+        });
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+        
+        // Show the modal
+        modal.style.display = 'block';
+        console.log('👥 DEBUGGING: Modal display set to block');
+        
+        // Initial render
+        this.renderProfileOverview();
+    }
+
+    populateProfileDepartmentFilter() {
+        const departmentSelect = document.getElementById('profileDepartmentFilter');
+        if (departmentSelect) {
+            departmentSelect.innerHTML = '<option value="">Alle Abteilungen</option>';
+            this.departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.id;
+                option.textContent = dept.name;
+                departmentSelect.appendChild(option);
+            });
+        }
+    }
+
+    renderProfileOverview() {
+        console.log('👥 DEBUGGING: Rendering profile overview...');
+        
+        const content = document.getElementById('profileOverviewContent');
+        const viewType = document.getElementById('profileViewType').value;
+        const departmentFilter = document.getElementById('profileDepartmentFilter').value;
+        const roleFilter = document.getElementById('profileRoleFilter').value;
+        const statusFilter = document.getElementById('profileStatusFilter').value;
+        
+        // Filter users
+        let filteredUsers = this.users.filter(user => {
+            if (departmentFilter && user.department !== departmentFilter) return false;
+            if (roleFilter && user.role !== roleFilter) return false;
+            if (statusFilter === 'active' && !user.isActive) return false;
+            if (statusFilter === 'inactive' && user.isActive) return false;
+            return true;
+        });
+        
+        console.log('👥 DEBUGGING: Filtered users:', filteredUsers.length);
+        
+        if (filteredUsers.length === 0) {
+            content.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fas fa-users"></i>
+                    <h3>Keine Mitarbeiter gefunden</h3>
+                    <p>Keine Mitarbeiter entsprechen den ausgewählten Filterkriterien.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        if (viewType === 'cards') {
+            this.renderProfileCards(content, filteredUsers);
+        } else if (viewType === 'table') {
+            this.renderProfileTable(content, filteredUsers);
+        } else if (viewType === 'detailed') {
+            this.renderDetailedProfiles(content, filteredUsers);
+        }
+    }
+
+    renderProfileCards(container, users) {
+        container.innerHTML = `
+            <div class="profile-cards-grid">
+                ${users.map(user => this.generateProfileCard(user)).join('')}
+            </div>
+        `;
+        
+        // Add click listeners for individual profile actions
+        users.forEach(user => {
+            const viewBtn = container.querySelector(`#viewProfile_${user.id}`);
+            const editBtn = container.querySelector(`#editProfile_${user.id}`);
+            
+            if (viewBtn) {
+                viewBtn.addEventListener('click', () => this.showDetailedUserProfile(user.id));
+            }
+            if (editBtn) {
+                editBtn.addEventListener('click', () => this.editUser(user.id));
+            }
+        });
+    }
+
+    generateProfileCard(user) {
+        const department = this.departments.find(d => d.id === user.department);
+        const departmentName = department ? department.name : 'Unbekannt';
+        const roleDisplayName = this.getRoleDisplayName(user.role);
+        const initials = this.getUserInitials(user.displayName || user.name);
+        const statusBadge = user.isActive ? 
+            '<span class="status-badge active">Aktiv</span>' : 
+            '<span class="status-badge inactive">Inaktiv</span>';
+        
+        return `
+            <div class="profile-card ${user.role}">
+                <div class="profile-card-header">
+                    <div class="profile-avatar large">${initials}</div>
+                    <div class="profile-basic-info">
+                        <h3>${user.displayName || user.name}</h3>
+                        <div class="role-badge ${user.role}">${roleDisplayName}</div>
+                        ${statusBadge}
+                    </div>
+                </div>
+                <div class="profile-card-body">
+                    <div class="profile-detail">
+                        <i class="fas fa-envelope"></i>
+                        <span>${user.email || 'Nicht angegeben'}</span>
+                    </div>
+                    <div class="profile-detail">
+                        <i class="fas fa-phone"></i>
+                        <span>${user.phone || 'Nicht angegeben'}</span>
+                    </div>
+                    <div class="profile-detail">
+                        <i class="fas fa-building"></i>
+                        <span>${departmentName}</span>
+                    </div>
+                    <div class="profile-detail">
+                        <i class="fas fa-briefcase"></i>
+                        <span>${user.position || 'Nicht angegeben'}</span>
+                    </div>
+                    <div class="profile-detail">
+                        <i class="fas fa-calendar"></i>
+                        <span>Seit ${user.startDate || 'Unbekannt'}</span>
+                    </div>
+                </div>
+                <div class="profile-card-actions">
+                    <button id="viewProfile_${user.id}" class="btn-small btn-primary">
+                        <i class="fas fa-eye"></i> Ansehen
+                    </button>
+                    <button id="editProfile_${user.id}" class="btn-small btn-secondary">
+                        <i class="fas fa-edit"></i> Bearbeiten
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    renderProfileTable(container, users) {
+        container.innerHTML = `
+            <div class="profile-table-container">
+                <table class="profile-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Rolle</th>
+                            <th>Abteilung</th>
+                            <th>E-Mail</th>
+                            <th>Telefon</th>
+                            <th>Status</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => this.generateProfileTableRow(user)).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        // Add click listeners for table actions
+        users.forEach(user => {
+            const viewBtn = container.querySelector(`#viewTableProfile_${user.id}`);
+            const editBtn = container.querySelector(`#editTableProfile_${user.id}`);
+            
+            if (viewBtn) {
+                viewBtn.addEventListener('click', () => this.showDetailedUserProfile(user.id));
+            }
+            if (editBtn) {
+                editBtn.addEventListener('click', () => this.editUser(user.id));
+            }
+        });
+    }
+
+    generateProfileTableRow(user) {
+        const department = this.departments.find(d => d.id === user.department);
+        const departmentName = department ? department.name : 'Unbekannt';
+        const roleDisplayName = this.getRoleDisplayName(user.role);
+        const statusBadge = user.isActive ? 
+            '<span class="status-badge active">Aktiv</span>' : 
+            '<span class="status-badge inactive">Inaktiv</span>';
+        
+        return `
+            <tr class="profile-row ${user.role}">
+                <td>
+                    <div class="profile-name-cell">
+                        <div class="profile-avatar small">${this.getUserInitials(user.displayName || user.name)}</div>
+                        <span>${user.displayName || user.name}</span>
+                    </div>
+                </td>
+                <td><span class="role-badge ${user.role}">${roleDisplayName}</span></td>
+                <td>${departmentName}</td>
+                <td>${user.email || 'Nicht angegeben'}</td>
+                <td>${user.phone || 'Nicht angegeben'}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div class="table-actions">
+                        <button id="viewTableProfile_${user.id}" class="btn-icon" title="Profil ansehen">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button id="editTableProfile_${user.id}" class="btn-icon" title="Profil bearbeiten">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    renderDetailedProfiles(container, users) {
+        container.innerHTML = `
+            <div class="detailed-profiles-container">
+                ${users.map(user => this.generateDetailedProfile(user)).join('')}
+            </div>
+        `;
+        
+        // Add click listeners for detailed profile actions
+        users.forEach(user => {
+            const editBtn = container.querySelector(`#editDetailedProfile_${user.id}`);
+            const expandBtn = container.querySelector(`#expandProfile_${user.id}`);
+            
+            if (editBtn) {
+                editBtn.addEventListener('click', () => this.editUser(user.id));
+            }
+            if (expandBtn) {
+                expandBtn.addEventListener('click', () => this.showDetailedUserProfile(user.id));
+            }
+        });
+    }
+
+    generateDetailedProfile(user) {
+        const department = this.departments.find(d => d.id === user.department);
+        const departmentName = department ? department.name : 'Unbekannt';
+        const roleDisplayName = this.getRoleDisplayName(user.role);
+        const initials = this.getUserInitials(user.displayName || user.name);
+        const statusBadge = user.isActive ? 
+            '<span class="status-badge active">Aktiv</span>' : 
+            '<span class="status-badge inactive">Inaktiv</span>';
+        
+        // Calculate some profile statistics
+        const qualifications = user.qualifications || [];
+        const activeQualifications = qualifications.filter(q => !q.expiryDate || new Date(q.expiryDate) > new Date());
+        const expiredQualifications = qualifications.filter(q => q.expiryDate && new Date(q.expiryDate) <= new Date());
+        
+        return `
+            <div class="detailed-profile-card ${user.role}">
+                <div class="detailed-profile-header">
+                    <div class="profile-avatar large">${initials}</div>
+                    <div class="profile-header-info">
+                        <h2>${user.displayName || user.name}</h2>
+                        <div class="profile-meta">
+                            <div class="role-badge ${user.role}">${roleDisplayName}</div>
+                            ${statusBadge}
+                            <span class="profile-id">ID: ${user.id}</span>
+                        </div>
+                        <div class="profile-actions-header">
+                            <button id="editDetailedProfile_${user.id}" class="btn-primary">
+                                <i class="fas fa-edit"></i> Bearbeiten
+                            </button>
+                            <button id="expandProfile_${user.id}" class="btn-secondary">
+                                <i class="fas fa-expand"></i> Vollansicht
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="detailed-profile-body">
+                    <div class="profile-section">
+                        <h4><i class="fas fa-user"></i> Grunddaten</h4>
+                        <div class="profile-info-grid">
+                            <div class="info-item">
+                                <label>E-Mail:</label>
+                                <span>${user.email || 'Nicht angegeben'}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Telefon:</label>
+                                <span>${user.phone || 'Nicht angegeben'}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Abteilung:</label>
+                                <span>${departmentName}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Position:</label>
+                                <span>${user.position || 'Nicht angegeben'}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Startdatum:</label>
+                                <span>${user.startDate || 'Unbekannt'}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Erstellt:</label>
+                                <span>${user.createdAt ? new Date(user.createdAt).toLocaleDateString('de-DE') : 'Unbekannt'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h4><i class="fas fa-certificate"></i> Qualifikationen</h4>
+                        <div class="qualification-summary">
+                            <div class="qualification-stat">
+                                <span class="stat-number">${qualifications.length}</span>
+                                <span class="stat-label">Gesamt</span>
+                            </div>
+                            <div class="qualification-stat">
+                                <span class="stat-number active">${activeQualifications.length}</span>
+                                <span class="stat-label">Aktiv</span>
+                            </div>
+                            <div class="qualification-stat">
+                                <span class="stat-number expired">${expiredQualifications.length}</span>
+                                <span class="stat-label">Abgelaufen</span>
+                            </div>
+                        </div>
+                        ${qualifications.length > 0 ? `
+                            <div class="qualification-list">
+                                ${qualifications.slice(0, 3).map(q => `
+                                    <div class="qualification-item ${q.expiryDate && new Date(q.expiryDate) <= new Date() ? 'expired' : 'active'}">
+                                        <span class="qualification-name">${q.name}</span>
+                                        <span class="qualification-expiry">${q.expiryDate ? new Date(q.expiryDate).toLocaleDateString('de-DE') : 'Unbegrenzt'}</span>
+                                    </div>
+                                `).join('')}
+                                ${qualifications.length > 3 ? `<div class="more-qualifications">... und ${qualifications.length - 3} weitere</div>` : ''}
+                            </div>
+                        ` : '<p class="no-data">Keine Qualifikationen erfasst</p>'}
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h4><i class="fas fa-shield-alt"></i> Berechtigungen</h4>
+                        <div class="permissions-summary">
+                            ${this.generatePermissionsSummary(user)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    generatePermissionsSummary(user) {
+        const roleDefinitions = this.roleDefinitions || {};
+        const userRole = roleDefinitions[user.role];
+        
+        if (!userRole) {
+            return '<p class="no-data">Keine Berechtigungen definiert</p>';
+        }
+        
+        const allowedSections = userRole.allowedSections || [];
+        const permissions = userRole.permissions || {};
+        
+        return `
+            <div class="permissions-grid">
+                <div class="permission-item">
+                    <span class="permission-label">Bereiche:</span>
+                    <span class="permission-value">${allowedSections.length} Bereiche</span>
+                </div>
+                <div class="permission-item">
+                    <span class="permission-label">Verwaltung:</span>
+                    <span class="permission-value">${permissions.canManageUsers ? 'Ja' : 'Nein'}</span>
+                </div>
+                <div class="permission-item">
+                    <span class="permission-label">Dokumente:</span>
+                    <span class="permission-value">${permissions.canUploadDocuments ? 'Ja' : 'Nein'}</span>
+                </div>
+                <div class="permission-item">
+                    <span class="permission-label">Berichte:</span>
+                    <span class="permission-value">${permissions.canAccessReports ? 'Ja' : 'Nein'}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    getUserInitials(name) {
+        if (!name) return '??';
+        return name.split(' ')
+            .map(part => part.charAt(0).toUpperCase())
+            .slice(0, 2)
+            .join('');
+    }
+
+    getRoleDisplayName(role) {
+        const roleNames = {
+            'root-admin': 'System Administrator',
+            'admin': 'Administrator',
+            'geschaeftsfuehrung': 'Geschäftsführung',
+            'betriebsleiter': 'Betriebsleiter',
+            'abteilungsleiter': 'Abteilungsleiter',
+            'qhse': 'QHSE-Manager',
+            'mitarbeiter': 'Mitarbeiter',
+            'techniker': 'Techniker'
+        };
+        return roleNames[role] || role;
+    }
+
+    showDetailedUserProfile(userId) {
+        console.log('👥 DEBUGGING: Showing detailed profile for user:', userId);
+        // This will open the existing detailed profile modal that was already implemented
+        this.showCurrentUserProfile(false, userId);
+    }
+
+    exportUserProfiles() {
+        console.log('📊 DEBUGGING: Exporting user profiles...');
+        
+        const viewType = document.getElementById('profileViewType').value;
+        const departmentFilter = document.getElementById('profileDepartmentFilter').value;
+        const roleFilter = document.getElementById('profileRoleFilter').value;
+        const statusFilter = document.getElementById('profileStatusFilter').value;
+        
+        // Filter users
+        let filteredUsers = this.users.filter(user => {
+            if (departmentFilter && user.department !== departmentFilter) return false;
+            if (roleFilter && user.role !== roleFilter) return false;
+            if (statusFilter === 'active' && !user.isActive) return false;
+            if (statusFilter === 'inactive' && user.isActive) return false;
+            return true;
+        });
+        
+        // Generate CSV data
+        const headers = ['Name', 'Rolle', 'Abteilung', 'E-Mail', 'Telefon', 'Position', 'Status', 'Startdatum'];
+        const csvData = filteredUsers.map(user => {
+            const department = this.departments.find(d => d.id === user.department);
+            return [
+                user.displayName || user.name,
+                this.getRoleDisplayName(user.role),
+                department ? department.name : 'Unbekannt',
+                user.email || '',
+                user.phone || '',
+                user.position || '',
+                user.isActive ? 'Aktiv' : 'Inaktiv',
+                user.startDate || ''
+            ];
+        });
+        
+        // Create CSV content
+        const csvContent = [headers, ...csvData]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
+        
+        // Download CSV
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `mitarbeiter_profile_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        
+        console.log('📊 DEBUGGING: CSV export completed');
+    }
+
+    printUserProfiles() {
+        console.log('🖨️ DEBUGGING: Printing user profiles...');
+        
+        const printWindow = window.open('', '_blank');
+        const profileContent = document.getElementById('profileOverviewContent').innerHTML;
+        
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Mitarbeiter-Profile - ${new Date().toLocaleDateString('de-DE')}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .profile-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+                    .profile-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; page-break-inside: avoid; }
+                    .profile-card-header { margin-bottom: 10px; }
+                    .profile-avatar { width: 40px; height: 40px; border-radius: 50%; background: #007bff; color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
+                    .role-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; background: #f8f9fa; border: 1px solid #dee2e6; }
+                    .status-badge.active { background: #d4edda; color: #155724; }
+                    .status-badge.inactive { background: #f8d7da; color: #721c24; }
+                    .profile-detail { margin: 5px 0; }
+                    .profile-detail i { width: 20px; }
+                    @media print { .btn-small { display: none; } }
+                </style>
+            </head>
+            <body>
+                <h1>Mitarbeiter-Profile Übersicht</h1>
+                <p>Erstellt am: ${new Date().toLocaleString('de-DE')}</p>
+                ${profileContent}
+            </body>
+            </html>
+        `);
+        
+        printWindow.document.close();
+        printWindow.print();
+        
+        console.log('🖨️ DEBUGGING: Print dialog opened');
+    }
+
+    showUserReports() {
+        console.log('📊 DEBUGGING: Opening user reports modal...');
+        console.log('📊 DEBUGGING: Users data:', this.users);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-line"></i> Mitarbeiter-Berichte</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="report-controls">
+                        <div class="control-group">
+                            <div class="form-group">
+                                <label for="userReportType">Berichtstyp:</label>
+                                <select id="userReportType">
+                                    <option value="overview">Mitarbeiter-Übersicht</option>
+                                    <option value="departments">Abteilungs-Aufschlüsselung</option>
+                                    <option value="roles">Rollen-Verteilung</option>
+                                    <option value="qualifications">Qualifikations-Status</option>
+                                    <option value="activity">Aktivitäts-Report</option>
+                                    <option value="complete">Vollständiger Bericht</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="userReportDepartment">Abteilung:</label>
+                                <select id="userReportDepartment">
+                                    <option value="">Alle Abteilungen</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="userReportFormat">Format:</label>
+                                <select id="userReportFormat">
+                                    <option value="pdf">PDF</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="excel">Excel</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="report-actions">
+                            <button id="generateUserReportBtn" class="btn-primary">
+                                <i class="fas fa-file-download"></i> Bericht erstellen
+                            </button>
+                            <button id="previewUserReportBtn" class="btn-secondary">
+                                <i class="fas fa-eye"></i> Vorschau
+                            </button>
+                        </div>
+                    </div>
+                    <div class="report-preview" id="userReportPreview" style="display: none;">
+                        <h3>Bericht Vorschau</h3>
+                        <div id="userReportContent"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        console.log('📊 DEBUGGING: Modal added to DOM');
+        
+        this.populateUserReportDepartmentDropdown();
+        console.log('📊 DEBUGGING: Department dropdown populated');
+        
+        // Event listeners
+        const closeBtn = modal.querySelector('.close-modal');
+        const generateBtn = modal.querySelector('#generateUserReportBtn');
+        const previewBtn = modal.querySelector('#previewUserReportBtn');
+        
+        closeBtn.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        generateBtn.addEventListener('click', () => {
+            console.log('📊 DEBUGGING: Generate user report button clicked');
+            this.generateUserReport();
+        });
+        
+        previewBtn.addEventListener('click', () => {
+            console.log('📊 DEBUGGING: Preview user report button clicked');
+            this.previewUserReport();
+        });
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+        
+        // Show the modal
+        modal.style.display = 'block';
+        console.log('📊 DEBUGGING: Modal display set to block');
+    }
+
+    populateUserReportDepartmentDropdown() {
+        const departmentSelect = document.getElementById('userReportDepartment');
+        if (departmentSelect) {
+            departmentSelect.innerHTML = '<option value="">Alle Abteilungen</option>';
+            this.departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.id;
+                option.textContent = dept.name;
+                departmentSelect.appendChild(option);
+            });
+        }
+    }
+
+    generateUserReport() {
+        console.log('📊 DEBUGGING: Generating user report...');
+        
+        const reportType = document.getElementById('userReportType').value;
+        const department = document.getElementById('userReportDepartment').value;
+        const format = document.getElementById('userReportFormat').value;
+        
+        console.log('📊 DEBUGGING: Report parameters:', { reportType, department, format });
+        
+        if (!reportType) {
+            alert('Bitte wählen Sie einen Berichtstyp aus.');
+            return;
+        }
+        
+        if (!format) {
+            alert('Bitte wählen Sie ein Format aus.');
+            return;
+        }
+        
+        const reportData = this.prepareUserReportData(reportType, department);
+        
+        console.log('📊 DEBUGGING: Report data prepared for generation:', reportData);
+        
+        if (reportData.users.length === 0) {
+            alert('Keine Daten für den ausgewählten Berichtstyp gefunden.');
+            return;
+        }
+        
+        console.log('📊 DEBUGGING: Starting export with format:', format);
+        
+        if (format === 'pdf') {
+            console.log('📊 DEBUGGING: Calling PDF export');
+            this.exportUserReportAsPDF(reportData, reportType);
+        } else if (format === 'csv') {
+            console.log('📊 DEBUGGING: Calling CSV export');
+            this.exportUserReportAsCSV(reportData, reportType);
+        } else if (format === 'excel') {
+            console.log('📊 DEBUGGING: Calling Excel export');
+            this.exportUserReportAsExcel(reportData, reportType);
+        } else {
+            console.error('📊 DEBUGGING: Unknown format:', format);
+        }
+    }
+
+    previewUserReport() {
+        console.log('📊 DEBUGGING: Previewing user report...');
+        
+        const reportType = document.getElementById('userReportType').value;
+        const department = document.getElementById('userReportDepartment').value;
+        
+        console.log('📊 DEBUGGING: Preview parameters:', { reportType, department });
+        
+        const reportData = this.prepareUserReportData(reportType, department);
+        const preview = document.getElementById('userReportPreview');
+        const content = document.getElementById('userReportContent');
+        
+        if (reportData.users.length === 0) {
+            content.innerHTML = '<p class="no-data">Keine Daten für den ausgewählten Berichtstyp gefunden.</p>';
+            preview.style.display = 'block';
+            return;
+        }
+        
+        content.innerHTML = this.generateUserReportHTML(reportData, reportType);
+        preview.style.display = 'block';
+        
+        console.log('📊 DEBUGGING: Preview generated successfully');
+    }
+
+    prepareUserReportData(reportType, department) {
+        console.log('📊 DEBUGGING: Preparing user report data...');
+        
+        let filteredUsers = this.users.filter(user => {
+            if (department && user.department !== department) return false;
+            return true;
+        });
+        
+        console.log('📊 DEBUGGING: Users after department filter:', filteredUsers.length);
+        
+        const reportData = {
+            users: filteredUsers,
+            type: reportType,
+            department: department,
+            generatedAt: new Date().toISOString(),
+            stats: this.calculateUserStats(filteredUsers)
+        };
+        
+        // Add specific data based on report type
+        if (reportType === 'departments') {
+            reportData.departmentBreakdown = this.generateDepartmentBreakdown(filteredUsers);
+        } else if (reportType === 'roles') {
+            reportData.roleDistribution = this.generateRoleDistribution(filteredUsers);
+        } else if (reportType === 'qualifications') {
+            reportData.qualificationStats = this.generateQualificationStats(filteredUsers);
+        }
+        
+        console.log('📊 DEBUGGING: Final report data:', reportData);
+        
+        return reportData;
+    }
+
+    calculateUserStats(users) {
+        const stats = {
+            total: users.length,
+            active: users.filter(u => u.isActive).length,
+            inactive: users.filter(u => !u.isActive).length,
+            byRole: {},
+            byDepartment: {},
+            totalQualifications: 0,
+            expiredQualifications: 0
+        };
+        
+        users.forEach(user => {
+            // Role stats
+            stats.byRole[user.role] = (stats.byRole[user.role] || 0) + 1;
+            
+            // Department stats
+            if (user.department) {
+                stats.byDepartment[user.department] = (stats.byDepartment[user.department] || 0) + 1;
+            }
+            
+            // Qualification stats
+            const qualifications = user.qualifications || [];
+            stats.totalQualifications += qualifications.length;
+            stats.expiredQualifications += qualifications.filter(q => 
+                q.expiryDate && new Date(q.expiryDate) <= new Date()
+            ).length;
+        });
+        
+        return stats;
+    }
+
+    generateDepartmentBreakdown(users) {
+        const breakdown = {};
+        
+        this.departments.forEach(dept => {
+            const deptUsers = users.filter(u => u.department === dept.id);
+            breakdown[dept.id] = {
+                name: dept.name,
+                total: deptUsers.length,
+                active: deptUsers.filter(u => u.isActive).length,
+                roles: {}
+            };
+            
+            deptUsers.forEach(user => {
+                breakdown[dept.id].roles[user.role] = (breakdown[dept.id].roles[user.role] || 0) + 1;
+            });
+        });
+        
+        return breakdown;
+    }
+
+    generateRoleDistribution(users) {
+        const distribution = {};
+        
+        users.forEach(user => {
+            if (!distribution[user.role]) {
+                distribution[user.role] = {
+                    name: this.getRoleDisplayName(user.role),
+                    count: 0,
+                    users: []
+                };
+            }
+            distribution[user.role].count++;
+            distribution[user.role].users.push({
+                name: user.displayName || user.name,
+                department: user.department,
+                active: user.isActive
+            });
+        });
+        
+        return distribution;
+    }
+
+    generateQualificationStats(users) {
+        const stats = {
+            total: 0,
+            active: 0,
+            expired: 0,
+            expiringSoon: 0,
+            byType: {},
+            userStats: []
+        };
+        
+        users.forEach(user => {
+            const qualifications = user.qualifications || [];
+            const userStat = {
+                name: user.displayName || user.name,
+                department: user.department,
+                total: qualifications.length,
+                active: 0,
+                expired: 0,
+                expiringSoon: 0
+            };
+            
+            qualifications.forEach(q => {
+                stats.total++;
+                
+                if (q.expiryDate) {
+                    const expiryDate = new Date(q.expiryDate);
+                    const now = new Date();
+                    const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+                    
+                    if (expiryDate <= now) {
+                        stats.expired++;
+                        userStat.expired++;
+                    } else if (expiryDate <= in30Days) {
+                        stats.expiringSoon++;
+                        userStat.expiringSoon++;
+                    } else {
+                        stats.active++;
+                        userStat.active++;
+                    }
+                } else {
+                    stats.active++;
+                    userStat.active++;
+                }
+                
+                // By type stats
+                const type = q.type || 'Unbekannt';
+                stats.byType[type] = (stats.byType[type] || 0) + 1;
+            });
+            
+            stats.userStats.push(userStat);
+        });
+        
+        return stats;
+    }
+
+    generateUserReportHTML(reportData, reportType) {
+        let html = `
+            <div class="report-summary">
+                <h4>Zusammenfassung</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number">${reportData.stats.total}</span>
+                        <span class="stat-label">Gesamt</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${reportData.stats.active}</span>
+                        <span class="stat-label">Aktiv</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">${reportData.stats.inactive}</span>
+                        <span class="stat-label">Inaktiv</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if (reportType === 'overview' || reportType === 'complete') {
+            html += this.generateUserListHTML(reportData.users);
+        }
+        
+        if (reportType === 'departments' || reportType === 'complete') {
+            html += this.generateDepartmentReportHTML(reportData.departmentBreakdown);
+        }
+        
+        if (reportType === 'roles' || reportType === 'complete') {
+            html += this.generateRoleReportHTML(reportData.roleDistribution);
+        }
+        
+        if (reportType === 'qualifications' || reportType === 'complete') {
+            html += this.generateQualificationReportHTML(reportData.qualificationStats);
+        }
+        
+        return html;
+    }
+
+    generateUserListHTML(users) {
+        return `
+            <div class="report-section">
+                <h4>Mitarbeiterliste</h4>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Rolle</th>
+                            <th>Abteilung</th>
+                            <th>E-Mail</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => {
+                            const dept = this.departments.find(d => d.id === user.department);
+                            return `
+                                <tr>
+                                    <td>${user.displayName || user.name}</td>
+                                    <td>${this.getRoleDisplayName(user.role)}</td>
+                                    <td>${dept ? dept.name : 'Unbekannt'}</td>
+                                    <td>${user.email || 'Nicht angegeben'}</td>
+                                    <td><span class="status-badge ${user.isActive ? 'active' : 'inactive'}">${user.isActive ? 'Aktiv' : 'Inaktiv'}</span></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    generateDepartmentReportHTML(breakdown) {
+        return `
+            <div class="report-section">
+                <h4>Abteilungs-Aufschlüsselung</h4>
+                ${Object.values(breakdown).map(dept => `
+                    <div class="department-breakdown">
+                        <h5>${dept.name}</h5>
+                        <div class="dept-stats">
+                            <span>Gesamt: ${dept.total}</span>
+                            <span>Aktiv: ${dept.active}</span>
+                        </div>
+                        <div class="role-breakdown">
+                            ${Object.entries(dept.roles).map(([role, count]) => `
+                                <span class="role-stat">${this.getRoleDisplayName(role)}: ${count}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    generateRoleReportHTML(distribution) {
+        return `
+            <div class="report-section">
+                <h4>Rollen-Verteilung</h4>
+                ${Object.values(distribution).map(role => `
+                    <div class="role-distribution">
+                        <h5>${role.name} (${role.count})</h5>
+                        <ul class="user-list">
+                            ${role.users.map(user => `
+                                <li>${user.name} - ${user.department} ${user.active ? '' : '(Inaktiv)'}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    generateQualificationReportHTML(stats) {
+        return `
+            <div class="report-section">
+                <h4>Qualifikations-Status</h4>
+                <div class="qualification-overview">
+                    <div class="qual-stats">
+                        <span>Gesamt: ${stats.total}</span>
+                        <span>Aktiv: ${stats.active}</span>
+                        <span>Abgelaufen: ${stats.expired}</span>
+                        <span>Läuft bald ab: ${stats.expiringSoon}</span>
+                    </div>
+                </div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Mitarbeiter</th>
+                            <th>Abteilung</th>
+                            <th>Gesamt</th>
+                            <th>Aktiv</th>
+                            <th>Abgelaufen</th>
+                            <th>Läuft bald ab</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${stats.userStats.map(user => {
+                            const dept = this.departments.find(d => d.id === user.department);
+                            return `
+                                <tr>
+                                    <td>${user.name}</td>
+                                    <td>${dept ? dept.name : 'Unbekannt'}</td>
+                                    <td>${user.total}</td>
+                                    <td>${user.active}</td>
+                                    <td>${user.expired}</td>
+                                    <td>${user.expiringSoon}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    exportUserReportAsPDF(reportData, reportType) {
+        console.log('📊 DEBUGGING: Exporting user report as PDF...');
+        
+        const printWindow = window.open('', '_blank');
+        const reportHTML = this.generateUserReportHTML(reportData, reportType);
+        
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Mitarbeiter-Bericht - ${reportType}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .report-summary { margin-bottom: 30px; }
+                    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin: 10px 0; }
+                    .stat-item { text-align: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+                    .stat-number { display: block; font-size: 24px; font-weight: bold; color: #007bff; }
+                    .stat-label { font-size: 12px; color: #666; }
+                    .report-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                    .report-table th, .report-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    .report-table th { background-color: #f8f9fa; }
+                    .status-badge.active { background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px; }
+                    .status-badge.inactive { background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 3px; }
+                    .department-breakdown, .role-distribution { margin: 15px 0; padding: 10px; border-left: 4px solid #007bff; }
+                    .dept-stats, .qual-stats { margin: 5px 0; }
+                    .dept-stats span, .qual-stats span { margin-right: 15px; font-weight: bold; }
+                    .role-breakdown { margin-top: 10px; }
+                    .role-stat { display: inline-block; margin-right: 15px; padding: 2px 6px; background: #f8f9fa; border-radius: 3px; }
+                    .user-list { margin: 10px 0; }
+                    @media print { body { margin: 0; } }
+                </style>
+            </head>
+            <body>
+                <h1>Mitarbeiter-Bericht: ${this.getReportTypeDisplayName(reportType)}</h1>
+                <p>Erstellt am: ${new Date().toLocaleString('de-DE')}</p>
+                <p>Firma: ${document.getElementById('companyName').textContent}</p>
+                ${reportHTML}
+            </body>
+            </html>
+        `);
+        
+        printWindow.document.close();
+        printWindow.print();
+        
+        console.log('📊 DEBUGGING: PDF export window opened');
+    }
+
+    exportUserReportAsCSV(reportData, reportType) {
+        console.log('📊 DEBUGGING: Exporting user report as CSV...');
+        
+        const headers = ['Name', 'Rolle', 'Abteilung', 'E-Mail', 'Telefon', 'Position', 'Status', 'Startdatum'];
+        const csvData = reportData.users.map(user => {
+            const department = this.departments.find(d => d.id === user.department);
+            return [
+                user.displayName || user.name,
+                this.getRoleDisplayName(user.role),
+                department ? department.name : 'Unbekannt',
+                user.email || '',
+                user.phone || '',
+                user.position || '',
+                user.isActive ? 'Aktiv' : 'Inaktiv',
+                user.startDate || ''
+            ];
+        });
+        
+        const csvContent = [headers, ...csvData]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `mitarbeiter_bericht_${reportType}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        
+        console.log('📊 DEBUGGING: CSV export completed');
+    }
+
+    exportUserReportAsExcel(reportData, reportType) {
+        console.log('📊 DEBUGGING: Exporting user report as Excel...');
+        // For now, export as CSV with .xlsx extension for Excel compatibility
+        this.exportUserReportAsCSV(reportData, reportType);
+    }
+
+    getReportTypeDisplayName(reportType) {
+        const reportNames = {
+            'overview': 'Mitarbeiter-Übersicht',
+            'departments': 'Abteilungs-Aufschlüsselung',
+            'roles': 'Rollen-Verteilung',
+            'qualifications': 'Qualifikations-Status',
+            'activity': 'Aktivitäts-Report',
+            'complete': 'Vollständiger Bericht'
+        };
+        return reportNames[reportType] || reportType;
     }
 
     renderUsersList() {
@@ -10844,7 +12060,13 @@ PLZ Ort">${user.address || ''}</textarea>
         }
         
         if (substanceReportsBtn) {
-            substanceReportsBtn.addEventListener('click', () => this.openSubstanceReports());
+            console.log('🧪 DEBUGGING: Setting up reports button listener');
+            substanceReportsBtn.addEventListener('click', () => {
+                console.log('🧪 DEBUGGING: Reports button clicked!');
+                this.openSubstanceReports();
+            });
+        } else {
+            console.error('🧪 DEBUGGING: substanceReportsBtn not found in DOM!');
         }
 
         // Search and filter controls
@@ -11792,6 +13014,10 @@ PLZ Ort">${user.address || ''}</textarea>
     }
 
     openSubstanceReports() {
+        console.log('🧪 DEBUGGING: Opening substance reports modal...');
+        console.log('🧪 DEBUGGING: Substances data:', this.hazardousSubstances);
+        console.log('🧪 DEBUGGING: Departments data:', this.departments);
+        
         const modal = document.createElement('div');
         modal.className = 'modal';
         modal.innerHTML = `
@@ -11846,8 +13072,10 @@ PLZ Ort">${user.address || ''}</textarea>
         `;
         
         document.body.appendChild(modal);
+        console.log('🧪 DEBUGGING: Modal added to DOM');
         
         this.populateReportDepartmentDropdown();
+        console.log('🧪 DEBUGGING: Department dropdown populated');
         
         // Event listeners
         const closeBtn = modal.querySelector('.close-modal');
@@ -11859,10 +13087,12 @@ PLZ Ort">${user.address || ''}</textarea>
         });
         
         generateBtn.addEventListener('click', () => {
+            console.log('Generate report button clicked');
             this.generateSubstanceReport();
         });
         
         previewBtn.addEventListener('click', () => {
+            console.log('Preview report button clicked');
             this.previewSubstanceReport();
         });
         
@@ -11872,6 +13102,11 @@ PLZ Ort">${user.address || ''}</textarea>
                 document.body.removeChild(modal);
             }
         });
+        
+        // Show the modal
+        modal.style.display = 'block';
+        console.log('🧪 DEBUGGING: Modal display set to block');
+        console.log('🧪 DEBUGGING: Modal element:', modal);
     }
     
     populateReportDepartmentDropdown() {
@@ -11888,35 +13123,87 @@ PLZ Ort">${user.address || ''}</textarea>
     }
     
     generateSubstanceReport() {
+        console.log('Generating substance report...');
+        
         const reportType = document.getElementById('reportType').value;
         const department = document.getElementById('reportDepartment').value;
         const format = document.getElementById('reportFormat').value;
         
+        console.log('Report parameters:', { reportType, department, format });
+        
+        if (!reportType) {
+            alert('Bitte wählen Sie einen Berichtstyp aus.');
+            return;
+        }
+        
+        if (!format) {
+            alert('Bitte wählen Sie ein Format aus.');
+            return;
+        }
+        
         const reportData = this.prepareSubstanceReportData(reportType, department);
         
+        console.log('Report data prepared for generation:', reportData);
+        
+        if (reportData.substances.length === 0) {
+            alert('Keine Daten für den ausgewählten Berichtstyp gefunden.');
+            return;
+        }
+        
+        console.log('🧪 DEBUGGING: Starting export with format:', format);
+        
         if (format === 'pdf') {
+            console.log('🧪 DEBUGGING: Calling PDF export');
             this.exportSubstanceReportAsPDF(reportData, reportType);
         } else if (format === 'csv') {
+            console.log('🧪 DEBUGGING: Calling CSV export');
             this.exportSubstanceReportAsCSV(reportData, reportType);
         } else if (format === 'excel') {
+            console.log('🧪 DEBUGGING: Calling Excel export');
             this.exportSubstanceReportAsExcel(reportData, reportType);
+        } else {
+            console.error('🧪 DEBUGGING: Unknown format:', format);
         }
     }
     
     previewSubstanceReport() {
+        console.log('Previewing substance report...');
+        
         const reportType = document.getElementById('reportType').value;
         const department = document.getElementById('reportDepartment').value;
+        
+        console.log('Preview parameters:', { reportType, department });
+        
+        if (!reportType) {
+            alert('Bitte wählen Sie einen Berichtstyp aus.');
+            return;
+        }
         
         const reportData = this.prepareSubstanceReportData(reportType, department);
         const previewDiv = document.getElementById('reportPreview');
         const contentDiv = document.getElementById('reportContent');
         
-        let html = this.generateReportHTML(reportData, reportType);
-        contentDiv.innerHTML = html;
+        console.log('Report data prepared:', reportData);
+        
+        if (reportData.substances.length === 0) {
+            contentDiv.innerHTML = `
+                <div class="no-data-message">
+                    <h4>Keine Daten gefunden</h4>
+                    <p>Für die gewählten Filterkriterien wurden keine Gefahrstoffe gefunden.</p>
+                </div>
+            `;
+        } else {
+            let html = this.generateReportHTML(reportData, reportType);
+            contentDiv.innerHTML = html;
+        }
+        
         previewDiv.style.display = 'block';
     }
     
     prepareSubstanceReportData(reportType, departmentFilter) {
+        console.log('Preparing report data...', { reportType, departmentFilter });
+        console.log('Available substances:', this.hazardousSubstances.length);
+        
         let substances = [...this.hazardousSubstances];
         
         // Filter by department if specified
@@ -11990,11 +13277,11 @@ PLZ Ort">${user.address || ''}</textarea>
                 <tr>
                     <td>${substance.name || 'Nicht angegeben'}</td>
                     <td>${substance.casNumber || 'Nicht angegeben'}</td>
-                    <td>${department?.name || 'Nicht zugeordnet'}</td>
-                    <td>${substance.quantity || 'Nicht angegeben'} ${substance.unit || ''}</td>
+                    <td>${department?.name || substance.department || 'Nicht zugeordnet'}</td>
+                    <td>${substance.quantity || substance.storageAmount || 'Nicht angegeben'} ${substance.unit || ''}</td>
                     <td>${substance.storageLocation || 'Nicht angegeben'}</td>
                     <td>${expiryDate}</td>
-                    <td>${substance.hazardClass || 'Nicht klassifiziert'}</td>
+                    <td>${substance.hazardClass || substance.signalWord || 'Nicht klassifiziert'}</td>
                 </tr>
             `;
         });
