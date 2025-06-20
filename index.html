@@ -184,7 +184,8 @@
                                             <p>Klicken Sie auf "Bearbeiten", um weitere Informationen zum Arbeitsschutz hinzuzufügen.</p>
                                         </div>
                                         <div id="safetyInfoEditor" class="info-editor" style="display: none;">
-                                            <textarea id="safetyInfoText" rows="6" placeholder="Arbeitsschutzmaßnahmen, Schulungen, Vorfälle, Verbesserungen..."></textarea>
+                                            <label for="safetyInfoText" class="sr-only">Arbeitsschutz-Informationen</label>
+                                            <textarea id="safetyInfoText" rows="6" placeholder="Arbeitsschutzmaßnahmen, Schulungen, Vorfälle, Verbesserungen..." aria-label="Arbeitsschutz-Informationen"></textarea>
                                             <div class="editor-actions">
                                                 <button id="saveSafetyInfoBtn" class="btn-primary btn-sm">
                                                     <i class="fas fa-save"></i> Speichern
@@ -840,7 +841,7 @@
                                 <input type="file" id="fileUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx">
                             </div>
                             <div class="upload-categories">
-                                <select id="documentCategory">
+                                <select id="documentCategory" aria-label="Dokument-Kategorie auswählen">
                                     <option value="">Kategorie wählen</option>
                                     <option value="arbeitsschutz">Arbeitsschutz</option>
                                     <option value="qualitaet">Qualität</option>
@@ -1069,7 +1070,7 @@
                                         </div>
                                         <div class="internal-audit-form">
                                             <div class="form-row">
-                                                <select id="internalAuditType" style="margin-right: 0.5rem;">
+                                                <select id="internalAuditType" style="margin-right: 0.5rem;" aria-label="Internes Audit-Typ auswählen">
                                                     <option value="">Audit-Typ wählen</option>
                                                     <option value="Qualitätsaudit">Qualitätsaudit</option>
                                                     <option value="Umweltaudit">Umweltaudit</option>
@@ -1080,9 +1081,9 @@
                                                     <option value="Compliance-Audit">Compliance-Audit</option>
                                                     <option value="Integriertes Audit">Integriertes Audit</option>
                                                 </select>
-                                                <input type="text" id="internalAuditTitle" placeholder="z.B. 2024 Q2" style="flex: 1; margin-right: 0.5rem;">
-                                                <input type="date" id="internalAuditDate" style="margin-right: 0.5rem;">
-                                                <select id="internalAuditStatus" style="margin-right: 0.5rem;">
+                                                <input type="text" id="internalAuditTitle" placeholder="z.B. 2024 Q2" style="flex: 1; margin-right: 0.5rem;" aria-label="Internes Audit-Titel">
+                                                <input type="date" id="internalAuditDate" style="margin-right: 0.5rem;" aria-label="Internes Audit-Datum">
+                                                <select id="internalAuditStatus" style="margin-right: 0.5rem;" aria-label="Internes Audit-Status">
                                                     <option value="geplant">Geplant</option>
                                                     <option value="durchgeführt">Durchgeführt</option>
                                                     <option value="abgeschlossen">Abgeschlossen</option>
@@ -1103,7 +1104,7 @@
                                         </div>
                                         <div class="external-audit-form">
                                             <div class="form-row">
-                                                <select id="externalAuditType" style="margin-right: 0.5rem;">
+                                                <select id="externalAuditType" style="margin-right: 0.5rem;" aria-label="Externes Audit-Typ auswählen">
                                                     <option value="">Audit-Typ wählen</option>
                                                     <option value="ISO 9001 Zertifizierung">ISO 9001 Zertifizierung</option>
                                                     <option value="ISO 14001 Zertifizierung">ISO 14001 Zertifizierung</option>
@@ -1116,10 +1117,10 @@
                                                     <option value="Überwachungsaudit">Überwachungsaudit</option>
                                                     <option value="Rezertifizierungsaudit">Rezertifizierungsaudit</option>
                                                 </select>
-                                                <input type="text" id="externalAuditTitle" placeholder="z.B. 2024 Überwachungsaudit" style="flex: 1; margin-right: 0.5rem;">
-                                                <input type="text" id="externalAuditor" placeholder="z.B. TÜV Rheinland" style="flex: 1; margin-right: 0.5rem;">
-                                                <input type="date" id="externalAuditDate" style="margin-right: 0.5rem;">
-                                                <select id="externalAuditStatus" style="margin-right: 0.5rem;">
+                                                <input type="text" id="externalAuditTitle" placeholder="z.B. 2024 Überwachungsaudit" style="flex: 1; margin-right: 0.5rem;" aria-label="Externes Audit-Titel">
+                                                <input type="text" id="externalAuditor" placeholder="z.B. TÜV Rheinland" style="flex: 1; margin-right: 0.5rem;" aria-label="Externes Audit-Auditor">
+                                                <input type="date" id="externalAuditDate" style="margin-right: 0.5rem;" aria-label="Externes Audit-Datum">
+                                                <select id="externalAuditStatus" style="margin-right: 0.5rem;" aria-label="Externes Audit-Status">
                                                     <option value="geplant">Geplant</option>
                                                     <option value="durchgeführt">Durchgeführt</option>
                                                     <option value="bestanden">Bestanden</option>
@@ -1513,7 +1514,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="workDescription">Tätigkeitsbeschreibung/Projekt:</label>
-                                        <textarea id="workDescription" rows="3" placeholder="Beschreibung der Tätigkeiten oder Projektbezug..."></textarea>
+                                        <textarea id="workDescription" rows="3" placeholder="Beschreibung der Tätigkeiten oder Projektbezug..." aria-label="Tätigkeitsbeschreibung"></textarea>
                                     </div>
                                     <div class="form-actions">
                                         <button type="submit" class="btn-primary">
@@ -1580,7 +1581,7 @@
                             <div class="control-group">
                                 <div class="form-group">
                                     <label for="evalEmployee">Mitarbeiter:</label>
-                                    <select id="evalEmployee">
+                                    <select id="evalEmployee" aria-label="Mitarbeiter für Zeitauswertung auswählen">
                                         <option value="">Alle Mitarbeiter</option>
                                         <!-- Wird dynamisch gefüllt -->
                                     </select>
@@ -2047,7 +2048,7 @@
                     </div>
                     <div class="form-group">
                         <label for="editUserDepartment">Abteilung:</label>
-                        <input type="text" id="editUserDepartment" name="userDepartment" autocomplete="organization">
+                        <input type="text" id="editUserDepartment" name="userDepartment" autocomplete="organization-title">
                     </div>
                 </form>
             </div>
@@ -2124,7 +2125,7 @@
                         </div>
                         <div class="form-group">
                             <label for="newUserEmergencyContact">Notfallkontakt:</label>
-                            <input type="text" id="newUserEmergencyContact" name="userEmergencyContact" placeholder="Name und Telefonnummer">
+                            <input type="text" id="newUserEmergencyContact" name="userEmergencyContact" placeholder="Name und Telefonnummer" autocomplete="off">
                         </div>
                     </div>
                     
@@ -2459,7 +2460,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="department">Zugeordnete Abteilung</label>
-                                <select id="substanceDepartment">
+                                <select id="substanceDepartment" aria-label="Abteilung für Gefahrstoff auswählen">
                                     <option value="">Abteilung wählen</option>
                                 </select>
                             </div>
@@ -2521,7 +2522,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="signalWord">Signalwort</label>
-                                <select id="signalWord">
+                                <select id="signalWord" aria-label="GHS-Signalwort auswählen">
                                     <option value="">Bitte wählen</option>
                                     <option value="Gefahr">Gefahr</option>
                                     <option value="Achtung">Achtung</option>
