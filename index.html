@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-ancestors 'none';">
     <title>QHSE Management System - Hoffmann und Voss GmbH</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
 </head>
 <body>
     <div class="app-container">
@@ -45,7 +48,15 @@
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
                     </li>
+                    <li class="menu-item static-item" data-section="mein-profil">
+                        <i class="fas fa-user"></i>
+                        <span>Mein Profil</span>
+                    </li>
                     <!-- Dynamic areas will be populated by JavaScript -->
+                    <li class="menu-item static-item" data-section="sicherheitsecke">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Sicherheitsecke</span>
+                    </li>
                     <li class="menu-item static-item" data-section="arbeitsanweisungen">
                         <i class="fas fa-clipboard-list"></i>
                         <span>Arbeitsanweisungen</span>
@@ -54,7 +65,7 @@
                         <i class="fas fa-cogs"></i>
                         <span>Verfahrensanweisungen</span>
                     </li>
-                    <li class="menu-item static-item" data-section="audits" data-roles="geschaeftsfuehrung,qhse,admin,root-admin">
+                    <li class="menu-item static-item" data-section="audits" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,mitarbeiter,techniker,admin,root-admin">
                         <i class="fas fa-search"></i>
                         <span>Auditauswertungen</span>
                     </li>
@@ -102,6 +113,10 @@
                         <i class="fas fa-chart-line"></i>
                         <span>Instandhaltungs-Auswertung</span>
                     </li>
+                    <li class="menu-item static-item" data-section="gefahrstoffe" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,techniker,admin,root-admin">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Gefahrstoffe</span>
+                    </li>
                     <li class="menu-item static-item" data-section="einstellungen" data-roles="root-admin">
                         <i class="fas fa-cog"></i>
                         <span>Einstellungen</span>
@@ -126,7 +141,7 @@
                 <div class="header-actions">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Suchen...">
+                        <input type="text" id="globalSearch" placeholder="Suchen..." autocomplete="off" aria-label="Global search">
                     </div>
                     <button class="notification-btn">
                         <i class="fas fa-bell"></i>
@@ -148,9 +163,14 @@
                                     <h3>Arbeitsschutz</h3>
                                     <div class="kpi-value">98.5%</div>
                                     <p>Compliance Rate</p>
-                                    <button id="expandSafetyInfoBtn" class="expand-btn" title="Weitere Informationen hinzufügen">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
+                                    <div class="kpi-actions">
+                                        <button id="expandSafetyInfoBtn" class="expand-btn" title="Weitere Informationen hinzufügen">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </button>
+                                        <button id="editKpiBtn" class="edit-kpi-btn" data-roles="root-admin" title="KPI-Werte bearbeiten">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div id="safetyInfoSection" class="expandable-section" style="display: none;">
                                     <div class="section-header">
@@ -214,22 +234,36 @@
 
                         <div class="dashboard-widgets">
                             <div class="widget audit-status">
-                                <h3>Letzte Audits</h3>
-                                <div class="audit-list">
-                                    <div class="audit-item passed">
-                                        <span class="audit-type">ISO 9001</span>
-                                        <span class="audit-date">15.03.2024</span>
-                                        <span class="audit-result">Bestanden</span>
+                                <div class="widget-header">
+                                    <h3>Audit-Zertifizierungen</h3>
+                                    <div class="widget-actions" data-roles="root-admin">
+                                        <button id="editDashboardAuditsBtn" class="btn-secondary btn-sm">
+                                            <i class="fas fa-edit"></i> Bearbeiten
+                                        </button>
                                     </div>
-                                    <div class="audit-item passed">
-                                        <span class="audit-type">ISO 14001</span>
-                                        <span class="audit-date">22.02.2024</span>
-                                        <span class="audit-result">Bestanden</span>
+                                </div>
+                                
+                                <!-- TÜV Zertifizierungen -->
+                                <div class="dashboard-certifications">
+                                    <h4>TÜV Zertifizierungen</h4>
+                                    <div id="dashboardCertificationsList" class="cert-status">
+                                        <!-- Wird dynamisch mit JavaScript befüllt -->
                                     </div>
-                                    <div class="audit-item pending">
-                                        <span class="audit-type">OHSAS 18001</span>
-                                        <span class="audit-date">05.04.2024</span>
-                                        <span class="audit-result">Geplant</span>
+                                </div>
+                                
+                                <!-- Interne Audits -->
+                                <div class="dashboard-internal-audits">
+                                    <h4>Interne Audits</h4>
+                                    <div id="dashboardInternalAuditsList" class="audit-list">
+                                        <!-- Wird dynamisch mit JavaScript befüllt -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Externe Audits -->
+                                <div class="dashboard-external-audits">
+                                    <h4>Externe Audits</h4>
+                                    <div id="dashboardExternalAuditsList" class="audit-list">
+                                        <!-- Wird dynamisch mit JavaScript befüllt -->
                                     </div>
                                 </div>
                             </div>
@@ -242,6 +276,130 @@
                                     </div>
                                     <p>von 5 Sternen</p>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Mein Profil Section -->
+                <section id="mein-profil-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Mein Profil</h2>
+                        <div class="profile-container">
+                            <div class="profile-header">
+                                <div class="profile-avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div class="profile-info">
+                                    <h3 id="profileUserName">Benutzername</h3>
+                                    <p id="profileUserRole">Rolle</p>
+                                    <p id="profileUserDepartment">Abteilung</p>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-sections">
+                                <div class="profile-section">
+                                    <h4>Persönliche Informationen</h4>
+                                    <div class="profile-form">
+                                        <div class="form-group">
+                                            <label for="profileEmail">E-Mail:</label>
+                                            <input type="email" id="profileEmail" name="email" placeholder="E-Mail-Adresse" autocomplete="email">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="profilePhone">Telefon:</label>
+                                            <input type="tel" id="profilePhone" name="phone" placeholder="Telefonnummer" autocomplete="tel">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="profilePosition">Position:</label>
+                                            <input type="text" id="profilePosition" name="position" placeholder="Berufsbezeichnung" autocomplete="organization-title">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="profile-section">
+                                    <h4>Passwort ändern</h4>
+                                    <div class="profile-form">
+                                        <div class="form-group">
+                                            <label for="currentPassword">Aktuelles Passwort:</label>
+                                            <input type="password" id="currentPassword" name="current-password" placeholder="Aktuelles Passwort" autocomplete="current-password">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="newPassword">Neues Passwort:</label>
+                                            <input type="password" id="newPassword" name="new-password" placeholder="Neues Passwort" autocomplete="new-password">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="confirmPassword">Passwort bestätigen:</label>
+                                            <input type="password" id="confirmPassword" name="confirm-password" placeholder="Neues Passwort bestätigen" autocomplete="new-password">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="profile-section">
+                                    <h4>Einstellungen</h4>
+                                    <div class="profile-form">
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" id="emailNotifications"> 
+                                                E-Mail-Benachrichtigungen erhalten
+                                            </label>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" id="systemNotifications"> 
+                                                System-Benachrichtigungen erhalten
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-actions">
+                                <button id="saveProfileBtn" class="btn-primary">
+                                    <i class="fas fa-save"></i> Profil speichern
+                                </button>
+                                <button id="changePasswordBtn" class="btn-secondary">
+                                    <i class="fas fa-key"></i> Passwort ändern
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sicherheitsecke Section -->
+                <section id="sicherheitsecke-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Sicherheitsecke</h2>
+                        <p>Wichtige Sicherheitsinformationen und Mitteilungen für alle Mitarbeiter</p>
+                        
+                        <!-- Mitarbeiter-Ankündigungen -->
+                        <div class="safety-announcements">
+                            <div class="announcements-header">
+                                <h3>Wichtige Mitteilungen</h3>
+                                <div class="announcement-meta" id="announcementMeta" style="display: none;">
+                                    <span class="announcement-author">Erstellt von: <span id="announcementAuthor"></span></span>
+                                    <span class="announcement-date">Letzte Aktualisierung: <span id="announcementDate"></span></span>
+                                </div>
+                            </div>
+                            <div class="announcements-content">
+                                <div id="safetyAnnouncementsDisplay" class="announcements-display">
+                                    <p class="no-announcements">Derzeit keine wichtigen Mitteilungen vorhanden.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PDF Dokumente Bereich -->
+                        <div class="safety-documents">
+                            <div class="documents-header">
+                                <h3>Sicherheitsdokumente</h3>
+                                <div class="documents-actions" data-roles="admin,root-admin">
+                                    <input type="file" id="safetyPdfUpload" accept=".pdf" style="display: none;">
+                                    <button id="uploadSafetyPdfBtn" class="btn-primary btn-sm">
+                                        <i class="fas fa-upload"></i> PDF hochladen
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="safety-pdf-list" id="safetyPdfList">
+                                <!-- PDF Dokumente werden hier angezeigt -->
                             </div>
                         </div>
                     </div>
@@ -574,13 +732,51 @@
                 <section id="audits-section" class="content-section">
                     <div class="section-content">
                         <h2>Auditauswertungen</h2>
+                        <!-- Audit Evaluations Free Text -->
+                        <div class="audit-content">
+                            <div class="audit-free-text">
+                                <h3>Auditauswertungen Informationen</h3>
+                                <div id="auditFreeTextDisplay" class="audit-text-display">
+                                    <!-- Free text will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Audit Documents Section -->
+                            <div class="audit-documents">
+                                <h3>Audit Dokumente</h3>
+                                <div id="auditDocumentsList" class="documents-grid">
+                                    <!-- Documents will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Audit Images Section -->
+                            <div class="audit-images">
+                                <h3>Audit Bilder</h3>
+                                <div id="auditImagesList" class="images-grid">
+                                    <!-- Images will be displayed here -->
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="audit-overview">
                             <div class="audit-summary">
                                 <h3>TÜV Zertifizierungen</h3>
-                                <div class="cert-status">
-                                    <div class="cert-item">ISO 9001:2015 - Gültig bis 12/2025</div>
-                                    <div class="cert-item">ISO 14001:2015 - Gültig bis 03/2026</div>
-                                    <div class="cert-item">OHSAS 18001 - Erneuerung 04/2024</div>
+                                <div id="certificationsList" class="cert-status">
+                                    <!-- Certifications will be dynamically rendered here -->
+                                </div>
+                            </div>
+                            
+                            <div class="audit-summary">
+                                <h3>Interne Audits</h3>
+                                <div id="internalAuditsList" class="audit-list">
+                                    <!-- Internal audits will be dynamically rendered here -->
+                                </div>
+                            </div>
+                            
+                            <div class="audit-summary">
+                                <h3>Externe Audits</h3>
+                                <div id="externalAuditsList" class="audit-list">
+                                    <!-- External audits will be dynamically rendered here -->
                                 </div>
                             </div>
                         </div>
@@ -742,6 +938,540 @@
                                         <i class="fas fa-undo"></i> Zurücksetzen
                                     </button>
                                 </div>
+                            </div>
+
+                            <div class="settings-card">
+                                <h3>Sicherheitsecke verwalten</h3>
+                                <p>Verwalten Sie wichtige Mitteilungen für die Sicherheitsecke und bestimmen Sie, welche Mitarbeiter diese sehen können.</p>
+                                
+                                <!-- Bestehende Mitteilungen anzeigen -->
+                                <div class="existing-announcements">
+                                    <h4>Bestehende Mitteilungen</h4>
+                                    <div id="existingAnnouncementsList">
+                                        <!-- Wird dynamisch gefüllt -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Neue Mitteilung erstellen -->
+                                <div class="new-announcement-section">
+                                    <h4>Neue Mitteilung erstellen</h4>
+                                    
+                                    <!-- Mitteilungs-Editor -->
+                                    <div class="form-group">
+                                        <label for="safetyAnnouncementText">Wichtige Mitteilung:</label>
+                                        <textarea id="safetyAnnouncementText" rows="6" placeholder="Geben Sie hier wichtige Sicherheitsinformationen für alle Mitarbeiter ein..."></textarea>
+                                    </div>
+                                    
+                                    <!-- Benutzerauswahl -->
+                                    <div class="form-group">
+                                        <label>Sichtbar für folgende Mitarbeiter:</label>
+                                        <div class="user-selection-grid" id="announcementUserSelection">
+                                            <!-- Mitarbeiterauswahl wird dynamisch gefüllt -->
+                                        </div>
+                                        <div class="selection-actions">
+                                            <button type="button" id="selectAllUsersBtn" class="btn-secondary btn-sm">Alle auswählen</button>
+                                            <button type="button" id="deselectAllUsersBtn" class="btn-secondary btn-sm">Alle abwählen</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="announcement-form-actions">
+                                        <button id="saveSafetyAnnouncementBtn" class="btn-primary">
+                                            <i class="fas fa-save"></i> Mitteilung hinzufügen
+                                        </button>
+                                        <button id="clearAnnouncementFormBtn" class="btn-secondary">
+                                            <i class="fas fa-times"></i> Formular leeren
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="settings-actions">
+                                    <button id="debugSafetySystemBtn" class="btn-secondary">
+                                        <i class="fas fa-bug"></i> Debug Sicherheitssystem
+                                    </button>
+                                    <button id="addTestPdfBtn" class="btn-info">
+                                        <i class="fas fa-plus"></i> Test-PDF hinzufügen
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Audit Evaluations Management -->
+                            <div class="settings-card">
+                                <h3>Auditauswertungen Verwaltung</h3>
+                                <p>Verwalten Sie Freitext, Dokumente und Bilder für die Auditauswertungen Sektion. Diese Inhalte sind für alle Nutzer sichtbar.</p>
+                                
+                                <div class="form-group">
+                                    <label for="auditFreeTextInput">Freitext für Auditauswertungen:</label>
+                                    <textarea id="auditFreeTextInput" rows="6" placeholder="Geben Sie hier wichtige Informationen zu Auditauswertungen ein..."></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="auditDocumentUpload">Dokumente hochladen:</label>
+                                    <div class="file-upload-area" id="auditDocumentUploadArea">
+                                        <input type="file" id="auditDocumentUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                        <div class="upload-text">
+                                            <i class="fas fa-upload"></i>
+                                            <p>Dokumente hier hinziehen oder klicken zum Auswählen</p>
+                                            <small>Unterstützte Formate: PDF, DOC, DOCX, XLS, XLSX</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="auditImageUpload">Bilder hochladen:</label>
+                                    <div class="file-upload-area" id="auditImageUploadArea">
+                                        <input type="file" id="auditImageUpload" multiple accept="image/*">
+                                        <div class="upload-text">
+                                            <i class="fas fa-image"></i>
+                                            <p>Bilder hier hinziehen oder klicken zum Auswählen</p>
+                                            <small>Unterstützte Formate: JPG, PNG, GIF, BMP, SVG</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="settings-actions">
+                                    <button id="saveAuditContentBtn" class="btn-primary">
+                                        <i class="fas fa-save"></i> Audit Inhalte speichern
+                                    </button>
+                                    <button id="clearAuditContentBtn" class="btn-danger">
+                                        <i class="fas fa-trash"></i> Alle Inhalte löschen
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Audit Certifications Management -->
+                            <div class="settings-card">
+                                <h3>Audit Zertifizierungen Verwaltung</h3>
+                                <p>Verwalten Sie TÜV Zertifizierungen und interne Audits.</p>
+                                
+                                <div class="form-group">
+                                    <h4>TÜV Zertifizierungen</h4>
+                                    <div id="certificationsManagement">
+                                        <div id="existingCertifications">
+                                            <!-- Existing certifications will be listed here -->
+                                        </div>
+                                        <div class="certification-form">
+                                            <div class="form-row">
+                                                <input type="text" id="certificationName" placeholder="z.B. ISO 9001:2015" style="flex: 1; margin-right: 0.5rem;">
+                                                <input type="text" id="certificationValidity" placeholder="z.B. Gültig bis 12/2025" style="flex: 1; margin-right: 0.5rem;">
+                                                <button id="addCertificationBtn" class="btn-secondary">
+                                                    <i class="fas fa-plus"></i> Hinzufügen
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <h4>Interne Audits</h4>
+                                    <div id="internalAuditsManagement">
+                                        <div id="existingInternalAudits">
+                                            <!-- Existing internal audits will be listed here -->
+                                        </div>
+                                        <div class="internal-audit-form">
+                                            <div class="form-row">
+                                                <select id="internalAuditType" style="margin-right: 0.5rem;">
+                                                    <option value="">Audit-Typ wählen</option>
+                                                    <option value="Qualitätsaudit">Qualitätsaudit</option>
+                                                    <option value="Umweltaudit">Umweltaudit</option>
+                                                    <option value="Arbeitsschutzaudit">Arbeitsschutzaudit</option>
+                                                    <option value="Datenschutzaudit">Datenschutzaudit</option>
+                                                    <option value="Prozessaudit">Prozessaudit</option>
+                                                    <option value="Lieferantenaudit">Lieferantenaudit</option>
+                                                    <option value="Compliance-Audit">Compliance-Audit</option>
+                                                    <option value="Integriertes Audit">Integriertes Audit</option>
+                                                </select>
+                                                <input type="text" id="internalAuditTitle" placeholder="z.B. 2024 Q2" style="flex: 1; margin-right: 0.5rem;">
+                                                <input type="date" id="internalAuditDate" style="margin-right: 0.5rem;">
+                                                <select id="internalAuditStatus" style="margin-right: 0.5rem;">
+                                                    <option value="geplant">Geplant</option>
+                                                    <option value="durchgeführt">Durchgeführt</option>
+                                                    <option value="abgeschlossen">Abgeschlossen</option>
+                                                </select>
+                                                <button id="addInternalAuditBtn" class="btn-secondary">
+                                                    <i class="fas fa-plus"></i> Hinzufügen
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <h4>Externe Audits</h4>
+                                    <div id="externalAuditsManagement">
+                                        <div id="existingExternalAudits">
+                                            <!-- Existing external audits will be listed here -->
+                                        </div>
+                                        <div class="external-audit-form">
+                                            <div class="form-row">
+                                                <select id="externalAuditType" style="margin-right: 0.5rem;">
+                                                    <option value="">Audit-Typ wählen</option>
+                                                    <option value="ISO 9001 Zertifizierung">ISO 9001 Zertifizierung</option>
+                                                    <option value="ISO 14001 Zertifizierung">ISO 14001 Zertifizierung</option>
+                                                    <option value="ISO 45001 Zertifizierung">ISO 45001 Zertifizierung</option>
+                                                    <option value="OHSAS 18001 Zertifizierung">OHSAS 18001 Zertifizierung</option>
+                                                    <option value="DSGVO Audit">DSGVO Audit</option>
+                                                    <option value="Kundenaudit">Kundenaudit</option>
+                                                    <option value="Behördenaudit">Behördenaudit</option>
+                                                    <option value="Lieferantenaudit">Lieferantenaudit</option>
+                                                    <option value="Überwachungsaudit">Überwachungsaudit</option>
+                                                    <option value="Rezertifizierungsaudit">Rezertifizierungsaudit</option>
+                                                </select>
+                                                <input type="text" id="externalAuditTitle" placeholder="z.B. 2024 Überwachungsaudit" style="flex: 1; margin-right: 0.5rem;">
+                                                <input type="text" id="externalAuditor" placeholder="z.B. TÜV Rheinland" style="flex: 1; margin-right: 0.5rem;">
+                                                <input type="date" id="externalAuditDate" style="margin-right: 0.5rem;">
+                                                <select id="externalAuditStatus" style="margin-right: 0.5rem;">
+                                                    <option value="geplant">Geplant</option>
+                                                    <option value="durchgeführt">Durchgeführt</option>
+                                                    <option value="bestanden">Bestanden</option>
+                                                    <option value="nachbesserung">Nachbesserung erforderlich</option>
+                                                </select>
+                                                <button id="addExternalAuditBtn" class="btn-secondary">
+                                                    <i class="fas fa-plus"></i> Hinzufügen
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="settings-actions">
+                                    <button id="saveAuditCertificationsBtn" class="btn-primary">
+                                        <i class="fas fa-save"></i> Zertifizierungen speichern
+                                    </button>
+                                    <button id="resetAuditCertificationsBtn" class="btn-secondary">
+                                        <i class="fas fa-undo"></i> Zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Dashboard Content Management -->
+                            <div class="settings-card">
+                                <h3>Dashboard Inhalte verwalten</h3>
+                                <p>Bearbeiten Sie die KPI-Werte und Informationen, die im Dashboard angezeigt werden.</p>
+                                
+                                <!-- Arbeitsschutz KPI -->
+                                <div class="form-group">
+                                    <h4>Arbeitsschutz KPI</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="safetyKpiValue">Wert (z.B. 98.5):</label>
+                                            <input type="text" id="safetyKpiValue" placeholder="98.5">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="safetyKpiUnit">Einheit (z.B. %):</label>
+                                            <input type="text" id="safetyKpiUnit" placeholder="%">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="safetyKpiLabel">Beschreibung:</label>
+                                            <input type="text" id="safetyKpiLabel" placeholder="Compliance Rate">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Qualität KPI -->
+                                <div class="form-group">
+                                    <h4>Qualität KPI</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="qualityKpiValue">Wert (z.B. 99.2):</label>
+                                            <input type="text" id="qualityKpiValue" placeholder="99.2">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="qualityKpiUnit">Einheit (z.B. %):</label>
+                                            <input type="text" id="qualityKpiUnit" placeholder="%">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="qualityKpiLabel">Beschreibung:</label>
+                                            <input type="text" id="qualityKpiLabel" placeholder="Qualitätsrate">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Umwelt KPI -->
+                                <div class="form-group">
+                                    <h4>Umwelt KPI</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="environmentKpiValue">Wert (z.B. 12):</label>
+                                            <input type="text" id="environmentKpiValue" placeholder="12">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="environmentKpiUnit">Einheit (z.B. t):</label>
+                                            <input type="text" id="environmentKpiUnit" placeholder="t">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="environmentKpiLabel">Beschreibung:</label>
+                                            <input type="text" id="environmentKpiLabel" placeholder="CO₂ Einsparung">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Gesundheit KPI -->
+                                <div class="form-group">
+                                    <h4>Gesundheit KPI</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="healthKpiValue">Wert (z.B. 2.1):</label>
+                                            <input type="text" id="healthKpiValue" placeholder="2.1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="healthKpiUnit">Einheit (z.B. Tage):</label>
+                                            <input type="text" id="healthKpiUnit" placeholder="Tage">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="healthKpiLabel">Beschreibung:</label>
+                                            <input type="text" id="healthKpiLabel" placeholder="Krankentage (Ø)">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Kundenzufriedenheit -->
+                                <div class="form-group">
+                                    <h4>Kundenzufriedenheit</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="customerSatisfactionValue">Bewertung (z.B. 4.7):</label>
+                                            <input type="text" id="customerSatisfactionValue" placeholder="4.7">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="customerSatisfactionMax">Maximaler Wert (z.B. 5):</label>
+                                            <input type="text" id="customerSatisfactionMax" placeholder="5">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="customerSatisfactionLabel">Beschreibung:</label>
+                                            <input type="text" id="customerSatisfactionLabel" placeholder="von 5 Sternen">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Custom KPIs Management -->
+                                <div class="form-group">
+                                    <h4>Zusätzliche KPIs verwalten</h4>
+                                    <p>Fügen Sie weitere KPI-Karten zum Dashboard hinzu.</p>
+                                    
+                                    <!-- Existing Custom KPIs -->
+                                    <div id="existingCustomKpis" class="existing-items">
+                                        <!-- Custom KPIs will be listed here -->
+                                    </div>
+                                    
+                                    <!-- Add New Custom KPI -->
+                                    <div class="add-custom-kpi-form">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="customKpiTitle">Titel:</label>
+                                                <input type="text" id="customKpiTitle" placeholder="z.B. Effizienz">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="customKpiValue">Wert:</label>
+                                                <input type="text" id="customKpiValue" placeholder="z.B. 87.5">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="customKpiUnit">Einheit:</label>
+                                                <input type="text" id="customKpiUnit" placeholder="z.B. %">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="customKpiLabel">Beschreibung:</label>
+                                                <input type="text" id="customKpiLabel" placeholder="z.B. Produktionseffizienz">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="customKpiIcon">Icon:</label>
+                                                <select id="customKpiIcon">
+                                                    <option value="">Icon wählen</option>
+                                                    <option value="fas fa-chart-line">📈 Liniendiagramm</option>
+                                                    <option value="fas fa-chart-bar">📊 Balkendiagramm</option>
+                                                    <option value="fas fa-chart-pie">🥧 Kreisdiagramm</option>
+                                                    <option value="fas fa-tachometer-alt">🌡️ Tachometer</option>
+                                                    <option value="fas fa-bolt">⚡ Blitz</option>
+                                                    <option value="fas fa-rocket">🚀 Rakete</option>
+                                                    <option value="fas fa-target">🎯 Ziel</option>
+                                                    <option value="fas fa-star">⭐ Stern</option>
+                                                    <option value="fas fa-trophy">🏆 Pokal</option>
+                                                    <option value="fas fa-thumbs-up">👍 Daumen hoch</option>
+                                                    <option value="fas fa-clock">⏰ Uhr</option>
+                                                    <option value="fas fa-dollar-sign">💰 Dollar</option>
+                                                    <option value="fas fa-euro-sign">💶 Euro</option>
+                                                    <option value="fas fa-percentage">% Prozent</option>
+                                                    <option value="fas fa-users">👥 Nutzer</option>
+                                                    <option value="fas fa-cogs">⚙️ Zahnräder</option>
+                                                    <option value="fas fa-tools">🔧 Werkzeuge</option>
+                                                    <option value="fas fa-industry">🏭 Industrie</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="customKpiColor">Farbe:</label>
+                                                <select id="customKpiColor">
+                                                    <option value="">Farbe wählen</option>
+                                                    <option value="blue">🔵 Blau</option>
+                                                    <option value="green">🟢 Grün</option>
+                                                    <option value="red">🔴 Rot</option>
+                                                    <option value="yellow">🟡 Gelb</option>
+                                                    <option value="purple">🟣 Lila</option>
+                                                    <option value="orange">🟠 Orange</option>
+                                                    <option value="gray">⚫ Grau</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-actions">
+                                            <button id="addCustomKpiBtn" class="btn-secondary">
+                                                <i class="fas fa-plus"></i> KPI hinzufügen
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="settings-actions">
+                                    <button id="saveDashboardKpisBtn" class="btn-primary">
+                                        <i class="fas fa-save"></i> Dashboard-Inhalte speichern
+                                    </button>
+                                    <button id="resetDashboardKpisBtn" class="btn-secondary">
+                                        <i class="fas fa-undo"></i> Zurücksetzen
+                                    </button>
+                                    <button id="previewDashboardBtn" class="btn-info">
+                                        <i class="fas fa-eye"></i> Dashboard anzeigen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Module Management -->
+                        <div class="settings-card">
+                            <h3><i class="fas fa-cubes"></i> Modulverwaltung</h3>
+                            <p>Aktivieren oder deaktivieren Sie verfügbare System-Module. Diese Einstellungen bestimmen, ob Module im System verfügbar sind.</p>
+                            
+                            <div class="module-controls">
+                                <div class="module-item">
+                                    <div class="module-info">
+                                        <div class="module-header">
+                                            <i class="fas fa-flask module-icon"></i>
+                                            <div class="module-details">
+                                                <h4>Gefahrstoffverzeichnis</h4>
+                                                <p>Verwaltung von Gefahrstoffen, Sicherheitsdatenblättern und Betriebsanweisungen</p>
+                                            </div>
+                                        </div>
+                                        <div class="module-meta">
+                                            <span class="module-status" id="gefahrstoffeModuleStatus">Aktiv</span>
+                                            <span class="module-users" id="gefahrstoffeModuleUsers">0 Benutzer</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-toggle">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="enableGefahrstoffeModule" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Placeholder for future modules -->
+                                <div class="module-item disabled">
+                                    <div class="module-info">
+                                        <div class="module-header">
+                                            <i class="fas fa-puzzle-piece module-icon"></i>
+                                            <div class="module-details">
+                                                <h4>Weitere Module</h4>
+                                                <p>Zusätzliche Module können hier in Zukunft hinzugefügt werden</p>
+                                            </div>
+                                        </div>
+                                        <div class="module-meta">
+                                            <span class="module-status disabled">Verfügbar in zukünftigen Versionen</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-toggle">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" disabled>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-info">
+                                <div class="info-box">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="info-content">
+                                        <strong>Hinweis:</strong>
+                                        <p>Wenn Sie ein Modul deaktivieren, verlieren alle Benutzer den Zugriff darauf, unabhängig von ihren individuellen Berechtigungen. Die gespeicherten Daten bleiben erhalten.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-actions">
+                                <button id="saveModuleSettings" class="btn-primary">
+                                    <i class="fas fa-save"></i> Moduleinstellungen speichern
+                                </button>
+                                <button id="resetModuleSettings" class="btn-secondary">
+                                    <i class="fas fa-undo"></i> Zurücksetzen
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- User Module Permissions -->
+                        <div class="settings-card">
+                            <h3><i class="fas fa-user-cog"></i> Benutzer-Modulberechtigungen</h3>
+                            <p>Verwalten Sie individuelle Modulzugriffe für jeden Benutzer. Diese Einstellungen gelten zusätzlich zu den Rollenberechtigunen.</p>
+                            
+                            <div class="user-permissions-controls">
+                                <div class="permission-filter">
+                                    <div class="form-group">
+                                        <label for="permissionModuleFilter">Modul:</label>
+                                        <select id="permissionModuleFilter">
+                                            <option value="gefahrstoffe">Gefahrstoffverzeichnis</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="permissionUserFilter">Benutzer:</label>
+                                        <select id="permissionUserFilter">
+                                            <option value="">Alle Benutzer anzeigen</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="permissionRoleFilter">Nach Rolle filtern:</label>
+                                        <select id="permissionRoleFilter">
+                                            <option value="">Alle Rollen</option>
+                                            <option value="geschaeftsfuehrung">Geschäftsführung</option>
+                                            <option value="betriebsleiter">Betriebsleiter</option>
+                                            <option value="abteilungsleiter">Abteilungsleiter</option>
+                                            <option value="qhse">QHSE</option>
+                                            <option value="mitarbeiter">Mitarbeiter</option>
+                                            <option value="techniker">Techniker</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="bulk-actions">
+                                    <button id="selectAllUsersBtn" class="btn-secondary">
+                                        <i class="fas fa-ban"></i> Allen sichtbaren Zugriff verweigern
+                                    </button>
+                                    <button id="deselectAllUsersBtn" class="btn-secondary">
+                                        <i class="fas fa-check"></i> Allen sichtbaren Zugriff erlauben
+                                    </button>
+                                    <div class="bulk-info">
+                                        <small><i class="fas fa-info-circle"></i> Standardmäßig haben alle Benutzer Zugriff. Markierte Benutzer wird der Zugriff verweigert.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="user-permissions-list" id="userPermissionsList">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+
+                            <div class="settings-info">
+                                <div class="info-box">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="info-content">
+                                        <strong>Hinweis:</strong>
+                                        <p>Benutzer können nur auf Module zugreifen, die sowohl global aktiviert als auch für sie individuell freigeschaltet sind. Rollenbasierte Grundberechtigungen bleiben bestehen.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="settings-actions">
+                                <button id="saveUserPermissionsBtn" class="btn-primary">
+                                    <i class="fas fa-save"></i> Benutzerberechtigungen speichern
+                                </button>
+                                <button id="resetUserPermissionsBtn" class="btn-secondary">
+                                    <i class="fas fa-undo"></i> Zurücksetzen
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1128,6 +1858,123 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Hazardous Substances Section -->
+                <section id="gefahrstoffe-section" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-exclamation-circle"></i> Gefahrstoffverzeichnis</h2>
+                        <div class="section-actions">
+                            <button id="addSubstanceBtn" class="btn-primary">
+                                <i class="fas fa-plus"></i> Neuer Gefahrstoff
+                            </button>
+                            <button id="substanceReportsBtn" class="btn-secondary">
+                                <i class="fas fa-chart-bar"></i> Berichte
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="substance-management">
+                        <!-- Substance Statistics -->
+                        <div class="substance-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-flask"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="totalSubstances">0</span>
+                                    <span class="stat-label">Gefahrstoffe</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="highRiskSubstances">0</span>
+                                    <span class="stat-label">Hochgefährlich</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="expiredSDS">0</span>
+                                    <span class="stat-label">SDB abgelaufen</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-warehouse"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-number" id="storageLocations">0</span>
+                                    <span class="stat-label">Lagerorte</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search and Filter Controls -->
+                        <div class="substance-controls">
+                            <div class="search-filter-section">
+                                <div class="search-group">
+                                    <input type="text" id="substanceSearch" placeholder="Suche nach Name, CAS-Nr., Hersteller...">
+                                    <button id="clearSearchBtn" class="btn-icon">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="filter-group">
+                                    <select id="hazardClassFilter">
+                                        <option value="">Alle Gefahrenklassen</option>
+                                        <option value="explosive">Explosiv</option>
+                                        <option value="flammable">Entzündbar</option>
+                                        <option value="toxic">Giftig</option>
+                                        <option value="corrosive">Ätzend</option>
+                                        <option value="environmental">Umweltgefährlich</option>
+                                        <option value="health">Gesundheitsgefährlich</option>
+                                    </select>
+                                    <select id="departmentFilter">
+                                        <option value="">Alle Abteilungen</option>
+                                    </select>
+                                    <select id="storageLocationFilter">
+                                        <option value="">Alle Lagerorte</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Substance List -->
+                        <div class="substance-table-container">
+                            <table id="substanceTable" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th data-sort="name">Name <i class="fas fa-sort"></i></th>
+                                        <th data-sort="cas">CAS-Nr.</th>
+                                        <th data-sort="supplier">Hersteller</th>
+                                        <th data-sort="department">Abteilung</th>
+                                        <th data-sort="storage">Lagerort</th>
+                                        <th>Gefahren</th>
+                                        <th data-sort="lastUpdated">Aktualisiert</th>
+                                        <th>Aktionen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="substanceTableBody">
+                                    <!-- Dynamic content will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- No substances message -->
+                        <div id="noSubstancesMessage" class="no-data-message" style="display: none;">
+                            <i class="fas fa-flask"></i>
+                            <h3>Keine Gefahrstoffe gefunden</h3>
+                            <p>Fügen Sie Ihren ersten Gefahrstoff hinzu oder passen Sie Ihre Suchkriterien an.</p>
+                            <button class="btn-primary" onclick="document.getElementById('addSubstanceBtn').click()">
+                                <i class="fas fa-plus"></i> Ersten Gefahrstoff anlegen
+                            </button>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
@@ -1224,6 +2071,7 @@
                         <button type="button" class="tab-btn active" data-tab="basic">Grunddaten</button>
                         <button type="button" class="tab-btn" data-tab="personal">Persönliche Daten</button>
                         <button type="button" class="tab-btn" data-tab="hierarchy">Hierarchie</button>
+                        <button type="button" class="tab-btn" data-tab="permissions">Berechtigungen</button>
                         <button type="button" class="tab-btn" data-tab="notes">Anmerkungen</button>
                     </div>
                     
@@ -1298,6 +2146,42 @@
                         </div>
                     </div>
                     
+                    <div class="tab-content" id="permissions-tab">
+                        <div class="form-group">
+                            <label>Zusätzliche Berechtigungen:</label>
+                            <p class="permission-info">
+                                Diese Berechtigungen ergänzen die rollenbasierten Zugriffsrechte.
+                                Root-Admin und Admin haben automatisch Zugriff auf alle Bereiche.
+                            </p>
+                            <div class="permissions-grid">
+                                <div class="permission-item">
+                                    <label class="permission-label">
+                                        <input type="checkbox" id="newUserGefahrstoffeAccess" name="userGefahrstoffeAccess">
+                                        <div class="permission-details">
+                                            <strong>Gefahrstoffverzeichnis - Zugriff verweigern</strong>
+                                            <span class="permission-description">
+                                                Aktivieren Sie diese Option, um dem Benutzer den Zugriff auf das Gefahrstoffverzeichnis zu verweigern. 
+                                                Standardmäßig haben alle Benutzer Zugriff, es sei denn, er wird explizit verweigert.
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <!-- Placeholder for future permissions -->
+                                <div class="permission-item disabled">
+                                    <label class="permission-label">
+                                        <input type="checkbox" disabled>
+                                        <div class="permission-details">
+                                            <strong>Weitere Module</strong>
+                                            <span class="permission-description">
+                                                Zusätzliche Berechtigungen können hier in Zukunft hinzugefügt werden
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="tab-content" id="notes-tab">
                         <div class="form-group">
                             <label for="newUserNotes">Anmerkungen:</label>
@@ -1357,13 +2241,13 @@
                     <div class="form-group">
                         <label for="newAreaRoles">Zugriffsberechtigte Rollen:</label>
                         <div class="checkbox-group">
-                            <label><input type="checkbox" name="areaRoles" value="geschaeftsfuehrung"> Geschäftsführung</label>
-                            <label><input type="checkbox" name="areaRoles" value="betriebsleiter"> Betriebsleiter</label>
-                            <label><input type="checkbox" name="areaRoles" value="abteilungsleiter"> Abteilungsleiter</label>
-                            <label><input type="checkbox" name="areaRoles" value="qhse"> QHSE-Mitarbeiter</label>
-                            <label><input type="checkbox" name="areaRoles" value="mitarbeiter"> Mitarbeiter</label>
-                            <label><input type="checkbox" name="areaRoles" value="admin"> Administrator</label>
-                            <label><input type="checkbox" name="areaRoles" value="root-admin"> Root Administrator</label>
+                            <label><input type="checkbox" id="role_geschaeftsfuehrung" name="areaRoles" value="geschaeftsfuehrung"> Geschäftsführung</label>
+                            <label><input type="checkbox" id="role_betriebsleiter" name="areaRoles" value="betriebsleiter"> Betriebsleiter</label>
+                            <label><input type="checkbox" id="role_abteilungsleiter" name="areaRoles" value="abteilungsleiter"> Abteilungsleiter</label>
+                            <label><input type="checkbox" id="role_qhse" name="areaRoles" value="qhse"> QHSE-Mitarbeiter</label>
+                            <label><input type="checkbox" id="role_mitarbeiter" name="areaRoles" value="mitarbeiter"> Mitarbeiter</label>
+                            <label><input type="checkbox" id="role_admin" name="areaRoles" value="admin"> Administrator</label>
+                            <label><input type="checkbox" id="role_root_admin" name="areaRoles" value="root-admin"> Root Administrator</label>
                         </div>
                     </div>
                     <input type="hidden" id="editAreaId" name="areaId">
@@ -1466,6 +2350,425 @@
         </div>
     </div>
 
-    <script src="script.js"></script></script>
+    <!-- Audit Results Modal -->
+    <div id="auditResultsModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 id="auditResultsTitle">Audit Ergebnisse</h2>
+                <span class="close" id="closeAuditResults">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="auditResultsForm">
+                    <div class="form-group">
+                        <label for="auditResultsFindings">Befunde/Ergebnisse:</label>
+                        <textarea id="auditResultsFindings" rows="4" placeholder="Beschreiben Sie die wichtigsten Befunde und Ergebnisse..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="auditResultsActions">Maßnahmen/Empfehlungen:</label>
+                        <textarea id="auditResultsActions" rows="4" placeholder="Welche Maßnahmen wurden empfohlen oder eingeleitet?"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="auditResultsScore">Bewertung/Note:</label>
+                        <input type="text" id="auditResultsScore" placeholder="z.B. Bestanden, 85/100, Gut, etc.">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="auditResultsNotes">Zusätzliche Notizen:</label>
+                        <textarea id="auditResultsNotes" rows="3" placeholder="Weitere wichtige Informationen..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveAuditResultsBtn" class="btn-primary">Ergebnisse speichern</button>
+                <button id="cancelAuditResultsBtn" class="btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div id="pdfViewerModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 id="pdfViewerTitle">PDF Dokument</h2>
+                <span class="close" id="closePdfViewer">&times;</span>
+            </div>
+            <div class="modal-body pdf-viewer-body">
+                <div class="pdf-toolbar">
+                    <button id="pdfDownloadBtn" class="btn-secondary">
+                        <i class="fas fa-download"></i> Herunterladen
+                    </button>
+                    <button id="pdfPrintBtn" class="btn-secondary">
+                        <i class="fas fa-print"></i> Drucken
+                    </button>
+                    <div class="pdf-info">
+                        <span id="pdfFileName"></span>
+                        <span id="pdfFileSize"></span>
+                    </div>
+                </div>
+                <div class="pdf-content" id="pdfContent">
+                    <iframe id="pdfFrame" style="width: 100%; height: 70vh; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hazardous Substance Modal -->
+    <div id="substanceModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 id="substanceModalTitle">
+                    <i class="fas fa-flask"></i> Gefahrstoff bearbeiten
+                </h2>
+                <span class="close" id="closeSubstanceModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="substanceForm">
+                    <div class="form-tabs">
+                        <button type="button" class="tab-btn active" data-tab="basic">Stammdaten</button>
+                        <button type="button" class="tab-btn" data-tab="classification">Klassifizierung</button>
+                        <button type="button" class="tab-btn" data-tab="storage">Lagerung</button>
+                        <button type="button" class="tab-btn" data-tab="safety">Sicherheit</button>
+                        <button type="button" class="tab-btn" data-tab="documents">Dokumente</button>
+                        <button type="button" class="tab-btn" data-tab="comments">Kommentare</button>
+                    </div>
+
+                    <!-- Basic Information Tab -->
+                    <div class="tab-content active" data-tab="basic">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="substanceName">Name des Stoffes *</label>
+                                <input type="text" id="substanceName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="casNumber">CAS-Nummer</label>
+                                <input type="text" id="casNumber" placeholder="z.B. 67-64-1">
+                            </div>
+                            <div class="form-group">
+                                <label for="ecNumber">EG-Nummer</label>
+                                <input type="text" id="ecNumber" placeholder="z.B. 200-662-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="supplier">Lieferant/Hersteller</label>
+                                <input type="text" id="supplier">
+                            </div>
+                            <div class="form-group">
+                                <label for="purpose">Verwendungszweck</label>
+                                <textarea id="purpose" rows="3" placeholder="z.B. Reinigung, Fertigung, Labor"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="department">Zugeordnete Abteilung</label>
+                                <select id="substanceDepartment">
+                                    <option value="">Abteilung wählen</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classification Tab -->
+                    <div class="tab-content" data-tab="classification">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>GHS-Piktogramme</label>
+                                <div class="checkbox-grid ghs-symbols">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS01" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Explodierende Bombe">💥</span>
+                                        <span>GHS01 - Explosiv</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS02" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Flamme">🔥</span>
+                                        <span>GHS02 - Entzündbar</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS03" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Flamme über Kreis">⭕</span>
+                                        <span>GHS03 - Oxidierend</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS04" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Gasflasche">⚗️</span>
+                                        <span>GHS04 - Gas unter Druck</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS05" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Ätzwirkung">🧪</span>
+                                        <span>GHS05 - Ätzend</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS06" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Totenkopf">☠️</span>
+                                        <span>GHS06 - Giftig</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS07" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Ausrufezeichen">❗</span>
+                                        <span>GHS07 - Reizend</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS08" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Gesundheitsgefahr">⚕️</span>
+                                        <span>GHS08 - Gesundheitsgefahr</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="GHS09" name="ghsSymbols">
+                                        <span class="ghs-symbol" title="Umwelt">🌍</span>
+                                        <span>GHS09 - Umweltgefährlich</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="signalWord">Signalwort</label>
+                                <select id="signalWord">
+                                    <option value="">Bitte wählen</option>
+                                    <option value="Gefahr">Gefahr</option>
+                                    <option value="Achtung">Achtung</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hPhrases">H-Sätze (Hazard Statements)</label>
+                                <textarea id="hPhrases" rows="3" placeholder="z.B. H226, H319, H335"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="pPhrases">P-Sätze (Precautionary Statements)</label>
+                                <textarea id="pPhrases" rows="3" placeholder="z.B. P210, P233, P240"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="wgkClass">WGK-Klassifizierung</label>
+                                <select id="wgkClass">
+                                    <option value="">Bitte wählen</option>
+                                    <option value="WGK 1">WGK 1 - schwach wassergefährdend</option>
+                                    <option value="WGK 2">WGK 2 - wassergefährdend</option>
+                                    <option value="WGK 3">WGK 3 - stark wassergefährdend</option>
+                                    <option value="nwg">nwg - nicht wassergefährdend</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Storage Tab -->
+                    <div class="tab-content" data-tab="storage">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="storageAmount">Lagermenge</label>
+                                <input type="text" id="storageAmount" placeholder="z.B. 5 L, 2.5 kg">
+                            </div>
+                            <div class="form-group">
+                                <label for="storageLocation">Lagerort</label>
+                                <input type="text" id="storageLocation" placeholder="z.B. Chemikalienschrank A1, Raum 205">
+                            </div>
+                            <div class="form-group">
+                                <label for="storageClass">Lagerklasse</label>
+                                <select id="storageClass">
+                                    <option value="">Bitte wählen</option>
+                                    <option value="LGK 1">LGK 1 - Explosive Stoffe</option>
+                                    <option value="LGK 2A">LGK 2A - Gase (nicht brennbar)</option>
+                                    <option value="LGK 2B">LGK 2B - Gase (brennbar)</option>
+                                    <option value="LGK 3">LGK 3 - Entzündbare Flüssigkeiten</option>
+                                    <option value="LGK 4.1A">LGK 4.1A - Entzündbare feste Stoffe</option>
+                                    <option value="LGK 4.1B">LGK 4.1B - Entzündbare feste Stoffe</option>
+                                    <option value="LGK 4.2">LGK 4.2 - Selbstentzündliche Stoffe</option>
+                                    <option value="LGK 4.3">LGK 4.3 - Stoffe, die mit Wasser gefährliche Gase entwickeln</option>
+                                    <option value="LGK 5.1A">LGK 5.1A - Entzündend wirkende Stoffe</option>
+                                    <option value="LGK 5.1B">LGK 5.1B - Entzündend wirkende Stoffe</option>
+                                    <option value="LGK 5.1C">LGK 5.1C - Ammoniumnitrat und ammoniumnitrathaltige Zubereitungen</option>
+                                    <option value="LGK 5.2">LGK 5.2 - Organische Peroxide</option>
+                                    <option value="LGK 6.1A">LGK 6.1A - Brennbare, akut toxische Stoffe</option>
+                                    <option value="LGK 6.1B">LGK 6.1B - Nicht brennbare, akut toxische Stoffe</option>
+                                    <option value="LGK 6.1C">LGK 6.1C - Brennbare, akut toxische Stoffe</option>
+                                    <option value="LGK 6.1D">LGK 6.1D - Nicht brennbare, akut toxische Stoffe</option>
+                                    <option value="LGK 6.2">LGK 6.2 - Ansteckungsgefährliche Stoffe</option>
+                                    <option value="LGK 7">LGK 7 - Radioaktive Stoffe</option>
+                                    <option value="LGK 8A">LGK 8A - Ätzende Stoffe (brennbar)</option>
+                                    <option value="LGK 8B">LGK 8B - Ätzende Stoffe (nicht brennbar)</option>
+                                    <option value="LGK 10">LGK 10 - Brennbare Flüssigkeiten, die keiner der vorgenannten Lagerklassen zugeordnet werden können</option>
+                                    <option value="LGK 11">LGK 11 - Brennbare Feststoffe, die keiner der vorgenannten Lagerklassen zugeordnet werden können</option>
+                                    <option value="LGK 12">LGK 12 - Nicht brennbare Flüssigkeiten, die keiner der vorgenannten Lagerklassen zugeordnet werden können</option>
+                                    <option value="LGK 13">LGK 13 - Nicht brennbare Feststoffe, die keiner der vorgenannten Lagerklassen zugeordnet werden können</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="storageTemperature">Lagertemperatur</label>
+                                <input type="text" id="storageTemperature" placeholder="z.B. Raumtemperatur, < 25°C, Kühl">
+                            </div>
+                            <div class="form-group">
+                                <label for="ventilationRequired">Lüftungspflicht</label>
+                                <select id="ventilationRequired">
+                                    <option value="">Bitte wählen</option>
+                                    <option value="ja">Ja - Lüftung erforderlich</option>
+                                    <option value="nein">Nein - keine spezielle Lüftung</option>
+                                    <option value="abzug">Abzug erforderlich</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="incompatibilities">Unverträglichkeiten</label>
+                                <textarea id="incompatibilities" rows="3" placeholder="Stoffe, die nicht zusammen gelagert werden dürfen"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Safety Tab -->
+                    <div class="tab-content" data-tab="safety">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="requiredPPE">Erforderliche PSA</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="gloves" name="ppe">
+                                        <span>Schutzhandschuhe</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="goggles" name="ppe">
+                                        <span>Schutzbrille</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="respiratory" name="ppe">
+                                        <span>Atemschutz</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="coat" name="ppe">
+                                        <span>Laborkittel</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="shoes" name="ppe">
+                                        <span>Sicherheitsschuhe</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="workplaceLimit">Arbeitsplatzgrenzwert (AGW)</label>
+                                <input type="text" id="workplaceLimit" placeholder="z.B. 500 mg/m³, 200 ppm">
+                            </div>
+                            <div class="form-group">
+                                <label for="usageInstructions">Verwendungsanweisungen</label>
+                                <textarea id="usageInstructions" rows="4" placeholder="Dosierung, Mischverhältnisse, spezielle Anweisungen"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="emergencyMeasures">Notfallmaßnahmen</label>
+                                <textarea id="emergencyMeasures" rows="4" placeholder="Maßnahmen bei Leckage, Brand, Hautkontakt etc."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="riskAssessmentRequired">Gefährdungsbeurteilung erforderlich</label>
+                                <select id="riskAssessmentRequired">
+                                    <option value="">Bitte wählen</option>
+                                    <option value="ja">Ja - GBU erforderlich</option>
+                                    <option value="nein">Nein - keine GBU nötig</option>
+                                    <option value="vorhanden">Bereits vorhanden</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="substitutionCheck">Substitutionsprüfung</label>
+                                <select id="substitutionCheck">
+                                    <option value="">Bitte wählen</option>
+                                    <option value="erforderlich">Erforderlich</option>
+                                    <option value="durchgefuehrt">Durchgeführt</option>
+                                    <option value="nicht_erforderlich">Nicht erforderlich</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents Tab -->
+                    <div class="tab-content" data-tab="documents">
+                        <div class="document-upload-section">
+                            <h4>Sicherheitsdatenblatt (SDB) *</h4>
+                            <div class="file-upload-area" id="sdsUpload">
+                                <i class="fas fa-file-pdf"></i>
+                                <p>SDB hier hochladen oder per Drag & Drop</p>
+                                <input type="file" id="sdsFile" accept=".pdf" style="display: none;">
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('sdsFile').click()">
+                                    Datei auswählen
+                                </button>
+                            </div>
+                            
+                            <h4>Betriebsanweisung</h4>
+                            <div class="file-upload-area" id="operatingInstructionUpload">
+                                <i class="fas fa-file-pdf"></i>
+                                <p>Betriebsanweisung hochladen</p>
+                                <input type="file" id="operatingInstructionFile" accept=".pdf,.doc,.docx" style="display: none;">
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('operatingInstructionFile').click()">
+                                    Datei auswählen
+                                </button>
+                            </div>
+
+                            <h4>Weitere Dokumente</h4>
+                            <div class="file-upload-area" id="additionalDocsUpload">
+                                <i class="fas fa-file"></i>
+                                <p>Weitere Dokumente (GBU, Zertifikate, Fotos etc.)</p>
+                                <input type="file" id="additionalDocsFile" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
+                                <button type="button" class="btn-secondary" onclick="document.getElementById('additionalDocsFile').click()">
+                                    Dateien auswählen
+                                </button>
+                            </div>
+
+                            <div id="uploadedDocuments" class="uploaded-documents">
+                                <!-- Uploaded files will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comments Tab -->
+                    <div class="tab-content" data-tab="comments">
+                        <div class="comments-section">
+                            <div class="add-comment">
+                                <h4>Neuen Kommentar hinzufügen</h4>
+                                <textarea id="newComment" rows="3" placeholder="Kommentar eingeben..."></textarea>
+                                <button type="button" id="addCommentBtn" class="btn-primary">
+                                    <i class="fas fa-plus"></i> Kommentar hinzufügen
+                                </button>
+                            </div>
+                            <div id="commentsList" class="comments-list">
+                                <!-- Comments will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveSubstanceBtn" class="btn-primary">
+                    <i class="fas fa-save"></i> Speichern
+                </button>
+                <button id="cancelSubstanceBtn" class="btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Substance Details Modal -->
+    <div id="substanceDetailsModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 id="substanceDetailsTitle">
+                    <i class="fas fa-flask"></i> Gefahrstoff Details
+                </h2>
+                <span class="close" id="closeSubstanceDetailsModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="substanceDetailsContent">
+                    <!-- Content will be populated dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="editSubstanceBtn" class="btn-primary">
+                    <i class="fas fa-edit"></i> Bearbeiten
+                </button>
+                <button id="closeSubstanceDetailsBtn" class="btn-secondary">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialize the dashboard and make it globally available
+        document.addEventListener('DOMContentLoaded', () => {
+            const qhseDashboard = new QHSEDashboard();
+            window.qhseDashboard = qhseDashboard;
+            // Initialize sample data if needed
+            if (typeof qhseDashboard.initializeSampleData === 'function') {
+                qhseDashboard.initializeSampleData();
+            }
+        });
+    </script>
 </body>
 </html>
