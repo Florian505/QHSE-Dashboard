@@ -21,6 +21,13 @@ class QHSEDashboard {
         this.dashboardKpis = this.loadDashboardKpisFromStorage();
         this.customKpis = this.loadCustomKpisFromStorage();
         this.hazardousSubstances = this.loadHazardousSubstancesFromStorage();
+        this.trainings = this.loadTrainingsFromStorage();
+        this.trainingAssignments = this.loadTrainingAssignmentsFromStorage();
+        this.certificates = this.loadCertificatesFromStorage();
+        this.suppliers = this.loadSuppliersFromStorage();
+        this.supplierEvaluations = this.loadSupplierEvaluationsFromStorage();
+        this.supplierDocuments = this.loadSupplierDocumentsFromStorage();
+        this.supplierAudits = this.loadSupplierAuditsFromStorage();
         this.initializeRootAdmin();
         this.initializeDefaultAreas();
         this.initializeDefaultDepartments();
@@ -50,6 +57,8 @@ class QHSEDashboard {
         this.setupDashboardAudits();
         this.setupDashboardKpiManagement();
         this.setupHazardousSubstances();
+        this.setupTrainingManagement();
+        this.setupSupplierManagement();
         this.setupUserProfiles();
         this.loadCustomLabels();
         
@@ -2070,7 +2079,7 @@ PLZ Ort">${user.address || ''}</textarea>
         this.roleDefinitions = {
             'root-admin': {
                 name: 'Root Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'einstellungen', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'einstellungen', 'mein-profil'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2078,7 +2087,7 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             admin: {
                 name: 'Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2086,40 +2095,40 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             geschaeftsfuehrung: {
                 name: 'Geschäftsführung',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
                 hierarchyLevel: 1,
                 canSupervise: ['betriebsleiter', 'qhse']
             },
             betriebsleiter: {
                 name: 'Betriebsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
                 hierarchyLevel: 2,
                 canSupervise: ['abteilungsleiter'],
                 mustHaveSupervisor: ['geschaeftsfuehrung']
             },
             abteilungsleiter: {
                 name: 'Abteilungsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
                 hierarchyLevel: 3,
                 canSupervise: ['mitarbeiter'],
                 mustHaveSupervisor: ['betriebsleiter']
             },
             qhse: {
                 name: 'QHSE-Mitarbeiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
                 hierarchyLevel: 2,
                 isStaffPosition: true,
                 mustHaveSupervisor: ['geschaeftsfuehrung']
             },
             mitarbeiter: {
                 name: 'Mitarbeiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'gefahrstoffe', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'mein-profil'],
                 hierarchyLevel: 4,
                 mustHaveSupervisor: ['abteilungsleiter']
             },
             techniker: {
                 name: 'Techniker',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'mein-profil'],
                 hierarchyLevel: 4,
                 canManageMachines: true,
                 canReportIssues: true,
@@ -2326,6 +2335,8 @@ PLZ Ort">${user.address || ''}</textarea>
                     stoerungen: 'Störungsmeldungen',
                     'instandhaltung-auswertung': 'Instandhaltungs-Auswertung',
                     gefahrstoffe: 'Gefahrstoffverzeichnis',
+                    schulungen: 'Schulungsmanagement',
+                    lieferanten: 'Lieferantenbewertung',
                     einstellungen: 'System-Einstellungen'
                 };
                 
@@ -2338,6 +2349,9 @@ PLZ Ort">${user.address || ''}</textarea>
                 } else if (targetSection === 'mein-profil') {
                     // Show profile modal when navigating to profile section
                     setTimeout(() => this.showCurrentUserProfile(false), 100);
+                } else if (targetSection === 'lieferanten') {
+                    // Initialize supplier management when section is accessed
+                    setTimeout(() => this.renderSupplierDashboard(), 100);
                 }
             });
         });
@@ -4794,6 +4808,3142 @@ PLZ Ort">${user.address || ''}</textarea>
             'complete': 'Vollständiger Bericht'
         };
         return reportNames[reportType] || reportType;
+    }
+
+    // ========================================
+    // TRAINING MANAGEMENT SYSTEM
+    // ========================================
+
+    loadTrainingsFromStorage() {
+        try {
+            const stored = localStorage.getItem('qhse_trainings');
+            const trainings = stored ? JSON.parse(stored) : [];
+            
+            // Initialize with default trainings if empty
+            if (trainings.length === 0) {
+                return this.initializeDefaultTrainings();
+            }
+            
+            return trainings;
+        } catch (error) {
+            console.error('🎓 ERROR: Failed to load trainings from storage:', error);
+            return this.initializeDefaultTrainings();
+        }
+    }
+
+    loadTrainingAssignmentsFromStorage() {
+        try {
+            const stored = localStorage.getItem('qhse_training_assignments');
+            return stored ? JSON.parse(stored) : [];
+        } catch (error) {
+            console.error('🎓 ERROR: Failed to load training assignments from storage:', error);
+            return [];
+        }
+    }
+
+    loadCertificatesFromStorage() {
+        try {
+            const stored = localStorage.getItem('qhse_certificates');
+            return stored ? JSON.parse(stored) : [];
+        } catch (error) {
+            console.error('🎓 ERROR: Failed to load certificates from storage:', error);
+            return [];
+        }
+    }
+
+    saveTrainingsToStorage() {
+        try {
+            localStorage.setItem('qhse_trainings', JSON.stringify(this.trainings));
+            console.log('🎓 SUCCESS: Trainings saved to storage');
+        } catch (error) {
+            console.error('🎓 ERROR: Failed to save trainings to storage:', error);
+        }
+    }
+
+    saveTrainingAssignmentsToStorage() {
+        try {
+            localStorage.setItem('qhse_training_assignments', JSON.stringify(this.trainingAssignments));
+            console.log('🎓 SUCCESS: Training assignments saved to storage');
+        } catch (error) {
+            console.error('🎓 ERROR: Failed to save training assignments to storage:', error);
+        }
+    }
+
+    saveCertificatesToStorage() {
+        try {
+            localStorage.setItem('qhse_certificates', JSON.stringify(this.certificates));
+            console.log('🎓 SUCCESS: Certificates saved to storage');
+        } catch (error) {
+            console.error('🎓 ERROR: Failed to save certificates to storage:', error);
+        }
+    }
+
+    initializeDefaultTrainings() {
+        const defaultTrainings = [
+            {
+                id: 'training-001',
+                title: 'Allgemeine Arbeitssicherheit',
+                description: 'Grundlegende Unterweisung in Arbeitssicherheit für alle Mitarbeiter',
+                category: 'safety',
+                type: 'mandatory',
+                duration: 120, // minutes
+                validityPeriod: 12, // months
+                isRecurring: true,
+                content: {
+                    materials: [],
+                    videos: [],
+                    documents: [],
+                    testQuestions: []
+                },
+                targetRoles: ['mitarbeiter', 'techniker', 'abteilungsleiter', 'betriebsleiter'],
+                targetDepartments: [],
+                createdAt: new Date().toISOString(),
+                createdBy: 'root-admin',
+                isActive: true,
+                completionCriteria: {
+                    requiresTest: false,
+                    passingScore: 80,
+                    requiresSignature: true
+                }
+            },
+            {
+                id: 'training-002',
+                title: 'Gefahrstoffunterweisung',
+                description: 'Unterweisung im Umgang mit Gefahrstoffen nach GefStoffV',
+                category: 'safety',
+                type: 'mandatory',
+                duration: 90,
+                validityPeriod: 12,
+                isRecurring: true,
+                content: {
+                    materials: [],
+                    videos: [],
+                    documents: [],
+                    testQuestions: []
+                },
+                targetRoles: ['techniker', 'abteilungsleiter', 'betriebsleiter'],
+                targetDepartments: ['produktion', 'instandhaltung'],
+                createdAt: new Date().toISOString(),
+                createdBy: 'root-admin',
+                isActive: true,
+                completionCriteria: {
+                    requiresTest: true,
+                    passingScore: 80,
+                    requiresSignature: true
+                }
+            },
+            {
+                id: 'training-003',
+                title: 'Qualitätsmanagement ISO 9001',
+                description: 'Schulung zu den Grundlagen des Qualitätsmanagements',
+                category: 'quality',
+                type: 'optional',
+                duration: 180,
+                validityPeriod: 24,
+                isRecurring: true,
+                content: {
+                    materials: [],
+                    videos: [],
+                    documents: [],
+                    testQuestions: []
+                },
+                targetRoles: ['abteilungsleiter', 'betriebsleiter', 'qhse'],
+                targetDepartments: [],
+                createdAt: new Date().toISOString(),
+                createdBy: 'root-admin',
+                isActive: true,
+                completionCriteria: {
+                    requiresTest: true,
+                    passingScore: 85,
+                    requiresSignature: false
+                }
+            },
+            {
+                id: 'training-004',
+                title: 'Datenschutz DSGVO',
+                description: 'Schulung zu Datenschutzbestimmungen und DSGVO-Compliance',
+                category: 'data-protection',
+                type: 'mandatory',
+                duration: 60,
+                validityPeriod: 12,
+                isRecurring: true,
+                content: {
+                    materials: [],
+                    videos: [],
+                    documents: [],
+                    testQuestions: []
+                },
+                targetRoles: ['mitarbeiter', 'techniker', 'abteilungsleiter', 'betriebsleiter', 'qhse', 'admin'],
+                targetDepartments: [],
+                createdAt: new Date().toISOString(),
+                createdBy: 'root-admin',
+                isActive: true,
+                completionCriteria: {
+                    requiresTest: true,
+                    passingScore: 80,
+                    requiresSignature: true
+                }
+            }
+        ];
+
+        this.trainings = defaultTrainings;
+        this.saveTrainingsToStorage();
+        return defaultTrainings;
+    }
+
+    setupTrainingManagement() {
+        console.log('🎓 DEBUGGING: Setting up training management...');
+        
+        // Setup training navigation and event listeners
+        this.setupTrainingEventListeners();
+        this.setupTrainingTabs();
+        this.updateTrainingStatistics();
+        
+        console.log('🎓 DEBUGGING: Training management setup completed');
+    }
+
+    setupTrainingEventListeners() {
+        console.log('🎓 DEBUGGING: Setting up training event listeners...');
+        
+        // Main action buttons
+        const addTrainingBtn = document.getElementById('addTrainingBtn');
+        const trainingReportsBtn = document.getElementById('trainingReportsBtn');
+        const trainingCalendarBtn = document.getElementById('trainingCalendarBtn');
+        
+        // Quick action buttons
+        const myTrainingsBtn = document.getElementById('myTrainingsBtn');
+        const assignTrainingsBtn = document.getElementById('assignTrainingsBtn');
+        const certificatesBtn = document.getElementById('certificatesBtn');
+        
+        // Control buttons
+        const bulkAssignBtn = document.getElementById('bulkAssignBtn');
+        const exportTrainingsBtn = document.getElementById('exportTrainingsBtn');
+        const newAssignmentBtn = document.getElementById('newAssignmentBtn');
+        const uploadCertificateBtn = document.getElementById('uploadCertificateBtn');
+        
+        // Main action handlers
+        if (addTrainingBtn) {
+            addTrainingBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: Add training button clicked');
+                this.openTrainingModal();
+            });
+        }
+        
+        if (trainingReportsBtn) {
+            trainingReportsBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: Training reports button clicked');
+                this.openTrainingReports();
+            });
+        }
+        
+        if (trainingCalendarBtn) {
+            trainingCalendarBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: Training calendar button clicked');
+                this.openTrainingCalendar();
+            });
+        }
+        
+        // Quick action handlers
+        if (myTrainingsBtn) {
+            myTrainingsBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: My trainings button clicked');
+                this.switchTrainingTab('my-trainings');
+            });
+        }
+        
+        if (assignTrainingsBtn) {
+            assignTrainingsBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: Assign trainings button clicked');
+                this.switchTrainingTab('assignments');
+            });
+        }
+        
+        if (certificatesBtn) {
+            certificatesBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: Certificates button clicked');
+                this.switchTrainingTab('certificates');
+            });
+        }
+        
+        // Control button handlers
+        if (bulkAssignBtn) {
+            bulkAssignBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: Bulk assign button clicked');
+                this.openBulkAssignmentModal();
+            });
+        }
+        
+        if (exportTrainingsBtn) {
+            exportTrainingsBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: Export trainings button clicked');
+                this.exportTrainingData();
+            });
+        }
+        
+        if (newAssignmentBtn) {
+            newAssignmentBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: New assignment button clicked');
+                this.openAssignmentModal();
+            });
+        }
+        
+        if (uploadCertificateBtn) {
+            uploadCertificateBtn.addEventListener('click', () => {
+                console.log('🎓 DEBUGGING: Upload certificate button clicked');
+                this.openCertificateUploadModal();
+            });
+        }
+        
+        // Filter event listeners
+        this.setupTrainingFilters();
+        
+        console.log('🎓 DEBUGGING: Training event listeners setup completed');
+    }
+
+    setupTrainingTabs() {
+        console.log('🎓 DEBUGGING: Setting up training tabs...');
+        
+        const tabButtons = document.querySelectorAll('.training-tab-btn');
+        const tabPanels = document.querySelectorAll('.training-tab-panel');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                console.log('🎓 DEBUGGING: Tab clicked:', tabId);
+                
+                this.switchTrainingTab(tabId);
+            });
+        });
+        
+        // Initialize with overview tab
+        this.switchTrainingTab('overview');
+        
+        console.log('🎓 DEBUGGING: Training tabs setup completed');
+    }
+
+    switchTrainingTab(tabId) {
+        console.log('🎓 DEBUGGING: Switching to tab:', tabId);
+        
+        // Update tab buttons
+        const tabButtons = document.querySelectorAll('.training-tab-btn');
+        const tabPanels = document.querySelectorAll('.training-tab-panel');
+        
+        tabButtons.forEach(btn => {
+            if (btn.getAttribute('data-tab') === tabId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Update tab panels
+        tabPanels.forEach(panel => {
+            if (panel.id === `training-${tabId}`) {
+                panel.classList.add('active');
+            } else {
+                panel.classList.remove('active');
+            }
+        });
+        
+        // Load content for the active tab
+        this.loadTrainingTabContent(tabId);
+    }
+
+    loadTrainingTabContent(tabId) {
+        console.log('🎓 DEBUGGING: Loading content for tab:', tabId);
+        
+        switch (tabId) {
+            case 'overview':
+                this.renderTrainingOverview();
+                break;
+            case 'my-trainings':
+                this.renderMyTrainings();
+                break;
+            case 'all-trainings':
+                this.renderAllTrainings();
+                break;
+            case 'assignments':
+                this.renderTrainingAssignments();
+                break;
+            case 'certificates':
+                this.renderCertificates();
+                break;
+            default:
+                console.log('🎓 DEBUGGING: Unknown tab:', tabId);
+        }
+    }
+
+    setupTrainingFilters() {
+        const statusFilter = document.getElementById('trainingStatusFilter');
+        const categoryFilter = document.getElementById('trainingCategoryFilter');
+        const searchInput = document.getElementById('trainingSearch');
+        
+        if (statusFilter) {
+            statusFilter.addEventListener('change', () => {
+                console.log('🎓 DEBUGGING: Status filter changed:', statusFilter.value);
+                this.renderTrainingOverview();
+            });
+        }
+        
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', () => {
+                console.log('🎓 DEBUGGING: Category filter changed:', categoryFilter.value);
+                this.renderTrainingOverview();
+            });
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                console.log('🎓 DEBUGGING: Search input changed:', searchInput.value);
+                this.renderTrainingOverview();
+            });
+        }
+    }
+
+    updateTrainingStatistics() {
+        console.log('🎓 DEBUGGING: Updating training statistics...');
+        
+        const currentUser = this.getCurrentUser();
+        const userAssignments = this.getUserTrainingAssignments(currentUser.id);
+        
+        // Calculate statistics
+        const totalCount = this.trainings.length;
+        const completedCount = userAssignments.filter(a => a.status === 'completed').length;
+        const pendingCount = userAssignments.filter(a => a.status === 'assigned' || a.status === 'in-progress').length;
+        const overdueCount = userAssignments.filter(a => a.status === 'overdue').length;
+        
+        // Update UI elements
+        const totalElement = document.getElementById('totalTrainingsCount');
+        const completedElement = document.getElementById('completedTrainingsCount');
+        const pendingElement = document.getElementById('pendingTrainingsCount');
+        const overdueElement = document.getElementById('overdueTrainingsCount');
+        
+        if (totalElement) totalElement.textContent = totalCount;
+        if (completedElement) completedElement.textContent = completedCount;
+        if (pendingElement) pendingElement.textContent = pendingCount;
+        if (overdueElement) overdueElement.textContent = overdueCount;
+        
+        console.log('🎓 DEBUGGING: Statistics updated:', {
+            total: totalCount,
+            completed: completedCount,
+            pending: pendingCount,
+            overdue: overdueCount
+        });
+    }
+
+    getUserTrainingAssignments(userId) {
+        return this.trainingAssignments.filter(assignment => assignment.userId === userId);
+    }
+
+    renderTrainingOverview() {
+        console.log('🎓 DEBUGGING: Rendering training overview...');
+        
+        const container = document.getElementById('trainingOverviewList');
+        if (!container) {
+            console.error('🎓 ERROR: Training overview container not found');
+            return;
+        }
+        
+        // Get filter values
+        const statusFilter = document.getElementById('trainingStatusFilter')?.value || '';
+        const categoryFilter = document.getElementById('trainingCategoryFilter')?.value || '';
+        const searchQuery = document.getElementById('trainingSearch')?.value?.toLowerCase() || '';
+        
+        // Filter trainings
+        let filteredTrainings = this.trainings.filter(training => {
+            if (categoryFilter && training.category !== categoryFilter) return false;
+            if (searchQuery && !training.title.toLowerCase().includes(searchQuery)) return false;
+            return true;
+        });
+        
+        console.log('🎓 DEBUGGING: Filtered trainings:', filteredTrainings.length);
+        
+        if (filteredTrainings.length === 0) {
+            container.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Keine Schulungen gefunden</h3>
+                    <p>Keine Schulungen entsprechen den ausgewählten Filterkriterien.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Render training items
+        container.innerHTML = filteredTrainings.map(training => this.generateTrainingCard(training)).join('');
+        
+        // Add event listeners for training actions
+        this.setupTrainingCardListeners(filteredTrainings);
+        
+        console.log('🎓 DEBUGGING: Training overview rendered');
+    }
+
+    generateTrainingCard(training) {
+        const categoryIcon = this.getTrainingCategoryIcon(training.category);
+        const statusBadge = this.getTrainingStatusBadge(training);
+        const durationText = this.formatDuration(training.duration);
+        
+        return `
+            <div class="training-card" data-training-id="${training.id}">
+                <div class="training-card-header">
+                    <div class="training-icon">
+                        <i class="fas ${categoryIcon}"></i>
+                    </div>
+                    <div class="training-info">
+                        <h4>${training.title}</h4>
+                        <p class="training-description">${training.description}</p>
+                        <div class="training-meta">
+                            <span class="training-duration">
+                                <i class="fas fa-clock"></i> ${durationText}
+                            </span>
+                            <span class="training-category">
+                                <i class="fas fa-tag"></i> ${this.getTrainingCategoryDisplayName(training.category)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="training-status">
+                        ${statusBadge}
+                    </div>
+                </div>
+                <div class="training-card-actions">
+                    <button class="btn-small btn-primary view-training" data-training-id="${training.id}">
+                        <i class="fas fa-eye"></i> Ansehen
+                    </button>
+                    <button class="btn-small btn-secondary assign-training" data-training-id="${training.id}">
+                        <i class="fas fa-user-plus"></i> Zuweisen
+                    </button>
+                    <button class="btn-small btn-secondary edit-training" data-training-id="${training.id}">
+                        <i class="fas fa-edit"></i> Bearbeiten
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    getTrainingCategoryIcon(category) {
+        const icons = {
+            'safety': 'fa-shield-alt',
+            'quality': 'fa-star',
+            'environment': 'fa-leaf',
+            'health': 'fa-heartbeat',
+            'data-protection': 'fa-shield-alt',
+            'compliance': 'fa-gavel',
+            'technical': 'fa-cogs'
+        };
+        return icons[category] || 'fa-graduation-cap';
+    }
+
+    getTrainingCategoryDisplayName(category) {
+        const names = {
+            'safety': 'Arbeitssicherheit',
+            'quality': 'Qualitätsmanagement',
+            'environment': 'Umweltschutz',
+            'health': 'Gesundheitsschutz',
+            'data-protection': 'Datenschutz',
+            'compliance': 'Compliance',
+            'technical': 'Technische Schulung'
+        };
+        return names[category] || category;
+    }
+
+    getTrainingStatusBadge(training) {
+        const currentUser = this.getCurrentUser();
+        const assignment = this.trainingAssignments.find(a => 
+            a.trainingId === training.id && a.userId === currentUser.id
+        );
+        
+        if (!assignment) {
+            return '<span class="status-badge not-assigned">Nicht zugewiesen</span>';
+        }
+        
+        switch (assignment.status) {
+            case 'completed':
+                return '<span class="status-badge completed">Abgeschlossen</span>';
+            case 'in-progress':
+                return '<span class="status-badge in-progress">In Bearbeitung</span>';
+            case 'overdue':
+                return '<span class="status-badge overdue">Überfällig</span>';
+            case 'assigned':
+                return '<span class="status-badge assigned">Zugewiesen</span>';
+            default:
+                return '<span class="status-badge unknown">Unbekannt</span>';
+        }
+    }
+
+    formatDuration(minutes) {
+        if (minutes < 60) {
+            return `${minutes} Min`;
+        } else {
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            if (remainingMinutes === 0) {
+                return `${hours} Std`;
+            } else {
+                return `${hours}:${remainingMinutes.toString().padStart(2, '0')} Std`;
+            }
+        }
+    }
+
+    setupTrainingCardListeners(trainings) {
+        trainings.forEach(training => {
+            const viewBtn = document.querySelector(`.view-training[data-training-id="${training.id}"]`);
+            const assignBtn = document.querySelector(`.assign-training[data-training-id="${training.id}"]`);
+            const editBtn = document.querySelector(`.edit-training[data-training-id="${training.id}"]`);
+            
+            if (viewBtn) {
+                viewBtn.addEventListener('click', () => this.viewTrainingDetails(training.id));
+            }
+            if (assignBtn) {
+                assignBtn.addEventListener('click', () => this.openTrainingAssignmentModal(training.id));
+            }
+            if (editBtn) {
+                editBtn.addEventListener('click', () => this.editTraining(training.id));
+            }
+        });
+    }
+
+    renderMyTrainings() {
+        console.log('🎓 DEBUGGING: Rendering my trainings...');
+        
+        const container = document.getElementById('myTrainingsList');
+        if (!container) {
+            console.error('🎓 ERROR: My trainings container not found');
+            return;
+        }
+        
+        const currentUser = this.getCurrentUser();
+        const userAssignments = this.getUserTrainingAssignments(currentUser.id);
+        
+        if (userAssignments.length === 0) {
+            container.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>Keine Schulungen zugewiesen</h3>
+                    <p>Ihnen wurden noch keine Schulungen zugewiesen.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Update progress bar
+        this.updateMyTrainingProgress(userAssignments);
+        
+        // Render training assignments
+        const trainingItems = userAssignments.map(assignment => {
+            const training = this.trainings.find(t => t.id === assignment.trainingId);
+            return training ? this.generateMyTrainingCard(training, assignment) : '';
+        }).filter(item => item);
+        
+        container.innerHTML = trainingItems.join('');
+        
+        console.log('🎓 DEBUGGING: My trainings rendered');
+    }
+
+    updateMyTrainingProgress(assignments) {
+        const completedCount = assignments.filter(a => a.status === 'completed').length;
+        const totalCount = assignments.length;
+        const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+        
+        const progressElement = document.getElementById('myTrainingProgress');
+        const progressBarElement = document.getElementById('myTrainingProgressBar');
+        
+        if (progressElement) {
+            progressElement.textContent = `${percentage}% abgeschlossen (${completedCount} von ${totalCount})`;
+        }
+        
+        if (progressBarElement) {
+            progressBarElement.style.width = `${percentage}%`;
+        }
+    }
+
+    generateMyTrainingCard(training, assignment) {
+        const statusClass = assignment.status;
+        const durationText = this.formatDuration(training.duration);
+        const dueDate = assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('de-DE') : 'Keine Frist';
+        const isOverdue = assignment.dueDate && new Date(assignment.dueDate) < new Date();
+        
+        return `
+            <div class="my-training-card ${statusClass} ${isOverdue ? 'overdue' : ''}">
+                <div class="training-progress-indicator">
+                    <div class="progress-circle ${statusClass}">
+                        ${assignment.status === 'completed' ? '<i class="fas fa-check"></i>' : 
+                          assignment.status === 'in-progress' ? '<i class="fas fa-play"></i>' : 
+                          '<i class="fas fa-clock"></i>'}
+                    </div>
+                </div>
+                <div class="my-training-info">
+                    <h4>${training.title}</h4>
+                    <p>${training.description}</p>
+                    <div class="training-details">
+                        <span><i class="fas fa-clock"></i> ${durationText}</span>
+                        <span><i class="fas fa-calendar"></i> Frist: ${dueDate}</span>
+                        <span class="training-status ${statusClass}">
+                            ${this.getTrainingStatusDisplayName(assignment.status)}
+                        </span>
+                    </div>
+                </div>
+                <div class="my-training-actions">
+                    ${assignment.status === 'completed' ? 
+                        `<button class="btn-small btn-success view-certificate" data-assignment-id="${assignment.id}">
+                            <i class="fas fa-certificate"></i> Zertifikat
+                        </button>` :
+                        `<button class="btn-small btn-primary start-training" data-training-id="${training.id}">
+                            <i class="fas fa-play"></i> ${assignment.status === 'in-progress' ? 'Fortsetzen' : 'Starten'}
+                        </button>`
+                    }
+                    <button class="btn-small btn-secondary view-details" data-training-id="${training.id}">
+                        <i class="fas fa-info"></i> Details
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    getTrainingStatusDisplayName(status) {
+        const names = {
+            'completed': 'Abgeschlossen',
+            'in-progress': 'In Bearbeitung',
+            'assigned': 'Zugewiesen',
+            'overdue': 'Überfällig',
+            'not-started': 'Nicht begonnen'
+        };
+        return names[status] || status;
+    }
+
+    renderAllTrainings() {
+        console.log('🎓 DEBUGGING: Rendering all trainings...');
+        const container = document.getElementById('allTrainingsList');
+        if (!container) return;
+        
+        if (this.trainings.length === 0) {
+            container.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Keine Schulungen vorhanden</h3>
+                    <p>Es wurden noch keine Schulungen erstellt.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = this.trainings.map(training => this.generateDetailedTrainingCard(training)).join('');
+        this.setupDetailedTrainingCardListeners();
+    }
+
+    generateDetailedTrainingCard(training) {
+        const assignmentCount = this.trainingAssignments.filter(a => a.trainingId === training.id).length;
+        const completedCount = this.trainingAssignments.filter(a => a.trainingId === training.id && a.status === 'completed').length;
+        const completionRate = assignmentCount > 0 ? ((completedCount / assignmentCount) * 100).toFixed(1) : 0;
+        
+        return `
+            <div class="detailed-training-card" data-training-id="${training.id}">
+                <div class="training-card-header">
+                    <div class="training-main-info">
+                        <h4>${training.title}</h4>
+                        <p>${training.description}</p>
+                        <div class="training-meta-extended">
+                            <span><i class="fas fa-tag"></i> ${this.getTrainingCategoryDisplayName(training.category)}</span>
+                            <span><i class="fas fa-clock"></i> ${this.formatDuration(training.duration)}</span>
+                            <span><i class="fas fa-users"></i> ${assignmentCount} Zuweisungen</span>
+                            <span><i class="fas fa-percentage"></i> ${completionRate}% Abschluss</span>
+                            <span><i class="fas fa-calendar"></i> Erstellt: ${new Date(training.createdAt).toLocaleDateString('de-DE')}</span>
+                        </div>
+                    </div>
+                    <div class="training-actions-extended">
+                        <button class="btn-small btn-primary view-detailed-training" data-training-id="${training.id}">
+                            <i class="fas fa-eye"></i> Details
+                        </button>
+                        <button class="btn-small btn-secondary assign-detailed-training" data-training-id="${training.id}">
+                            <i class="fas fa-user-plus"></i> Zuweisen
+                        </button>
+                        <button class="btn-small btn-secondary edit-detailed-training" data-training-id="${training.id}">
+                            <i class="fas fa-edit"></i> Bearbeiten
+                        </button>
+                        <button class="btn-small btn-danger delete-training" data-training-id="${training.id}">
+                            <i class="fas fa-trash"></i> Löschen
+                        </button>
+                    </div>
+                </div>
+                <div class="training-progress-bar">
+                    <div class="progress-fill" style="width: ${completionRate}%"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    setupDetailedTrainingCardListeners() {
+        document.querySelectorAll('.view-detailed-training').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.viewTrainingDetails(btn.dataset.trainingId);
+            });
+        });
+        
+        document.querySelectorAll('.assign-detailed-training').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.openTrainingAssignmentModal(btn.dataset.trainingId);
+            });
+        });
+        
+        document.querySelectorAll('.edit-detailed-training').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.editTraining(btn.dataset.trainingId);
+            });
+        });
+        
+        document.querySelectorAll('.delete-training').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.deleteTraining(btn.dataset.trainingId);
+            });
+        });
+    }
+
+    deleteTraining(trainingId) {
+        const training = this.trainings.find(t => t.id === trainingId);
+        if (!training) {
+            alert('Schulung nicht gefunden!');
+            return;
+        }
+
+        if (!confirm(`Sind Sie sicher, dass Sie die Schulung "${training.title}" löschen möchten? Alle zugehörigen Zuweisungen werden ebenfalls gelöscht.`)) {
+            return;
+        }
+        
+        // Remove training
+        this.trainings = this.trainings.filter(t => t.id !== trainingId);
+        
+        // Remove related assignments
+        this.trainingAssignments = this.trainingAssignments.filter(a => a.trainingId !== trainingId);
+        
+        // Save changes
+        this.saveTrainingsToStorage();
+        this.saveTrainingAssignmentsToStorage();
+        
+        // Update UI
+        this.updateTrainingStatistics();
+        this.renderAllTrainings();
+        this.renderTrainingOverview();
+        
+        alert('Schulung wurde erfolgreich gelöscht.');
+    }
+
+    renderTrainingAssignments() {
+        console.log('🎓 DEBUGGING: Rendering training assignments...');
+        const container = document.getElementById('assignmentsList');
+        if (!container) return;
+        
+        const assignments = this.trainingAssignments.map(assignment => {
+            const training = this.trainings.find(t => t.id === assignment.trainingId);
+            const user = this.users.find(u => u.id === assignment.userId);
+            return { ...assignment, training, user };
+        }).filter(a => a.training && a.user);
+        
+        if (assignments.length === 0) {
+            container.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fas fa-users"></i>
+                    <h3>Keine Zuweisungen vorhanden</h3>
+                    <p>Es wurden noch keine Schulungen zugewiesen.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = assignments.map(assignment => this.generateAssignmentCard(assignment)).join('');
+        this.setupAssignmentCardListeners();
+    }
+
+    generateAssignmentCard(assignment) {
+        const statusClass = assignment.status.replace('-', '_');
+        const deadlineText = assignment.deadline ? new Date(assignment.deadline).toLocaleDateString('de-DE') : 'Keine Frist';
+        const priorityText = assignment.priority || 'normal';
+        const priorityIcon = this.getPriorityIcon(priorityText);
+        
+        return `
+            <div class="assignment-card ${statusClass}" data-assignment-id="${assignment.id}">
+                <div class="assignment-header">
+                    <div class="assignment-info">
+                        <h4>${assignment.training.title}</h4>
+                        <p><strong>Benutzer:</strong> ${assignment.user.displayName || assignment.user.name || assignment.user.id}</p>
+                        <p><strong>Abteilung:</strong> ${this.departments.find(d => d.id === assignment.user.department)?.name || 'Unbekannt'}</p>
+                        <p><strong>Rolle:</strong> ${this.roleDefinitions[assignment.user.role]?.name || assignment.user.role}</p>
+                        ${assignment.notes ? `<p><strong>Notizen:</strong> ${assignment.notes}</p>` : ''}
+                    </div>
+                    <div class="assignment-status">
+                        <span class="status-badge ${assignment.status}">
+                            ${this.getAssignmentStatusText(assignment.status)}
+                        </span>
+                        <div class="assignment-priority ${priorityText}">
+                            <i class="${priorityIcon}"></i> ${priorityText.charAt(0).toUpperCase() + priorityText.slice(1)}
+                        </div>
+                    </div>
+                </div>
+                <div class="assignment-details">
+                    <div class="assignment-meta">
+                        <span><i class="fas fa-calendar"></i> Frist: ${deadlineText}</span>
+                        <span><i class="fas fa-clock"></i> Zugewiesen: ${new Date(assignment.assignedAt).toLocaleDateString('de-DE')}</span>
+                        ${assignment.startedAt ? `<span><i class="fas fa-play"></i> Gestartet: ${new Date(assignment.startedAt).toLocaleDateString('de-DE')}</span>` : ''}
+                        <span><i class="fas fa-chart-line"></i> Fortschritt: ${assignment.progress || 0}%</span>
+                    </div>
+                    <div class="assignment-progress-bar">
+                        <div class="progress-fill" style="width: ${assignment.progress || 0}%"></div>
+                    </div>
+                    <div class="assignment-actions">
+                        <button class="btn-small btn-primary view-assignment-progress" data-assignment-id="${assignment.id}">
+                            <i class="fas fa-chart-line"></i> Fortschritt
+                        </button>
+                        <button class="btn-small btn-secondary edit-assignment" data-assignment-id="${assignment.id}">
+                            <i class="fas fa-edit"></i> Bearbeiten
+                        </button>
+                        ${assignment.status === 'assigned' || assignment.status === 'in-progress' ? `
+                            <button class="btn-small btn-success complete-assignment" data-assignment-id="${assignment.id}">
+                                <i class="fas fa-check"></i> Abschließen
+                            </button>
+                        ` : ''}
+                        <button class="btn-small btn-danger remove-assignment" data-assignment-id="${assignment.id}">
+                            <i class="fas fa-times"></i> Entfernen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    getPriorityIcon(priority) {
+        const icons = {
+            'normal': 'fas fa-minus',
+            'high': 'fas fa-exclamation',
+            'urgent': 'fas fa-exclamation-triangle'
+        };
+        return icons[priority] || 'fas fa-minus';
+    }
+
+    setupAssignmentCardListeners() {
+        document.querySelectorAll('.view-assignment-progress').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.viewAssignmentProgress(btn.dataset.assignmentId);
+            });
+        });
+        
+        document.querySelectorAll('.edit-assignment').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.editAssignment(btn.dataset.assignmentId);
+            });
+        });
+        
+        document.querySelectorAll('.complete-assignment').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.completeAssignment(btn.dataset.assignmentId);
+            });
+        });
+        
+        document.querySelectorAll('.remove-assignment').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.removeAssignment(btn.dataset.assignmentId);
+            });
+        });
+    }
+
+    viewAssignmentProgress(assignmentId) {
+        const assignment = this.trainingAssignments.find(a => a.id === assignmentId);
+        if (!assignment) {
+            alert('Zuweisung nicht gefunden!');
+            return;
+        }
+
+        const training = this.trainings.find(t => t.id === assignment.trainingId);
+        const user = this.users.find(u => u.id === assignment.userId);
+
+        const modal = this.createAssignmentProgressModal(assignment, training, user);
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createAssignmentProgressModal(assignment, training, user) {
+        const modal = document.createElement('div');
+        modal.className = 'modal assignment-progress-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-line"></i> Fortschritt: ${training.title}</h2>
+                    <span class="close progress-modal-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="progress-details">
+                        <div class="progress-info">
+                            <h3>Benutzerinformationen</h3>
+                            <p><strong>Name:</strong> ${user.displayName || user.name || user.id}</p>
+                            <p><strong>Rolle:</strong> ${this.roleDefinitions[user.role]?.name || user.role}</p>
+                            <p><strong>Abteilung:</strong> ${this.departments.find(d => d.id === user.department)?.name || 'Unbekannt'}</p>
+                        </div>
+                        <div class="progress-status">
+                            <h3>Status</h3>
+                            <p><strong>Aktueller Status:</strong> ${this.getAssignmentStatusText(assignment.status)}</p>
+                            <p><strong>Fortschritt:</strong> ${assignment.progress || 0}%</p>
+                            <p><strong>Zugewiesen am:</strong> ${new Date(assignment.assignedAt).toLocaleDateString('de-DE')}</p>
+                            ${assignment.startedAt ? `<p><strong>Gestartet am:</strong> ${new Date(assignment.startedAt).toLocaleDateString('de-DE')}</p>` : ''}
+                            ${assignment.deadline ? `<p><strong>Frist:</strong> ${new Date(assignment.deadline).toLocaleDateString('de-DE')}</p>` : ''}
+                        </div>
+                        <div class="progress-update">
+                            <h3>Fortschritt aktualisieren</h3>
+                            <div class="form-group">
+                                <label for="updateProgress">Fortschritt (%):</label>
+                                <input type="number" id="updateProgress" min="0" max="100" value="${assignment.progress || 0}">
+                            </div>
+                            <div class="form-group">
+                                <label for="updateStatus">Status:</label>
+                                <select id="updateStatus">
+                                    <option value="assigned" ${assignment.status === 'assigned' ? 'selected' : ''}>Zugewiesen</option>
+                                    <option value="in-progress" ${assignment.status === 'in-progress' ? 'selected' : ''}>In Bearbeitung</option>
+                                    <option value="completed" ${assignment.status === 'completed' ? 'selected' : ''}>Abgeschlossen</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn-primary" id="saveProgress">
+                                    <i class="fas fa-save"></i> Speichern
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.progress-modal-close');
+        closeBtn.addEventListener('click', () => modal.remove());
+
+        const saveBtn = modal.querySelector('#saveProgress');
+        saveBtn.addEventListener('click', () => {
+            this.updateAssignmentProgress(assignment.id, modal);
+        });
+
+        return modal;
+    }
+
+    updateAssignmentProgress(assignmentId, modal) {
+        const progress = parseInt(modal.querySelector('#updateProgress').value);
+        const status = modal.querySelector('#updateStatus').value;
+
+        const assignmentIndex = this.trainingAssignments.findIndex(a => a.id === assignmentId);
+        if (assignmentIndex === -1) {
+            alert('Zuweisung nicht gefunden!');
+            return;
+        }
+
+        this.trainingAssignments[assignmentIndex].progress = progress;
+        this.trainingAssignments[assignmentIndex].status = status;
+        
+        if (status === 'completed' && progress < 100) {
+            this.trainingAssignments[assignmentIndex].progress = 100;
+        }
+
+        this.saveTrainingAssignmentsToStorage();
+        this.renderTrainingAssignments();
+        this.updateTrainingStatistics();
+
+        alert('Fortschritt wurde aktualisiert!');
+        modal.remove();
+    }
+
+    editAssignment(assignmentId) {
+        const assignment = this.trainingAssignments.find(a => a.id === assignmentId);
+        if (!assignment) {
+            alert('Zuweisung nicht gefunden!');
+            return;
+        }
+
+        // For now, open the progress modal which allows editing
+        this.viewAssignmentProgress(assignmentId);
+    }
+
+    completeAssignment(assignmentId) {
+        const assignmentIndex = this.trainingAssignments.findIndex(a => a.id === assignmentId);
+        if (assignmentIndex === -1) {
+            alert('Zuweisung nicht gefunden!');
+            return;
+        }
+
+        if (confirm('Soll diese Zuweisung als abgeschlossen markiert werden?')) {
+            this.trainingAssignments[assignmentIndex].status = 'completed';
+            this.trainingAssignments[assignmentIndex].progress = 100;
+            this.trainingAssignments[assignmentIndex].completedAt = new Date().toISOString();
+
+            this.saveTrainingAssignmentsToStorage();
+            this.renderTrainingAssignments();
+            this.updateTrainingStatistics();
+
+            alert('Zuweisung wurde als abgeschlossen markiert!');
+        }
+    }
+
+    removeAssignment(assignmentId) {
+        if (!confirm('Sind Sie sicher, dass Sie diese Zuweisung entfernen möchten?')) {
+            return;
+        }
+        
+        this.trainingAssignments = this.trainingAssignments.filter(a => a.id !== assignmentId);
+        this.saveTrainingAssignmentsToStorage();
+        this.renderTrainingAssignments();
+        this.updateTrainingStatistics();
+        
+        alert('Zuweisung wurde entfernt.');
+    }
+
+    renderCertificates() {
+        console.log('🎓 DEBUGGING: Rendering certificates...');
+        const container = document.getElementById('certificatesList');
+        if (!container) return;
+        
+        // Filter certificates based on search and status
+        const searchQuery = document.getElementById('certificateSearch')?.value?.toLowerCase() || '';
+        const statusFilter = document.getElementById('certificateStatusFilter')?.value || '';
+        
+        let filteredCertificates = this.certificates.filter(certificate => {
+            // Search filter
+            if (searchQuery && !certificate.title.toLowerCase().includes(searchQuery)) return false;
+            
+            // Status filter
+            if (statusFilter) {
+                const expiryDate = certificate.expiryDate ? new Date(certificate.expiryDate) : null;
+                const isExpired = expiryDate && expiryDate < new Date();
+                const isExpiring = expiryDate && expiryDate < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                
+                if (statusFilter === 'valid' && (isExpired || isExpiring)) return false;
+                if (statusFilter === 'expiring' && (!isExpiring || isExpired)) return false;
+                if (statusFilter === 'expired' && !isExpired) return false;
+            }
+            
+            return true;
+        });
+        
+        if (filteredCertificates.length === 0) {
+            container.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fas fa-certificate"></i>
+                    <h3>Keine Zertifikate gefunden</h3>
+                    <p>Keine Zertifikate entsprechen den ausgewählten Kriterien.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = filteredCertificates.map(certificate => this.generateCertificateCard(certificate)).join('');
+        this.setupCertificateCardListeners();
+    }
+
+    generateCertificateCard(certificate) {
+        const expiryDate = certificate.expiryDate ? new Date(certificate.expiryDate) : null;
+        const isExpired = expiryDate && expiryDate < new Date();
+        const isExpiring = expiryDate && expiryDate < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        
+        let statusClass = 'valid';
+        let statusText = 'Gültig';
+        
+        if (isExpired) {
+            statusClass = 'expired';
+            statusText = 'Abgelaufen';
+        } else if (isExpiring) {
+            statusClass = 'expiring';
+            statusText = 'Läuft ab';
+        }
+        
+        return `
+            <div class="certificate-card ${statusClass}" data-certificate-id="${certificate.id}">
+                <div class="certificate-header">
+                    <div class="certificate-info">
+                        <h4>${certificate.title}</h4>
+                        <p><strong>Inhaber:</strong> ${certificate.holderName}</p>
+                        <p><strong>Aussteller:</strong> ${certificate.issuer}</p>
+                        ${certificate.notes ? `<p><strong>Notizen:</strong> ${certificate.notes}</p>` : ''}
+                    </div>
+                    <div class="certificate-status">
+                        <span class="certificate-badge ${statusClass}">${statusText}</span>
+                    </div>
+                </div>
+                <div class="certificate-details">
+                    <div class="certificate-meta">
+                        <span><i class="fas fa-calendar"></i> Ausgestellt: ${new Date(certificate.issueDate).toLocaleDateString('de-DE')}</span>
+                        ${expiryDate ? `<span><i class="fas fa-calendar-times"></i> Gültig bis: ${expiryDate.toLocaleDateString('de-DE')}</span>` : ''}
+                        ${certificate.fileName ? `<span><i class="fas fa-file"></i> Datei: ${certificate.fileName}</span>` : ''}
+                    </div>
+                    <div class="certificate-actions">
+                        ${certificate.fileData ? `
+                            <button class="btn-small btn-primary view-certificate" data-certificate-id="${certificate.id}">
+                                <i class="fas fa-eye"></i> Anzeigen
+                            </button>
+                            <button class="btn-small btn-secondary download-certificate" data-certificate-id="${certificate.id}">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                            <button class="btn-small btn-secondary print-certificate" data-certificate-id="${certificate.id}">
+                                <i class="fas fa-print"></i> Drucken
+                            </button>
+                        ` : ''}
+                        <button class="btn-small btn-danger delete-certificate" data-certificate-id="${certificate.id}">
+                            <i class="fas fa-trash"></i> Löschen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    setupCertificateCardListeners() {
+        // View certificate
+        document.querySelectorAll('.view-certificate').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.viewCertificate(btn.dataset.certificateId);
+            });
+        });
+
+        // Download certificate
+        document.querySelectorAll('.download-certificate').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.downloadCertificate(btn.dataset.certificateId);
+            });
+        });
+
+        // Print certificate
+        document.querySelectorAll('.print-certificate').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.printCertificate(btn.dataset.certificateId);
+            });
+        });
+
+        // Delete certificate
+        document.querySelectorAll('.delete-certificate').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.deleteCertificate(btn.dataset.certificateId);
+            });
+        });
+
+        // Setup certificate filters
+        const searchInput = document.getElementById('certificateSearch');
+        const statusFilter = document.getElementById('certificateStatusFilter');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                this.renderCertificates();
+            });
+        }
+        
+        if (statusFilter) {
+            statusFilter.addEventListener('change', () => {
+                this.renderCertificates();
+            });
+        }
+    }
+
+    viewCertificate(certificateId) {
+        const certificate = this.certificates.find(c => c.id === certificateId);
+        if (!certificate || !certificate.fileData) {
+            alert('Zertifikatsdatei nicht gefunden!');
+            return;
+        }
+
+        const modal = this.createCertificateViewModal(certificate);
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createCertificateViewModal(certificate) {
+        const modal = document.createElement('div');
+        modal.className = 'modal certificate-view-modal';
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-certificate"></i> ${certificate.title}</h2>
+                    <span class="close certificate-view-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="certificate-viewer">
+                        <div class="certificate-info-panel">
+                            <h3>Zertifikatsinformationen</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Titel:</label>
+                                    <span>${certificate.title}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Inhaber:</label>
+                                    <span>${certificate.holderName}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Aussteller:</label>
+                                    <span>${certificate.issuer}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label>Ausstellungsdatum:</label>
+                                    <span>${new Date(certificate.issueDate).toLocaleDateString('de-DE')}</span>
+                                </div>
+                                ${certificate.expiryDate ? `
+                                    <div class="info-item">
+                                        <label>Ablaufdatum:</label>
+                                        <span>${new Date(certificate.expiryDate).toLocaleDateString('de-DE')}</span>
+                                    </div>
+                                ` : ''}
+                                ${certificate.notes ? `
+                                    <div class="info-item full-width">
+                                        <label>Notizen:</label>
+                                        <span>${certificate.notes}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="certificate-preview">
+                            ${this.generateCertificatePreview(certificate)}
+                        </div>
+                    </div>
+                    <div class="certificate-view-actions">
+                        <button class="btn-primary download-cert-modal" data-certificate-id="${certificate.id}">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="btn-secondary print-cert-modal" data-certificate-id="${certificate.id}">
+                            <i class="fas fa-print"></i> Drucken
+                        </button>
+                        <button class="btn-secondary close-cert-view">
+                            <i class="fas fa-times"></i> Schließen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.certificate-view-close');
+        const closeViewBtn = modal.querySelector('.close-cert-view');
+        [closeBtn, closeViewBtn].forEach(btn => {
+            btn.addEventListener('click', () => modal.remove());
+        });
+
+        const downloadBtn = modal.querySelector('.download-cert-modal');
+        downloadBtn.addEventListener('click', () => {
+            this.downloadCertificate(certificate.id);
+        });
+
+        const printBtn = modal.querySelector('.print-cert-modal');
+        printBtn.addEventListener('click', () => {
+            this.printCertificate(certificate.id);
+        });
+
+        return modal;
+    }
+
+    generateCertificatePreview(certificate) {
+        if (!certificate.fileData) {
+            return '<div class="no-preview">Keine Vorschau verfügbar</div>';
+        }
+
+        const fileType = certificate.fileData.split(';')[0].split(':')[1];
+        
+        if (fileType.startsWith('image/')) {
+            return `
+                <div class="image-preview">
+                    <img src="${certificate.fileData}" alt="${certificate.title}" style="max-width: 100%; max-height: 500px;">
+                </div>
+            `;
+        } else if (fileType === 'application/pdf') {
+            return `
+                <div class="pdf-preview">
+                    <iframe src="${certificate.fileData}" width="100%" height="500px" style="border: none;">
+                        <p>PDF-Vorschau nicht verfügbar. <a href="${certificate.fileData}" target="_blank">Hier klicken zum Öffnen</a></p>
+                    </iframe>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="file-preview">
+                    <i class="fas fa-file fa-3x"></i>
+                    <p>Dateivorschau nicht verfügbar</p>
+                    <p>Dateityp: ${fileType}</p>
+                </div>
+            `;
+        }
+    }
+
+    downloadCertificate(certificateId) {
+        const certificate = this.certificates.find(c => c.id === certificateId);
+        if (!certificate || !certificate.fileData) {
+            alert('Zertifikatsdatei nicht gefunden!');
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = certificate.fileData;
+        link.download = certificate.fileName || `${certificate.title}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    printCertificate(certificateId) {
+        const certificate = this.certificates.find(c => c.id === certificateId);
+        if (!certificate || !certificate.fileData) {
+            alert('Zertifikatsdatei nicht gefunden!');
+            return;
+        }
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Zertifikat: ${certificate.title}</title>
+                    <style>
+                        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+                        .certificate-header { margin-bottom: 20px; }
+                        .certificate-info { margin-bottom: 10px; }
+                        img { max-width: 100%; height: auto; }
+                        @media print { body { margin: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="certificate-header">
+                        <h1>${certificate.title}</h1>
+                        <div class="certificate-info">
+                            <p><strong>Inhaber:</strong> ${certificate.holderName}</p>
+                            <p><strong>Aussteller:</strong> ${certificate.issuer}</p>
+                            <p><strong>Ausstellungsdatum:</strong> ${new Date(certificate.issueDate).toLocaleDateString('de-DE')}</p>
+                            ${certificate.expiryDate ? `<p><strong>Ablaufdatum:</strong> ${new Date(certificate.expiryDate).toLocaleDateString('de-DE')}</p>` : ''}
+                        </div>
+                    </div>
+                    ${certificate.fileData.startsWith('data:image/') ? 
+                        `<img src="${certificate.fileData}" alt="${certificate.title}">` : 
+                        `<iframe src="${certificate.fileData}" width="100%" height="600px"></iframe>`
+                    }
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+    }
+
+    deleteCertificate(certificateId) {
+        const certificate = this.certificates.find(c => c.id === certificateId);
+        if (!certificate) {
+            alert('Zertifikat nicht gefunden!');
+            return;
+        }
+
+        if (confirm(`Sind Sie sicher, dass Sie das Zertifikat "${certificate.title}" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.`)) {
+            this.certificates = this.certificates.filter(c => c.id !== certificateId);
+            this.saveCertificatesToStorage();
+            this.renderCertificates();
+            alert('Zertifikat wurde erfolgreich gelöscht.');
+        }
+    }
+
+    // ========================================
+    // FULL TRAINING FUNCTIONALITY IMPLEMENTATION
+    // ========================================
+
+    openTrainingModal() {
+        console.log('🎓 DEBUGGING: Opening training creation modal...');
+        this.openNewTrainingModal();
+    }
+
+    openTrainingReports() {
+        console.log('🎓 DEBUGGING: Opening training reports...');
+        this.openTrainingReportsModal();
+    }
+
+    openTrainingCalendar() {
+        console.log('🎓 DEBUGGING: Opening training calendar...');
+        this.openTrainingCalendarModal();
+    }
+
+    // ========================================
+    // TRAINING DETAIL FUNCTIONS
+    // ========================================
+
+    viewTrainingDetails(trainingId) {
+        const training = this.trainings.find(t => t.id === trainingId);
+        if (!training) {
+            alert('Schulung nicht gefunden!');
+            return;
+        }
+
+        const modal = this.createTrainingDetailModal(training);
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createTrainingDetailModal(training) {
+        const modal = document.createElement('div');
+        modal.className = 'modal training-detail-modal';
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-graduation-cap"></i> ${training.title}</h2>
+                    <span class="close training-detail-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="training-detail-content">
+                        <div class="training-info-grid">
+                            <div class="training-main-info">
+                                <div class="info-section">
+                                    <h3>Beschreibung</h3>
+                                    <p>${training.description}</p>
+                                </div>
+                                <div class="info-section">
+                                    <h3>Details</h3>
+                                    <div class="detail-grid">
+                                        <div class="detail-item">
+                                            <label>Kategorie:</label>
+                                            <span>${this.getTrainingCategoryDisplayName(training.category)}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Typ:</label>
+                                            <span>${training.type === 'mandatory' ? 'Pflicht' : 'Optional'}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Dauer:</label>
+                                            <span>${this.formatDuration(training.duration)}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Gültigkeit:</label>
+                                            <span>${training.validityPeriod} Monate</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <label>Wiederkehrend:</label>
+                                            <span>${training.isRecurring ? 'Ja' : 'Nein'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="info-section">
+                                    <h3>Zielgruppe</h3>
+                                    <div class="target-info">
+                                        <div class="target-roles">
+                                            <label>Rollen:</label>
+                                            <div class="role-tags">
+                                                ${training.targetRoles.map(role => `<span class="role-tag">${this.roleDefinitions[role]?.name || role}</span>`).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="training-actions">
+                            <button class="btn-primary start-training" data-training-id="${training.id}">
+                                <i class="fas fa-play"></i> Schulung starten
+                            </button>
+                            <button class="btn-secondary assign-to-users" data-training-id="${training.id}">
+                                <i class="fas fa-users"></i> Nutzer zuweisen
+                            </button>
+                            <button class="btn-secondary view-progress" data-training-id="${training.id}">
+                                <i class="fas fa-chart-line"></i> Fortschritt anzeigen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.training-detail-close');
+        closeBtn.addEventListener('click', () => {
+            modal.remove();
+        });
+
+        const startBtn = modal.querySelector('.start-training');
+        startBtn.addEventListener('click', () => {
+            this.startTraining(training.id);
+            modal.remove();
+        });
+
+        const assignBtn = modal.querySelector('.assign-to-users');
+        assignBtn.addEventListener('click', () => {
+            this.openTrainingAssignmentModal(training.id);
+        });
+
+        const progressBtn = modal.querySelector('.view-progress');
+        progressBtn.addEventListener('click', () => {
+            this.viewTrainingProgress(training.id);
+        });
+
+        return modal;
+    }
+
+    startTraining(trainingId) {
+        const currentUser = this.getCurrentUser();
+        let assignment = this.trainingAssignments.find(a => 
+            a.trainingId === trainingId && a.userId === currentUser.id
+        );
+
+        if (!assignment) {
+            // Create new assignment
+            assignment = {
+                id: `assignment-${Date.now()}`,
+                trainingId: trainingId,
+                userId: currentUser.id,
+                assignedBy: currentUser.id,
+                assignedAt: new Date().toISOString(),
+                status: 'in-progress',
+                progress: 0,
+                startedAt: new Date().toISOString()
+            };
+            this.trainingAssignments.push(assignment);
+        } else {
+            assignment.status = 'in-progress';
+            assignment.startedAt = new Date().toISOString();
+        }
+
+        this.saveTrainingAssignmentsToStorage();
+        this.updateTrainingStatistics();
+        this.renderTrainingOverview();
+        
+        alert('Schulung wurde gestartet!');
+    }
+
+    // ========================================
+    // TRAINING ASSIGNMENT FUNCTIONS
+    // ========================================
+
+    openTrainingAssignmentModal(trainingId) {
+        const training = this.trainings.find(t => t.id === trainingId);
+        if (!training) {
+            alert('Schulung nicht gefunden!');
+            return;
+        }
+
+        const modal = this.createTrainingAssignmentModal(training);
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createTrainingAssignmentModal(training) {
+        const modal = document.createElement('div');
+        modal.className = 'modal assignment-modal';
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-user-plus"></i> Schulung zuweisen: ${training.title}</h2>
+                    <span class="close assignment-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="assignment-form">
+                        <div class="form-section">
+                            <h3>Benutzer auswählen</h3>
+                            <div class="user-selection">
+                                <div class="selection-filters">
+                                    <select id="assignmentDepartmentSelect">
+                                        <option value="">Alle Abteilungen</option>
+                                        ${this.departments.map(dept => `<option value="${dept.id}">${dept.name}</option>`).join('')}
+                                    </select>
+                                    <select id="assignmentRoleSelect">
+                                        <option value="">Alle Rollen</option>
+                                        ${Object.entries(this.roleDefinitions).map(([key, role]) => `<option value="${key}">${role.name}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="user-list" id="assignmentUserList">
+                                    ${this.renderAssignmentUserList()}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h3>Zuweisung konfigurieren</h3>
+                            <div class="assignment-config">
+                                <div class="form-group">
+                                    <label for="assignmentDeadline">Frist:</label>
+                                    <input type="date" id="assignmentDeadline" min="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="assignmentPriority">Priorität:</label>
+                                    <select id="assignmentPriority">
+                                        <option value="normal">Normal</option>
+                                        <option value="high">Hoch</option>
+                                        <option value="urgent">Dringend</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="assignmentNotes">Notizen:</label>
+                                    <textarea id="assignmentNotes" placeholder="Zusätzliche Informationen zur Zuweisung..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" id="confirmAssignment">
+                                <i class="fas fa-check"></i> Zuweisen
+                            </button>
+                            <button class="btn-secondary" id="cancelAssignment">
+                                <i class="fas fa-times"></i> Abbrechen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.assignment-close');
+        const cancelBtn = modal.querySelector('#cancelAssignment');
+        [closeBtn, cancelBtn].forEach(btn => {
+            btn.addEventListener('click', () => modal.remove());
+        });
+
+        const confirmBtn = modal.querySelector('#confirmAssignment');
+        confirmBtn.addEventListener('click', () => {
+            this.confirmTrainingAssignment(training.id, modal);
+        });
+
+        // Filter event listeners
+        const deptSelect = modal.querySelector('#assignmentDepartmentSelect');
+        const roleSelect = modal.querySelector('#assignmentRoleSelect');
+        [deptSelect, roleSelect].forEach(select => {
+            select.addEventListener('change', () => {
+                this.updateAssignmentUserList(modal);
+            });
+        });
+
+        return modal;
+    }
+
+    renderAssignmentUserList(departmentFilter = '', roleFilter = '') {
+        return this.users.filter(user => {
+            if (departmentFilter && user.department !== departmentFilter) return false;
+            if (roleFilter && user.role !== roleFilter) return false;
+            return true;
+        }).map(user => `
+            <div class="user-item">
+                <label>
+                    <input type="checkbox" class="user-checkbox" value="${user.id}">
+                    <span class="user-info">
+                        <strong>${user.displayName || user.name || user.id}</strong>
+                        <small>${this.roleDefinitions[user.role]?.name || user.role} - ${this.departments.find(d => d.id === user.department)?.name || 'Keine Abteilung'}</small>
+                    </span>
+                </label>
+            </div>
+        `).join('');
+    }
+
+    updateAssignmentUserList(modal) {
+        const deptFilter = modal.querySelector('#assignmentDepartmentSelect').value;
+        const roleFilter = modal.querySelector('#assignmentRoleSelect').value;
+        const userList = modal.querySelector('#assignmentUserList');
+        userList.innerHTML = this.renderAssignmentUserList(deptFilter, roleFilter);
+    }
+
+    confirmTrainingAssignment(trainingId, modal) {
+        const selectedUsers = Array.from(modal.querySelectorAll('.user-checkbox:checked')).map(cb => cb.value);
+        const deadline = modal.querySelector('#assignmentDeadline').value;
+        const priority = modal.querySelector('#assignmentPriority').value;
+        const notes = modal.querySelector('#assignmentNotes').value;
+
+        if (selectedUsers.length === 0) {
+            alert('Bitte mindestens einen Benutzer auswählen.');
+            return;
+        }
+
+        const currentUser = this.getCurrentUser();
+        const assignmentDate = new Date().toISOString();
+
+        selectedUsers.forEach(userId => {
+            // Check if assignment already exists
+            const existingAssignment = this.trainingAssignments.find(a => 
+                a.trainingId === trainingId && a.userId === userId
+            );
+
+            if (!existingAssignment) {
+                const newAssignment = {
+                    id: `assignment-${Date.now()}-${userId}`,
+                    trainingId: trainingId,
+                    userId: userId,
+                    assignedBy: currentUser.id,
+                    assignedAt: assignmentDate,
+                    deadline: deadline || null,
+                    priority: priority,
+                    notes: notes,
+                    status: 'assigned',
+                    progress: 0
+                };
+                this.trainingAssignments.push(newAssignment);
+            }
+        });
+
+        this.saveTrainingAssignmentsToStorage();
+        this.updateTrainingStatistics();
+        
+        alert(`Schulung wurde an ${selectedUsers.length} Benutzer zugewiesen.`);
+        modal.remove();
+    }
+
+    editTraining(trainingId) {
+        const training = this.trainings.find(t => t.id === trainingId);
+        if (!training) {
+            alert('Schulung nicht gefunden!');
+            return;
+        }
+        
+        // Create edit modal similar to new training modal but pre-filled
+        const modal = this.createEditTrainingModal(training);
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createEditTrainingModal(training) {
+        const modal = this.createNewTrainingModal();
+        
+        // Change title and button text
+        modal.querySelector('.modal-header h2').innerHTML = `<i class="fas fa-edit"></i> Schulung bearbeiten`;
+        modal.querySelector('button[type="submit"]').innerHTML = `<i class="fas fa-save"></i> Änderungen speichern`;
+        
+        // Pre-fill form with existing data
+        modal.querySelector('#trainingTitle').value = training.title;
+        modal.querySelector('#trainingDescription').value = training.description;
+        modal.querySelector('#trainingCategory').value = training.category;
+        modal.querySelector('#trainingType').value = training.type;
+        modal.querySelector('#trainingDuration').value = training.duration;
+        modal.querySelector('#trainingValidity').value = training.validityPeriod;
+        modal.querySelector('#trainingRecurring').checked = training.isRecurring;
+        modal.querySelector('#requiresTest').checked = training.completionCriteria.requiresTest;
+        modal.querySelector('#passingScore').value = training.completionCriteria.passingScore;
+        modal.querySelector('#requiresSignature').checked = training.completionCriteria.requiresSignature;
+        
+        // Select target roles
+        training.targetRoles.forEach(role => {
+            const checkbox = modal.querySelector(`input[name="targetRoles"][value="${role}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+        
+        // Select target departments
+        training.targetDepartments.forEach(dept => {
+            const checkbox = modal.querySelector(`input[name="targetDepartments"][value="${dept}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+        
+        // Update form submission handler
+        const form = modal.querySelector('#newTrainingForm');
+        form.removeEventListener('submit', this.createNewTraining);
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.updateTraining(training.id, modal);
+        });
+        
+        return modal;
+    }
+
+    updateTraining(trainingId, modal) {
+        const trainingIndex = this.trainings.findIndex(t => t.id === trainingId);
+        if (trainingIndex === -1) {
+            alert('Schulung nicht gefunden!');
+            return;
+        }
+        
+        const currentUser = this.getCurrentUser();
+        
+        // Get form values (same as createNewTraining)
+        const title = modal.querySelector('#trainingTitle').value;
+        const description = modal.querySelector('#trainingDescription').value;
+        const category = modal.querySelector('#trainingCategory').value;
+        const type = modal.querySelector('#trainingType').value;
+        const duration = parseInt(modal.querySelector('#trainingDuration').value);
+        const validity = parseInt(modal.querySelector('#trainingValidity').value) || 12;
+        const isRecurring = modal.querySelector('#trainingRecurring').checked;
+        const requiresTest = modal.querySelector('#requiresTest').checked;
+        const passingScore = parseInt(modal.querySelector('#passingScore').value) || 80;
+        const requiresSignature = modal.querySelector('#requiresSignature').checked;
+        
+        const targetRoles = Array.from(modal.querySelectorAll('input[name="targetRoles"]:checked')).map(cb => cb.value);
+        const targetDepartments = Array.from(modal.querySelectorAll('input[name="targetDepartments"]:checked')).map(cb => cb.value);
+        
+        if (!title || !description || !category || !type || !duration || targetRoles.length === 0) {
+            alert('Bitte füllen Sie alle Pflichtfelder aus und wählen Sie mindestens eine Zielrolle.');
+            return;
+        }
+        
+        // Update training
+        this.trainings[trainingIndex] = {
+            ...this.trainings[trainingIndex],
+            title: title,
+            description: description,
+            category: category,
+            type: type,
+            duration: duration,
+            validityPeriod: validity,
+            isRecurring: isRecurring,
+            targetRoles: targetRoles,
+            targetDepartments: targetDepartments,
+            updatedAt: new Date().toISOString(),
+            updatedBy: currentUser.id,
+            completionCriteria: {
+                requiresTest: requiresTest,
+                passingScore: passingScore,
+                requiresSignature: requiresSignature
+            }
+        };
+        
+        this.saveTrainingsToStorage();
+        this.updateTrainingStatistics();
+        this.renderTrainingOverview();
+        
+        alert('Schulung wurde erfolgreich aktualisiert!');
+        modal.remove();
+    }
+
+    openBulkAssignmentModal() {
+        const modal = this.createBulkAssignmentModal();
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createBulkAssignmentModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal bulk-assignment-modal';
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-users"></i> Massen-Zuweisung</h2>
+                    <span class="close bulk-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="bulk-assignment-form">
+                        <div class="form-section">
+                            <h3>Schulungen auswählen</h3>
+                            <div class="training-selection">
+                                ${this.trainings.map(training => `
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="bulkTrainings" value="${training.id}">
+                                        ${training.title} (${this.getTrainingCategoryDisplayName(training.category)})
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h3>Benutzer auswählen</h3>
+                            <div class="bulk-user-selection">
+                                <div class="selection-options">
+                                    <label>
+                                        <input type="radio" name="selectionType" value="department" checked>
+                                        Nach Abteilung
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="selectionType" value="role">
+                                        Nach Rolle
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="selectionType" value="individual">
+                                        Individuelle Auswahl
+                                    </label>
+                                </div>
+                                <div id="departmentSelection" class="selection-content">
+                                    ${this.departments.map(dept => `
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="bulkDepartments" value="${dept.id}">
+                                            ${dept.name}
+                                        </label>
+                                    `).join('')}
+                                </div>
+                                <div id="roleSelection" class="selection-content hidden">
+                                    ${Object.entries(this.roleDefinitions).map(([key, role]) => `
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="bulkRoles" value="${key}">
+                                            ${role.name}
+                                        </label>
+                                    `).join('')}
+                                </div>
+                                <div id="individualSelection" class="selection-content hidden">
+                                    ${this.users.map(user => `
+                                        <label class="checkbox-item">
+                                            <input type="checkbox" name="bulkUsers" value="${user.id}">
+                                            ${user.displayName || user.name || user.id} (${this.roleDefinitions[user.role]?.name || user.role})
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <h3>Konfiguration</h3>
+                            <div class="bulk-config">
+                                <div class="form-group">
+                                    <label for="bulkDeadline">Frist:</label>
+                                    <input type="date" id="bulkDeadline" min="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="bulkPriority">Priorität:</label>
+                                    <select id="bulkPriority">
+                                        <option value="normal">Normal</option>
+                                        <option value="high">Hoch</option>
+                                        <option value="urgent">Dringend</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" id="confirmBulkAssignment">
+                                <i class="fas fa-check"></i> Massen-Zuweisung durchführen
+                            </button>
+                            <button class="btn-secondary" id="cancelBulkAssignment">
+                                <i class="fas fa-times"></i> Abbrechen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.bulk-close');
+        const cancelBtn = modal.querySelector('#cancelBulkAssignment');
+        [closeBtn, cancelBtn].forEach(btn => {
+            btn.addEventListener('click', () => modal.remove());
+        });
+
+        // Selection type toggle
+        modal.querySelectorAll('input[name="selectionType"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                modal.querySelectorAll('.selection-content').forEach(content => content.classList.add('hidden'));
+                if (radio.value === 'department') {
+                    modal.querySelector('#departmentSelection').classList.remove('hidden');
+                } else if (radio.value === 'role') {
+                    modal.querySelector('#roleSelection').classList.remove('hidden');
+                } else if (radio.value === 'individual') {
+                    modal.querySelector('#individualSelection').classList.remove('hidden');
+                }
+            });
+        });
+
+        const confirmBtn = modal.querySelector('#confirmBulkAssignment');
+        confirmBtn.addEventListener('click', () => {
+            this.confirmBulkAssignment(modal);
+        });
+
+        return modal;
+    }
+
+    confirmBulkAssignment(modal) {
+        const selectedTrainings = Array.from(modal.querySelectorAll('input[name="bulkTrainings"]:checked')).map(cb => cb.value);
+        const selectionType = modal.querySelector('input[name="selectionType"]:checked').value;
+        const deadline = modal.querySelector('#bulkDeadline').value;
+        const priority = modal.querySelector('#bulkPriority').value;
+
+        if (selectedTrainings.length === 0) {
+            alert('Bitte mindestens eine Schulung auswählen.');
+            return;
+        }
+
+        let targetUsers = [];
+
+        if (selectionType === 'department') {
+            const selectedDepartments = Array.from(modal.querySelectorAll('input[name="bulkDepartments"]:checked')).map(cb => cb.value);
+            if (selectedDepartments.length === 0) {
+                alert('Bitte mindestens eine Abteilung auswählen.');
+                return;
+            }
+            targetUsers = this.users.filter(user => selectedDepartments.includes(user.department));
+        } else if (selectionType === 'role') {
+            const selectedRoles = Array.from(modal.querySelectorAll('input[name="bulkRoles"]:checked')).map(cb => cb.value);
+            if (selectedRoles.length === 0) {
+                alert('Bitte mindestens eine Rolle auswählen.');
+                return;
+            }
+            targetUsers = this.users.filter(user => selectedRoles.includes(user.role));
+        } else if (selectionType === 'individual') {
+            const selectedUserIds = Array.from(modal.querySelectorAll('input[name="bulkUsers"]:checked')).map(cb => cb.value);
+            if (selectedUserIds.length === 0) {
+                alert('Bitte mindestens einen Benutzer auswählen.');
+                return;
+            }
+            targetUsers = this.users.filter(user => selectedUserIds.includes(user.id));
+        }
+
+        const currentUser = this.getCurrentUser();
+        const assignmentDate = new Date().toISOString();
+        let assignmentCount = 0;
+
+        selectedTrainings.forEach(trainingId => {
+            targetUsers.forEach(user => {
+                // Check if assignment already exists
+                const existingAssignment = this.trainingAssignments.find(a => 
+                    a.trainingId === trainingId && a.userId === user.id
+                );
+
+                if (!existingAssignment) {
+                    const newAssignment = {
+                        id: `assignment-${Date.now()}-${trainingId}-${user.id}`,
+                        trainingId: trainingId,
+                        userId: user.id,
+                        assignedBy: currentUser.id,
+                        assignedAt: assignmentDate,
+                        deadline: deadline || null,
+                        priority: priority,
+                        status: 'assigned',
+                        progress: 0
+                    };
+                    this.trainingAssignments.push(newAssignment);
+                    assignmentCount++;
+                }
+            });
+        });
+
+        this.saveTrainingAssignmentsToStorage();
+        this.updateTrainingStatistics();
+
+        alert(`Massen-Zuweisung abgeschlossen: ${assignmentCount} neue Zuweisungen erstellt.`);
+        modal.remove();
+    }
+
+    exportTrainingData() {
+        const data = {
+            trainings: this.trainings,
+            assignments: this.trainingAssignments,
+            certificates: this.certificates,
+            exportDate: new Date().toISOString(),
+            exportedBy: this.getCurrentUser().id
+        };
+
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `training-data-export-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert('Schulungsdaten wurden erfolgreich exportiert!');
+    }
+
+    openAssignmentModal() {
+        // This opens the general assignment modal without a specific training
+        const modal = this.createGeneralAssignmentModal();
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createGeneralAssignmentModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal general-assignment-modal';
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-plus"></i> Neue Schulungszuweisung</h2>
+                    <span class="close general-assignment-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="assignment-wizard">
+                        <div class="wizard-step active" id="step1">
+                            <h3>1. Schulung auswählen</h3>
+                            <div class="training-list-selection">
+                                ${this.trainings.map(training => `
+                                    <div class="training-option" data-training-id="${training.id}">
+                                        <input type="radio" name="selectedTraining" value="${training.id}" id="training-${training.id}">
+                                        <label for="training-${training.id}">
+                                            <strong>${training.title}</strong>
+                                            <p>${training.description}</p>
+                                            <small>${this.getTrainingCategoryDisplayName(training.category)} - ${this.formatDuration(training.duration)}</small>
+                                        </label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="wizard-actions">
+                                <button class="btn-primary" id="nextToStep2">
+                                    Weiter <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="wizard-step" id="step2">
+                            <h3>2. Benutzer auswählen</h3>
+                            <div class="user-selection-wizard">
+                                <div class="selection-filters">
+                                    <select id="wizardDepartmentSelect">
+                                        <option value="">Alle Abteilungen</option>
+                                        ${this.departments.map(dept => `<option value="${dept.id}">${dept.name}</option>`).join('')}
+                                    </select>
+                                    <select id="wizardRoleSelect">
+                                        <option value="">Alle Rollen</option>
+                                        ${Object.entries(this.roleDefinitions).map(([key, role]) => `<option value="${key}">${role.name}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="user-list-wizard" id="wizardUserList">
+                                    ${this.renderWizardUserList()}
+                                </div>
+                            </div>
+                            <div class="wizard-actions">
+                                <button class="btn-secondary" id="backToStep1">
+                                    <i class="fas fa-arrow-left"></i> Zurück
+                                </button>
+                                <button class="btn-primary" id="nextToStep3">
+                                    Weiter <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="wizard-step" id="step3">
+                            <h3>3. Konfiguration</h3>
+                            <div class="wizard-config">
+                                <div class="form-group">
+                                    <label for="wizardDeadline">Frist:</label>
+                                    <input type="date" id="wizardDeadline" min="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="wizardPriority">Priorität:</label>
+                                    <select id="wizardPriority">
+                                        <option value="normal">Normal</option>
+                                        <option value="high">Hoch</option>
+                                        <option value="urgent">Dringend</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="wizardNotes">Notizen:</label>
+                                    <textarea id="wizardNotes" placeholder="Zusätzliche Informationen..."></textarea>
+                                </div>
+                            </div>
+                            <div class="wizard-actions">
+                                <button class="btn-secondary" id="backToStep2">
+                                    <i class="fas fa-arrow-left"></i> Zurück
+                                </button>
+                                <button class="btn-primary" id="completeAssignment">
+                                    <i class="fas fa-check"></i> Zuweisung abschließen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add wizard navigation listeners
+        this.setupWizardNavigation(modal);
+
+        return modal;
+    }
+
+    renderWizardUserList(departmentFilter = '', roleFilter = '') {
+        return this.users.filter(user => {
+            if (departmentFilter && user.department !== departmentFilter) return false;
+            if (roleFilter && user.role !== roleFilter) return false;
+            return true;
+        }).map(user => `
+            <div class="wizard-user-item">
+                <label>
+                    <input type="checkbox" class="wizard-user-checkbox" value="${user.id}">
+                    <span class="wizard-user-info">
+                        <strong>${user.displayName || user.name || user.id}</strong>
+                        <small>${this.roleDefinitions[user.role]?.name || user.role} - ${this.departments.find(d => d.id === user.department)?.name || 'Keine Abteilung'}</small>
+                    </span>
+                </label>
+            </div>
+        `).join('');
+    }
+
+    setupWizardNavigation(modal) {
+        const closeBtn = modal.querySelector('.general-assignment-close');
+        closeBtn.addEventListener('click', () => modal.remove());
+
+        // Step navigation
+        modal.querySelector('#nextToStep2').addEventListener('click', () => {
+            const selectedTraining = modal.querySelector('input[name="selectedTraining"]:checked');
+            if (!selectedTraining) {
+                alert('Bitte wählen Sie eine Schulung aus.');
+                return;
+            }
+            this.showWizardStep(modal, 2);
+        });
+
+        modal.querySelector('#backToStep1').addEventListener('click', () => {
+            this.showWizardStep(modal, 1);
+        });
+
+        modal.querySelector('#nextToStep3').addEventListener('click', () => {
+            const selectedUsers = modal.querySelectorAll('.wizard-user-checkbox:checked');
+            if (selectedUsers.length === 0) {
+                alert('Bitte wählen Sie mindestens einen Benutzer aus.');
+                return;
+            }
+            this.showWizardStep(modal, 3);
+        });
+
+        modal.querySelector('#backToStep2').addEventListener('click', () => {
+            this.showWizardStep(modal, 2);
+        });
+
+        modal.querySelector('#completeAssignment').addEventListener('click', () => {
+            this.completeWizardAssignment(modal);
+        });
+
+        // Filter listeners
+        const deptSelect = modal.querySelector('#wizardDepartmentSelect');
+        const roleSelect = modal.querySelector('#wizardRoleSelect');
+        [deptSelect, roleSelect].forEach(select => {
+            select.addEventListener('change', () => {
+                this.updateWizardUserList(modal);
+            });
+        });
+    }
+
+    showWizardStep(modal, stepNumber) {
+        modal.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
+        modal.querySelector(`#step${stepNumber}`).classList.add('active');
+    }
+
+    updateWizardUserList(modal) {
+        const deptFilter = modal.querySelector('#wizardDepartmentSelect').value;
+        const roleFilter = modal.querySelector('#wizardRoleSelect').value;
+        const userList = modal.querySelector('#wizardUserList');
+        userList.innerHTML = this.renderWizardUserList(deptFilter, roleFilter);
+    }
+
+    completeWizardAssignment(modal) {
+        const selectedTraining = modal.querySelector('input[name="selectedTraining"]:checked').value;
+        const selectedUsers = Array.from(modal.querySelectorAll('.wizard-user-checkbox:checked')).map(cb => cb.value);
+        const deadline = modal.querySelector('#wizardDeadline').value;
+        const priority = modal.querySelector('#wizardPriority').value;
+        const notes = modal.querySelector('#wizardNotes').value;
+
+        const currentUser = this.getCurrentUser();
+        const assignmentDate = new Date().toISOString();
+
+        selectedUsers.forEach(userId => {
+            const existingAssignment = this.trainingAssignments.find(a => 
+                a.trainingId === selectedTraining && a.userId === userId
+            );
+
+            if (!existingAssignment) {
+                const newAssignment = {
+                    id: `assignment-${Date.now()}-${userId}`,
+                    trainingId: selectedTraining,
+                    userId: userId,
+                    assignedBy: currentUser.id,
+                    assignedAt: assignmentDate,
+                    deadline: deadline || null,
+                    priority: priority,
+                    notes: notes,
+                    status: 'assigned',
+                    progress: 0
+                };
+                this.trainingAssignments.push(newAssignment);
+            }
+        });
+
+        this.saveTrainingAssignmentsToStorage();
+        this.updateTrainingStatistics();
+
+        alert(`Schulung wurde an ${selectedUsers.length} Benutzer zugewiesen.`);
+        modal.remove();
+    }
+
+    openCertificateUploadModal() {
+        const modal = this.createCertificateUploadModal();
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createCertificateUploadModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal certificate-upload-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-upload"></i> Zertifikat hochladen</h2>
+                    <span class="close certificate-upload-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form class="certificate-form" id="certificateUploadForm">
+                        <div class="form-group">
+                            <label for="certificateTitle">Zertifikatstitel *</label>
+                            <input type="text" id="certificateTitle" required placeholder="z.B. Arbeitssicherheit Grundausbildung">
+                        </div>
+                        <div class="form-group">
+                            <label for="certificateHolder">Inhaber *</label>
+                            <select id="certificateHolder" required>
+                                <option value="">Bitte wählen...</option>
+                                ${this.users.map(user => `
+                                    <option value="${user.id}" ${user.id === this.getCurrentUser().id ? 'selected' : ''}>
+                                        ${user.displayName || user.name || user.id}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="certificateIssuer">Aussteller *</label>
+                            <input type="text" id="certificateIssuer" required placeholder="z.B. TÜV Nord, IHK, etc.">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="certificateIssueDate">Ausstellungsdatum *</label>
+                                <input type="date" id="certificateIssueDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="certificateExpiryDate">Ablaufdatum</label>
+                                <input type="date" id="certificateExpiryDate">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="certificateFile">Zertifikatsdatei</label>
+                            <input type="file" id="certificateFile" accept=".pdf,.jpg,.jpeg,.png">
+                            <small>Unterstützte Formate: PDF, JPG, PNG (max. 5MB)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="certificateNotes">Notizen</label>
+                            <textarea id="certificateNotes" placeholder="Zusätzliche Informationen zum Zertifikat..."></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i> Zertifikat speichern
+                            </button>
+                            <button type="button" class="btn-secondary" id="cancelCertificateUpload">
+                                <i class="fas fa-times"></i> Abbrechen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.certificate-upload-close');
+        const cancelBtn = modal.querySelector('#cancelCertificateUpload');
+        [closeBtn, cancelBtn].forEach(btn => {
+            btn.addEventListener('click', () => modal.remove());
+        });
+
+        const form = modal.querySelector('#certificateUploadForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveCertificate(modal);
+        });
+
+        return modal;
+    }
+
+    saveCertificate(modal) {
+        const title = modal.querySelector('#certificateTitle').value;
+        const holderId = modal.querySelector('#certificateHolder').value;
+        const issuer = modal.querySelector('#certificateIssuer').value;
+        const issueDate = modal.querySelector('#certificateIssueDate').value;
+        const expiryDate = modal.querySelector('#certificateExpiryDate').value;
+        const fileInput = modal.querySelector('#certificateFile');
+        const notes = modal.querySelector('#certificateNotes').value;
+
+        if (!title || !holderId || !issuer || !issueDate) {
+            alert('Bitte füllen Sie alle Pflichtfelder aus.');
+            return;
+        }
+
+        const currentUser = this.getCurrentUser();
+        const holderUser = this.users.find(u => u.id === holderId);
+
+        const newCertificate = {
+            id: `certificate-${Date.now()}`,
+            title: title,
+            holderId: holderId,
+            holderName: holderUser ? (holderUser.displayName || holderUser.name || holderUser.id) : 'Unbekannt',
+            issuer: issuer,
+            issueDate: issueDate,
+            expiryDate: expiryDate || null,
+            notes: notes,
+            uploadedBy: currentUser.id,
+            uploadedAt: new Date().toISOString(),
+            fileName: fileInput.files.length > 0 ? fileInput.files[0].name : null,
+            fileSize: fileInput.files.length > 0 ? fileInput.files[0].size : null
+        };
+
+        // Handle file upload (in a real app, this would upload to a server)
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                newCertificate.fileData = e.target.result;
+                this.certificates.push(newCertificate);
+                this.saveCertificatesToStorage();
+                alert('Zertifikat wurde erfolgreich hochgeladen!');
+                modal.remove();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            this.certificates.push(newCertificate);
+            this.saveCertificatesToStorage();
+            alert('Zertifikat wurde erfolgreich gespeichert!');
+            modal.remove();
+        }
+    }
+
+    viewTrainingProgress(trainingId) {
+        const training = this.trainings.find(t => t.id === trainingId);
+        if (!training) {
+            alert('Schulung nicht gefunden!');
+            return;
+        }
+
+        const assignments = this.trainingAssignments.filter(a => a.trainingId === trainingId);
+        const modal = this.createProgressModal(training, assignments);
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createProgressModal(training, assignments) {
+        const totalAssignments = assignments.length;
+        const completedAssignments = assignments.filter(a => a.status === 'completed').length;
+        const inProgressAssignments = assignments.filter(a => a.status === 'in-progress').length;
+        const overdueAssignments = assignments.filter(a => a.status === 'overdue').length;
+        const completionRate = totalAssignments > 0 ? ((completedAssignments / totalAssignments) * 100).toFixed(1) : 0;
+
+        const modal = document.createElement('div');
+        modal.className = 'modal progress-modal';
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-line"></i> Fortschritt: ${training.title}</h2>
+                    <span class="close progress-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="progress-overview">
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <h3>${totalAssignments}</h3>
+                                <p>Gesamt Zuweisungen</p>
+                            </div>
+                            <div class="stat-item">
+                                <h3>${completedAssignments}</h3>
+                                <p>Abgeschlossen</p>
+                            </div>
+                            <div class="stat-item">
+                                <h3>${inProgressAssignments}</h3>
+                                <p>In Bearbeitung</p>
+                            </div>
+                            <div class="stat-item">
+                                <h3>${overdueAssignments}</h3>
+                                <p>Überfällig</p>
+                            </div>
+                        </div>
+                        <div class="progress-chart">
+                            <h4>Abschlussrate: ${completionRate}%</h4>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${completionRate}%"></div>
+                            </div>
+                        </div>
+                        <div class="assignment-details">
+                            <h4>Detaillierte Übersicht</h4>
+                            <div class="assignment-list">
+                                ${assignments.map(assignment => {
+                                    const user = this.users.find(u => u.id === assignment.userId);
+                                    const statusClass = assignment.status.replace('-', '_');
+                                    return `
+                                        <div class="assignment-detail-item ${statusClass}">
+                                            <div class="user-info">
+                                                <strong>${user ? (user.displayName || user.name || user.id) : 'Unbekannter Benutzer'}</strong>
+                                                <small>${user ? (this.roleDefinitions[user.role]?.name || user.role) : ''}</small>
+                                            </div>
+                                            <div class="assignment-progress">
+                                                <span class="status-badge ${assignment.status}">
+                                                    ${this.getAssignmentStatusText(assignment.status)}
+                                                </span>
+                                                <div class="progress-bar-small">
+                                                    <div class="progress-fill-small" style="width: ${assignment.progress || 0}%"></div>
+                                                </div>
+                                                <span class="progress-percent">${assignment.progress || 0}%</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const closeBtn = modal.querySelector('.progress-close');
+        closeBtn.addEventListener('click', () => modal.remove());
+
+        return modal;
+    }
+
+    // ========================================
+    // TRAINING CREATION FUNCTIONS
+    // ========================================
+
+    openNewTrainingModal() {
+        const modal = this.createNewTrainingModal();
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createNewTrainingModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal new-training-modal';
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-plus"></i> Neue Schulung erstellen</h2>
+                    <span class="close new-training-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form class="training-form" id="newTrainingForm">
+                        <div class="form-sections">
+                            <div class="form-section">
+                                <h3>Grundinformationen</h3>
+                                <div class="form-grid">
+                                    <div class="form-group full-width">
+                                        <label for="trainingTitle">Titel *</label>
+                                        <input type="text" id="trainingTitle" required placeholder="z.B. Arbeitssicherheit Grundlagen">
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label for="trainingDescription">Beschreibung *</label>
+                                        <textarea id="trainingDescription" required placeholder="Detaillierte Beschreibung der Schulung..."></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingCategory">Kategorie *</label>
+                                        <select id="trainingCategory" required>
+                                            <option value="">Bitte wählen...</option>
+                                            <option value="safety">Arbeitssicherheit</option>
+                                            <option value="quality">Qualitätsmanagement</option>
+                                            <option value="environment">Umweltschutz</option>
+                                            <option value="health">Gesundheitsschutz</option>
+                                            <option value="data-protection">Datenschutz</option>
+                                            <option value="compliance">Compliance</option>
+                                            <option value="technical">Technische Schulung</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingType">Typ *</label>
+                                        <select id="trainingType" required>
+                                            <option value="mandatory">Pflichtschulung</option>
+                                            <option value="optional">Optionale Schulung</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingDuration">Dauer (Minuten) *</label>
+                                        <input type="number" id="trainingDuration" required min="15" placeholder="60">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingValidity">Gültigkeit (Monate)</label>
+                                        <input type="number" id="trainingValidity" min="1" max="36" placeholder="12">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="trainingRecurring">
+                                        Wiederkehrende Schulung
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3>Zielgruppe</h3>
+                                <div class="target-selection">
+                                    <div class="form-group">
+                                        <label>Zielrollen:</label>
+                                        <div class="checkbox-grid">
+                                            ${Object.entries(this.roleDefinitions).map(([key, role]) => `
+                                                <label class="checkbox-item">
+                                                    <input type="checkbox" name="targetRoles" value="${key}">
+                                                    ${role.name}
+                                                </label>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Abteilungen (optional):</label>
+                                        <div class="checkbox-grid">
+                                            ${this.departments.map(dept => `
+                                                <label class="checkbox-item">
+                                                    <input type="checkbox" name="targetDepartments" value="${dept.id}">
+                                                    ${dept.name}
+                                                </label>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3>Abschlusskriterien</h3>
+                                <div class="completion-criteria">
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="requiresTest">
+                                            Test erforderlich
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="passingScore">Mindestpunktzahl (%):</label>
+                                        <input type="number" id="passingScore" min="0" max="100" value="80">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="requiresSignature" checked>
+                                            Unterschrift erforderlich
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i> Schulung erstellen
+                            </button>
+                            <button type="button" class="btn-secondary" id="cancelNewTraining">
+                                <i class="fas fa-times"></i> Abbrechen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.new-training-close');
+        const cancelBtn = modal.querySelector('#cancelNewTraining');
+        [closeBtn, cancelBtn].forEach(btn => {
+            btn.addEventListener('click', () => modal.remove());
+        });
+
+        const form = modal.querySelector('#newTrainingForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.createNewTraining(modal);
+        });
+
+        return modal;
+    }
+
+    createNewTraining(modal) {
+        const formData = new FormData(modal.querySelector('#newTrainingForm'));
+        const currentUser = this.getCurrentUser();
+        
+        // Get form values
+        const title = modal.querySelector('#trainingTitle').value;
+        const description = modal.querySelector('#trainingDescription').value;
+        const category = modal.querySelector('#trainingCategory').value;
+        const type = modal.querySelector('#trainingType').value;
+        const duration = parseInt(modal.querySelector('#trainingDuration').value);
+        const validity = parseInt(modal.querySelector('#trainingValidity').value) || 12;
+        const isRecurring = modal.querySelector('#trainingRecurring').checked;
+        const requiresTest = modal.querySelector('#requiresTest').checked;
+        const passingScore = parseInt(modal.querySelector('#passingScore').value) || 80;
+        const requiresSignature = modal.querySelector('#requiresSignature').checked;
+        
+        // Get selected roles and departments
+        const targetRoles = Array.from(modal.querySelectorAll('input[name="targetRoles"]:checked')).map(cb => cb.value);
+        const targetDepartments = Array.from(modal.querySelectorAll('input[name="targetDepartments"]:checked')).map(cb => cb.value);
+        
+        // Validation
+        if (!title || !description || !category || !type || !duration || targetRoles.length === 0) {
+            alert('Bitte füllen Sie alle Pflichtfelder aus und wählen Sie mindestens eine Zielrolle.');
+            return;
+        }
+        
+        // Create new training
+        const newTraining = {
+            id: `training-${Date.now()}`,
+            title: title,
+            description: description,
+            category: category,
+            type: type,
+            duration: duration,
+            validityPeriod: validity,
+            isRecurring: isRecurring,
+            content: {
+                materials: [],
+                videos: [],
+                documents: [],
+                testQuestions: []
+            },
+            targetRoles: targetRoles,
+            targetDepartments: targetDepartments,
+            createdAt: new Date().toISOString(),
+            createdBy: currentUser.id,
+            isActive: true,
+            completionCriteria: {
+                requiresTest: requiresTest,
+                passingScore: passingScore,
+                requiresSignature: requiresSignature
+            }
+        };
+        
+        this.trainings.push(newTraining);
+        this.saveTrainingsToStorage();
+        this.updateTrainingStatistics();
+        this.renderTrainingOverview();
+        
+        alert('Neue Schulung wurde erfolgreich erstellt!');
+        modal.remove();
+    }
+
+    // ========================================
+    // TRAINING REPORTS AND CALENDAR
+    // ========================================
+
+    openTrainingReportsModal() {
+        const modal = this.createTrainingReportsModal();
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createTrainingReportsModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal training-reports-modal';
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-bar"></i> Schulungsberichte</h2>
+                    <span class="close reports-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="reports-dashboard">
+                        <div class="report-tabs">
+                            <button class="report-tab-btn active" data-report="overview">Übersicht</button>
+                            <button class="report-tab-btn" data-report="completion">Abschlussraten</button>
+                            <button class="report-tab-btn" data-report="compliance">Compliance</button>
+                            <button class="report-tab-btn" data-report="individual">Individuelle Berichte</button>
+                        </div>
+                        <div class="report-content">
+                            <div id="report-overview" class="report-panel active">
+                                ${this.generateOverviewReport()}
+                            </div>
+                            <div id="report-completion" class="report-panel">
+                                ${this.generateCompletionReport()}
+                            </div>
+                            <div id="report-compliance" class="report-panel">
+                                ${this.generateComplianceReport()}
+                            </div>
+                            <div id="report-individual" class="report-panel">
+                                ${this.generateIndividualReport()}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.reports-close');
+        closeBtn.addEventListener('click', () => modal.remove());
+
+        // Tab switching
+        modal.querySelectorAll('.report-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const reportType = btn.getAttribute('data-report');
+                this.switchReportTab(modal, reportType);
+            });
+        });
+
+        return modal;
+    }
+
+    switchReportTab(modal, reportType) {
+        // Update active tab
+        modal.querySelectorAll('.report-tab-btn').forEach(btn => btn.classList.remove('active'));
+        modal.querySelector(`[data-report="${reportType}"]`).classList.add('active');
+
+        // Update active panel
+        modal.querySelectorAll('.report-panel').forEach(panel => panel.classList.remove('active'));
+        modal.querySelector(`#report-${reportType}`).classList.add('active');
+    }
+
+    generateOverviewReport() {
+        const totalTrainings = this.trainings.length;
+        const totalAssignments = this.trainingAssignments.length;
+        const completedAssignments = this.trainingAssignments.filter(a => a.status === 'completed').length;
+        const overdueAssignments = this.trainingAssignments.filter(a => a.status === 'overdue').length;
+        const completionRate = totalAssignments > 0 ? ((completedAssignments / totalAssignments) * 100).toFixed(1) : 0;
+
+        return `
+            <div class="overview-stats">
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <h3>${totalTrainings}</h3>
+                        <p>Verfügbare Schulungen</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>${totalAssignments}</h3>
+                        <p>Gesamt Zuweisungen</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>${completedAssignments}</h3>
+                        <p>Abgeschlossen</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>${overdueAssignments}</h3>
+                        <p>Überfällig</p>
+                    </div>
+                </div>
+                <div class="completion-chart">
+                    <h4>Abschlussrate: ${completionRate}%</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${completionRate}%"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    generateCompletionReport() {
+        const categoryStats = {};
+        this.trainings.forEach(training => {
+            if (!categoryStats[training.category]) {
+                categoryStats[training.category] = { total: 0, completed: 0 };
+            }
+            categoryStats[training.category].total++;
+            
+            const completedCount = this.trainingAssignments.filter(a => 
+                a.trainingId === training.id && a.status === 'completed'
+            ).length;
+            categoryStats[training.category].completed += completedCount;
+        });
+
+        return `
+            <div class="completion-stats">
+                <h4>Abschlussraten nach Kategorie</h4>
+                <div class="category-stats">
+                    ${Object.entries(categoryStats).map(([category, stats]) => {
+                        const rate = stats.total > 0 ? ((stats.completed / stats.total) * 100).toFixed(1) : 0;
+                        return `
+                            <div class="category-item">
+                                <div class="category-info">
+                                    <strong>${this.getTrainingCategoryDisplayName(category)}</strong>
+                                    <span>${stats.completed}/${stats.total} (${rate}%)</span>
+                                </div>
+                                <div class="category-bar">
+                                    <div class="category-fill" style="width: ${rate}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    generateComplianceReport() {
+        const mandatoryTrainings = this.trainings.filter(t => t.type === 'mandatory');
+        const complianceData = mandatoryTrainings.map(training => {
+            const assignments = this.trainingAssignments.filter(a => a.trainingId === training.id);
+            const completed = assignments.filter(a => a.status === 'completed').length;
+            const total = assignments.length;
+            const compliance = total > 0 ? ((completed / total) * 100).toFixed(1) : 0;
+            
+            return {
+                training: training,
+                completed: completed,
+                total: total,
+                compliance: compliance
+            };
+        });
+
+        return `
+            <div class="compliance-report">
+                <h4>Compliance-Status (Pflichtschulungen)</h4>
+                <div class="compliance-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Schulung</th>
+                                <th>Abgeschlossen</th>
+                                <th>Gesamt</th>
+                                <th>Compliance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${complianceData.map(data => `
+                                <tr>
+                                    <td>${data.training.title}</td>
+                                    <td>${data.completed}</td>
+                                    <td>${data.total}</td>
+                                    <td>${data.compliance}%</td>
+                                    <td>
+                                        <span class="compliance-badge ${data.compliance >= 80 ? 'good' : data.compliance >= 60 ? 'warning' : 'critical'}">
+                                            ${data.compliance >= 80 ? 'Gut' : data.compliance >= 60 ? 'Warnung' : 'Kritisch'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    generateIndividualReport() {
+        return `
+            <div class="individual-report">
+                <div class="report-filters">
+                    <select id="individualReportUser">
+                        <option value="">Benutzer wählen...</option>
+                        ${this.users.map(user => `
+                            <option value="${user.id}">${user.displayName || user.name || user.id}</option>
+                        `).join('')}
+                    </select>
+                    <button class="btn-primary" id="generateIndividualReport">
+                        <i class="fas fa-chart-line"></i> Bericht generieren
+                    </button>
+                </div>
+                <div id="individualReportContent">
+                    <p>Bitte wählen Sie einen Benutzer aus, um einen individuellen Bericht zu generieren.</p>
+                </div>
+            </div>
+        `;
+    }
+
+    openTrainingCalendarModal() {
+        const modal = this.createTrainingCalendarModal();
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    createTrainingCalendarModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal training-calendar-modal';
+        
+        // Initialize calendar state
+        this.calendarDate = new Date();
+        
+        modal.innerHTML = `
+            <div class="modal-content large-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-calendar-alt"></i> Schulungskalender</h2>
+                    <span class="close calendar-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="calendar-container">
+                        <div class="calendar-controls">
+                            <button id="calendarPrevMonth" class="btn-secondary">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <h3 id="calendarCurrentMonth">${this.calendarDate.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</h3>
+                            <button id="calendarNextMonth" class="btn-secondary">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="calendar-view" id="calendarView">
+                            ${this.generateCalendarView(this.calendarDate)}
+                        </div>
+                        <div class="calendar-legend">
+                            <div class="legend-item">
+                                <span class="legend-color deadline"></span>
+                                <span>Frist</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color completed"></span>
+                                <span>Abgeschlossen</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color overdue"></span>
+                                <span>Überfällig</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.calendar-close');
+        closeBtn.addEventListener('click', () => modal.remove());
+
+        // Calendar navigation
+        const prevBtn = modal.querySelector('#calendarPrevMonth');
+        const nextBtn = modal.querySelector('#calendarNextMonth');
+        
+        prevBtn.addEventListener('click', () => {
+            this.calendarDate.setMonth(this.calendarDate.getMonth() - 1);
+            this.updateCalendarView(modal);
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            this.calendarDate.setMonth(this.calendarDate.getMonth() + 1);
+            this.updateCalendarView(modal);
+        });
+
+        return modal;
+    }
+
+    updateCalendarView(modal) {
+        const monthHeader = modal.querySelector('#calendarCurrentMonth');
+        const calendarView = modal.querySelector('#calendarView');
+        
+        monthHeader.textContent = this.calendarDate.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+        calendarView.innerHTML = this.generateCalendarView(this.calendarDate);
+    }
+
+    generateCalendarView(date = new Date()) {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+        
+        let calendarHTML = `
+            <div class="calendar-grid">
+                <div class="calendar-header">
+                    <div class="day-header">Mo</div>
+                    <div class="day-header">Di</div>
+                    <div class="day-header">Mi</div>
+                    <div class="day-header">Do</div>
+                    <div class="day-header">Fr</div>
+                    <div class="day-header">Sa</div>
+                    <div class="day-header">So</div>
+                </div>
+                <div class="calendar-body">
+        `;
+        
+        // Add empty cells for days before month starts
+        const mondayStart = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
+        for (let i = 0; i < mondayStart; i++) {
+            calendarHTML += '<div class="calendar-day empty"></div>';
+        }
+        
+        // Add days of month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const currentDate = new Date(year, month, day);
+            const dateString = currentDate.toISOString().split('T')[0];
+            const dayEvents = this.getTrainingEventsForDate(dateString);
+            
+            calendarHTML += `
+                <div class="calendar-day" data-date="${dateString}">
+                    <div class="day-number">${day}</div>
+                    <div class="day-events">
+                        ${dayEvents.map(event => `
+                            <div class="event ${event.type}" title="${event.title}">
+                                ${event.title.substring(0, 20)}${event.title.length > 20 ? '...' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        calendarHTML += '</div></div>';
+        return calendarHTML;
+    }
+
+    getTrainingEventsForDate(dateString) {
+        const events = [];
+        
+        this.trainingAssignments.forEach(assignment => {
+            if (assignment.deadline && assignment.deadline === dateString) {
+                const training = this.trainings.find(t => t.id === assignment.trainingId);
+                if (training) {
+                    events.push({
+                        title: training.title,
+                        type: assignment.status === 'completed' ? 'completed' : 
+                              assignment.status === 'overdue' ? 'overdue' : 'deadline'
+                    });
+                }
+            }
+        });
+        
+        return events;
+    }
+
+    getAssignmentStatusText(status) {
+        const statusTexts = {
+            'assigned': 'Zugewiesen',
+            'in-progress': 'In Bearbeitung',
+            'completed': 'Abgeschlossen',
+            'overdue': 'Überfällig'
+        };
+        return statusTexts[status] || status;
     }
 
     renderUsersList() {
@@ -13903,6 +17053,1421 @@ PLZ Ort">${user.address || ''}</textarea>
             });
         });
     }
+
+    // ====================================
+    // SUPPLIER MANAGEMENT SYSTEM  
+    // ====================================
+
+    // Data Loading Functions
+    loadSuppliersFromStorage() {
+        try {
+            const suppliers = JSON.parse(localStorage.getItem('qhse_suppliers') || '[]');
+            if (suppliers.length === 0) {
+                return this.initializeDefaultSuppliers();
+            }
+            return suppliers;
+        } catch (error) {
+            console.error('Error loading suppliers:', error);
+            return this.initializeDefaultSuppliers();
+        }
+    }
+
+    loadSupplierEvaluationsFromStorage() {
+        try {
+            return JSON.parse(localStorage.getItem('qhse_supplier_evaluations') || '[]');
+        } catch (error) {
+            console.error('Error loading supplier evaluations:', error);
+            return [];
+        }
+    }
+
+    loadSupplierDocumentsFromStorage() {
+        try {
+            return JSON.parse(localStorage.getItem('qhse_supplier_documents') || '[]');
+        } catch (error) {
+            console.error('Error loading supplier documents:', error);
+            return [];
+        }
+    }
+
+    loadSupplierAuditsFromStorage() {
+        try {
+            return JSON.parse(localStorage.getItem('qhse_supplier_audits') || '[]');
+        } catch (error) {
+            console.error('Error loading supplier audits:', error);
+            return [];
+        }
+    }
+
+    // Supplier Management Setup
+    setupSupplierManagement() {
+        // Setup supplier management functionality
+        this.setupSupplierTabs();
+        this.setupSupplierFilters();
+        this.setupSupplierModal();
+        this.setupSupplierQuickActions();
+        this.renderSupplierDashboard();
+    }
+
+    setupSupplierTabs() {
+        const supplierTabs = document.querySelectorAll('.supplier-tab-btn');
+        const supplierTabContents = document.querySelectorAll('.supplier-tab-panel');
+
+        supplierTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                supplierTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content
+                supplierTabContents.forEach(content => {
+                    const contentTab = content.id.replace('supplier-', '');
+                    if (contentTab === targetTab) {
+                        content.classList.add('active');
+                        content.style.display = 'block';
+                    } else {
+                        content.classList.remove('active');
+                        content.style.display = 'none';
+                    }
+                });
+
+                // Render content based on active tab
+                this.renderSupplierTabContent(targetTab);
+            });
+        });
+
+        // Show overview tab by default
+        this.renderSupplierTabContent('overview');
+    }
+
+    setupSupplierFilters() {
+        const statusFilter = document.getElementById('supplierStatusFilter');
+        const typeFilter = document.getElementById('supplierTypeFilter');
+        const searchInput = document.getElementById('supplierSearchInput');
+
+        if (statusFilter) {
+            statusFilter.addEventListener('change', () => this.filterSuppliers());
+        }
+        if (typeFilter) {
+            typeFilter.addEventListener('change', () => this.filterSuppliers());
+        }
+        if (searchInput) {
+            searchInput.addEventListener('input', () => this.filterSuppliers());
+        }
+    }
+
+    setupSupplierModal() {
+        const addSupplierBtn = document.getElementById('addSupplierBtn');
+        const supplierModal = document.getElementById('supplierModal');
+        const supplierForm = document.getElementById('supplierForm');
+
+        if (addSupplierBtn) {
+            addSupplierBtn.addEventListener('click', () => {
+                this.showSupplierModal();
+            });
+        }
+
+        if (supplierForm) {
+            supplierForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveSupplier();
+            });
+        }
+
+        // Setup modal close functionality
+        const modalCloses = document.querySelectorAll('#supplierModal .modal-close');
+        modalCloses.forEach(btn => {
+            btn.addEventListener('click', () => {
+                supplierModal.style.display = 'none';
+                this.currentEditingSupplierId = null;
+            });
+        });
+
+        // Setup evaluation modal
+        const evalForm = document.getElementById('evaluationForm');
+        if (evalForm) {
+            evalForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveSupplierEvaluation();
+            });
+        }
+    }
+
+    setupSupplierQuickActions() {
+        const evaluateBtn = document.getElementById('evaluateSupplierBtn');
+        const checkCertificatesBtn = document.getElementById('checkCertificatesBtn');
+        const planAuditBtn = document.getElementById('planAuditBtn');
+        const reportsBtn = document.getElementById('supplierReportsBtn');
+        const auditBtn = document.getElementById('supplierAuditBtn');
+
+        if (evaluateBtn) {
+            evaluateBtn.addEventListener('click', () => this.openEvaluationModal());
+        }
+        if (checkCertificatesBtn) {
+            checkCertificatesBtn.addEventListener('click', () => this.checkCertificates());
+        }
+        if (planAuditBtn) {
+            planAuditBtn.addEventListener('click', () => this.planAudit());
+        }
+        if (reportsBtn) {
+            reportsBtn.addEventListener('click', () => this.openReportsModal());
+        }
+        if (auditBtn) {
+            auditBtn.addEventListener('click', () => this.planAudit());
+        }
+    }
+
+    // Supplier Data Management
+    initializeDefaultSuppliers() {
+        const defaultSuppliers = [
+            {
+                id: 'SUP001',
+                number: 'L-2024-001',
+                name: 'Mustermann Stahl GmbH',
+                type: 'warenlieferant',
+                status: 'freigegeben',
+                contact: {
+                    person: 'Max Mustermann',
+                    email: 'max@mustermann-stahl.de',
+                    phone: '+49 40 123456',
+                    address: 'Musterstraße 1, 20095 Hamburg'
+                },
+                products: ['Stahlprodukte', 'Metallverarbeitung'],
+                certificates: [
+                    { name: 'ISO 9001', validUntil: '2025-12-31', status: 'gültig' }
+                ],
+                evaluation: {
+                    score: 85,
+                    lastEvaluated: '2024-01-15',
+                    criteria: {
+                        quality: 90,
+                        delivery: 85,
+                        price: 80,
+                        service: 85
+                    }
+                },
+                createdAt: '2024-01-01',
+                updatedAt: '2024-01-15'
+            },
+            {
+                id: 'SUP002',
+                number: 'L-2024-002',
+                name: 'Technik Service Nord',
+                type: 'dienstleister',
+                status: 'kritisch',
+                contact: {
+                    person: 'Anna Schmidt',
+                    email: 'a.schmidt@technik-service.de',
+                    phone: '+49 40 987654',
+                    address: 'Industrieweg 5, 20097 Hamburg'
+                },
+                products: ['Wartung', 'Reparaturen', 'Technischer Support'],
+                certificates: [
+                    { name: 'ISO 45001', validUntil: '2024-06-30', status: 'läuft ab' }
+                ],
+                evaluation: {
+                    score: 65,
+                    lastEvaluated: '2024-01-10',
+                    criteria: {
+                        quality: 70,
+                        delivery: 60,
+                        price: 70,
+                        service: 60
+                    }
+                },
+                createdAt: '2024-01-01',
+                updatedAt: '2024-01-10'
+            },
+            {
+                id: 'SUP003',
+                number: 'L-2024-003',
+                name: 'Entsorgung Hamburg GmbH',
+                type: 'entsorger',
+                status: 'freigegeben',
+                contact: {
+                    person: 'Peter Müller',
+                    email: 'p.mueller@entsorgung-hh.de',
+                    phone: '+49 40 555777',
+                    address: 'Hafenstraße 10, 20459 Hamburg'
+                },
+                products: ['Abfallentsorgung', 'Recycling', 'Sonderabfall'],
+                certificates: [
+                    { name: 'Entsorgungsnachweis', validUntil: '2025-03-31', status: 'gültig' },
+                    { name: 'ISO 14001', validUntil: '2025-08-15', status: 'gültig' }
+                ],
+                evaluation: {
+                    score: 92,
+                    lastEvaluated: '2024-01-20',
+                    criteria: {
+                        quality: 95,
+                        delivery: 90,
+                        price: 85,
+                        service: 95
+                    }
+                },
+                createdAt: '2024-01-01',
+                updatedAt: '2024-01-20'
+            }
+        ];
+
+        this.saveSuppliersToStorage(defaultSuppliers);
+        return defaultSuppliers;
+    }
+
+    // Enhanced supplier management methods
+    showSupplierModal(supplierId = null) {
+        const modal = document.getElementById('supplierModal');
+        const form = document.getElementById('supplierForm');
+        const titleText = document.getElementById('supplierModalTitleText');
+        
+        if (supplierId) {
+            // Edit mode
+            titleText.textContent = 'Lieferant bearbeiten';
+            this.populateSupplierForm(supplierId);
+        } else {
+            // Add mode
+            titleText.textContent = 'Neuer Lieferant';
+            form.reset();
+            this.generateSupplierNumber();
+        }
+        
+        this.setupSupplierFormTabs();
+        this.setupScoreSliders();
+        modal.style.display = 'block';
+    }
+
+    generateSupplierNumber() {
+        const year = new Date().getFullYear();
+        const existingNumbers = this.suppliers.map(s => s.number);
+        let counter = 1;
+        let newNumber;
+        
+        do {
+            newNumber = `L-${year}-${counter.toString().padStart(3, '0')}`;
+            counter++;
+        } while (existingNumbers.includes(newNumber));
+        
+        document.getElementById('supplierNumber').value = newNumber;
+    }
+
+    setupSupplierFormTabs() {
+        const tabs = document.querySelectorAll('.supplier-form-tab');
+        const contents = document.querySelectorAll('.supplier-form-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content
+                contents.forEach(content => {
+                    content.classList.toggle('active', content.getAttribute('data-tab') === targetTab);
+                });
+            });
+        });
+    }
+
+    setupScoreSliders() {
+        const sliders = ['qualityScore', 'deliveryScore', 'priceScore', 'serviceScore'];
+        
+        sliders.forEach(sliderId => {
+            const slider = document.getElementById(sliderId);
+            const valueSpan = document.getElementById(sliderId + 'Value');
+            
+            if (slider && valueSpan) {
+                slider.addEventListener('input', () => {
+                    valueSpan.textContent = slider.value + '%';
+                    this.updateOverallScore();
+                });
+            }
+        });
+
+        // Setup evaluation form sliders too
+        const evalSliders = ['evalQualityScore', 'evalDeliveryScore', 'evalPriceScore', 'evalServiceScore'];
+        
+        evalSliders.forEach(sliderId => {
+            const slider = document.getElementById(sliderId);
+            const valueSpan = document.getElementById(sliderId + 'Value');
+            
+            if (slider && valueSpan) {
+                slider.addEventListener('input', () => {
+                    valueSpan.textContent = slider.value + '%';
+                    this.updateEvalOverallScore();
+                });
+            }
+        });
+    }
+
+    updateOverallScore() {
+        const quality = parseInt(document.getElementById('qualityScore')?.value || 0);
+        const delivery = parseInt(document.getElementById('deliveryScore')?.value || 0);
+        const price = parseInt(document.getElementById('priceScore')?.value || 0);
+        const service = parseInt(document.getElementById('serviceScore')?.value || 0);
+        
+        const overall = Math.round((quality + delivery + price + service) / 4);
+        const overallSpan = document.getElementById('overallScore');
+        if (overallSpan) {
+            overallSpan.textContent = overall + '%';
+        }
+    }
+
+    updateEvalOverallScore() {
+        const quality = parseInt(document.getElementById('evalQualityScore')?.value || 0);
+        const delivery = parseInt(document.getElementById('evalDeliveryScore')?.value || 0);
+        const price = parseInt(document.getElementById('evalPriceScore')?.value || 0);
+        const service = parseInt(document.getElementById('evalServiceScore')?.value || 0);
+        
+        const overall = Math.round((quality + delivery + price + service) / 4);
+        const overallSpan = document.getElementById('evalOverallScore');
+        if (overallSpan) {
+            overallSpan.textContent = overall + '%';
+        }
+    }
+
+    populateSupplierForm(supplierId) {
+        const supplier = this.suppliers.find(s => s.id === supplierId);
+        if (!supplier) return;
+
+        // Basic information
+        document.getElementById('supplierNumber').value = supplier.number || '';
+        document.getElementById('supplierName').value = supplier.name || '';
+        document.getElementById('supplierType').value = supplier.type || '';
+        document.getElementById('supplierStatus').value = supplier.status || 'neu';
+        document.getElementById('supplierDescription').value = supplier.description || '';
+
+        // Contact information
+        document.getElementById('contactPerson').value = supplier.contact?.person || '';
+        document.getElementById('contactEmail').value = supplier.contact?.email || '';
+        document.getElementById('contactPhone').value = supplier.contact?.phone || '';
+        document.getElementById('contactFax').value = supplier.contact?.fax || '';
+        document.getElementById('supplierAddress').value = supplier.contact?.address || '';
+        document.getElementById('supplierWebsite').value = supplier.contact?.website || '';
+        document.getElementById('supplierTaxId').value = supplier.contact?.taxId || '';
+
+        // Products
+        document.getElementById('supplierProducts').value = supplier.products?.join(', ') || '';
+        document.getElementById('supplierCapacity').value = supplier.capacity || '';
+        document.getElementById('supplierDeliveryTime').value = supplier.deliveryTime || '';
+        document.getElementById('supplierQualityStandards').value = supplier.qualityStandards || '';
+
+        // Evaluation scores
+        const evaluation = supplier.evaluation || {};
+        const criteria = evaluation.criteria || {};
+        
+        document.getElementById('qualityScore').value = criteria.quality || 75;
+        document.getElementById('deliveryScore').value = criteria.delivery || 75;
+        document.getElementById('priceScore').value = criteria.price || 75;
+        document.getElementById('serviceScore').value = criteria.service || 75;
+        document.getElementById('evaluationNotes').value = evaluation.notes || '';
+
+        // Update score displays
+        this.updateOverallScore();
+        ['qualityScore', 'deliveryScore', 'priceScore', 'serviceScore'].forEach(id => {
+            const slider = document.getElementById(id);
+            const valueSpan = document.getElementById(id + 'Value');
+            if (slider && valueSpan) {
+                valueSpan.textContent = slider.value + '%';
+            }
+        });
+
+        // Store current editing ID
+        this.currentEditingSupplierId = supplierId;
+    }
+
+    saveSupplier() {
+        const form = document.getElementById('supplierForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(form);
+        const supplierData = {
+            id: this.currentEditingSupplierId || 'SUP' + Date.now(),
+            number: formData.get('supplierNumber'),
+            name: formData.get('supplierName'),
+            type: formData.get('supplierType'),
+            status: formData.get('supplierStatus'),
+            description: formData.get('supplierDescription'),
+            contact: {
+                person: formData.get('contactPerson'),
+                email: formData.get('contactEmail'),
+                phone: formData.get('contactPhone'),
+                fax: formData.get('contactFax'),
+                address: formData.get('supplierAddress'),
+                website: formData.get('supplierWebsite'),
+                taxId: formData.get('supplierTaxId')
+            },
+            products: formData.get('supplierProducts').split(',').map(p => p.trim()).filter(p => p),
+            capacity: formData.get('supplierCapacity'),
+            deliveryTime: formData.get('supplierDeliveryTime'),
+            qualityStandards: formData.get('supplierQualityStandards'),
+            certificates: [], // Will be populated from the certificates section
+            evaluation: {
+                score: Math.round((
+                    parseInt(formData.get('qualityScore')) +
+                    parseInt(formData.get('deliveryScore')) +
+                    parseInt(formData.get('priceScore')) +
+                    parseInt(formData.get('serviceScore'))
+                ) / 4),
+                lastEvaluated: new Date().toISOString(),
+                criteria: {
+                    quality: parseInt(formData.get('qualityScore')),
+                    delivery: parseInt(formData.get('deliveryScore')),
+                    price: parseInt(formData.get('priceScore')),
+                    service: parseInt(formData.get('serviceScore'))
+                },
+                notes: formData.get('evaluationNotes')
+            },
+            createdAt: this.currentEditingSupplierId ? 
+                this.suppliers.find(s => s.id === this.currentEditingSupplierId)?.createdAt : new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        // Check for duplicate supplier number
+        if (!this.currentEditingSupplierId || 
+            this.suppliers.find(s => s.id !== this.currentEditingSupplierId && s.number === supplierData.number)) {
+            if (this.suppliers.some(s => s.number === supplierData.number)) {
+                alert('Diese Lieferantennummer ist bereits vergeben. Bitte wählen Sie eine andere.');
+                return;
+            }
+        }
+
+        if (this.currentEditingSupplierId) {
+            // Update existing supplier
+            const index = this.suppliers.findIndex(s => s.id === this.currentEditingSupplierId);
+            if (index !== -1) {
+                this.suppliers[index] = supplierData;
+            }
+        } else {
+            // Add new supplier
+            this.suppliers.push(supplierData);
+        }
+
+        this.saveSuppliersToStorage();
+        this.renderSupplierDashboard();
+        this.renderSupplierList();
+        
+        // Close modal
+        document.getElementById('supplierModal').style.display = 'none';
+        this.currentEditingSupplierId = null;
+
+        const action = this.currentEditingSupplierId ? 'aktualisiert' : 'hinzugefügt';
+        alert(`Lieferant "${supplierData.name}" wurde erfolgreich ${action}.`);
+    }
+
+    filterSuppliers() {
+        console.log('Filtering suppliers...');
+        this.renderSupplierList();
+    }
+
+    renderSupplierTabContent(tabName) {
+        switch (tabName) {
+            case 'overview':
+                this.renderSupplierDashboard();
+                break;
+            case 'suppliers':
+                this.renderSupplierList();
+                break;
+            case 'evaluations':
+                this.renderSupplierEvaluations();
+                break;
+            case 'documents':
+                this.renderSupplierDocuments();
+                break;
+            case 'audits':
+                this.renderSupplierAudits();
+                break;
+        }
+    }
+
+    renderSupplierDashboard() {
+        const stats = this.calculateSupplierStats();
+        this.updateSupplierStatistics(stats);
+        this.renderRecentSupplierActivity();
+    }
+
+    calculateSupplierStats() {
+        const suppliers = this.suppliers || [];
+        
+        const stats = {
+            total: suppliers.length,
+            approved: suppliers.filter(s => s.status === 'freigegeben').length,
+            critical: suppliers.filter(s => s.status === 'kritisch').length,
+            blocked: suppliers.filter(s => s.status === 'gesperrt').length,
+            new: suppliers.filter(s => s.status === 'neu').length
+        };
+
+        stats.avgScore = suppliers.length > 0 
+            ? Math.round(suppliers.reduce((sum, s) => sum + (s.evaluation?.score || 0), 0) / suppliers.length)
+            : 0;
+
+        return stats;
+    }
+
+    updateSupplierStatistics(stats) {
+        const elements = {
+            total: document.getElementById('totalSuppliersCount'),
+            approved: document.getElementById('approvedSuppliersCount'),
+            critical: document.getElementById('criticalSuppliersCount'),
+            blocked: document.getElementById('blockedSuppliersCount'),
+            avgScore: document.getElementById('avgSupplierScore')
+        };
+
+        if (elements.total) elements.total.textContent = stats.total;
+        if (elements.approved) elements.approved.textContent = stats.approved;
+        if (elements.critical) elements.critical.textContent = stats.critical;
+        if (elements.blocked) elements.blocked.textContent = stats.blocked;
+        if (elements.avgScore) elements.avgScore.textContent = stats.avgScore + '%';
+    }
+
+    renderSupplierList() {
+        const container = document.getElementById('suppliersList');
+        if (!container) return;
+
+        const filteredSuppliers = this.getFilteredSuppliers();
+        
+        if (filteredSuppliers.length === 0) {
+            container.innerHTML = '<p class="no-data">Keine Lieferanten gefunden.</p>';
+            return;
+        }
+
+        container.innerHTML = filteredSuppliers.map(supplier => `
+            <div class="supplier-card" data-id="${supplier.id}">
+                <div class="supplier-header">
+                    <div class="supplier-info">
+                        <h3>${supplier.name}</h3>
+                        <span class="supplier-number">${supplier.number}</span>
+                    </div>
+                    <div class="supplier-status">
+                        <span class="status-badge status-${supplier.status}">${this.getStatusLabel(supplier.status)}</span>
+                        <span class="supplier-type">${this.getTypeLabel(supplier.type)}</span>
+                    </div>
+                </div>
+                <div class="supplier-details">
+                    <div class="supplier-contact">
+                        <i class="fas fa-user"></i>
+                        <span>${supplier.contact.person}</span>
+                        <i class="fas fa-envelope"></i>
+                        <span>${supplier.contact.email}</span>
+                    </div>
+                    <div class="supplier-products">
+                        <i class="fas fa-box"></i>
+                        <span>${supplier.products.join(', ')}</span>
+                    </div>
+                </div>
+                <div class="supplier-metrics">
+                    <div class="metric">
+                        <span class="metric-label">Bewertung</span>
+                        <span class="metric-value">${supplier.evaluation?.score || 0}%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Zertifikate</span>
+                        <span class="metric-value">${supplier.certificates?.length || 0}</span>
+                    </div>
+                </div>
+                <div class="supplier-actions">
+                    <button class="btn-secondary" onclick="qhseDashboard.editSupplier('${supplier.id}')">
+                        <i class="fas fa-edit"></i> Bearbeiten
+                    </button>
+                    <button class="btn-primary" onclick="qhseDashboard.evaluateSupplier('${supplier.id}')">
+                        <i class="fas fa-star"></i> Bewerten
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    getFilteredSuppliers() {
+        const suppliers = this.suppliers || [];
+        const statusFilter = document.getElementById('supplierStatusFilter')?.value || 'all';
+        const typeFilter = document.getElementById('supplierTypeFilter')?.value || 'all';
+        const searchTerm = document.getElementById('supplierSearchInput')?.value.toLowerCase() || '';
+
+        return suppliers.filter(supplier => {
+            const matchesStatus = statusFilter === 'all' || supplier.status === statusFilter;
+            const matchesType = typeFilter === 'all' || supplier.type === typeFilter;
+            const matchesSearch = !searchTerm || 
+                supplier.name.toLowerCase().includes(searchTerm) ||
+                supplier.number.toLowerCase().includes(searchTerm) ||
+                supplier.contact.person.toLowerCase().includes(searchTerm);
+
+            return matchesStatus && matchesType && matchesSearch;
+        });
+    }
+
+    getStatusLabel(status) {
+        const labels = {
+            'freigegeben': 'Freigegeben',
+            'kritisch': 'Kritisch',
+            'gesperrt': 'Gesperrt',
+            'neu': 'Neu'
+        };
+        return labels[status] || status;
+    }
+
+    getTypeLabel(type) {
+        const labels = {
+            'warenlieferant': 'Warenlieferant',
+            'dienstleister': 'Dienstleister',
+            'entsorger': 'Entsorger',
+            'pruefinstitut': 'Prüfinstitut'
+        };
+        return labels[type] || type;
+    }
+
+    renderSupplierEvaluations() {
+        const container = document.getElementById('supplierEvaluationsList');
+        if (!container) return;
+        
+        const evaluations = this.suppliers.filter(s => s.evaluation).map(supplier => ({
+            ...supplier.evaluation,
+            supplierName: supplier.name,
+            supplierId: supplier.id,
+            status: supplier.status
+        })).sort((a, b) => new Date(b.lastEvaluated) - new Date(a.lastEvaluated));
+        
+        if (evaluations.length === 0) {
+            container.innerHTML = '<p class="no-data">Noch keine Bewertungen vorhanden.</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="evaluations-header">
+                <h3>Bewertungsübersicht</h3>
+                <button class="btn-primary" onclick="qhseDashboard.openEvaluationModal()">
+                    <i class="fas fa-plus"></i> Neue Bewertung
+                </button>
+            </div>
+            <div class="evaluations-list">
+                ${evaluations.map(evaluation => `
+                    <div class="evaluation-card">
+                        <div class="evaluation-header">
+                            <h4>${evaluation.supplierName}</h4>
+                            <span class="evaluation-score ${evaluation.score >= 80 ? 'success' : evaluation.score >= 60 ? 'warning' : 'danger'}">
+                                ${evaluation.score}%
+                            </span>
+                        </div>
+                        <div class="evaluation-details">
+                            <div class="evaluation-criteria">
+                                <div class="criterion-small">
+                                    <span>Qualität</span>
+                                    <span>${evaluation.criteria.quality}%</span>
+                                </div>
+                                <div class="criterion-small">
+                                    <span>Lieferung</span>
+                                    <span>${evaluation.criteria.delivery}%</span>
+                                </div>
+                                <div class="criterion-small">
+                                    <span>Preis</span>
+                                    <span>${evaluation.criteria.price}%</span>
+                                </div>
+                                <div class="criterion-small">
+                                    <span>Service</span>
+                                    <span>${evaluation.criteria.service}%</span>
+                                </div>
+                            </div>
+                            <div class="evaluation-meta">
+                                <span class="evaluation-date">${formatDate(evaluation.lastEvaluated)}</span>
+                                <span class="evaluation-status status-${evaluation.status}">${this.getStatusLabel(evaluation.status)}</span>
+                            </div>
+                        </div>
+                        <div class="evaluation-actions">
+                            <button class="btn-sm btn-secondary" onclick="qhseDashboard.openEvaluationModal('${evaluation.supplierId}')">
+                                <i class="fas fa-edit"></i> Bearbeiten
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    renderSupplierDocuments() {
+        const container = document.getElementById('supplierDocumentsList');
+        if (!container) return;
+        
+        const allDocuments = [];
+        this.suppliers.forEach(supplier => {
+            if (supplier.certificates) {
+                supplier.certificates.forEach(cert => {
+                    allDocuments.push({
+                        ...cert,
+                        supplierName: supplier.name,
+                        supplierId: supplier.id,
+                        type: 'certificate'
+                    });
+                });
+            }
+        });
+
+        container.innerHTML = `
+            <div class="documents-header">
+                <h3>Dokumente & Zertifikate</h3>
+                <div class="documents-filters">
+                    <select id="docTypeFilter" class="form-control">
+                        <option value="all">Alle Dokumente</option>
+                        <option value="certificate">Zertifikate</option>
+                        <option value="contract">Verträge</option>
+                        <option value="quality">Qualitätsdokumente</option>
+                    </select>
+                    <select id="docStatusFilter" class="form-control">
+                        <option value="all">Alle Status</option>
+                        <option value="valid">Gültig</option>
+                        <option value="expiring">Läuft ab</option>
+                        <option value="expired">Abgelaufen</option>
+                    </select>
+                </div>
+            </div>
+            <div class="documents-grid">
+                ${allDocuments.length > 0 ? allDocuments.map(doc => {
+                    const expiryDate = new Date(doc.validUntil);
+                    const today = new Date();
+                    const isExpired = expiryDate < today;
+                    const isExpiring = !isExpired && expiryDate < new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+                    
+                    return `
+                        <div class="document-card">
+                            <div class="document-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div class="document-info">
+                                <h4>${doc.name}</h4>
+                                <p class="document-supplier">${doc.supplierName}</p>
+                                <div class="document-meta">
+                                    <span class="document-expiry ${isExpired ? 'expired' : isExpiring ? 'expiring' : 'valid'}">
+                                        ${isExpired ? 'Abgelaufen' : isExpiring ? 'Läuft ab' : 'Gültig'} bis ${formatDate(doc.validUntil)}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <button class="btn-sm btn-secondary" title="Herunterladen">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="btn-sm btn-secondary" title="Vorschau">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('') : '<p class="no-data">Keine Dokumente verfügbar.</p>'}
+            </div>
+        `;
+    }
+
+    renderSupplierAudits() {
+        const container = document.getElementById('supplierAuditsList');
+        if (!container) return;
+        
+        // Generate sample audit data based on supplier evaluations
+        const auditData = this.suppliers.map(supplier => {
+            const lastEval = supplier.evaluation?.lastEvaluated ? new Date(supplier.evaluation.lastEvaluated) : null;
+            const score = supplier.evaluation?.score || 0;
+            
+            // Determine audit status
+            let auditStatus = 'planned';
+            let auditPriority = 'medium';
+            let nextAuditDate = new Date();
+            nextAuditDate.setMonth(nextAuditDate.getMonth() + 12);
+            
+            if (score < 60) {
+                auditStatus = 'urgent';
+                auditPriority = 'high';
+                nextAuditDate.setMonth(nextAuditDate.getMonth() - 10); // Due soon
+            } else if (score < 80) {
+                auditStatus = 'scheduled';
+                auditPriority = 'medium';
+                nextAuditDate.setMonth(nextAuditDate.getMonth() - 6);
+            }
+            
+            return {
+                supplierId: supplier.id,
+                supplierName: supplier.name,
+                lastAudit: lastEval,
+                nextAudit: nextAuditDate,
+                status: auditStatus,
+                priority: auditPriority,
+                score: score,
+                type: supplier.type
+            };
+        }).sort((a, b) => a.nextAudit - b.nextAudit);
+        
+        container.innerHTML = `
+            <div class="audits-header">
+                <h3>Audit-Planung</h3>
+                <div class="audits-actions">
+                    <button class="btn-secondary" onclick="qhseDashboard.planAudit()">
+                        <i class="fas fa-calendar"></i> Audit planen
+                    </button>
+                    <button class="btn-primary" onclick="qhseDashboard.openNewAuditModal()">
+                        <i class="fas fa-plus"></i> Neues Audit
+                    </button>
+                </div>
+            </div>
+            <div class="audits-calendar">
+                <h4>Anstehende Audits</h4>
+                <div class="audits-timeline">
+                    ${auditData.slice(0, 8).map(audit => `
+                        <div class="audit-item priority-${audit.priority}">
+                            <div class="audit-date">
+                                <span class="audit-day">${audit.nextAudit.getDate()}</span>
+                                <span class="audit-month">${audit.nextAudit.toLocaleDateString('de-DE', { month: 'short' })}</span>
+                            </div>
+                            <div class="audit-details">
+                                <h4>${audit.supplierName}</h4>
+                                <p class="audit-type">${this.getTypeLabel(audit.type)}</p>
+                                <div class="audit-meta">
+                                    <span class="audit-status status-${audit.status}">${this.getAuditStatusLabel(audit.status)}</span>
+                                    <span class="audit-score ${audit.score >= 80 ? 'success' : audit.score >= 60 ? 'warning' : 'danger'}">
+                                        Score: ${audit.score}%
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="audit-actions">
+                                <button class="btn-sm btn-secondary" onclick="qhseDashboard.scheduleAudit('${audit.supplierId}')">
+                                    <i class="fas fa-calendar"></i>
+                                </button>
+                                <button class="btn-sm btn-primary" onclick="qhseDashboard.startAudit('${audit.supplierId}')">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    getAuditStatusLabel(status) {
+        const labels = {
+            'planned': 'Geplant',
+            'scheduled': 'Terminiert', 
+            'urgent': 'Dringend',
+            'completed': 'Abgeschlossen',
+            'overdue': 'Überfällig'
+        };
+        return labels[status] || status;
+    }
+
+    // Additional audit methods
+    openNewAuditModal() {
+        alert('Neues Audit Modal wird in Kürze verfügbar sein.');
+    }
+
+    scheduleAudit(supplierId) {
+        const supplier = this.suppliers.find(s => s.id === supplierId);
+        if (supplier) {
+            alert(`Audit für "${supplier.name}" wird geplant.`);
+        }
+    }
+
+    startAudit(supplierId) {
+        const supplier = this.suppliers.find(s => s.id === supplierId);
+        if (supplier) {
+            alert(`Audit für "${supplier.name}" wird gestartet.`);
+        }
+    }
+
+    renderRecentSupplierActivity() {
+        const container = document.getElementById('recentSupplierActivity');
+        if (!container) return;
+        
+        const activities = [
+            { type: 'evaluation', supplier: 'Mustermann Stahl GmbH', date: '2024-01-15', message: 'Bewertung aktualisiert (85%)' },
+            { type: 'certificate', supplier: 'Technik Service Nord', date: '2024-01-10', message: 'Zertifikat läuft ab: ISO 45001' },
+            { type: 'approval', supplier: 'Entsorgung Hamburg GmbH', date: '2024-01-05', message: 'Freigegeben für Zusammenarbeit' }
+        ];
+
+        container.innerHTML = activities.map(activity => `
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-${this.getActivityIcon(activity.type)}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-header">
+                        <span class="activity-supplier">${activity.supplier}</span>
+                        <span class="activity-date">${formatDate(activity.date)}</span>
+                    </div>
+                    <div class="activity-message">${activity.message}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    getActivityIcon(type) {
+        const icons = {
+            'evaluation': 'star',
+            'certificate': 'certificate',
+            'approval': 'check-circle',
+            'audit': 'search'
+        };
+        return icons[type] || 'info-circle';
+    }
+
+    // Storage functions
+    saveSuppliersToStorage(suppliers = null) {
+        try {
+            const suppliersToSave = suppliers || this.suppliers;
+            localStorage.setItem('qhse_suppliers', JSON.stringify(suppliersToSave));
+            return true;
+        } catch (error) {
+            console.error('Error saving suppliers:', error);
+            return false;
+        }
+    }
+
+    // Enhanced quick action methods
+    openEvaluationModal(supplierId = null) {
+        const modal = document.getElementById('supplierEvaluationModal');
+        const form = document.getElementById('evaluationForm');
+        const supplierSelect = document.getElementById('evalSupplierSelect');
+        
+        // Populate supplier dropdown
+        supplierSelect.innerHTML = '<option value="">Bitte wählen...</option>';
+        this.suppliers.forEach(supplier => {
+            const option = document.createElement('option');
+            option.value = supplier.id;
+            option.textContent = `${supplier.name} (${supplier.number})`;
+            if (supplier.id === supplierId) {
+                option.selected = true;
+            }
+            supplierSelect.appendChild(option);
+        });
+
+        if (supplierId) {
+            this.loadSupplierEvaluation(supplierId);
+        }
+
+        this.setupScoreSliders();
+        modal.style.display = 'block';
+    }
+
+    loadSupplierEvaluation(supplierId) {
+        const supplier = this.suppliers.find(s => s.id === supplierId);
+        if (!supplier || !supplier.evaluation) return;
+
+        const criteria = supplier.evaluation.criteria || {};
+        document.getElementById('evalQualityScore').value = criteria.quality || 75;
+        document.getElementById('evalDeliveryScore').value = criteria.delivery || 75;
+        document.getElementById('evalPriceScore').value = criteria.price || 75;
+        document.getElementById('evalServiceScore').value = criteria.service || 75;
+        document.getElementById('evalNotes').value = supplier.evaluation.notes || '';
+
+        // Update displays
+        this.updateEvalOverallScore();
+        ['evalQualityScore', 'evalDeliveryScore', 'evalPriceScore', 'evalServiceScore'].forEach(id => {
+            const slider = document.getElementById(id);
+            const valueSpan = document.getElementById(id + 'Value');
+            if (slider && valueSpan) {
+                valueSpan.textContent = slider.value + '%';
+            }
+        });
+    }
+
+    saveSupplierEvaluation() {
+        const form = document.getElementById('evaluationForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(form);
+        const supplierId = formData.get('evalSupplierSelect');
+        
+        if (!supplierId) {
+            alert('Bitte wählen Sie einen Lieferanten aus.');
+            return;
+        }
+
+        const supplier = this.suppliers.find(s => s.id === supplierId);
+        if (!supplier) return;
+
+        const quality = parseInt(formData.get('evalQualityScore'));
+        const delivery = parseInt(formData.get('evalDeliveryScore'));
+        const price = parseInt(formData.get('evalPriceScore'));
+        const service = parseInt(formData.get('evalServiceScore'));
+
+        supplier.evaluation = {
+            score: Math.round((quality + delivery + price + service) / 4),
+            lastEvaluated: new Date().toISOString(),
+            criteria: { quality, delivery, price, service },
+            notes: formData.get('evalNotes')
+        };
+
+        // Update status based on score
+        if (supplier.evaluation.score >= 80) {
+            supplier.status = 'freigegeben';
+        } else if (supplier.evaluation.score >= 60) {
+            supplier.status = 'kritisch';
+        } else {
+            supplier.status = 'gesperrt';
+        }
+
+        supplier.updatedAt = new Date().toISOString();
+
+        this.saveSuppliersToStorage();
+        this.renderSupplierDashboard();
+        this.renderSupplierList();
+
+        document.getElementById('supplierEvaluationModal').style.display = 'none';
+        alert(`Bewertung für "${supplier.name}" wurde erfolgreich gespeichert (${supplier.evaluation.score}%).`);
+    }
+
+    checkCertificates() {
+        const expiringSoon = [];
+        const expired = [];
+        const today = new Date();
+        const threeMonthsFromNow = new Date();
+        threeMonthsFromNow.setMonth(today.getMonth() + 3);
+
+        this.suppliers.forEach(supplier => {
+            if (supplier.certificates) {
+                supplier.certificates.forEach(cert => {
+                    const expiryDate = new Date(cert.validUntil);
+                    if (expiryDate < today) {
+                        expired.push({supplier: supplier.name, certificate: cert.name, date: cert.validUntil});
+                    } else if (expiryDate < threeMonthsFromNow) {
+                        expiringSoon.push({supplier: supplier.name, certificate: cert.name, date: cert.validUntil});
+                    }
+                });
+            }
+        });
+
+        let message = 'Zertifikatsstatus-Überprüfung:\n\n';
+        
+        if (expired.length > 0) {
+            message += '🔴 ABGELAUFENE ZERTIFIKATE:\n';
+            expired.forEach(item => {
+                message += `• ${item.supplier}: ${item.certificate} (abgelaufen am ${formatDate(item.date)})\n`;
+            });
+            message += '\n';
+        }
+
+        if (expiringSoon.length > 0) {
+            message += '🟡 BALD ABLAUFENDE ZERTIFIKATE (nächste 3 Monate):\n';
+            expiringSoon.forEach(item => {
+                message += `• ${item.supplier}: ${item.certificate} (läuft ab am ${formatDate(item.date)})\n`;
+            });
+            message += '\n';
+        }
+
+        if (expired.length === 0 && expiringSoon.length === 0) {
+            message += '✅ Alle Zertifikate sind aktuell und gültig.';
+        }
+
+        alert(message);
+    }
+
+    planAudit() {
+        const suppliersNeedingAudit = this.suppliers.filter(supplier => {
+            const lastEvaluated = supplier.evaluation?.lastEvaluated ? new Date(supplier.evaluation.lastEvaluated) : null;
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            
+            return !lastEvaluated || lastEvaluated < oneYearAgo || supplier.evaluation.score < 70;
+        });
+
+        let message = 'Audit-Planung:\n\n';
+        
+        if (suppliersNeedingAudit.length > 0) {
+            message += 'Folgende Lieferanten benötigen ein Audit:\n\n';
+            suppliersNeedingAudit.forEach(supplier => {
+                const reason = supplier.evaluation?.score < 70 ? 'Niedrige Bewertung' : 'Keine aktuelle Bewertung';
+                const lastEval = supplier.evaluation?.lastEvaluated ? formatDate(supplier.evaluation.lastEvaluated) : 'Nie';
+                message += `• ${supplier.name}\n  Grund: ${reason}\n  Letzte Bewertung: ${lastEval}\n  Aktueller Score: ${supplier.evaluation?.score || 'N/A'}%\n\n`;
+            });
+        } else {
+            message += '✅ Alle Lieferanten sind aktuell bewertet und benötigen derzeit kein Audit.';
+        }
+
+        alert(message);
+    }
+
+    editSupplier(supplierId) {
+        this.showSupplierModal(supplierId);
+    }
+
+    evaluateSupplier(supplierId) {
+        this.openEvaluationModal(supplierId);
+    }
+
+    // Reports functionality
+    openReportsModal() {
+        const modal = document.getElementById('supplierReportsModal');
+        this.setupReportsTabs();
+        this.renderSupplierReports();
+        modal.style.display = 'block';
+    }
+
+    setupReportsTabs() {
+        const tabs = document.querySelectorAll('.reports-tab');
+        const contents = document.querySelectorAll('.reports-tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content
+                contents.forEach(content => {
+                    content.classList.toggle('active', content.getAttribute('data-tab') === targetTab);
+                });
+
+                // Render specific report content
+                this.renderReportContent(targetTab);
+            });
+        });
+    }
+
+    renderSupplierReports() {
+        this.renderReportContent('overview');
+    }
+
+    renderReportContent(reportType) {
+        switch (reportType) {
+            case 'overview':
+                this.renderOverviewReport();
+                break;
+            case 'performance':
+                this.renderPerformanceReport();
+                break;
+            case 'compliance':
+                this.renderComplianceReport();
+                break;
+        }
+    }
+
+    renderOverviewReport() {
+        const container = document.getElementById('supplierOverviewReport');
+        const stats = this.calculateSupplierStats();
+        
+        const typeDistribution = {};
+        const statusDistribution = {};
+        
+        this.suppliers.forEach(supplier => {
+            typeDistribution[supplier.type] = (typeDistribution[supplier.type] || 0) + 1;
+            statusDistribution[supplier.status] = (statusDistribution[supplier.status] || 0) + 1;
+        });
+
+        container.innerHTML = `
+            <div class="report-summary">
+                <h3>Lieferanten-Übersicht</h3>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h4>Gesamt Lieferanten</h4>
+                        <div class="summary-value">${stats.total}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Durchschnittsbewertung</h4>
+                        <div class="summary-value">${stats.avgScore}%</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Freigegeben</h4>
+                        <div class="summary-value success">${stats.approved}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Kritisch</h4>
+                        <div class="summary-value warning">${stats.critical}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="report-charts">
+                <div class="chart-section">
+                    <h4>Verteilung nach Typ</h4>
+                    <div class="chart-bars">
+                        ${Object.entries(typeDistribution).map(([type, count]) => `
+                            <div class="chart-bar">
+                                <span class="bar-label">${this.getTypeLabel(type)}</span>
+                                <div class="bar-container">
+                                    <div class="bar" style="width: ${(count / stats.total) * 100}%"></div>
+                                    <span class="bar-value">${count}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="chart-section">
+                    <h4>Verteilung nach Status</h4>
+                    <div class="chart-bars">
+                        ${Object.entries(statusDistribution).map(([status, count]) => `
+                            <div class="chart-bar">
+                                <span class="bar-label">${this.getStatusLabel(status)}</span>
+                                <div class="bar-container">
+                                    <div class="bar status-${status}" style="width: ${(count / stats.total) * 100}%"></div>
+                                    <span class="bar-value">${count}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderPerformanceReport() {
+        const container = document.getElementById('supplierPerformanceReport');
+        
+        const topPerformers = [...this.suppliers]
+            .filter(s => s.evaluation && s.evaluation.score)
+            .sort((a, b) => b.evaluation.score - a.evaluation.score)
+            .slice(0, 5);
+
+        const lowPerformers = [...this.suppliers]
+            .filter(s => s.evaluation && s.evaluation.score)
+            .sort((a, b) => a.evaluation.score - b.evaluation.score)
+            .slice(0, 5);
+
+        container.innerHTML = `
+            <div class="performance-section">
+                <h3>Leistungs-Analyse</h3>
+                
+                <div class="performance-tables">
+                    <div class="performance-table">
+                        <h4>🏆 Top Performer</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Lieferant</th>
+                                    <th>Bewertung</th>
+                                    <th>Status</th>
+                                    <th>Letzte Bewertung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${topPerformers.map(supplier => `
+                                    <tr>
+                                        <td>${supplier.name}</td>
+                                        <td><span class="score-badge success">${supplier.evaluation.score}%</span></td>
+                                        <td><span class="status-badge status-${supplier.status}">${this.getStatusLabel(supplier.status)}</span></td>
+                                        <td>${formatDate(supplier.evaluation.lastEvaluated)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="performance-table">
+                        <h4>⚠️ Verbesserung erforderlich</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Lieferant</th>
+                                    <th>Bewertung</th>
+                                    <th>Status</th>
+                                    <th>Maßnahmen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${lowPerformers.map(supplier => `
+                                    <tr>
+                                        <td>${supplier.name}</td>
+                                        <td><span class="score-badge ${supplier.evaluation.score < 60 ? 'danger' : 'warning'}">${supplier.evaluation.score}%</span></td>
+                                        <td><span class="status-badge status-${supplier.status}">${this.getStatusLabel(supplier.status)}</span></td>
+                                        <td>
+                                            ${supplier.evaluation.score < 60 ? 'Sofortige Maßnahmen' : 'Überwachung'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderComplianceReport() {
+        const container = document.getElementById('supplierComplianceReport');
+        
+        const certificateStatus = {};
+        const expiringCertificates = [];
+        const today = new Date();
+        const threeMonthsFromNow = new Date();
+        threeMonthsFromNow.setMonth(today.getMonth() + 3);
+
+        this.suppliers.forEach(supplier => {
+            if (supplier.certificates) {
+                supplier.certificates.forEach(cert => {
+                    const expiryDate = new Date(cert.validUntil);
+                    if (expiryDate < today) {
+                        cert.complianceStatus = 'expired';
+                    } else if (expiryDate < threeMonthsFromNow) {
+                        cert.complianceStatus = 'expiring';
+                        expiringCertificates.push({
+                            supplier: supplier.name,
+                            certificate: cert.name,
+                            expiryDate: cert.validUntil
+                        });
+                    } else {
+                        cert.complianceStatus = 'valid';
+                    }
+                    
+                    certificateStatus[cert.complianceStatus] = (certificateStatus[cert.complianceStatus] || 0) + 1;
+                });
+            }
+        });
+
+        container.innerHTML = `
+            <div class="compliance-section">
+                <h3>Compliance-Status</h3>
+                
+                <div class="compliance-summary">
+                    <div class="compliance-card">
+                        <h4>Gültige Zertifikate</h4>
+                        <div class="compliance-value success">${certificateStatus.valid || 0}</div>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>Bald ablaufend</h4>
+                        <div class="compliance-value warning">${certificateStatus.expiring || 0}</div>
+                    </div>
+                    <div class="compliance-card">
+                        <h4>Abgelaufen</h4>
+                        <div class="compliance-value danger">${certificateStatus.expired || 0}</div>
+                    </div>
+                </div>
+                
+                ${expiringCertificates.length > 0 ? `
+                    <div class="expiring-certificates">
+                        <h4>🚨 Bald ablaufende Zertifikate</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Lieferant</th>
+                                    <th>Zertifikat</th>
+                                    <th>Ablaufdatum</th>
+                                    <th>Tage verbleibend</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${expiringCertificates.map(item => {
+                                    const daysLeft = Math.ceil((new Date(item.expiryDate) - today) / (1000 * 60 * 60 * 24));
+                                    return `
+                                        <tr>
+                                            <td>${item.supplier}</td>
+                                            <td>${item.certificate}</td>
+                                            <td>${formatDate(item.expiryDate)}</td>
+                                            <td><span class="days-left ${daysLeft <= 30 ? 'danger' : 'warning'}">${daysLeft}</span></td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                ` : '<p class="no-issues">✅ Alle Zertifikate sind aktuell.</p>'}
+            </div>
+        `;
+    }
+
 }
 
 // Global dashboard instance for onclick handlers
@@ -13962,3 +18527,64 @@ function printSection(sectionId) {
     printWindow.print();
 }
 
+// Global dashboard instance for onclick handlers
+// Dashboard will be initialized in index.html
+// This allows for proper global access to the instance
+
+// Additional utility functions
+function formatDate(date) {
+    return new Date(date).toLocaleDateString('de-DE');
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Export functionality for reports
+function exportToCSV(data, filename) {
+    const csv = data.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Print functionality
+function printSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>QHSE Bericht - Hoffmann & Voss GmbH</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .no-print { display: none; }
+                    @media print {
+                        .no-print { display: none !important; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Hoffmann & Voss GmbH - QHSE Management System</h1>
+                <p>Erstellt am: ${new Date().toLocaleDateString('de-DE')}</p>
+                <hr>
+                ${section.innerHTML}
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.qhseDashboard = new QHSEDashboard();
+});

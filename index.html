@@ -117,6 +117,14 @@
                         <i class="fas fa-exclamation-circle"></i>
                         <span>Gefahrstoffe</span>
                     </li>
+                    <li class="menu-item static-item" data-section="schulungen" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,mitarbeiter,techniker,admin,root-admin">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Schulungen</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="lieferanten" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,admin,root-admin">
+                        <i class="fas fa-truck"></i>
+                        <span>Lieferantenbewertung</span>
+                    </li>
                     <li class="menu-item static-item" data-section="einstellungen" data-roles="root-admin">
                         <i class="fas fa-cog"></i>
                         <span>Einstellungen</span>
@@ -1982,6 +1990,525 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Training Management Section -->
+                <section id="schulungen-section" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-graduation-cap"></i> Schulungsmanagement</h2>
+                        <div class="section-actions">
+                            <button id="addTrainingBtn" class="btn-primary">
+                                <i class="fas fa-plus"></i> Neue Schulung
+                            </button>
+                            <button id="trainingReportsBtn" class="btn-secondary">
+                                <i class="fas fa-chart-bar"></i> Berichte
+                            </button>
+                            <button id="trainingCalendarBtn" class="btn-secondary">
+                                <i class="fas fa-calendar-alt"></i> Kalender
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Training Dashboard -->
+                    <div class="training-dashboard">
+                        <!-- Training Statistics -->
+                        <div class="training-stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="totalTrainingsCount">0</h3>
+                                    <p>Gesamt Schulungen</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="completedTrainingsCount">0</h3>
+                                    <p>Abgeschlossen</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="pendingTrainingsCount">0</h3>
+                                    <p>Ausstehend</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="overdueTrainingsCount">0</h3>
+                                    <p>Überfällig</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="training-quick-actions">
+                            <div class="quick-action-card">
+                                <h4>Meine Schulungen</h4>
+                                <p>Persönliche Schulungsübersicht</p>
+                                <button id="myTrainingsBtn" class="btn-primary">
+                                    <i class="fas fa-user-graduate"></i> Anzeigen
+                                </button>
+                            </div>
+                            <div class="quick-action-card">
+                                <h4>Schulungen zuweisen</h4>
+                                <p>Schulungen an Mitarbeiter zuweisen</p>
+                                <button id="assignTrainingsBtn" class="btn-secondary">
+                                    <i class="fas fa-user-plus"></i> Zuweisen
+                                </button>
+                            </div>
+                            <div class="quick-action-card">
+                                <h4>Zertifikate verwalten</h4>
+                                <p>Nachweise und Zertifikate</p>
+                                <button id="certificatesBtn" class="btn-secondary">
+                                    <i class="fas fa-certificate"></i> Verwalten
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Training Content Areas -->
+                    <div class="training-content">
+                        <!-- Tab Navigation -->
+                        <div class="training-tabs">
+                            <button class="training-tab-btn active" data-tab="overview">
+                                <i class="fas fa-home"></i> Übersicht
+                            </button>
+                            <button class="training-tab-btn" data-tab="my-trainings">
+                                <i class="fas fa-user"></i> Meine Schulungen
+                            </button>
+                            <button class="training-tab-btn" data-tab="all-trainings" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,admin,root-admin">
+                                <i class="fas fa-list"></i> Alle Schulungen
+                            </button>
+                            <button class="training-tab-btn" data-tab="assignments" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,admin,root-admin">
+                                <i class="fas fa-users"></i> Zuweisungen
+                            </button>
+                            <button class="training-tab-btn" data-tab="certificates">
+                                <i class="fas fa-certificate"></i> Zertifikate
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="training-tab-content">
+                            <!-- Overview Tab -->
+                            <div id="training-overview" class="training-tab-panel active">
+                                <div class="training-overview-content">
+                                    <div class="training-filters">
+                                        <div class="filter-group">
+                                            <label for="trainingStatusFilter">Status:</label>
+                                            <select id="trainingStatusFilter">
+                                                <option value="">Alle Status</option>
+                                                <option value="completed">Abgeschlossen</option>
+                                                <option value="pending">Ausstehend</option>
+                                                <option value="overdue">Überfällig</option>
+                                                <option value="in-progress">In Bearbeitung</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="trainingCategoryFilter">Kategorie:</label>
+                                            <select id="trainingCategoryFilter">
+                                                <option value="">Alle Kategorien</option>
+                                                <option value="safety">Arbeitssicherheit</option>
+                                                <option value="quality">Qualitätsmanagement</option>
+                                                <option value="environment">Umweltschutz</option>
+                                                <option value="health">Gesundheitsschutz</option>
+                                                <option value="data-protection">Datenschutz</option>
+                                                <option value="compliance">Compliance</option>
+                                                <option value="technical">Technische Schulung</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="trainingSearch">Suche:</label>
+                                            <input type="text" id="trainingSearch" placeholder="Schulung suchen...">
+                                        </div>
+                                    </div>
+                                    <div id="trainingOverviewList" class="training-list">
+                                        <!-- Training items will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- My Trainings Tab -->
+                            <div id="training-my-trainings" class="training-tab-panel">
+                                <div class="my-trainings-header">
+                                    <h3>Meine Schulungen</h3>
+                                    <div class="training-progress">
+                                        <div class="progress-info">
+                                            <span id="myTrainingProgress">0% abgeschlossen</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="myTrainingProgressBar"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="myTrainingsList" class="training-list">
+                                    <!-- Personal training items will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- All Trainings Tab -->
+                            <div id="training-all-trainings" class="training-tab-panel">
+                                <div class="all-trainings-header">
+                                    <h3>Alle Schulungen im Unternehmen</h3>
+                                    <div class="training-controls">
+                                        <button id="bulkAssignBtn" class="btn-secondary">
+                                            <i class="fas fa-users"></i> Massen-Zuweisung
+                                        </button>
+                                        <button id="exportTrainingsBtn" class="btn-secondary">
+                                            <i class="fas fa-download"></i> Exportieren
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="allTrainingsList" class="training-list">
+                                    <!-- All training items will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Assignments Tab -->
+                            <div id="training-assignments" class="training-tab-panel">
+                                <div class="assignments-header">
+                                    <h3>Schulungszuweisungen</h3>
+                                    <button id="newAssignmentBtn" class="btn-primary">
+                                        <i class="fas fa-plus"></i> Neue Zuweisung
+                                    </button>
+                                </div>
+                                <div class="assignments-grid">
+                                    <div class="assignment-filters">
+                                        <select id="assignmentDepartmentFilter">
+                                            <option value="">Alle Abteilungen</option>
+                                        </select>
+                                        <select id="assignmentRoleFilter">
+                                            <option value="">Alle Rollen</option>
+                                        </select>
+                                        <input type="date" id="assignmentDateFilter">
+                                    </div>
+                                </div>
+                                <div id="assignmentsList" class="assignments-list">
+                                    <!-- Assignment items will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Certificates Tab -->
+                            <div id="training-certificates" class="training-tab-panel">
+                                <div class="certificates-header">
+                                    <h3>Zertifikate & Nachweise</h3>
+                                    <button id="uploadCertificateBtn" class="btn-primary">
+                                        <i class="fas fa-upload"></i> Zertifikat hochladen
+                                    </button>
+                                </div>
+                                <div class="certificates-grid">
+                                    <div class="certificate-filters">
+                                        <select id="certificateStatusFilter">
+                                            <option value="">Alle Status</option>
+                                            <option value="valid">Gültig</option>
+                                            <option value="expiring">Läuft ab</option>
+                                            <option value="expired">Abgelaufen</option>
+                                        </select>
+                                        <input type="text" id="certificateSearch" placeholder="Zertifikat suchen...">
+                                    </div>
+                                </div>
+                                <div id="certificatesList" class="certificates-list">
+                                    <!-- Certificate items will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Supplier Management Section -->
+                <section id="lieferanten-section" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-truck"></i> Lieferantenbewertung & -management</h2>
+                        <div class="section-actions">
+                            <button id="addSupplierBtn" class="btn-primary">
+                                <i class="fas fa-plus"></i> Neuer Lieferant
+                            </button>
+                            <button id="supplierReportsBtn" class="btn-secondary">
+                                <i class="fas fa-chart-bar"></i> Berichte
+                            </button>
+                            <button id="supplierAuditBtn" class="btn-secondary">
+                                <i class="fas fa-search"></i> Audits
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Supplier Dashboard -->
+                    <div class="supplier-dashboard">
+                        <!-- Supplier Statistics -->
+                        <div class="supplier-stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-industry"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="totalSuppliersCount">0</h3>
+                                    <p>Gesamt Lieferanten</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="approvedSuppliersCount">0</h3>
+                                    <p>Freigegeben</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="criticalSuppliersCount">0</h3>
+                                    <p>Unter Beobachtung</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-ban"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="blockedSuppliersCount">0</h3>
+                                    <p>Gesperrt</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="supplier-quick-actions">
+                            <div class="quick-action-card">
+                                <h4>Bewertung durchführen</h4>
+                                <p>Lieferanten bewerten und Status aktualisieren</p>
+                                <button id="evaluateSupplierBtn" class="btn-primary">
+                                    <i class="fas fa-star"></i> Bewerten
+                                </button>
+                            </div>
+                            <div class="quick-action-card">
+                                <h4>Zertifikate prüfen</h4>
+                                <p>Ablaufende Zertifikate überprüfen</p>
+                                <button id="checkCertificatesBtn" class="btn-secondary">
+                                    <i class="fas fa-certificate"></i> Prüfen
+                                </button>
+                            </div>
+                            <div class="quick-action-card">
+                                <h4>Audit planen</h4>
+                                <p>Lieferantenaudit terminieren</p>
+                                <button id="planAuditBtn" class="btn-secondary">
+                                    <i class="fas fa-calendar-check"></i> Planen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Supplier Content Areas -->
+                    <div class="supplier-content">
+                        <!-- Tab Navigation -->
+                        <div class="supplier-tabs">
+                            <button class="supplier-tab-btn active" data-tab="overview">
+                                <i class="fas fa-home"></i> Übersicht
+                            </button>
+                            <button class="supplier-tab-btn" data-tab="suppliers">
+                                <i class="fas fa-list"></i> Lieferanten
+                            </button>
+                            <button class="supplier-tab-btn" data-tab="evaluations">
+                                <i class="fas fa-star"></i> Bewertungen
+                            </button>
+                            <button class="supplier-tab-btn" data-tab="documents">
+                                <i class="fas fa-file-alt"></i> Dokumente
+                            </button>
+                            <button class="supplier-tab-btn" data-tab="audits">
+                                <i class="fas fa-search"></i> Audits
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="supplier-tab-content">
+                            <!-- Overview Tab -->
+                            <div id="supplier-overview" class="supplier-tab-panel active">
+                                <div class="supplier-overview-grid">
+                                    <div class="overview-section">
+                                        <h3>Bewertungsübersicht</h3>
+                                        <div class="evaluation-summary">
+                                            <div class="evaluation-item">
+                                                <span class="evaluation-label">Durchschnittsbewertung:</span>
+                                                <span class="evaluation-value" id="avgEvaluation">0%</span>
+                                            </div>
+                                            <div class="evaluation-item">
+                                                <span class="evaluation-label">Bevorzugte Lieferanten:</span>
+                                                <span class="evaluation-value" id="preferredSuppliers">0</span>
+                                            </div>
+                                            <div class="evaluation-item">
+                                                <span class="evaluation-label">Kritische Lieferanten:</span>
+                                                <span class="evaluation-value" id="criticalSuppliers">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="overview-section">
+                                        <h3>Zertifikatsstatus</h3>
+                                        <div class="certificate-summary">
+                                            <div class="certificate-item">
+                                                <span class="certificate-label">Ablaufende Zertifikate (30 Tage):</span>
+                                                <span class="certificate-value warning" id="expiringCertificates">0</span>
+                                            </div>
+                                            <div class="certificate-item">
+                                                <span class="certificate-label">Abgelaufene Zertifikate:</span>
+                                                <span class="certificate-value error" id="expiredCertificates">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recent-activities">
+                                    <h3>Aktuelle Aktivitäten</h3>
+                                    <div id="recentSupplierActivity" class="activity-list">
+                                        <!-- Recent activities will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Suppliers Tab -->
+                            <div id="supplier-suppliers" class="supplier-tab-panel">
+                                <div class="suppliers-header">
+                                    <h3>Lieferantenverwaltung</h3>
+                                    <div class="supplier-filters">
+                                        <div class="filter-group">
+                                            <label for="supplierStatusFilter">Status:</label>
+                                            <select id="supplierStatusFilter" name="supplierStatusFilter" autocomplete="off">
+                                                <option value="">Alle Status</option>
+                                                <option value="approved">Freigegeben</option>
+                                                <option value="critical">Unter Beobachtung</option>
+                                                <option value="blocked">Gesperrt</option>
+                                                <option value="new">Neu</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="supplierTypeFilter">Typ:</label>
+                                            <select id="supplierTypeFilter" name="supplierTypeFilter" autocomplete="off">
+                                                <option value="">Alle Typen</option>
+                                                <option value="material">Warenlieferant</option>
+                                                <option value="service">Dienstleister</option>
+                                                <option value="disposal">Entsorger</option>
+                                                <option value="testing">Prüfinstitut</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="supplierSearch">Suche:</label>
+                                            <input type="text" id="supplierSearch" name="supplierSearch" placeholder="Lieferant suchen..." autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="suppliersList" class="suppliers-list">
+                                    <!-- Supplier items will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Evaluations Tab -->
+                            <div id="supplier-evaluations" class="supplier-tab-panel">
+                                <div class="evaluations-header">
+                                    <h3>Lieferantenbewertungen</h3>
+                                    <div class="evaluation-controls">
+                                        <button id="newEvaluationBtn" class="btn-primary">
+                                            <i class="fas fa-plus"></i> Neue Bewertung
+                                        </button>
+                                        <button id="evaluationMatrixBtn" class="btn-secondary">
+                                            <i class="fas fa-cog"></i> Bewertungsmatrix
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="evaluationsList" class="evaluations-list">
+                                    <!-- Evaluation items will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Documents Tab -->
+                            <div id="supplier-documents" class="supplier-tab-panel">
+                                <div class="documents-header">
+                                    <h3>Lieferantendokumente</h3>
+                                    <div class="document-controls">
+                                        <button id="uploadSupplierDocBtn" class="btn-primary">
+                                            <i class="fas fa-upload"></i> Dokument hochladen
+                                        </button>
+                                        <button id="checkDocumentsBtn" class="btn-secondary">
+                                            <i class="fas fa-check"></i> Gültigkeit prüfen
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="documents-grid">
+                                    <div class="document-filters">
+                                        <div class="filter-group">
+                                            <label for="documentTypeFilter">Dokumenttyp:</label>
+                                            <select id="documentTypeFilter" name="documentTypeFilter" autocomplete="off">
+                                                <option value="">Alle Dokumenttypen</option>
+                                                <option value="certificate">Zertifikate</option>
+                                                <option value="contract">Verträge</option>
+                                                <option value="audit">Auditberichte</option>
+                                                <option value="training">Schulungsnachweise</option>
+                                                <option value="safety">Gefährdungsbeurteilungen</option>
+                                                <option value="communication">Kommunikation</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="documentStatusFilter">Status:</label>
+                                            <select id="documentStatusFilter" name="documentStatusFilter" autocomplete="off">
+                                                <option value="">Alle Status</option>
+                                                <option value="valid">Gültig</option>
+                                                <option value="expiring">Läuft ab</option>
+                                                <option value="expired">Abgelaufen</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="supplierDocumentsList" class="documents-list">
+                                    <!-- Document items will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Evaluations Tab -->
+                            <div id="supplier-evaluations" class="supplier-tab-panel">
+                                <div class="evaluations-header">
+                                    <h3>Lieferantenbewertungen</h3>
+                                    <div class="evaluation-controls">
+                                        <button id="newEvaluationBtn" class="btn-primary" onclick="qhseDashboard.openEvaluationModal()">
+                                            <i class="fas fa-star"></i> Neue Bewertung
+                                        </button>
+                                        <button id="evaluationReportBtn" class="btn-secondary">
+                                            <i class="fas fa-chart-line"></i> Bewertungsreport
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="supplierEvaluationsList" class="evaluations-list">
+                                    <!-- Evaluation items will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Audits Tab -->
+                            <div id="supplier-audits" class="supplier-tab-panel">
+                                <div class="audits-header">
+                                    <h3>Lieferantenaudits</h3>
+                                    <div class="audit-controls">
+                                        <button id="newAuditBtn" class="btn-primary">
+                                            <i class="fas fa-plus"></i> Neues Audit
+                                        </button>
+                                        <button id="auditScheduleBtn" class="btn-secondary">
+                                            <i class="fas fa-calendar"></i> Auditplan
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="supplierAuditsList" class="audits-list">
+                                    <!-- Audit items will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
@@ -2777,5 +3304,368 @@
             }
         });
     </script>
+
+    <!-- Supplier Management Modal -->
+    <div id="supplierModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 id="supplierModalTitle">
+                    <i class="fas fa-truck"></i> 
+                    <span id="supplierModalTitleText">Neuer Lieferant</span>
+                </h2>
+                <button class="modal-close" onclick="document.getElementById('supplierModal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Supplier Form Tabs -->
+                <div class="supplier-form-tabs">
+                    <button class="supplier-form-tab active" data-tab="basic">
+                        <i class="fas fa-info-circle"></i> Grunddaten
+                    </button>
+                    <button class="supplier-form-tab" data-tab="contact">
+                        <i class="fas fa-address-book"></i> Kontakt
+                    </button>
+                    <button class="supplier-form-tab" data-tab="products">
+                        <i class="fas fa-box"></i> Produkte/Services
+                    </button>
+                    <button class="supplier-form-tab" data-tab="certificates">
+                        <i class="fas fa-certificate"></i> Zertifikate
+                    </button>
+                    <button class="supplier-form-tab" data-tab="evaluation">
+                        <i class="fas fa-star"></i> Bewertung
+                    </button>
+                </div>
+
+                <form id="supplierForm">
+                    <!-- Basic Information Tab -->
+                    <div class="supplier-form-content active" data-tab="basic">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="supplierNumber">Lieferantennummer *</label>
+                                <input type="text" id="supplierNumber" name="supplierNumber" 
+                                       autocomplete="organization" required
+                                       placeholder="L-2024-XXX">
+                            </div>
+                            <div class="form-group">
+                                <label for="supplierName">Firmenname *</label>
+                                <input type="text" id="supplierName" name="supplierName" 
+                                       autocomplete="organization" required
+                                       placeholder="Firma GmbH">
+                            </div>
+                            <div class="form-group">
+                                <label for="supplierType">Typ *</label>
+                                <select id="supplierType" name="supplierType" autocomplete="off" required>
+                                    <option value="">Bitte wählen...</option>
+                                    <option value="warenlieferant">Warenlieferant</option>
+                                    <option value="dienstleister">Dienstleister</option>
+                                    <option value="entsorger">Entsorger</option>
+                                    <option value="pruefinstitut">Prüfinstitut</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="supplierStatus">Status</label>
+                                <select id="supplierStatus" name="supplierStatus" autocomplete="off">
+                                    <option value="neu">Neu</option>
+                                    <option value="freigegeben">Freigegeben</option>
+                                    <option value="kritisch">Kritisch</option>
+                                    <option value="gesperrt">Gesperrt</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="supplierDescription">Beschreibung</label>
+                            <textarea id="supplierDescription" name="supplierDescription" 
+                                      autocomplete="off" rows="3"
+                                      placeholder="Kurze Beschreibung des Lieferanten..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Tab -->
+                    <div class="supplier-form-content" data-tab="contact">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="contactPerson">Ansprechpartner *</label>
+                                <input type="text" id="contactPerson" name="contactPerson" 
+                                       autocomplete="name" required
+                                       placeholder="Max Mustermann">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">E-Mail *</label>
+                                <input type="email" id="contactEmail" name="contactEmail" 
+                                       autocomplete="email" required
+                                       placeholder="max@firma.de">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactPhone">Telefon</label>
+                                <input type="tel" id="contactPhone" name="contactPhone" 
+                                       autocomplete="tel" 
+                                       placeholder="+49 XXX XXXXXXX">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactFax">Fax</label>
+                                <input type="tel" id="contactFax" name="contactFax" 
+                                       autocomplete="tel" 
+                                       placeholder="+49 XXX XXXXXXX">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="supplierAddress">Adresse *</label>
+                            <textarea id="supplierAddress" name="supplierAddress" 
+                                      autocomplete="street-address" required rows="3"
+                                      placeholder="Straße, PLZ Ort, Land"></textarea>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="supplierWebsite">Website</label>
+                                <input type="url" id="supplierWebsite" name="supplierWebsite" 
+                                       autocomplete="url" 
+                                       placeholder="https://www.firma.de">
+                            </div>
+                            <div class="form-group">
+                                <label for="supplierTaxId">Steuernummer</label>
+                                <input type="text" id="supplierTaxId" name="supplierTaxId" 
+                                       autocomplete="off" 
+                                       placeholder="DE123456789">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products/Services Tab -->
+                    <div class="supplier-form-content" data-tab="products">
+                        <div class="form-group">
+                            <label for="supplierProducts">Produkte/Dienstleistungen *</label>
+                            <textarea id="supplierProducts" name="supplierProducts" 
+                                      autocomplete="off" required rows="4"
+                                      placeholder="Kommagetrennte Liste der Produkte/Dienstleistungen..."></textarea>
+                            <small>Trennen Sie verschiedene Produkte mit Kommas</small>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="supplierCapacity">Kapazität</label>
+                                <input type="text" id="supplierCapacity" name="supplierCapacity" 
+                                       autocomplete="off" 
+                                       placeholder="z.B. 1000 Einheiten/Monat">
+                            </div>
+                            <div class="form-group">
+                                <label for="supplierDeliveryTime">Lieferzeit</label>
+                                <input type="text" id="supplierDeliveryTime" name="supplierDeliveryTime" 
+                                       autocomplete="off" 
+                                       placeholder="z.B. 2-3 Wochen">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="supplierQualityStandards">Qualitätsstandards</label>
+                            <textarea id="supplierQualityStandards" name="supplierQualityStandards" 
+                                      autocomplete="off" rows="3"
+                                      placeholder="Beschreibung der Qualitätsstandards..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Certificates Tab -->
+                    <div class="supplier-form-content" data-tab="certificates">
+                        <div class="certificates-section">
+                            <div class="section-header">
+                                <h3>Zertifikate</h3>
+                                <button type="button" id="addCertificateBtn" class="btn-secondary">
+                                    <i class="fas fa-plus"></i> Zertifikat hinzufügen
+                                </button>
+                            </div>
+                            <div id="certificatesList" class="certificates-list">
+                                <!-- Certificates will be added here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evaluation Tab -->
+                    <div class="supplier-form-content" data-tab="evaluation">
+                        <div class="evaluation-section">
+                            <h3>Lieferantenbewertung</h3>
+                            <div class="evaluation-criteria">
+                                <div class="criterion">
+                                    <label for="qualityScore">Qualität (0-100%)</label>
+                                    <div class="score-input">
+                                        <input type="range" id="qualityScore" name="qualityScore" 
+                                               min="0" max="100" value="75">
+                                        <span id="qualityScoreValue">75%</span>
+                                    </div>
+                                </div>
+                                <div class="criterion">
+                                    <label for="deliveryScore">Lieferperformance (0-100%)</label>
+                                    <div class="score-input">
+                                        <input type="range" id="deliveryScore" name="deliveryScore" 
+                                               min="0" max="100" value="75">
+                                        <span id="deliveryScoreValue">75%</span>
+                                    </div>
+                                </div>
+                                <div class="criterion">
+                                    <label for="priceScore">Preis-Leistung (0-100%)</label>
+                                    <div class="score-input">
+                                        <input type="range" id="priceScore" name="priceScore" 
+                                               min="0" max="100" value="75">
+                                        <span id="priceScoreValue">75%</span>
+                                    </div>
+                                </div>
+                                <div class="criterion">
+                                    <label for="serviceScore">Service (0-100%)</label>
+                                    <div class="score-input">
+                                        <input type="range" id="serviceScore" name="serviceScore" 
+                                               min="0" max="100" value="75">
+                                        <span id="serviceScoreValue">75%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="overall-score">
+                                <h4>Gesamtbewertung: <span id="overallScore">75%</span></h4>
+                            </div>
+                            <div class="form-group">
+                                <label for="evaluationNotes">Bewertungsnotizen</label>
+                                <textarea id="evaluationNotes" name="evaluationNotes" 
+                                          autocomplete="off" rows="4"
+                                          placeholder="Zusätzliche Notizen zur Bewertung..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="document.getElementById('supplierModal').style.display='none'">
+                    Abbrechen
+                </button>
+                <button type="submit" form="supplierForm" class="btn-primary">
+                    <i class="fas fa-save"></i> Speichern
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supplier Evaluation Modal -->
+    <div id="supplierEvaluationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-star"></i> Lieferant bewerten</h2>
+                <button class="modal-close" onclick="document.getElementById('supplierEvaluationModal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="evaluationForm">
+                    <div class="form-group">
+                        <label for="evalSupplierSelect">Lieferant auswählen</label>
+                        <select id="evalSupplierSelect" name="evalSupplierSelect" autocomplete="off" required>
+                            <option value="">Bitte wählen...</option>
+                        </select>
+                    </div>
+                    <div class="evaluation-criteria">
+                        <div class="criterion">
+                            <label for="evalQualityScore">Qualität (0-100%)</label>
+                            <div class="score-input">
+                                <input type="range" id="evalQualityScore" name="evalQualityScore" 
+                                       min="0" max="100" value="75">
+                                <span id="evalQualityScoreValue">75%</span>
+                            </div>
+                        </div>
+                        <div class="criterion">
+                            <label for="evalDeliveryScore">Lieferperformance (0-100%)</label>
+                            <div class="score-input">
+                                <input type="range" id="evalDeliveryScore" name="evalDeliveryScore" 
+                                       min="0" max="100" value="75">
+                                <span id="evalDeliveryScoreValue">75%</span>
+                            </div>
+                        </div>
+                        <div class="criterion">
+                            <label for="evalPriceScore">Preis-Leistung (0-100%)</label>
+                            <div class="score-input">
+                                <input type="range" id="evalPriceScore" name="evalPriceScore" 
+                                       min="0" max="100" value="75">
+                                <span id="evalPriceScoreValue">75%</span>
+                            </div>
+                        </div>
+                        <div class="criterion">
+                            <label for="evalServiceScore">Service (0-100%)</label>
+                            <div class="score-input">
+                                <input type="range" id="evalServiceScore" name="evalServiceScore" 
+                                       min="0" max="100" value="75">
+                                <span id="evalServiceScoreValue">75%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overall-score">
+                        <h4>Gesamtbewertung: <span id="evalOverallScore">75%</span></h4>
+                    </div>
+                    <div class="form-group">
+                        <label for="evalNotes">Bewertungsnotizen</label>
+                        <textarea id="evalNotes" name="evalNotes" autocomplete="off" rows="4"
+                                  placeholder="Zusätzliche Notizen zur Bewertung..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="document.getElementById('supplierEvaluationModal').style.display='none'">
+                    Abbrechen
+                </button>
+                <button type="submit" form="evaluationForm" class="btn-primary">
+                    <i class="fas fa-save"></i> Bewertung speichern
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supplier Reports Modal -->
+    <div id="supplierReportsModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-chart-bar"></i> Lieferanten-Berichte</h2>
+                <button class="modal-close" onclick="document.getElementById('supplierReportsModal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="reports-tabs">
+                    <button class="reports-tab active" data-tab="overview">
+                        <i class="fas fa-chart-pie"></i> Übersicht
+                    </button>
+                    <button class="reports-tab" data-tab="performance">
+                        <i class="fas fa-chart-line"></i> Performance
+                    </button>
+                    <button class="reports-tab" data-tab="compliance">
+                        <i class="fas fa-certificate"></i> Compliance
+                    </button>
+                </div>
+                
+                <div class="reports-content">
+                    <div class="reports-tab-content active" data-tab="overview">
+                        <div id="supplierOverviewReport" class="report-section">
+                            <!-- Overview report content -->
+                        </div>
+                    </div>
+                    <div class="reports-tab-content" data-tab="performance">
+                        <div id="supplierPerformanceReport" class="report-section">
+                            <!-- Performance report content -->
+                        </div>
+                    </div>
+                    <div class="reports-tab-content" data-tab="compliance">
+                        <div id="supplierComplianceReport" class="report-section">
+                            <!-- Compliance report content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary">
+                    <i class="fas fa-download"></i> PDF Export
+                </button>
+                <button type="button" class="btn-secondary">
+                    <i class="fas fa-file-csv"></i> CSV Export
+                </button>
+                <button type="button" class="btn-primary" onclick="document.getElementById('supplierReportsModal').style.display='none'">
+                    Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
