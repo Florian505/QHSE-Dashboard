@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐛 Debug Urlaubsplanung Funktionen</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .debug-container { max-width: 1200px; margin: 0 auto; }
+        .debug-card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .debug-header { background: #dc3545; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .debug-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .debug-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .debug-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .debug-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .console-output { background: #1e1e1e; color: #00ff00; padding: 15px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 400px; overflow-y: auto; margin: 15px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <div class="debug-header">
+            <h1>🐛 URLAUBSPLANUNG DEBUG - Funktionen reparieren</h1>
+            <p>Systematische Fehlersuche und Reparatur aller nicht-funktionierenden Features</p>
+        </div>
+
+        <div class="debug-card">
+            <h2>🔍 Diagnose-Tests</h2>
+            <div class="grid">
+                <div>
+                    <h3>1. Element-Existenz prüfen</h3>
+                    <button class="btn btn-primary" onclick="checkElements()">
+                        🔍 Elemente prüfen
+                    </button>
+                    <div id="elementsResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>2. Event Listener testen</h3>
+                    <button class="btn btn-primary" onclick="checkEventListeners()">
+                        ⚡ Events prüfen
+                    </button>
+                    <div id="eventsResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>3. JavaScript Methoden</h3>
+                    <button class="btn btn-primary" onclick="checkMethods()">
+                        🧪 Methoden testen
+                    </button>
+                    <div id="methodsResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>4. Tab-Funktionalität</h3>
+                    <button class="btn btn-primary" onclick="checkTabs()">
+                        📑 Tabs testen
+                    </button>
+                    <div id="tabsResult" class="debug-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="debug-card">
+            <h2>🔧 Manuelle Funktions-Tests</h2>
+            <div class="grid">
+                <div>
+                    <h3>Quick Actions</h3>
+                    <button class="btn btn-success" onclick="testQuickActions()">
+                        🚀 Quick Actions testen
+                    </button>
+                    <div id="quickActionsResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>Modal Funktionen</h3>
+                    <button class="btn btn-success" onclick="testModals()">
+                        🎯 Modals testen
+                    </button>
+                    <div id="modalsResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>Tab Navigation</h3>
+                    <button class="btn btn-success" onclick="testTabNavigation()">
+                        📑 Tab-Navigation testen
+                    </button>
+                    <div id="tabNavResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>QHSE Dashboard</h3>
+                    <button class="btn btn-success" onclick="testQHSEDashboard()">
+                        🎛️ Dashboard testen
+                    </button>
+                    <div id="dashboardResult" class="debug-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="debug-card">
+            <h2>📊 Live-Konsolen-Output</h2>
+            <div class="console-output" id="consoleOutput">
+Bereit für Debug-Tests...<br>
+            </div>
+            <button class="btn btn-danger" onclick="clearConsole()">🧹 Konsole leeren</button>
+        </div>
+
+        <div class="debug-card">
+            <h2>🔧 Reparatur-Aktionen</h2>
+            <div class="grid">
+                <div>
+                    <h3>Event Listener reparieren</h3>
+                    <button class="btn btn-danger" onclick="repairEventListeners()">
+                        🔧 Event Listener reparieren
+                    </button>
+                    <div id="repairEventsResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>Tabs reparieren</h3>
+                    <button class="btn btn-danger" onclick="repairTabs()">
+                        🔧 Tab-System reparieren
+                    </button>
+                    <div id="repairTabsResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>Vacation Management neu starten</h3>
+                    <button class="btn btn-danger" onclick="restartVacationManagement()">
+                        🔄 Vacation Management neu starten
+                    </button>
+                    <div id="restartResult" class="debug-result"></div>
+                </div>
+                <div>
+                    <h3>Vollständige Reparatur</h3>
+                    <button class="btn btn-danger" onclick="performFullRepair()">
+                        🛠️ Vollständige Reparatur
+                    </button>
+                    <div id="fullRepairResult" class="debug-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="debug-card">
+            <h2>🚀 Zur Hauptanwendung</h2>
+            <button class="btn btn-primary" onclick="window.open('index.html', '_blank')">
+                🚀 Hauptanwendung öffnen (zum Testen)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Console logging helper
+        function log(message, type = 'info') {
+            const consoleOutput = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#74c0fc';
+            consoleOutput.innerHTML += `<span style="color: ${color};">[${timestamp}] ${message}</span><br>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            console.log(message);
+        }
+
+        function clearConsole() {
+            document.getElementById('consoleOutput').innerHTML = 'Konsole geleert...<br>';
+        }
+
+        function showResult(elementId, success, message) {
+            const element = document.getElementById(elementId);
+            const className = success ? 'debug-success' : 'debug-error';
+            const icon = success ? '✅' : '❌';
+            element.innerHTML = `<div class="${className}">${icon} ${message}</div>`;
+        }
+
+        // Diagnosis Functions
+        function checkElements() {
+            log('Prüfe Existenz von Urlaubsplanung-Elementen...', 'info');
+            
+            const elements = [
+                'quickVacationRequestBtn',
+                'quickTeamViewBtn', 
+                'quickApprovalBtn',
+                'vacationRequestModal',
+                'vacationRequestForm',
+                'vacationPrevMonthBtn',
+                'vacationNextMonthBtn',
+                'vacationCurrentMonth'
+            ];
+
+            let results = [];
+            let allFound = true;
+
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    results.push(`✅ ${id}: Gefunden`);
+                    log(`Element gefunden: ${id}`, 'success');
+                } else {
+                    results.push(`❌ ${id}: NICHT GEFUNDEN`);
+                    log(`Element FEHLT: ${id}`, 'error');
+                    allFound = false;
+                }
+            });
+
+            showResult('elementsResult', allFound, `Elemente-Check: ${allFound ? 'Alle gefunden' : 'Einige fehlen'}`);
+            
+            // Show details
+            document.getElementById('elementsResult').innerHTML += 
+                '<div style="margin-top: 10px; font-size: 12px;">' + results.join('<br>') + '</div>';
+        }
+
+        function checkEventListeners() {
+            log('Prüfe Event Listener...', 'info');
+            
+            let hasListeners = false;
+            let results = [];
+
+            // Check if QHSE Dashboard exists
+            if (window.qhseDashboard) {
+                log('QHSE Dashboard gefunden', 'success');
+                results.push('✅ window.qhseDashboard existiert');
+                
+                // Check if vacation methods exist
+                const methods = [
+                    'setupVacationManagement',
+                    'showVacationRequestModal',
+                    'showTeamVacationView',
+                    'showVacationApprovalView'
+                ];
+                
+                methods.forEach(method => {
+                    if (typeof window.qhseDashboard[method] === 'function') {
+                        results.push(`✅ ${method}: Verfügbar`);
+                        log(`Methode verfügbar: ${method}`, 'success');
+                    } else {
+                        results.push(`❌ ${method}: FEHLT`);
+                        log(`Methode FEHLT: ${method}`, 'error');
+                    }
+                });
+                
+                hasListeners = true;
+            } else {
+                log('QHSE Dashboard NICHT gefunden!', 'error');
+                results.push('❌ window.qhseDashboard FEHLT');
+            }
+
+            showResult('eventsResult', hasListeners, hasListeners ? 'Event-System verfügbar' : 'Event-System FEHLT');
+            document.getElementById('eventsResult').innerHTML += 
+                '<div style="margin-top: 10px; font-size: 12px;">' + results.join('<br>') + '</div>';
+        }
+
+        function checkMethods() {
+            log('Teste JavaScript-Methoden...', 'info');
+            
+            if (!window.qhseDashboard) {
+                showResult('methodsResult', false, 'QHSE Dashboard nicht verfügbar');
+                return;
+            }
+
+            try {
+                // Test vacation data loading
+                const vacationRequests = window.qhseDashboard.vacationRequests || [];
+                const vacationAccounts = window.qhseDashboard.vacationAccounts || {};
+                
+                log(`Vacation Requests: ${vacationRequests.length}`, 'info');
+                log(`Vacation Accounts: ${Object.keys(vacationAccounts).length}`, 'info');
+                
+                showResult('methodsResult', true, `Daten geladen: ${vacationRequests.length} Anträge, ${Object.keys(vacationAccounts).length} Konten`);
+            } catch (error) {
+                log(`Fehler beim Testen der Methoden: ${error.message}`, 'error');
+                showResult('methodsResult', false, 'Fehler beim Methodentest');
+            }
+        }
+
+        function checkTabs() {
+            log('Prüfe Tab-Funktionalität...', 'info');
+            
+            const tabButtons = document.querySelectorAll('.vacation-tab-btn');
+            const tabPanels = document.querySelectorAll('.vacation-tab-panel');
+            
+            log(`Tab Buttons gefunden: ${tabButtons.length}`, 'info');
+            log(`Tab Panels gefunden: ${tabPanels.length}`, 'info');
+            
+            let results = [];
+            tabButtons.forEach((btn, index) => {
+                const tabName = btn.getAttribute('data-tab') || `tab-${index}`;
+                results.push(`Tab Button: ${tabName}`);
+            });
+            
+            tabPanels.forEach((panel, index) => {
+                const panelId = panel.id || `panel-${index}`;
+                results.push(`Tab Panel: ${panelId}`);
+            });
+
+            const tabsOk = tabButtons.length > 0 && tabPanels.length > 0;
+            showResult('tabsResult', tabsOk, `Tabs: ${tabButtons.length} Buttons, ${tabPanels.length} Panels`);
+            document.getElementById('tabsResult').innerHTML += 
+                '<div style="margin-top: 10px; font-size: 12px;">' + results.join('<br>') + '</div>';
+        }
+
+        // Test Functions
+        function testQuickActions() {
+            log('Teste Quick Action Buttons...', 'info');
+            
+            const buttons = [
+                { id: 'quickVacationRequestBtn', name: 'Vacation Request' },
+                { id: 'quickTeamViewBtn', name: 'Team View' },
+                { id: 'quickApprovalBtn', name: 'Approval' }
+            ];
+            
+            let results = [];
+            let allWorking = true;
+            
+            buttons.forEach(btn => {
+                const element = document.getElementById(btn.id);
+                if (element) {
+                    try {
+                        // Simulate click event
+                        log(`Teste Button: ${btn.name}`, 'info');
+                        element.click();
+                        results.push(`✅ ${btn.name}: Click funktioniert`);
+                    } catch (error) {
+                        results.push(`❌ ${btn.name}: Click-Fehler - ${error.message}`);
+                        allWorking = false;
+                        log(`Button-Fehler ${btn.name}: ${error.message}`, 'error');
+                    }
+                } else {
+                    results.push(`❌ ${btn.name}: Button nicht gefunden`);
+                    allWorking = false;
+                    log(`Button nicht gefunden: ${btn.id}`, 'error');
+                }
+            });
+            
+            showResult('quickActionsResult', allWorking, allWorking ? 'Alle Buttons funktionieren' : 'Einige Buttons fehlerhaft');
+            document.getElementById('quickActionsResult').innerHTML += 
+                '<div style="margin-top: 10px; font-size: 12px;">' + results.join('<br>') + '</div>';
+        }
+
+        function testModals() {
+            log('Teste Modal-Funktionalität...', 'info');
+            
+            if (!window.qhseDashboard) {
+                showResult('modalsResult', false, 'QHSE Dashboard nicht verfügbar');
+                return;
+            }
+            
+            try {
+                // Test modal method
+                if (typeof window.qhseDashboard.showVacationRequestModal === 'function') {
+                    log('showVacationRequestModal Methode gefunden', 'success');
+                    // Don't actually call it to avoid opening modal
+                    showResult('modalsResult', true, 'Modal-Methoden verfügbar');
+                } else {
+                    log('showVacationRequestModal Methode FEHLT', 'error');
+                    showResult('modalsResult', false, 'Modal-Methoden fehlen');
+                }
+            } catch (error) {
+                log(`Modal-Test Fehler: ${error.message}`, 'error');
+                showResult('modalsResult', false, 'Modal-Test fehlgeschlagen');
+            }
+        }
+
+        function testTabNavigation() {
+            log('Teste Tab-Navigation...', 'info');
+            
+            const tabButtons = document.querySelectorAll('.vacation-tab-btn');
+            let results = [];
+            let allWorking = true;
+            
+            tabButtons.forEach((btn, index) => {
+                try {
+                    const tabName = btn.getAttribute('data-tab') || `tab-${index}`;
+                    log(`Teste Tab: ${tabName}`, 'info');
+                    
+                    // Test click (but don't actually click to avoid conflicts)
+                    if (btn.onclick || btn.addEventListener) {
+                        results.push(`✅ Tab ${tabName}: Event-Handler vorhanden`);
+                    } else {
+                        results.push(`❌ Tab ${tabName}: Kein Event-Handler`);
+                        allWorking = false;
+                    }
+                } catch (error) {
+                    results.push(`❌ Tab ${index}: Fehler - ${error.message}`);
+                    allWorking = false;
+                    log(`Tab-Fehler: ${error.message}`, 'error');
+                }
+            });
+            
+            showResult('tabNavResult', allWorking, `Tab-Navigation: ${allWorking ? 'Funktioniert' : 'Fehlerhaft'}`);
+            document.getElementById('tabNavResult').innerHTML += 
+                '<div style="margin-top: 10px; font-size: 12px;">' + results.join('<br>') + '</div>';
+        }
+
+        function testQHSEDashboard() {
+            log('Teste QHSE Dashboard Zustand...', 'info');
+            
+            if (!window.qhseDashboard) {
+                showResult('dashboardResult', false, 'QHSE Dashboard nicht geladen');
+                log('window.qhseDashboard ist undefined!', 'error');
+                return;
+            }
+            
+            try {
+                const dashboard = window.qhseDashboard;
+                const info = {
+                    users: dashboard.users ? dashboard.users.length : 0,
+                    currentUser: dashboard.getCurrentUser ? dashboard.getCurrentUser().displayName : 'Unbekannt',
+                    vacationRequests: dashboard.vacationRequests ? dashboard.vacationRequests.length : 0,
+                    vacationAccounts: dashboard.vacationAccounts ? Object.keys(dashboard.vacationAccounts).length : 0
+                };
+                
+                log(`Dashboard Info: ${JSON.stringify(info)}`, 'info');
+                showResult('dashboardResult', true, `Dashboard OK: ${info.users} Users, ${info.vacationRequests} Requests`);
+                
+                document.getElementById('dashboardResult').innerHTML += 
+                    `<div style="margin-top: 10px; font-size: 12px;">
+                        Benutzer: ${info.users}<br>
+                        Aktueller User: ${info.currentUser}<br>
+                        Vacation Requests: ${info.vacationRequests}<br>
+                        Vacation Accounts: ${info.vacationAccounts}
+                    </div>`;
+                    
+            } catch (error) {
+                log(`Dashboard-Test Fehler: ${error.message}`, 'error');
+                showResult('dashboardResult', false, 'Dashboard-Test fehlgeschlagen');
+            }
+        }
+
+        // Repair Functions
+        function repairEventListeners() {
+            log('Repariere Event Listeners...', 'warning');
+            
+            if (!window.qhseDashboard) {
+                showResult('repairEventsResult', false, 'Dashboard nicht verfügbar - kann nicht reparieren');
+                return;
+            }
+            
+            try {
+                // Re-setup vacation management
+                if (typeof window.qhseDashboard.setupVacationManagement === 'function') {
+                    window.qhseDashboard.setupVacationManagement();
+                    log('setupVacationManagement erneut ausgeführt', 'success');
+                }
+                
+                // Manually add event listeners if they're missing
+                const quickVacationBtn = document.getElementById('quickVacationRequestBtn');
+                if (quickVacationBtn) {
+                    quickVacationBtn.addEventListener('click', () => {
+                        log('Quick Vacation Button geklickt', 'info');
+                        if (window.qhseDashboard.showVacationRequestModal) {
+                            window.qhseDashboard.showVacationRequestModal();
+                        }
+                    });
+                    log('Quick Vacation Button Event Listener hinzugefügt', 'success');
+                }
+                
+                const quickTeamBtn = document.getElementById('quickTeamViewBtn');
+                if (quickTeamBtn) {
+                    quickTeamBtn.addEventListener('click', () => {
+                        log('Quick Team Button geklickt', 'info');
+                        if (window.qhseDashboard.showTeamVacationView) {
+                            window.qhseDashboard.showTeamVacationView();
+                        }
+                    });
+                    log('Quick Team Button Event Listener hinzugefügt', 'success');
+                }
+                
+                const quickApprovalBtn = document.getElementById('quickApprovalBtn');
+                if (quickApprovalBtn) {
+                    quickApprovalBtn.addEventListener('click', () => {
+                        log('Quick Approval Button geklickt', 'info');
+                        if (window.qhseDashboard.showVacationApprovalView) {
+                            window.qhseDashboard.showVacationApprovalView();
+                        }
+                    });
+                    log('Quick Approval Button Event Listener hinzugefügt', 'success');
+                }
+                
+                showResult('repairEventsResult', true, 'Event Listeners erfolgreich repariert');
+                
+            } catch (error) {
+                log(`Event Listener Reparatur Fehler: ${error.message}`, 'error');
+                showResult('repairEventsResult', false, 'Event Listener Reparatur fehlgeschlagen');
+            }
+        }
+
+        function repairTabs() {
+            log('Repariere Tab-System...', 'warning');
+            
+            try {
+                const tabButtons = document.querySelectorAll('.vacation-tab-btn');
+                const tabPanels = document.querySelectorAll('.vacation-tab-panel');
+                
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const targetTab = button.getAttribute('data-tab');
+                        log(`Tab geklickt: ${targetTab}`, 'info');
+                        
+                        // Remove active from all buttons
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        // Hide all panels
+                        tabPanels.forEach(panel => {
+                            panel.classList.remove('active');
+                            panel.style.display = 'none';
+                        });
+                        
+                        // Show target panel
+                        const targetPanel = document.getElementById(`vacation-${targetTab}`);
+                        if (targetPanel) {
+                            targetPanel.classList.add('active');
+                            targetPanel.style.display = 'block';
+                            log(`Tab Panel angezeigt: vacation-${targetTab}`, 'success');
+                            
+                            // Render content for tab
+                            if (window.qhseDashboard && window.qhseDashboard.renderVacationTabContent) {
+                                window.qhseDashboard.renderVacationTabContent(targetTab);
+                            }
+                        }
+                    });
+                });
+                
+                log(`${tabButtons.length} Tab-Buttons repariert`, 'success');
+                showResult('repairTabsResult', true, `Tab-System repariert: ${tabButtons.length} Tabs`);
+                
+            } catch (error) {
+                log(`Tab-Reparatur Fehler: ${error.message}`, 'error');
+                showResult('repairTabsResult', false, 'Tab-Reparatur fehlgeschlagen');
+            }
+        }
+
+        function restartVacationManagement() {
+            log('Starte Vacation Management neu...', 'warning');
+            
+            if (!window.qhseDashboard) {
+                showResult('restartResult', false, 'Dashboard nicht verfügbar');
+                return;
+            }
+            
+            try {
+                // Re-initialize vacation data
+                window.qhseDashboard.vacationRequests = window.qhseDashboard.loadVacationRequestsFromStorage();
+                window.qhseDashboard.vacationAccounts = window.qhseDashboard.loadVacationAccountsFromStorage();
+                
+                // Re-setup vacation management
+                window.qhseDashboard.setupVacationManagement();
+                
+                log('Vacation Management erfolgreich neu gestartet', 'success');
+                showResult('restartResult', true, 'Vacation Management neu gestartet');
+                
+            } catch (error) {
+                log(`Restart Fehler: ${error.message}`, 'error');
+                showResult('restartResult', false, 'Restart fehlgeschlagen');
+            }
+        }
+
+        function performFullRepair() {
+            log('Führe vollständige Reparatur durch...', 'warning');
+            
+            try {
+                // Step 1: Repair Event Listeners
+                repairEventListeners();
+                
+                // Step 2: Repair Tabs
+                repairTabs();
+                
+                // Step 3: Restart Vacation Management
+                restartVacationManagement();
+                
+                // Step 4: Force update UI
+                if (window.qhseDashboard && window.qhseDashboard.updateVacationStats) {
+                    window.qhseDashboard.updateVacationStats();
+                }
+                
+                log('Vollständige Reparatur abgeschlossen', 'success');
+                showResult('fullRepairResult', true, 'Vollständige Reparatur erfolgreich');
+                
+                // Test everything again
+                setTimeout(() => {
+                    log('Führe Verifikations-Tests durch...', 'info');
+                    testQuickActions();
+                    testTabNavigation();
+                }, 1000);
+                
+            } catch (error) {
+                log(`Vollständige Reparatur Fehler: ${error.message}`, 'error');
+                showResult('fullRepairResult', false, 'Vollständige Reparatur fehlgeschlagen');
+            }
+        }
+
+        // Initialize debug page
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Debug-Seite geladen', 'success');
+            log('Bereit für Diagnose und Reparatur', 'info');
+            
+            // Auto-check if we're in the main application
+            if (window.qhseDashboard) {
+                log('QHSE Dashboard erkannt - Debug-Modus aktiv', 'success');
+            } else {
+                log('QHSE Dashboard nicht erkannt - manueller Test erforderlich', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

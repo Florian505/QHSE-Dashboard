@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Lieferanten Funktionen</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-container { max-width: 1000px; margin: 0 auto; }
+        .test-card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-header { background: #3b82f6; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .status { display: inline-block; padding: 5px 10px; border-radius: 4px; margin: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .results { margin-top: 20px; }
+        .function-test { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .console-output { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🧪 QHSE Lieferanten-System - Funktionstest</h1>
+            <p>Direkter Test der Lieferanten-Funktionen</p>
+        </div>
+
+        <div class="test-card">
+            <h2>🚀 Funktions-Tests</h2>
+            
+            <div class="function-test">
+                <h3>1. LocalStorage Test</h3>
+                <button class="btn btn-primary" onclick="testLocalStorage()">LocalStorage testen</button>
+                <div id="localStorageResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>2. Lieferanten laden</h3>
+                <button class="btn btn-primary" onclick="testLoadSuppliers()">Lieferanten laden</button>
+                <div id="loadSuppliersResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>3. Neuen Lieferanten erstellen</h3>
+                <button class="btn btn-primary" onclick="testCreateSupplier()">Test-Lieferant erstellen</button>
+                <div id="createSupplierResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>4. Lieferanten speichern</h3>
+                <button class="btn btn-primary" onclick="testSaveSupplier()">Lieferant speichern</button>
+                <div id="saveSupplierResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>5. Alle Lieferanten anzeigen</h3>
+                <button class="btn btn-primary" onclick="testShowAllSuppliers()">Alle Lieferanten anzeigen</button>
+                <div id="showSuppliersResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>6. Dashboard-Statistiken</h3>
+                <button class="btn btn-primary" onclick="testCalculateStats()">Statistiken berechnen</button>
+                <div id="statsResult" class="results"></div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>📊 Konsolen-Output</h2>
+            <div id="consoleOutput" class="console-output">
+                Bereit für Tests...<br>
+            </div>
+            <button class="btn btn-secondary" onclick="clearConsole()">Konsole leeren</button>
+        </div>
+
+        <div class="test-card">
+            <h2>🔗 Navigation</h2>
+            <button class="btn btn-primary" onclick="window.open('index.html', '_blank')">
+                🚀 Hauptanwendung öffnen
+            </button>
+            <button class="btn btn-secondary" onclick="window.open('test_supplier_system.html', '_blank')">
+                📖 System-Dokumentation
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Console Output Helper
+        function log(message, type = 'info') {
+            const consoleOutput = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            consoleOutput.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span><br>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            console.log(message);
+        }
+
+        function clearConsole() {
+            document.getElementById('consoleOutput').innerHTML = 'Konsole geleert...<br>';
+        }
+
+        function showResult(elementId, success, message) {
+            const element = document.getElementById(elementId);
+            const statusClass = success ? 'success' : 'error';
+            const icon = success ? '✅' : '❌';
+            element.innerHTML = `<div class="status ${statusClass}">${icon} ${message}</div>`;
+        }
+
+        // Test Functions
+        function testLocalStorage() {
+            try {
+                // Test localStorage functionality
+                const testKey = 'qhse_test_key';
+                const testValue = { test: 'data', timestamp: new Date().toISOString() };
+                
+                localStorage.setItem(testKey, JSON.stringify(testValue));
+                const retrieved = JSON.parse(localStorage.getItem(testKey));
+                localStorage.removeItem(testKey);
+                
+                if (retrieved && retrieved.test === 'data') {
+                    log('LocalStorage Test erfolgreich', 'success');
+                    showResult('localStorageResult', true, 'LocalStorage funktioniert korrekt');
+                } else {
+                    throw new Error('Daten konnten nicht korrekt gespeichert/abgerufen werden');
+                }
+            } catch (error) {
+                log('LocalStorage Test fehlgeschlagen: ' + error.message, 'error');
+                showResult('localStorageResult', false, 'LocalStorage Problem: ' + error.message);
+            }
+        }
+
+        function testLoadSuppliers() {
+            try {
+                log('Lade Lieferanten aus localStorage...', 'info');
+                
+                // Try to load existing suppliers
+                let suppliers = JSON.parse(localStorage.getItem('qhse_suppliers') || '[]');
+                
+                // If no suppliers exist, create default ones
+                if (suppliers.length === 0) {
+                    log('Keine Lieferanten gefunden. Erstelle Standard-Lieferanten...', 'info');
+                    suppliers = createDefaultSuppliers();
+                    localStorage.setItem('qhse_suppliers', JSON.stringify(suppliers));
+                }
+                
+                log(`${suppliers.length} Lieferanten geladen`, 'success');
+                showResult('loadSuppliersResult', true, `${suppliers.length} Lieferanten erfolgreich geladen`);
+                
+                // Show supplier details
+                const details = suppliers.map(s => `• ${s.name} (${s.number}) - Status: ${s.status}`).join('<br>');
+                document.getElementById('loadSuppliersResult').innerHTML += `<div style="margin-top: 10px; font-size: 12px;">${details}</div>`;
+                
+            } catch (error) {
+                log('Fehler beim Laden der Lieferanten: ' + error.message, 'error');
+                showResult('loadSuppliersResult', false, 'Fehler beim Laden: ' + error.message);
+            }
+        }
+
+        function createDefaultSuppliers() {
+            return [
+                {
+                    id: 'SUP' + Date.now() + '_1',
+                    number: 'L-2024-001',
+                    name: 'Test Lieferant GmbH',
+                    type: 'warenlieferant',
+                    status: 'freigegeben',
+                    description: 'Test-Lieferant für Funktionstest',
+                    contact: {
+                        person: 'Max Mustermann',
+                        email: 'max@test-lieferant.de',
+                        phone: '+49 40 123456',
+                        fax: '+49 40 123457',
+                        address: 'Teststraße 1\\n20095 Hamburg\\nDeutschland',
+                        website: 'https://www.test-lieferant.de',
+                        taxId: 'DE123456789'
+                    },
+                    products: ['Testprodukte', 'Qualitätsprüfung'],
+                    capacity: '1000 Einheiten/Monat',
+                    deliveryTime: '2-3 Wochen',
+                    qualityStandards: 'ISO 9001, DIN EN Standards',
+                    certificates: [
+                        {
+                            name: 'ISO 9001:2015',
+                            validUntil: '2025-12-31',
+                            status: 'gültig',
+                            fileData: null
+                        }
+                    ],
+                    evaluation: {
+                        score: 85,
+                        lastEvaluated: new Date().toISOString(),
+                        criteria: {
+                            quality: 85,
+                            delivery: 80,
+                            price: 90,
+                            service: 85
+                        },
+                        notes: 'Zuverlässiger Lieferant mit konstanter Qualität'
+                    },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: 'SUP' + Date.now() + '_2',
+                    number: 'L-2024-002',
+                    name: 'Service Partner Nord',
+                    type: 'dienstleister',
+                    status: 'kritisch',
+                    description: 'Dienstleister für technische Services',
+                    contact: {
+                        person: 'Anna Schmidt',
+                        email: 'a.schmidt@service-partner.de',
+                        phone: '+49 40 987654',
+                        fax: '+49 40 987655',
+                        address: 'Serviceweg 5\\n20097 Hamburg\\nDeutschland',
+                        website: 'https://www.service-partner.de',
+                        taxId: 'DE987654321'
+                    },
+                    products: ['Wartung', 'Reparaturen', 'Technischer Support'],
+                    capacity: '50 Aufträge/Monat',
+                    deliveryTime: '1-2 Wochen',
+                    qualityStandards: 'ISO 45001, Branchenstandards',
+                    certificates: [
+                        {
+                            name: 'ISO 45001:2018',
+                            validUntil: '2024-06-30',
+                            status: 'läuft ab',
+                            fileData: null
+                        }
+                    ],
+                    evaluation: {
+                        score: 65,
+                        lastEvaluated: new Date().toISOString(),
+                        criteria: {
+                            quality: 70,
+                            delivery: 60,
+                            price: 70,
+                            service: 60
+                        },
+                        notes: 'Lieferzeiten müssen verbessert werden'
+                    },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                }
+            ];
+        }
+
+        function testCreateSupplier() {
+            try {
+                log('Erstelle neuen Test-Lieferanten...', 'info');
+                
+                const newSupplier = {
+                    id: 'SUP' + Date.now(),
+                    number: 'L-2024-TEST',
+                    name: 'Neu Erstellter Lieferant GmbH',
+                    type: 'dienstleister',
+                    status: 'neu',
+                    description: 'Über Test-Funktion erstellter Lieferant',
+                    contact: {
+                        person: 'Test Person',
+                        email: 'test@new-supplier.de',
+                        phone: '+49 40 111222',
+                        fax: '',
+                        address: 'Neue Adresse 123\\n20095 Hamburg',
+                        website: 'https://www.new-supplier.de',
+                        taxId: 'DE111222333'
+                    },
+                    products: ['Neue Dienstleistungen', 'Test Services'],
+                    capacity: 'Nach Absprache',
+                    deliveryTime: '1 Woche',
+                    qualityStandards: 'Wird noch definiert',
+                    certificates: [],
+                    evaluation: {
+                        score: 75,
+                        lastEvaluated: new Date().toISOString(),
+                        criteria: {
+                            quality: 75,
+                            delivery: 75,
+                            price: 75,
+                            service: 75
+                        },
+                        notes: 'Erstbewertung'
+                    },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                log('Neuer Lieferant erstellt: ' + newSupplier.name, 'success');
+                showResult('createSupplierResult', true, `Neuer Lieferant "${newSupplier.name}" erstellt`);
+                
+                // Store for later saving
+                window.newTestSupplier = newSupplier;
+                
+            } catch (error) {
+                log('Fehler beim Erstellen des Lieferanten: ' + error.message, 'error');
+                showResult('createSupplierResult', false, 'Fehler beim Erstellen: ' + error.message);
+            }
+        }
+
+        function testSaveSupplier() {
+            try {
+                if (!window.newTestSupplier) {
+                    throw new Error('Kein Test-Lieferant zum Speichern vorhanden. Erstelle zuerst einen Lieferanten.');
+                }
+
+                log('Speichere Test-Lieferanten...', 'info');
+                
+                // Load existing suppliers
+                let suppliers = JSON.parse(localStorage.getItem('qhse_suppliers') || '[]');
+                
+                // Add new supplier
+                suppliers.push(window.newTestSupplier);
+                
+                // Save back to localStorage
+                localStorage.setItem('qhse_suppliers', JSON.stringify(suppliers));
+                
+                log('Lieferant erfolgreich gespeichert', 'success');
+                showResult('saveSupplierResult', true, `Lieferant "${window.newTestSupplier.name}" gespeichert. Gesamt: ${suppliers.length} Lieferanten`);
+                
+            } catch (error) {
+                log('Fehler beim Speichern: ' + error.message, 'error');
+                showResult('saveSupplierResult', false, 'Speichern fehlgeschlagen: ' + error.message);
+            }
+        }
+
+        function testShowAllSuppliers() {
+            try {
+                log('Lade alle Lieferanten...', 'info');
+                
+                const suppliers = JSON.parse(localStorage.getItem('qhse_suppliers') || '[]');
+                
+                if (suppliers.length === 0) {
+                    throw new Error('Keine Lieferanten gefunden. Führe zuerst "Lieferanten laden" aus.');
+                }
+
+                let html = `<h4>Gefundene Lieferanten (${suppliers.length}):</h4>`;
+                html += '<div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">';
+                
+                suppliers.forEach((supplier, index) => {
+                    const statusColor = supplier.status === 'freigegeben' ? 'success' : supplier.status === 'kritisch' ? 'error' : 'info';
+                    html += `
+                        <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                            <strong>${index + 1}. ${supplier.name}</strong><br>
+                            <small>
+                                Nr: ${supplier.number} | 
+                                Typ: ${supplier.type} | 
+                                <span class="${statusColor}">Status: ${supplier.status}</span><br>
+                                Kontakt: ${supplier.contact?.person} (${supplier.contact?.email})<br>
+                                Bewertung: ${supplier.evaluation?.score || 0}% | 
+                                Zertifikate: ${supplier.certificates?.length || 0}
+                            </small>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                document.getElementById('showSuppliersResult').innerHTML = html;
+                
+                log(`${suppliers.length} Lieferanten erfolgreich angezeigt`, 'success');
+                
+            } catch (error) {
+                log('Fehler beim Anzeigen der Lieferanten: ' + error.message, 'error');
+                showResult('showSuppliersResult', false, 'Anzeige fehlgeschlagen: ' + error.message);
+            }
+        }
+
+        function testCalculateStats() {
+            try {
+                log('Berechne Dashboard-Statistiken...', 'info');
+                
+                const suppliers = JSON.parse(localStorage.getItem('qhse_suppliers') || '[]');
+                
+                if (suppliers.length === 0) {
+                    throw new Error('Keine Lieferanten für Statistiken vorhanden.');
+                }
+
+                const stats = {
+                    total: suppliers.length,
+                    approved: suppliers.filter(s => s.status === 'freigegeben').length,
+                    critical: suppliers.filter(s => s.status === 'kritisch').length,
+                    blocked: suppliers.filter(s => s.status === 'gesperrt').length,
+                    new: suppliers.filter(s => s.status === 'neu').length
+                };
+
+                const avgScore = suppliers.length > 0 
+                    ? Math.round(suppliers.reduce((sum, s) => sum + (s.evaluation?.score || 0), 0) / suppliers.length)
+                    : 0;
+
+                const expiringCerts = [];
+                const today = new Date();
+                const threeMonthsFromNow = new Date();
+                threeMonthsFromNow.setMonth(today.getMonth() + 3);
+
+                suppliers.forEach(supplier => {
+                    if (supplier.certificates) {
+                        supplier.certificates.forEach(cert => {
+                            const expiryDate = new Date(cert.validUntil);
+                            if (expiryDate < threeMonthsFromNow) {
+                                expiringCerts.push({ supplier: supplier.name, cert: cert.name, date: cert.validUntil });
+                            }
+                        });
+                    }
+                });
+
+                let html = `
+                    <h4>📊 Dashboard-Statistiken:</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 15px 0;">
+                        <div class="status info">Gesamt: <strong>${stats.total}</strong></div>
+                        <div class="status success">Freigegeben: <strong>${stats.approved}</strong></div>
+                        <div class="status error">Kritisch: <strong>${stats.critical}</strong></div>
+                        <div class="status error">Gesperrt: <strong>${stats.blocked}</strong></div>
+                        <div class="status info">Neu: <strong>${stats.new}</strong></div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <div class="status info">Durchschnittsbewertung: <strong>${avgScore}%</strong></div>
+                    </div>
+                `;
+
+                if (expiringCerts.length > 0) {
+                    html += `
+                        <h5>⚠️ Ablaufende Zertifikate (${expiringCerts.length}):</h5>
+                        <ul style="font-size: 12px;">
+                            ${expiringCerts.map(item => `<li>${item.supplier}: ${item.cert} (${item.date})</li>`).join('')}
+                        </ul>
+                    `;
+                }
+
+                document.getElementById('statsResult').innerHTML = html;
+                
+                log('Statistiken erfolgreich berechnet', 'success');
+                
+            } catch (error) {
+                log('Fehler bei Statistik-Berechnung: ' + error.message, 'error');
+                showResult('statsResult', false, 'Statistiken fehlgeschlagen: ' + error.message);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Test-Seite geladen und bereit', 'success');
+        });
+    </script>
+</body>
+</html>

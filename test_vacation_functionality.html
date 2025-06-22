@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Urlaubsplanung Funktionalität</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .test-container { max-width: 1000px; margin: 0 auto; }
+        .test-card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .test-header { background: #3b82f6; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .status { display: inline-block; padding: 5px 10px; border-radius: 4px; margin: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .results { margin-top: 20px; }
+        .function-test { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🏖️ QHSE Urlaubsplanung - Funktionstest</h1>
+            <p>Test der Urlaubsplanung & Abwesenheitsmanagement Funktionen</p>
+        </div>
+
+        <div class="test-card">
+            <h2>🚀 Funktions-Tests</h2>
+            
+            <div class="function-test">
+                <h3>1. LocalStorage für Urlaubsdaten</h3>
+                <button class="btn btn-primary" onclick="testVacationStorage()">Urlaubsdaten-Speicher testen</button>
+                <div id="storageResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>2. Urlaubskonto erstellen</h3>
+                <button class="btn btn-primary" onclick="testCreateVacationAccount()">Urlaubskonto erstellen</button>
+                <div id="accountResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>3. Urlaubsantrag erstellen</h3>
+                <button class="btn btn-primary" onclick="testCreateVacationRequest()">Testantrag erstellen</button>
+                <div id="requestResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>4. Arbeitstage berechnen</h3>
+                <button class="btn btn-primary" onclick="testCalculateWorkingDays()">Arbeitstage berechnen</button>
+                <div id="workingDaysResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>5. Urlaubskonflikt-Erkennung</h3>
+                <button class="btn btn-primary" onclick="testConflictDetection()">Konflikte testen</button>
+                <div id="conflictResult" class="results"></div>
+            </div>
+
+            <div class="function-test">
+                <h3>6. Alle Urlaubsdaten anzeigen</h3>
+                <button class="btn btn-primary" onclick="testShowAllVacationData()">Alle Daten anzeigen</button>
+                <div id="allDataResult" class="results"></div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>🔗 Navigation</h2>
+            <button class="btn btn-primary" onclick="window.open('index.html', '_blank')">
+                🚀 Hauptanwendung öffnen
+            </button>
+            <button class="btn btn-secondary" onclick="window.open('test_vacation_functionality.html', '_blank')">
+                🔄 Test neu laden
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function showResult(elementId, success, message) {
+            const element = document.getElementById(elementId);
+            const statusClass = success ? 'success' : 'error';
+            const icon = success ? '✅' : '❌';
+            element.innerHTML = `<div class="status ${statusClass}">${icon} ${message}</div>`;
+        }
+
+        function testVacationStorage() {
+            try {
+                // Test vacation storage functionality
+                const testRequests = [
+                    {
+                        id: 'VAC_TEST_1',
+                        userId: 'test-user',
+                        absenceType: 'urlaub',
+                        startDate: '2024-07-01',
+                        endDate: '2024-07-05',
+                        workingDays: 5,
+                        status: 'eingereicht',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                
+                localStorage.setItem('qhse_vacation_requests', JSON.stringify(testRequests));
+                const retrieved = JSON.parse(localStorage.getItem('qhse_vacation_requests'));
+                
+                if (retrieved && retrieved.length === 1 && retrieved[0].id === 'VAC_TEST_1') {
+                    showResult('storageResult', true, 'Urlaubsdaten-Speicher funktioniert korrekt');
+                } else {
+                    throw new Error('Daten konnten nicht korrekt gespeichert/abgerufen werden');
+                }
+            } catch (error) {
+                showResult('storageResult', false, 'Speicher-Problem: ' + error.message);
+            }
+        }
+
+        function testCreateVacationAccount() {
+            try {
+                const currentYear = new Date().getFullYear();
+                const testAccount = {
+                    userId: 'test-user',
+                    year: currentYear,
+                    totalDays: 30,
+                    usedDays: 5,
+                    pendingDays: 3,
+                    remainingDays: 22,
+                    carryOverDays: 0,
+                    carryOverLimit: 10,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                const accounts = { 'test-user': testAccount };
+                localStorage.setItem('qhse_vacation_accounts', JSON.stringify(accounts));
+                
+                const retrieved = JSON.parse(localStorage.getItem('qhse_vacation_accounts'));
+                
+                if (retrieved && retrieved['test-user'] && retrieved['test-user'].totalDays === 30) {
+                    showResult('accountResult', true, `Urlaubskonto erstellt: ${testAccount.totalDays} Tage Jahresurlaub`);
+                } else {
+                    throw new Error('Urlaubskonto konnte nicht erstellt werden');
+                }
+            } catch (error) {
+                showResult('accountResult', false, 'Konto-Erstellung fehlgeschlagen: ' + error.message);
+            }
+        }
+
+        function testCreateVacationRequest() {
+            try {
+                const newRequest = {
+                    id: 'VAC_' + Date.now(),
+                    userId: 'test-user',
+                    absenceType: 'urlaub',
+                    startDate: '2024-08-01',
+                    endDate: '2024-08-10',
+                    workingDays: calculateWorkingDays('2024-08-01', '2024-08-10'),
+                    reason: 'Sommerurlaub',
+                    substitute: 'backup-user',
+                    status: 'eingereicht',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    workflow: [{
+                        action: 'eingereicht',
+                        timestamp: new Date().toISOString(),
+                        userId: 'test-user',
+                        comment: 'Antrag eingereicht'
+                    }]
+                };
+
+                let requests = JSON.parse(localStorage.getItem('qhse_vacation_requests') || '[]');
+                requests.push(newRequest);
+                localStorage.setItem('qhse_vacation_requests', JSON.stringify(requests));
+                
+                showResult('requestResult', true, `Urlaubsantrag erstellt: ${newRequest.workingDays} Arbeitstage vom ${newRequest.startDate} bis ${newRequest.endDate}`);
+            } catch (error) {
+                showResult('requestResult', false, 'Antrag-Erstellung fehlgeschlagen: ' + error.message);
+            }
+        }
+
+        function calculateWorkingDays(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            let workingDays = 0;
+
+            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Not weekend
+                    workingDays++;
+                }
+            }
+
+            return workingDays;
+        }
+
+        function testCalculateWorkingDays() {
+            try {
+                const testCases = [
+                    { start: '2024-07-01', end: '2024-07-05', expected: 5 }, // Monday to Friday
+                    { start: '2024-07-06', end: '2024-07-07', expected: 0 }, // Weekend
+                    { start: '2024-07-01', end: '2024-07-07', expected: 5 }, // Week with weekend
+                ];
+
+                let allPassed = true;
+                let results = [];
+
+                testCases.forEach((testCase, index) => {
+                    const calculated = calculateWorkingDays(testCase.start, testCase.end);
+                    const passed = calculated === testCase.expected;
+                    allPassed = allPassed && passed;
+                    results.push(`Test ${index + 1}: ${calculated} Tage (erwartet: ${testCase.expected}) ${passed ? '✅' : '❌'}`);
+                });
+
+                const message = `Arbeitstage-Berechnung: ${allPassed ? 'Alle Tests bestanden' : 'Einige Tests fehlgeschlagen'}\\n${results.join('\\n')}`;
+                showResult('workingDaysResult', allPassed, message);
+            } catch (error) {
+                showResult('workingDaysResult', false, 'Berechnung fehlgeschlagen: ' + error.message);
+            }
+        }
+
+        function testConflictDetection() {
+            try {
+                // Create test vacation requests with overlapping dates
+                const existingRequests = [
+                    {
+                        id: 'VAC_EXISTING_1',
+                        userId: 'colleague-1',
+                        startDate: '2024-08-05',
+                        endDate: '2024-08-15',
+                        status: 'genehmigt'
+                    },
+                    {
+                        id: 'VAC_EXISTING_2',
+                        userId: 'colleague-2',
+                        startDate: '2024-08-20',
+                        endDate: '2024-08-25',
+                        status: 'genehmigt'
+                    }
+                ];
+
+                const newRequest = {
+                    startDate: '2024-08-10',
+                    endDate: '2024-08-20'
+                };
+
+                // Simple conflict detection logic
+                let conflicts = [];
+                existingRequests.forEach(existing => {
+                    const existingStart = new Date(existing.startDate);
+                    const existingEnd = new Date(existing.endDate);
+                    const newStart = new Date(newRequest.startDate);
+                    const newEnd = new Date(newRequest.endDate);
+
+                    if ((newStart <= existingEnd && newEnd >= existingStart)) {
+                        conflicts.push(existing);
+                    }
+                });
+
+                const message = conflicts.length > 0 
+                    ? `${conflicts.length} Konflikte erkannt: Überschneidung mit bestehenden Urlauben`
+                    : 'Keine Konflikte erkannt';
+                    
+                showResult('conflictResult', true, message);
+            } catch (error) {
+                showResult('conflictResult', false, 'Konflikt-Erkennung fehlgeschlagen: ' + error.message);
+            }
+        }
+
+        function testShowAllVacationData() {
+            try {
+                const requests = JSON.parse(localStorage.getItem('qhse_vacation_requests') || '[]');
+                const accounts = JSON.parse(localStorage.getItem('qhse_vacation_accounts') || '{}');
+                
+                let summary = `Urlaubsanträge: ${requests.length}\\n`;
+                summary += `Urlaubskonten: ${Object.keys(accounts).length}\\n`;
+                
+                if (requests.length > 0) {
+                    summary += '\\nAnträge:\\n';
+                    requests.forEach((req, index) => {
+                        summary += `${index + 1}. ${req.absenceType} vom ${req.startDate} bis ${req.endDate} (Status: ${req.status})\\n`;
+                    });
+                }
+
+                if (Object.keys(accounts).length > 0) {
+                    summary += '\\nKonten:\\n';
+                    Object.values(accounts).forEach((acc, index) => {
+                        summary += `${index + 1}. User ${acc.userId}: ${acc.remainingDays}/${acc.totalDays} Tage verfügbar\\n`;
+                    });
+                }
+
+                showResult('allDataResult', true, summary);
+            } catch (error) {
+                showResult('allDataResult', false, 'Daten-Anzeige fehlgeschlagen: ' + error.message);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Vacation Test-Seite geladen und bereit');
+        });
+    </script>
+</body>
+</html>

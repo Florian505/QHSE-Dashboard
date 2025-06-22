@@ -59,6 +59,7 @@ class QHSEDashboard {
         this.setupHazardousSubstances();
         this.setupTrainingManagement();
         this.setupSupplierManagement();
+        this.setupVacationManagement();
         this.setupUserProfiles();
         this.loadCustomLabels();
         
@@ -96,6 +97,9 @@ class QHSEDashboard {
             // Update dashboard KPIs
             this.updateDashboardKpiDisplay();
             this.renderCustomKpisOnDashboard();
+            
+            // Initialize supplier management after DOM is ready
+            this.initializeSupplierSection();
             
             // Add debug functions to window for testing
             window.debugQHSE = {
@@ -2079,7 +2083,7 @@ PLZ Ort">${user.address || ''}</textarea>
         this.roleDefinitions = {
             'root-admin': {
                 name: 'Root Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'einstellungen', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'einstellungen', 'mein-profil'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2087,7 +2091,7 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             admin: {
                 name: 'Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2095,40 +2099,40 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             geschaeftsfuehrung: {
                 name: 'Geschäftsführung',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 1,
                 canSupervise: ['betriebsleiter', 'qhse']
             },
             betriebsleiter: {
                 name: 'Betriebsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 2,
                 canSupervise: ['abteilungsleiter'],
                 mustHaveSupervisor: ['geschaeftsfuehrung']
             },
             abteilungsleiter: {
                 name: 'Abteilungsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 3,
                 canSupervise: ['mitarbeiter'],
                 mustHaveSupervisor: ['betriebsleiter']
             },
             qhse: {
                 name: 'QHSE-Mitarbeiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 2,
                 isStaffPosition: true,
                 mustHaveSupervisor: ['geschaeftsfuehrung']
             },
             mitarbeiter: {
                 name: 'Mitarbeiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 4,
                 mustHaveSupervisor: ['abteilungsleiter']
             },
             techniker: {
                 name: 'Techniker',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 4,
                 canManageMachines: true,
                 canReportIssues: true,
@@ -2337,11 +2341,15 @@ PLZ Ort">${user.address || ''}</textarea>
                     gefahrstoffe: 'Gefahrstoffverzeichnis',
                     schulungen: 'Schulungsmanagement',
                     lieferanten: 'Lieferantenbewertung',
+                    urlaubsplanung: 'Urlaubsplanung & Abwesenheitsmanagement',
                     einstellungen: 'System-Einstellungen'
                 };
                 
                 pageTitle.textContent = sectionTitles[targetSection] || (localStorage.getItem('qhse_dashboard_name') || 'Dashboard');
                 this.currentSection = targetSection;
+                
+                // Section-specific initialization
+                this.handleSectionChange(targetSection);
                 
                 // Section-specific initialization
                 if (targetSection === 'einstellungen') {
@@ -2355,6 +2363,28 @@ PLZ Ort">${user.address || ''}</textarea>
                 }
             });
         });
+    }
+
+    handleSectionChange(targetSection) {
+        console.log('🔄 Section changed to:', targetSection);
+        
+        // Section-specific initialization
+        switch(targetSection) {
+            case 'urlaubsplanung':
+                console.log('🏖️ Initializing vacation planning section...');
+                // Force re-setup vacation management to ensure everything works
+                setTimeout(() => {
+                    // Reset initialization flag to force re-setup
+                    this.vacationManagementInitialized = false;
+                    this.setupVacationManagement();
+                }, 100);
+                break;
+            case 'maschinen':
+                // Ensure machine management works
+                setTimeout(() => this.ensureMachineManagementWorks(), 100);
+                break;
+            // Add more cases as needed
+        }
     }
 
     showAccessDenied() {
@@ -17145,7 +17175,7 @@ PLZ Ort">${user.address || ''}</textarea>
     setupSupplierFilters() {
         const statusFilter = document.getElementById('supplierStatusFilter');
         const typeFilter = document.getElementById('supplierTypeFilter');
-        const searchInput = document.getElementById('supplierSearchInput');
+        const searchInput = document.getElementById('supplierSearch');
 
         if (statusFilter) {
             statusFilter.addEventListener('change', () => this.filterSuppliers());
@@ -17331,10 +17361,12 @@ PLZ Ort">${user.address || ''}</textarea>
             titleText.textContent = 'Neuer Lieferant';
             form.reset();
             this.generateSupplierNumber();
+            this.currentCertificates = {}; // Reset certificates for new supplier
         }
         
         this.setupSupplierFormTabs();
         this.setupScoreSliders();
+        this.setupCertificateManagement();
         modal.style.display = 'block';
     }
 
@@ -17373,7 +17405,7 @@ PLZ Ort">${user.address || ''}</textarea>
     }
 
     setupScoreSliders() {
-        const sliders = ['qualityScore', 'deliveryScore', 'priceScore', 'serviceScore'];
+        const sliders = ['supplierQualityScore', 'supplierDeliveryScore', 'supplierPriceScore', 'supplierServiceScore'];
         
         sliders.forEach(sliderId => {
             const slider = document.getElementById(sliderId);
@@ -17404,13 +17436,13 @@ PLZ Ort">${user.address || ''}</textarea>
     }
 
     updateOverallScore() {
-        const quality = parseInt(document.getElementById('qualityScore')?.value || 0);
-        const delivery = parseInt(document.getElementById('deliveryScore')?.value || 0);
-        const price = parseInt(document.getElementById('priceScore')?.value || 0);
-        const service = parseInt(document.getElementById('serviceScore')?.value || 0);
+        const quality = parseInt(document.getElementById('supplierQualityScore')?.value || 0);
+        const delivery = parseInt(document.getElementById('supplierDeliveryScore')?.value || 0);
+        const price = parseInt(document.getElementById('supplierPriceScore')?.value || 0);
+        const service = parseInt(document.getElementById('supplierServiceScore')?.value || 0);
         
         const overall = Math.round((quality + delivery + price + service) / 4);
-        const overallSpan = document.getElementById('overallScore');
+        const overallSpan = document.getElementById('supplierOverallScore');
         if (overallSpan) {
             overallSpan.textContent = overall + '%';
         }
@@ -17459,15 +17491,15 @@ PLZ Ort">${user.address || ''}</textarea>
         const evaluation = supplier.evaluation || {};
         const criteria = evaluation.criteria || {};
         
-        document.getElementById('qualityScore').value = criteria.quality || 75;
-        document.getElementById('deliveryScore').value = criteria.delivery || 75;
-        document.getElementById('priceScore').value = criteria.price || 75;
-        document.getElementById('serviceScore').value = criteria.service || 75;
+        document.getElementById('supplierQualityScore').value = criteria.quality || 75;
+        document.getElementById('supplierDeliveryScore').value = criteria.delivery || 75;
+        document.getElementById('supplierPriceScore').value = criteria.price || 75;
+        document.getElementById('supplierServiceScore').value = criteria.service || 75;
         document.getElementById('evaluationNotes').value = evaluation.notes || '';
 
         // Update score displays
         this.updateOverallScore();
-        ['qualityScore', 'deliveryScore', 'priceScore', 'serviceScore'].forEach(id => {
+        ['supplierQualityScore', 'supplierDeliveryScore', 'supplierPriceScore', 'supplierServiceScore'].forEach(id => {
             const slider = document.getElementById(id);
             const valueSpan = document.getElementById(id + 'Value');
             if (slider && valueSpan) {
@@ -17507,20 +17539,20 @@ PLZ Ort">${user.address || ''}</textarea>
             capacity: formData.get('supplierCapacity'),
             deliveryTime: formData.get('supplierDeliveryTime'),
             qualityStandards: formData.get('supplierQualityStandards'),
-            certificates: [], // Will be populated from the certificates section
+            certificates: this.collectCertificateData(),
             evaluation: {
                 score: Math.round((
-                    parseInt(formData.get('qualityScore')) +
-                    parseInt(formData.get('deliveryScore')) +
-                    parseInt(formData.get('priceScore')) +
-                    parseInt(formData.get('serviceScore'))
+                    parseInt(formData.get('supplierQualityScore')) +
+                    parseInt(formData.get('supplierDeliveryScore')) +
+                    parseInt(formData.get('supplierPriceScore')) +
+                    parseInt(formData.get('supplierServiceScore'))
                 ) / 4),
                 lastEvaluated: new Date().toISOString(),
                 criteria: {
-                    quality: parseInt(formData.get('qualityScore')),
-                    delivery: parseInt(formData.get('deliveryScore')),
-                    price: parseInt(formData.get('priceScore')),
-                    service: parseInt(formData.get('serviceScore'))
+                    quality: parseInt(formData.get('supplierQualityScore')),
+                    delivery: parseInt(formData.get('supplierDeliveryScore')),
+                    price: parseInt(formData.get('supplierPriceScore')),
+                    service: parseInt(formData.get('supplierServiceScore'))
                 },
                 notes: formData.get('evaluationNotes')
             },
@@ -17529,13 +17561,11 @@ PLZ Ort">${user.address || ''}</textarea>
             updatedAt: new Date().toISOString()
         };
 
-        // Check for duplicate supplier number
-        if (!this.currentEditingSupplierId || 
-            this.suppliers.find(s => s.id !== this.currentEditingSupplierId && s.number === supplierData.number)) {
-            if (this.suppliers.some(s => s.number === supplierData.number)) {
-                alert('Diese Lieferantennummer ist bereits vergeben. Bitte wählen Sie eine andere.');
-                return;
-            }
+        // Check for duplicate supplier number (only for new suppliers or when number changed)
+        const existingSupplier = this.suppliers.find(s => s.number === supplierData.number);
+        if (existingSupplier && (!this.currentEditingSupplierId || existingSupplier.id !== this.currentEditingSupplierId)) {
+            alert('Diese Lieferantennummer ist bereits vergeben. Bitte wählen Sie eine andere.');
+            return;
         }
 
         if (this.currentEditingSupplierId) {
@@ -17553,11 +17583,13 @@ PLZ Ort">${user.address || ''}</textarea>
         this.renderSupplierDashboard();
         this.renderSupplierList();
         
-        // Close modal
+        // Determine action before clearing the editing ID
+        const action = this.currentEditingSupplierId ? 'aktualisiert' : 'hinzugefügt';
+        
+        // Close modal and reset editing state
         document.getElementById('supplierModal').style.display = 'none';
         this.currentEditingSupplierId = null;
 
-        const action = this.currentEditingSupplierId ? 'aktualisiert' : 'hinzugefügt';
         alert(`Lieferant "${supplierData.name}" wurde erfolgreich ${action}.`);
     }
 
@@ -17687,11 +17719,11 @@ PLZ Ort">${user.address || ''}</textarea>
         const suppliers = this.suppliers || [];
         const statusFilter = document.getElementById('supplierStatusFilter')?.value || 'all';
         const typeFilter = document.getElementById('supplierTypeFilter')?.value || 'all';
-        const searchTerm = document.getElementById('supplierSearchInput')?.value.toLowerCase() || '';
+        const searchTerm = document.getElementById('supplierSearch')?.value.toLowerCase() || '';
 
         return suppliers.filter(supplier => {
-            const matchesStatus = statusFilter === 'all' || supplier.status === statusFilter;
-            const matchesType = typeFilter === 'all' || supplier.type === typeFilter;
+            const matchesStatus = statusFilter === '' || supplier.status === statusFilter;
+            const matchesType = typeFilter === '' || supplier.type === typeFilter;
             const matchesSearch = !searchTerm || 
                 supplier.name.toLowerCase().includes(searchTerm) ||
                 supplier.number.toLowerCase().includes(searchTerm) ||
@@ -17846,12 +17878,16 @@ PLZ Ort">${user.address || ''}</textarea>
                                 </div>
                             </div>
                             <div class="document-actions">
-                                <button class="btn-sm btn-secondary" title="Herunterladen">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                                <button class="btn-sm btn-secondary" title="Vorschau">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                ${doc.fileData ? `
+                                    <button class="btn-sm btn-secondary" onclick="qhseDashboard.previewSupplierDocument('${doc.supplierId}', '${doc.name}')" title="Vorschau">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-sm btn-secondary" onclick="qhseDashboard.downloadSupplierDocument('${doc.supplierId}', '${doc.name}')" title="Herunterladen">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                ` : `
+                                    <span class="no-file-text">Keine Datei</span>
+                                `}
                             </div>
                         </div>
                     `;
@@ -17971,6 +18007,377 @@ PLZ Ort">${user.address || ''}</textarea>
         if (supplier) {
             alert(`Audit für "${supplier.name}" wird gestartet.`);
         }
+    }
+
+    // Certificate Management Functions
+    setupCertificateManagement() {
+        const addCertBtn = document.getElementById('addCertificateBtn');
+        if (addCertBtn) {
+            addCertBtn.addEventListener('click', () => this.addCertificateField());
+        }
+        
+        // Initialize with existing certificates or one empty field
+        this.renderCertificateFields();
+    }
+
+    addCertificateField() {
+        const certificatesList = document.getElementById('modalCertificatesList');
+        if (!certificatesList) return;
+
+        const certId = 'cert_' + Date.now();
+        const certField = document.createElement('div');
+        certField.className = 'certificate-field';
+        certField.setAttribute('data-cert-id', certId);
+        
+        certField.innerHTML = `
+            <div class="certificate-header">
+                <h4>Zertifikat</h4>
+                <button type="button" class="btn-danger btn-sm" onclick="qhseDashboard.removeCertificateField('${certId}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="certName_${certId}">Zertifikat Name *</label>
+                    <input type="text" id="certName_${certId}" name="certName_${certId}" 
+                           autocomplete="off" required
+                           placeholder="z.B. ISO 9001">
+                </div>
+                <div class="form-group">
+                    <label for="certValidUntil_${certId}">Gültig bis *</label>
+                    <input type="date" id="certValidUntil_${certId}" name="certValidUntil_${certId}" 
+                           autocomplete="off" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="certFile_${certId}">Zertifikat-Datei</label>
+                <input type="file" id="certFile_${certId}" name="certFile_${certId}" 
+                       accept=".pdf,.jpg,.jpeg,.png" 
+                       onchange="qhseDashboard.handleCertificateUpload('${certId}', this)">
+                <small>Unterstützte Formate: PDF, JPG, PNG (max. 5MB)</small>
+            </div>
+            <div class="certificate-preview" id="certPreview_${certId}" style="display: none;">
+                <div class="preview-content">
+                    <i class="fas fa-file-pdf preview-icon"></i>
+                    <div class="preview-info">
+                        <span class="preview-name"></span>
+                        <span class="preview-size"></span>
+                    </div>
+                    <div class="preview-actions">
+                        <button type="button" class="btn-sm btn-secondary" onclick="qhseDashboard.previewCertificate('${certId}')" title="Vorschau">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button type="button" class="btn-sm btn-secondary" onclick="qhseDashboard.downloadCertificate('${certId}')" title="Herunterladen">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button type="button" class="btn-sm btn-danger" onclick="qhseDashboard.removeCertificateFile('${certId}')" title="Löschen">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        certificatesList.appendChild(certField);
+    }
+
+    removeCertificateField(certId) {
+        const field = document.querySelector(`[data-cert-id="${certId}"]`);
+        if (field && confirm('Zertifikat-Feld entfernen?')) {
+            field.remove();
+        }
+    }
+
+    handleCertificateUpload(certId, fileInput) {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        // Validate file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Datei ist zu groß. Maximum 5MB erlaubt.');
+            fileInput.value = '';
+            return;
+        }
+
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Nicht unterstütztes Dateiformat. Nur PDF, JPG und PNG erlaubt.');
+            fileInput.value = '';
+            return;
+        }
+
+        // Read file as base64 for storage
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const certData = {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                data: e.target.result,
+                uploadDate: new Date().toISOString()
+            };
+
+            // Store certificate data
+            this.storeCertificateData(certId, certData);
+            
+            // Update preview
+            this.updateCertificatePreview(certId, certData);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    storeCertificateData(certId, certData) {
+        if (!this.currentCertificates) {
+            this.currentCertificates = {};
+        }
+        this.currentCertificates[certId] = certData;
+    }
+
+    updateCertificatePreview(certId, certData) {
+        const preview = document.getElementById(`certPreview_${certId}`);
+        if (!preview) return;
+
+        const nameSpan = preview.querySelector('.preview-name');
+        const sizeSpan = preview.querySelector('.preview-size');
+        const icon = preview.querySelector('.preview-icon');
+
+        nameSpan.textContent = certData.name;
+        sizeSpan.textContent = this.formatFileSize(certData.size);
+        
+        // Update icon based on file type
+        if (certData.type === 'application/pdf') {
+            icon.className = 'fas fa-file-pdf preview-icon';
+        } else {
+            icon.className = 'fas fa-file-image preview-icon';
+        }
+
+        preview.style.display = 'block';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    previewCertificate(certId) {
+        const certData = this.currentCertificates?.[certId];
+        if (!certData) {
+            alert('Keine Zertifikat-Daten gefunden.');
+            return;
+        }
+
+        if (certData.type === 'application/pdf') {
+            // Open PDF in new window
+            const newWindow = window.open();
+            newWindow.document.write(`
+                <html>
+                    <head><title>${certData.name}</title></head>
+                    <body style="margin: 0;">
+                        <embed src="${certData.data}" type="application/pdf" width="100%" height="100%">
+                    </body>
+                </html>
+            `);
+        } else {
+            // Show image in modal
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>${certData.name}</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="text-align: center;">
+                        <img src="${certData.data}" style="max-width: 100%; max-height: 70vh;" alt="${certData.name}">
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    }
+
+    downloadCertificate(certId) {
+        const certData = this.currentCertificates?.[certId];
+        if (!certData) {
+            alert('Keine Zertifikat-Daten zum Herunterladen gefunden.');
+            return;
+        }
+
+        // Create download link
+        const link = document.createElement('a');
+        link.href = certData.data;
+        link.download = certData.name;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    removeCertificateFile(certId) {
+        if (confirm('Zertifikat-Datei entfernen?')) {
+            const fileInput = document.getElementById(`certFile_${certId}`);
+            const preview = document.getElementById(`certPreview_${certId}`);
+            
+            if (fileInput) fileInput.value = '';
+            if (preview) preview.style.display = 'none';
+            
+            if (this.currentCertificates) {
+                delete this.currentCertificates[certId];
+            }
+        }
+    }
+
+    renderCertificateFields() {
+        const certificatesList = document.getElementById('modalCertificatesList');
+        if (!certificatesList) return;
+
+        // Clear existing fields
+        certificatesList.innerHTML = '';
+
+        // If editing existing supplier, load their certificates
+        if (this.currentEditingSupplierId) {
+            const supplier = this.suppliers.find(s => s.id === this.currentEditingSupplierId);
+            if (supplier && supplier.certificates && supplier.certificates.length > 0) {
+                supplier.certificates.forEach((cert, index) => {
+                    this.addCertificateFieldWithData(cert);
+                });
+                return;
+            }
+        }
+
+        // Add one empty certificate field
+        this.addCertificateField();
+    }
+
+    addCertificateFieldWithData(certData) {
+        this.addCertificateField();
+        
+        // Get the last added field
+        const fields = document.querySelectorAll('.certificate-field');
+        const lastField = fields[fields.length - 1];
+        const certId = lastField.getAttribute('data-cert-id');
+        
+        // Populate with existing data
+        const nameInput = document.getElementById(`certName_${certId}`);
+        const validUntilInput = document.getElementById(`certValidUntil_${certId}`);
+        
+        if (nameInput) nameInput.value = certData.name || '';
+        if (validUntilInput) validUntilInput.value = certData.validUntil || '';
+        
+        // If there's file data, show preview
+        if (certData.fileData) {
+            this.storeCertificateData(certId, certData.fileData);
+            this.updateCertificatePreview(certId, certData.fileData);
+        }
+    }
+
+    collectCertificateData() {
+        const certificates = [];
+        const certificateFields = document.querySelectorAll('.certificate-field');
+        
+        certificateFields.forEach(field => {
+            const certId = field.getAttribute('data-cert-id');
+            const nameInput = document.getElementById(`certName_${certId}`);
+            const validUntilInput = document.getElementById(`certValidUntil_${certId}`);
+            
+            if (nameInput && nameInput.value.trim()) {
+                const certificate = {
+                    name: nameInput.value.trim(),
+                    validUntil: validUntilInput?.value || '',
+                    status: this.calculateCertificateStatus(validUntilInput?.value),
+                    fileData: this.currentCertificates?.[certId] || null
+                };
+                certificates.push(certificate);
+            }
+        });
+        
+        return certificates;
+    }
+
+    calculateCertificateStatus(validUntil) {
+        if (!validUntil) return 'unbekannt';
+        
+        const expiryDate = new Date(validUntil);
+        const today = new Date();
+        const threeMonthsFromNow = new Date();
+        threeMonthsFromNow.setMonth(today.getMonth() + 3);
+        
+        if (expiryDate < today) {
+            return 'abgelaufen';
+        } else if (expiryDate < threeMonthsFromNow) {
+            return 'läuft ab';
+        } else {
+            return 'gültig';
+        }
+    }
+
+    previewSupplierDocument(supplierId, certName) {
+        const supplier = this.suppliers.find(s => s.id === supplierId);
+        if (!supplier) return;
+
+        const certificate = supplier.certificates?.find(cert => cert.name === certName);
+        if (!certificate || !certificate.fileData) {
+            alert('Keine Datei für Vorschau verfügbar.');
+            return;
+        }
+
+        if (certificate.fileData.type === 'application/pdf') {
+            const newWindow = window.open();
+            newWindow.document.write(`
+                <html>
+                    <head><title>${certificate.fileData.name}</title></head>
+                    <body style="margin: 0;">
+                        <embed src="${certificate.fileData.data}" type="application/pdf" width="100%" height="100%">
+                    </body>
+                </html>
+            `);
+        } else {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>${certificate.fileData.name}</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="text-align: center;">
+                        <img src="${certificate.fileData.data}" style="max-width: 100%; max-height: 70vh;" alt="${certificate.fileData.name}">
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    }
+
+    downloadSupplierDocument(supplierId, certName) {
+        const supplier = this.suppliers.find(s => s.id === supplierId);
+        if (!supplier) return;
+
+        const certificate = supplier.certificates?.find(cert => cert.name === certName);
+        if (!certificate || !certificate.fileData) {
+            alert('Keine Datei zum Herunterladen verfügbar.');
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = certificate.fileData.data;
+        link.download = certificate.fileData.name;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     renderRecentSupplierActivity() {
@@ -18466,6 +18873,2197 @@ PLZ Ort">${user.address || ''}</textarea>
                 ` : '<p class="no-issues">✅ Alle Zertifikate sind aktuell.</p>'}
             </div>
         `;
+    }
+
+    // Initialize supplier section specifically
+    initializeSupplierSection() {
+        console.log('Initializing supplier section...');
+        
+        // Ensure suppliers are loaded
+        if (!this.suppliers || this.suppliers.length === 0) {
+            console.log('No suppliers found, loading default suppliers...');
+            this.suppliers = this.loadSuppliersFromStorage();
+        }
+        
+        // Render supplier dashboard
+        this.renderSupplierDashboard();
+        this.renderSupplierList();
+        
+        // Setup supplier event listeners again to ensure they work
+        this.ensureSupplierEventListeners();
+        
+        console.log(`Supplier section initialized with ${this.suppliers.length} suppliers`);
+    }
+
+    ensureSupplierEventListeners() {
+        // Ensure Add Supplier Button works
+        const addSupplierBtn = document.getElementById('addSupplierBtn');
+        if (addSupplierBtn) {
+            addSupplierBtn.removeEventListener('click', this.handleAddSupplier);
+            addSupplierBtn.addEventListener('click', () => {
+                console.log('Add supplier button clicked');
+                this.showSupplierModal();
+            });
+        }
+
+        // Ensure Quick Action Buttons work
+        const evaluateBtn = document.getElementById('evaluateSupplierBtn');
+        if (evaluateBtn) {
+            evaluateBtn.removeEventListener('click', this.handleEvaluateSupplier);
+            evaluateBtn.addEventListener('click', () => {
+                console.log('Evaluate supplier button clicked');
+                this.openEvaluationModal();
+            });
+        }
+
+        const checkCertBtn = document.getElementById('checkCertificatesBtn');
+        if (checkCertBtn) {
+            checkCertBtn.removeEventListener('click', this.handleCheckCertificates);
+            checkCertBtn.addEventListener('click', () => {
+                console.log('Check certificates button clicked');
+                this.checkCertificates();
+            });
+        }
+
+        const planAuditBtn = document.getElementById('planAuditBtn');
+        if (planAuditBtn) {
+            planAuditBtn.removeEventListener('click', this.handlePlanAudit);
+            planAuditBtn.addEventListener('click', () => {
+                console.log('Plan audit button clicked');
+                this.planAudit();
+            });
+        }
+
+        // Ensure form submission works
+        const supplierForm = document.getElementById('supplierForm');
+        if (supplierForm) {
+            // Remove any existing listeners first
+            const newForm = supplierForm.cloneNode(true);
+            supplierForm.parentNode.replaceChild(newForm, supplierForm);
+            
+            // Add new listener
+            newForm.addEventListener('submit', (e) => {
+                console.log('Supplier form submitted');
+                e.preventDefault();
+                this.saveSupplier();
+            });
+        }
+
+        console.log('Supplier event listeners ensured');
+    }
+
+    // ====================================
+    // VACATION PLANNING & ABSENCE MANAGEMENT
+    // ====================================
+
+    setupVacationManagement() {
+        // Prevent double initialization
+        if (this.vacationManagementInitialized) {
+            console.log('🏖️ Vacation management already initialized, skipping...');
+            return;
+        }
+        
+        console.log('🏖️ Setting up vacation management...');
+        
+        // Load vacation data
+        this.vacationRequests = this.loadVacationRequestsFromStorage();
+        this.vacationAccounts = this.loadVacationAccountsFromStorage();
+        console.log('Vacation data loaded:', {
+            requests: this.vacationRequests.length,
+            accounts: Object.keys(this.vacationAccounts).length
+        });
+        
+        // Setup UI components with enhanced debugging
+        console.log('🔧 Setting up vacation UI components...');
+        this.setupVacationTabs();
+        this.setupVacationCalendar();
+        this.setupVacationForms();
+        
+        // Render initial content
+        console.log('🎨 Rendering vacation dashboard...');
+        this.renderVacationDashboard();
+        this.updateVacationBalance();
+        
+        // Force-trigger initial calendar render
+        setTimeout(() => {
+            console.log('🔄 Force-rendering vacation calendar...');
+            this.renderVacationCalendar();
+        }, 100);
+        
+        console.log('✅ Vacation management setup complete');
+        
+        // Add debug info to window for testing
+        window.vacationDebug = {
+            requests: this.vacationRequests,
+            accounts: this.vacationAccounts,
+            dashboard: this
+        };
+        
+        // Final verification
+        this.verifyVacationSetup();
+        
+        // Mark as initialized
+        this.vacationManagementInitialized = true;
+    }
+
+    verifyVacationSetup() {
+        console.log('🔍 Verifying vacation setup...');
+        
+        const elements = {
+            quickVacationRequestBtn: document.getElementById('quickVacationRequestBtn'),
+            quickTeamViewBtn: document.getElementById('quickTeamViewBtn'),
+            quickApprovalBtn: document.getElementById('quickApprovalBtn'),
+            vacationCalendarGrid: document.getElementById('vacationCalendarGrid'),
+            vacationCurrentMonth: document.getElementById('vacationCurrentMonth'),
+            vacationPrevMonthBtn: document.getElementById('vacationPrevMonthBtn'),
+            vacationNextMonthBtn: document.getElementById('vacationNextMonthBtn'),
+            vacationTabs: document.querySelectorAll('.vacation-tab-btn'),
+            vacationTabPanels: document.querySelectorAll('.vacation-tab-panel')
+        };
+        
+        console.log('Element verification:', {
+            quickVacationRequestBtn: !!elements.quickVacationRequestBtn,
+            quickTeamViewBtn: !!elements.quickTeamViewBtn,
+            quickApprovalBtn: !!elements.quickApprovalBtn,
+            vacationCalendarGrid: !!elements.vacationCalendarGrid,
+            vacationCurrentMonth: !!elements.vacationCurrentMonth,
+            vacationPrevMonthBtn: !!elements.vacationPrevMonthBtn,
+            vacationNextMonthBtn: !!elements.vacationNextMonthBtn,
+            vacationTabs: elements.vacationTabs.length,
+            vacationTabPanels: elements.vacationTabPanels.length
+        });
+        
+        // Test quick action clicks
+        if (elements.quickVacationRequestBtn) {
+            console.log('✅ Quick vacation request button ready');
+        } else {
+            console.error('❌ Quick vacation request button missing!');
+        }
+        
+        if (elements.vacationCalendarGrid) {
+            console.log('✅ Vacation calendar grid ready');
+        } else {
+            console.error('❌ Vacation calendar grid missing!');
+        }
+        
+        console.log('🔍 Vacation setup verification complete');
+    }
+
+    loadVacationRequestsFromStorage() {
+        try {
+            return JSON.parse(localStorage.getItem('qhse_vacation_requests') || '[]');
+        } catch (error) {
+            console.error('Error loading vacation requests:', error);
+            return [];
+        }
+    }
+
+    loadVacationAccountsFromStorage() {
+        try {
+            const accounts = JSON.parse(localStorage.getItem('qhse_vacation_accounts') || '{}');
+            if (Object.keys(accounts).length === 0) {
+                return this.initializeDefaultVacationAccounts();
+            }
+            return accounts;
+        } catch (error) {
+            console.error('Error loading vacation accounts:', error);
+            return this.initializeDefaultVacationAccounts();
+        }
+    }
+
+    initializeDefaultVacationAccounts() {
+        const accounts = {};
+        const currentYear = new Date().getFullYear();
+        
+        this.users.forEach(user => {
+            accounts[user.id] = {
+                userId: user.id,
+                year: currentYear,
+                totalDays: 30, // Standard vacation days
+                usedDays: 0,
+                pendingDays: 0,
+                remainingDays: 30,
+                carryOverDays: 0,
+                carryOverLimit: 10,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+        });
+        
+        this.saveVacationAccountsToStorage(accounts);
+        return accounts;
+    }
+
+    saveVacationRequestsToStorage() {
+        localStorage.setItem('qhse_vacation_requests', JSON.stringify(this.vacationRequests));
+    }
+
+    saveVacationAccountsToStorage(accounts = this.vacationAccounts) {
+        localStorage.setItem('qhse_vacation_accounts', JSON.stringify(accounts));
+    }
+
+    setupVacationTabs() {
+        const vacationTabs = document.querySelectorAll('.vacation-tab-btn');
+        const vacationTabContents = document.querySelectorAll('.vacation-tab-panel');
+        
+        console.log('Setting up vacation tabs:', {
+            tabButtons: vacationTabs.length,
+            tabPanels: vacationTabContents.length
+        });
+
+        vacationTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                vacationTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content
+                vacationTabContents.forEach(content => {
+                    if (content.id === `vacation-${targetTab}`) {
+                        content.classList.add('active');
+                        content.style.display = 'block';
+                    } else {
+                        content.classList.remove('active');
+                        content.style.display = 'none';
+                    }
+                });
+
+                // Render content for active tab
+                this.renderVacationTabContent(targetTab);
+            });
+        });
+
+        // Show calendar tab by default
+        this.renderVacationTabContent('calendar');
+    }
+
+    setupVacationCalendar() {
+        console.log('Setting up vacation calendar...');
+        const prevBtn = document.getElementById('vacationPrevMonthBtn');
+        const nextBtn = document.getElementById('vacationNextMonthBtn');
+        const todayBtn = document.getElementById('vacationTodayBtn');
+        
+        console.log('Calendar buttons found:', {
+            prevBtn: !!prevBtn,
+            nextBtn: !!nextBtn,
+            todayBtn: !!todayBtn
+        });
+        const viewButtons = document.querySelectorAll('.view-btn');
+        
+        console.log('View buttons found:', viewButtons.length);
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                this.currentMonth--;
+                if (this.currentMonth < 0) {
+                    this.currentMonth = 11;
+                    this.currentYear--;
+                }
+                this.renderVacationCalendar();
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                this.currentMonth++;
+                if (this.currentMonth > 11) {
+                    this.currentMonth = 0;
+                    this.currentYear++;
+                }
+                this.renderVacationCalendar();
+            });
+        }
+
+        if (todayBtn) {
+            todayBtn.addEventListener('click', () => {
+                const today = new Date();
+                this.currentMonth = today.getMonth();
+                this.currentYear = today.getFullYear();
+                this.renderVacationCalendar();
+            });
+        }
+
+        viewButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Update active view button
+                viewButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                this.currentVacationView = button.getAttribute('data-view');
+                console.log('View changed to:', this.currentVacationView);
+                this.renderVacationCalendar();
+            });
+        });
+
+        this.currentVacationView = 'month';
+    }
+
+    setupVacationForms() {
+        // Vacation request form
+        const vacationRequestForm = document.getElementById('vacationRequestForm');
+        if (vacationRequestForm) {
+            vacationRequestForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.submitVacationRequest();
+            });
+        }
+
+        // Quick action buttons with enhanced debugging
+        console.log('🔧 Setting up quick action buttons...');
+        
+        const quickVacationRequestBtn = document.getElementById('quickVacationRequestBtn');
+        if (quickVacationRequestBtn) {
+            console.log('✅ Quick vacation request button found, adding event listener');
+            // Remove any existing listeners first
+            quickVacationRequestBtn.replaceWith(quickVacationRequestBtn.cloneNode(true));
+            const newBtn = document.getElementById('quickVacationRequestBtn');
+            newBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🚀 Quick vacation request button clicked!');
+                this.showVacationRequestModal();
+            });
+        } else {
+            console.error('❌ Quick vacation request button NOT found!');
+        }
+
+        const quickTeamViewBtn = document.getElementById('quickTeamViewBtn');
+        if (quickTeamViewBtn) {
+            console.log('✅ Quick team view button found, adding event listener');
+            quickTeamViewBtn.replaceWith(quickTeamViewBtn.cloneNode(true));
+            const newTeamBtn = document.getElementById('quickTeamViewBtn');
+            newTeamBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('👥 Quick team view button clicked!');
+                this.showTeamVacationView();
+            });
+        } else {
+            console.warn('⚠️ Quick team view button NOT found!');
+        }
+
+        const quickApprovalBtn = document.getElementById('quickApprovalBtn');
+        if (quickApprovalBtn) {
+            console.log('✅ Quick approval button found, adding event listener');
+            quickApprovalBtn.replaceWith(quickApprovalBtn.cloneNode(true));
+            const newApprovalBtn = document.getElementById('quickApprovalBtn');
+            newApprovalBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('✅ Quick approval button clicked!');
+                this.showVacationApprovalView();
+            });
+        } else {
+            console.warn('⚠️ Quick approval button NOT found!');
+        }
+
+        // Section header buttons
+        console.log('🔧 Setting up section header buttons...');
+        
+        const newVacationRequestBtn = document.getElementById('newVacationRequestBtn');
+        if (newVacationRequestBtn) {
+            newVacationRequestBtn.addEventListener('click', () => {
+                console.log('📝 New vacation request button clicked');
+                this.showVacationRequestModal();
+            });
+            console.log('✅ New vacation request button event listener added');
+        } else {
+            console.warn('⚠️ New vacation request button not found');
+        }
+
+        const vacationOverviewBtn = document.getElementById('vacationOverviewBtn');
+        if (vacationOverviewBtn) {
+            vacationOverviewBtn.addEventListener('click', () => {
+                console.log('📊 Vacation overview button clicked');
+                this.showVacationOverview();
+            });
+            console.log('✅ Vacation overview button event listener added');
+        } else {
+            console.warn('⚠️ Vacation overview button not found');
+        }
+
+        const teamCalendarBtn = document.getElementById('teamCalendarBtn');
+        if (teamCalendarBtn) {
+            teamCalendarBtn.addEventListener('click', () => {
+                console.log('👥 Team calendar button clicked');
+                this.showTeamVacationView();
+            });
+            console.log('✅ Team calendar button event listener added');
+        } else {
+            console.warn('⚠️ Team calendar button not found');
+        }
+
+        // Modal close functionality
+        const vacationModals = document.querySelectorAll('#vacationRequestModal, #vacationApprovalModal, #vacationDetailsModal');
+        vacationModals.forEach(modal => {
+            const closeButtons = modal.querySelectorAll('.modal-close');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                });
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // Date validation
+        const startDateInput = document.getElementById('vacationStartDate');
+        const endDateInput = document.getElementById('vacationEndDate');
+        
+        if (startDateInput && endDateInput) {
+            startDateInput.addEventListener('change', () => {
+                this.validateVacationDates();
+                this.calculateVacationDays();
+            });
+            
+            endDateInput.addEventListener('change', () => {
+                this.validateVacationDates();
+                this.calculateVacationDays();
+            });
+        }
+    }
+
+    renderVacationDashboard() {
+        this.updateVacationStats();
+        this.renderVacationQuickActions();
+        this.renderVacationNotifications();
+    }
+
+    renderVacationTabContent(tab) {
+        switch(tab) {
+            case 'calendar':
+                this.renderVacationCalendar();
+                break;
+            case 'requests':
+                this.renderMyVacationRequests();
+                break;
+            case 'approval':
+                this.renderVacationApprovals();
+                break;
+            case 'team':
+                this.renderTeamVacationOverview();
+                break;
+            case 'administration':
+                this.renderVacationAdministration();
+                break;
+        }
+    }
+
+    renderVacationCalendar() {
+        const calendarContainer = document.getElementById('vacationCalendarGrid');
+        if (!calendarContainer) return;
+
+        const monthNames = [
+            'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+            'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+        ];
+
+        // Update header
+        const monthYearElement = document.getElementById('vacationCurrentMonth');
+        if (monthYearElement) {
+            monthYearElement.textContent = `${monthNames[this.currentMonth]} ${this.currentYear}`;
+        }
+
+        // Generate calendar based on current view
+        switch(this.currentVacationView) {
+            case 'month':
+                this.renderMonthView(calendarContainer);
+                break;
+            case 'week':
+                this.renderWeekView(calendarContainer);
+                break;
+            case 'day':
+                this.renderDayView(calendarContainer);
+                break;
+        }
+    }
+
+    renderMonthView(container) {
+        const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+        const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay() + 1); // Start on Monday
+
+        let html = `
+            <div class="calendar-grid">
+                <div class="calendar-header">
+                    <div class="calendar-day-header">Mo</div>
+                    <div class="calendar-day-header">Di</div>
+                    <div class="calendar-day-header">Mi</div>
+                    <div class="calendar-day-header">Do</div>
+                    <div class="calendar-day-header">Fr</div>
+                    <div class="calendar-day-header">Sa</div>
+                    <div class="calendar-day-header">So</div>
+                </div>
+                <div class="calendar-body">
+        `;
+
+        const currentDate = new Date(startDate);
+        for (let week = 0; week < 6; week++) {
+            for (let day = 0; day < 7; day++) {
+                const isCurrentMonth = currentDate.getMonth() === this.currentMonth;
+                const isToday = this.isToday(currentDate);
+                const dayVacations = this.getVacationsForDate(currentDate);
+                
+                html += `
+                    <div class="calendar-day ${!isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}" 
+                         data-date="${currentDate.toISOString().split('T')[0]}">
+                        <div class="day-number">${currentDate.getDate()}</div>
+                        <div class="day-events">
+                            ${dayVacations.map(vacation => 
+                                `<div class="vacation-event vacation-${vacation.status}" title="${vacation.employee}: ${vacation.type}">
+                                    ${vacation.employee.split(' ')[0]}
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+
+        html += `
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+        // Add click handlers for days
+        container.querySelectorAll('.calendar-day').forEach(day => {
+            day.addEventListener('click', () => {
+                const date = day.getAttribute('data-date');
+                this.showDayVacationDetails(date);
+            });
+        });
+    }
+
+    renderWeekView(container) {
+        // Week view implementation
+        const startOfWeek = this.getStartOfWeek(new Date(this.currentYear, this.currentMonth, 1));
+        let html = '<div class="week-view">Week view coming soon...</div>';
+        container.innerHTML = html;
+    }
+
+    renderDayView(container) {
+        // Day view implementation
+        let html = '<div class="day-view">Day view coming soon...</div>';
+        container.innerHTML = html;
+    }
+
+    getVacationsForDate(date) {
+        const dateStr = date.toISOString().split('T')[0];
+        const vacations = [];
+        
+        this.vacationRequests.forEach(request => {
+            if (request.status !== 'genehmigt') return;
+            
+            const startDate = new Date(request.startDate);
+            const endDate = new Date(request.endDate);
+            const checkDate = new Date(date);
+            
+            if (checkDate >= startDate && checkDate <= endDate) {
+                const user = this.users.find(u => u.id === request.userId);
+                vacations.push({
+                    employee: user ? user.displayName : 'Unbekannt',
+                    type: request.absenceType,
+                    status: request.status
+                });
+            }
+        });
+        
+        return vacations;
+    }
+
+    renderMyVacationRequests() {
+        const container = document.getElementById('myVacationRequests');
+        if (!container) return;
+
+        const currentUser = this.getCurrentUser();
+        const myRequests = this.vacationRequests.filter(r => r.userId === currentUser.id);
+
+        if (myRequests.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-calendar-plus"></i>
+                    <h3>Keine Urlaubsanträge</h3>
+                    <p>Sie haben noch keine Urlaubsanträge gestellt.</p>
+                    <button class="btn btn-primary" onclick="window.qhseDashboard.showVacationRequestModal()">
+                        <i class="fas fa-plus"></i> Antrag stellen
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        const html = myRequests.map(request => {
+            const startDate = new Date(request.startDate).toLocaleDateString('de-DE');
+            const endDate = new Date(request.endDate).toLocaleDateString('de-DE');
+            const statusClass = this.getVacationStatusClass(request.status);
+            
+            return `
+                <div class="vacation-request-card">
+                    <div class="request-header">
+                        <div class="request-dates">
+                            <i class="fas fa-calendar"></i>
+                            ${startDate} - ${endDate} (${request.workingDays} Tage)
+                        </div>
+                        <span class="status-badge status-${statusClass}">${request.status}</span>
+                    </div>
+                    <div class="request-details">
+                        <div class="detail-row">
+                            <span class="label">Typ:</span>
+                            <span>${this.getAbsenceTypeName(request.absenceType)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Antragsdatum:</span>
+                            <span>${new Date(request.createdAt).toLocaleDateString('de-DE')}</span>
+                        </div>
+                        ${request.reason ? `
+                            <div class="detail-row">
+                                <span class="label">Grund:</span>
+                                <span>${request.reason}</span>
+                            </div>
+                        ` : ''}
+                        ${request.substitute ? `
+                            <div class="detail-row">
+                                <span class="label">Vertretung:</span>
+                                <span>${this.getUserDisplayName(request.substitute)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn btn-sm btn-outline" onclick="window.qhseDashboard.showVacationDetails('${request.id}')">
+                            <i class="fas fa-eye"></i> Details
+                        </button>
+                        ${request.status === 'eingereicht' ? `
+                            <button class="btn btn-sm btn-outline" onclick="window.qhseDashboard.editVacationRequest('${request.id}')">
+                                <i class="fas fa-edit"></i> Bearbeiten
+                            </button>
+                            <button class="btn btn-sm btn-outline btn-danger" onclick="window.qhseDashboard.cancelVacationRequest('${request.id}')">
+                                <i class="fas fa-times"></i> Zurückziehen
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = html;
+    }
+
+    renderVacationApprovals() {
+        const container = document.getElementById('pendingApprovalsList');
+        if (!container) return;
+
+        const currentUser = this.getCurrentUser();
+        const userRoles = this.roleDefinitions[currentUser.role]?.allowedSections || [];
+        
+        // Check if user can approve vacations
+        if (!userRoles.includes('urlaubsplanung') || !['admin', 'root-admin', 'geschaeftsfuehrung', 'betriebsleiter', 'abteilungsleiter'].includes(currentUser.role)) {
+            container.innerHTML = `
+                <div class="access-denied">
+                    <i class="fas fa-lock"></i>
+                    <h3>Keine Berechtigung</h3>
+                    <p>Sie haben keine Berechtigung, Urlaubsanträge zu genehmigen.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const pendingRequests = this.vacationRequests.filter(r => r.status === 'eingereicht');
+
+        if (pendingRequests.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Keine ausstehenden Genehmigungen</h3>
+                    <p>Alle Urlaubsanträge wurden bearbeitet.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const html = pendingRequests.map(request => {
+            const user = this.users.find(u => u.id === request.userId);
+            const startDate = new Date(request.startDate).toLocaleDateString('de-DE');
+            const endDate = new Date(request.endDate).toLocaleDateString('de-DE');
+            
+            return `
+                <div class="vacation-approval-card">
+                    <div class="approval-header">
+                        <div class="employee-info">
+                            <strong>${user ? user.displayName : 'Unbekannt'}</strong>
+                            <span class="department">${user ? user.department : ''}</span>
+                        </div>
+                        <div class="request-dates">
+                            <i class="fas fa-calendar"></i>
+                            ${startDate} - ${endDate} (${request.workingDays} Tage)
+                        </div>
+                    </div>
+                    <div class="approval-details">
+                        <div class="detail-row">
+                            <span class="label">Typ:</span>
+                            <span>${this.getAbsenceTypeName(request.absenceType)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Verfügbare Urlaubstage:</span>
+                            <span>${this.vacationAccounts[request.userId]?.remainingDays || 0} Tage</span>
+                        </div>
+                        ${request.reason ? `
+                            <div class="detail-row">
+                                <span class="label">Grund:</span>
+                                <span>${request.reason}</span>
+                            </div>
+                        ` : ''}
+                        ${request.substitute ? `
+                            <div class="detail-row">
+                                <span class="label">Vertretung:</span>
+                                <span>${this.getUserDisplayName(request.substitute)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="approval-actions">
+                        <button class="btn btn-sm btn-success" onclick="window.qhseDashboard.approveVacationRequest('${request.id}')">
+                            <i class="fas fa-check"></i> Genehmigen
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="window.qhseDashboard.rejectVacationRequest('${request.id}')">
+                            <i class="fas fa-times"></i> Ablehnen
+                        </button>
+                        <button class="btn btn-sm btn-outline" onclick="window.qhseDashboard.showVacationApprovalModal('${request.id}')">
+                            <i class="fas fa-comment"></i> Mit Kommentar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = html;
+    }
+
+    updateVacationStats() {
+        const currentUser = this.getCurrentUser();
+        const userAccount = this.vacationAccounts[currentUser.id];
+        
+        if (!userAccount) return;
+
+        // Update vacation balance display
+        const remainingElement = document.getElementById('vacationRemainingDays');
+        const usedElement = document.getElementById('vacationUsedDays');
+        const totalElement = document.getElementById('vacationTotalDays');
+        const pendingElement = document.getElementById('vacationPendingDays');
+
+        if (remainingElement) remainingElement.textContent = userAccount.remainingDays;
+        if (usedElement) usedElement.textContent = userAccount.usedDays;
+        if (totalElement) totalElement.textContent = userAccount.totalDays;
+        if (pendingElement) pendingElement.textContent = userAccount.pendingDays;
+
+        // Update dashboard stats
+        const totalRequestsElement = document.getElementById('totalVacationRequests');
+        const pendingRequestsElement = document.getElementById('pendingVacationRequests');
+        const approvedRequestsElement = document.getElementById('approvedVacationRequests');
+
+        if (totalRequestsElement) {
+            totalRequestsElement.textContent = this.vacationRequests.length;
+        }
+        if (pendingRequestsElement) {
+            const pending = this.vacationRequests.filter(r => r.status === 'eingereicht').length;
+            pendingRequestsElement.textContent = pending;
+        }
+        if (approvedRequestsElement) {
+            const approved = this.vacationRequests.filter(r => r.status === 'genehmigt').length;
+            approvedRequestsElement.textContent = approved;
+        }
+    }
+
+    showVacationRequestModal() {
+        console.log('🎯 showVacationRequestModal called');
+        const modal = document.getElementById('vacationRequestModal');
+        if (!modal) {
+            console.error('❌ Vacation request modal not found!');
+            alert('Fehler: Urlaubsantrag-Modal nicht gefunden.');
+            return;
+        }
+
+        console.log('✅ Modal found, setting up form...');
+
+        // Reset form
+        const form = document.getElementById('vacationRequestForm');
+        if (form) {
+            form.reset();
+            console.log('✅ Form reset');
+        } else {
+            console.warn('⚠️ Form not found');
+        }
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        const startDateInput = document.getElementById('vacationStartDate');
+        const endDateInput = document.getElementById('vacationEndDate');
+        
+        if (startDateInput) {
+            startDateInput.min = today;
+            console.log('✅ Start date min set to:', today);
+        }
+        if (endDateInput) {
+            endDateInput.min = today;
+            console.log('✅ End date min set to:', today);
+        }
+
+        // Populate substitute dropdown
+        this.populateSubstituteDropdown();
+        console.log('✅ Substitute dropdown populated');
+
+        // Show modal
+        modal.style.display = 'block';
+        console.log('✅ Modal displayed');
+    }
+
+    populateSubstituteDropdown() {
+        const select = document.getElementById('vacationSubstitute');
+        if (!select) return;
+
+        const currentUser = this.getCurrentUser();
+        const colleagues = this.users.filter(u => 
+            u.id !== currentUser.id && 
+            u.department === currentUser.department &&
+            u.role !== 'mitarbeiter'
+        );
+
+        select.innerHTML = '<option value="">Keine Vertretung erforderlich</option>';
+        colleagues.forEach(user => {
+            select.innerHTML += `<option value="${user.id}">${user.displayName}</option>`;
+        });
+    }
+
+    submitVacationRequest() {
+        const form = document.getElementById('vacationRequestForm');
+        if (!form) return;
+
+        const formData = new FormData(form);
+        const currentUser = this.getCurrentUser();
+        
+        const request = {
+            id: 'VAC_' + Date.now(),
+            userId: currentUser.id,
+            absenceType: formData.get('vacationType'),
+            startDate: formData.get('vacationStartDate'),
+            endDate: formData.get('vacationEndDate'),
+            workingDays: this.calculateWorkingDays(formData.get('vacationStartDate'), formData.get('vacationEndDate')),
+            reason: formData.get('vacationReason') || '',
+            substitute: formData.get('vacationSubstitute') || null,
+            status: 'eingereicht',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            workflow: [{
+                action: 'eingereicht',
+                timestamp: new Date().toISOString(),
+                userId: currentUser.id,
+                comment: 'Antrag eingereicht'
+            }]
+        };
+
+        // Validate request
+        if (!this.validateVacationRequest(request)) return;
+
+        this.vacationRequests.push(request);
+        this.saveVacationRequestsToStorage();
+
+        // Update vacation account
+        if (request.absenceType === 'urlaub') {
+            const userAccount = this.vacationAccounts[currentUser.id];
+            if (userAccount) {
+                userAccount.pendingDays += request.workingDays;
+                this.saveVacationAccountsToStorage();
+            }
+        }
+
+        // Close modal and refresh display
+        document.getElementById('vacationRequestModal').style.display = 'none';
+        this.renderVacationTabContent('requests');
+        this.updateVacationStats();
+
+        alert('Urlaubsantrag erfolgreich eingereicht!');
+    }
+
+    validateVacationRequest(request) {
+        const startDate = new Date(request.startDate);
+        const endDate = new Date(request.endDate);
+        const today = new Date();
+
+        if (startDate <= today) {
+            alert('Das Startdatum muss in der Zukunft liegen.');
+            return false;
+        }
+
+        if (endDate <= startDate) {
+            alert('Das Enddatum muss nach dem Startdatum liegen.');
+            return false;
+        }
+
+        if (request.absenceType === 'urlaub') {
+            const userAccount = this.vacationAccounts[request.userId];
+            if (userAccount && request.workingDays > userAccount.remainingDays) {
+                alert('Nicht genügend Urlaubstage verfügbar.');
+                return false;
+            }
+        }
+
+        // Check for conflicts
+        const conflicts = this.checkVacationConflicts(request);
+        if (conflicts.length > 0) {
+            const conflictNames = conflicts.map(c => this.getUserDisplayName(c.userId)).join(', ');
+            if (!confirm(`Warnung: Überschneidung mit anderen Urlauben (${conflictNames}). Trotzdem fortfahren?`)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    checkVacationConflicts(request) {
+        const startDate = new Date(request.startDate);
+        const endDate = new Date(request.endDate);
+        const conflicts = [];
+
+        const currentUser = this.getCurrentUser();
+        const departmentColleagues = this.users.filter(u => 
+            u.department === currentUser.department && u.id !== currentUser.id
+        );
+
+        departmentColleagues.forEach(colleague => {
+            const colleagueRequests = this.vacationRequests.filter(r => 
+                r.userId === colleague.id && 
+                r.status === 'genehmigt' &&
+                r.id !== request.id
+            );
+
+            colleagueRequests.forEach(existingRequest => {
+                const existingStart = new Date(existingRequest.startDate);
+                const existingEnd = new Date(existingRequest.endDate);
+
+                if ((startDate <= existingEnd && endDate >= existingStart)) {
+                    conflicts.push(existingRequest);
+                }
+            });
+        });
+
+        return conflicts;
+    }
+
+    calculateWorkingDays(startDate, endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        let workingDays = 0;
+
+        for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+            const dayOfWeek = date.getDay();
+            if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Not weekend
+                workingDays++;
+            }
+        }
+
+        return workingDays;
+    }
+
+    getAbsenceTypeName(type) {
+        const types = {
+            'urlaub': 'Urlaub',
+            'krank': 'Krankheit',
+            'fortbildung': 'Fortbildung',
+            'elternzeit': 'Elternzeit',
+            'sonderurlaub': 'Sonderurlaub',
+            'unbezahlt': 'Unbezahlter Urlaub'
+        };
+        return types[type] || type;
+    }
+
+    getVacationStatusClass(status) {
+        const classes = {
+            'eingereicht': 'pending',
+            'genehmigt': 'approved',
+            'abgelehnt': 'rejected',
+            'storniert': 'cancelled'
+        };
+        return classes[status] || 'unknown';
+    }
+
+    getUserDisplayName(userId) {
+        const user = this.users.find(u => u.id === userId);
+        return user ? user.displayName : 'Unbekannt';
+    }
+
+    isToday(date) {
+        const today = new Date();
+        return date.toDateString() === today.toDateString();
+    }
+
+    getStartOfWeek(date) {
+        const start = new Date(date);
+        const day = start.getDay();
+        const diff = start.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(start.setDate(diff));
+    }
+
+    // Additional vacation management methods
+    updateVacationBalance() {
+        this.updateVacationStats();
+    }
+
+    renderVacationQuickActions() {
+        // Placeholder for quick actions rendering
+        console.log('Rendering vacation quick actions...');
+    }
+
+    renderVacationNotifications() {
+        // Placeholder for notifications rendering
+        console.log('Rendering vacation notifications...');
+    }
+
+    renderTeamVacationOverview() {
+        const container = document.getElementById('teamAbsencesList');
+        if (!container) return;
+
+        const currentUser = this.getCurrentUser();
+        const userDepartment = currentUser.department;
+        
+        // Get team members from same department
+        const teamMembers = this.users.filter(u => 
+            u.department === userDepartment && u.id !== currentUser.id
+        );
+
+        if (teamMembers.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h3>Keine Teammitglieder</h3>
+                    <p>In Ihrer Abteilung sind keine weiteren Mitarbeiter vorhanden.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Get vacation requests for team members
+        const teamRequests = this.vacationRequests.filter(r => 
+            teamMembers.some(member => member.id === r.userId) &&
+            r.status === 'genehmigt'
+        );
+
+        let html = '<div class="team-vacation-grid">';
+        
+        teamMembers.forEach(member => {
+            const memberRequests = teamRequests.filter(r => r.userId === member.id);
+            const nextVacation = memberRequests
+                .filter(r => new Date(r.startDate) > new Date())
+                .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0];
+
+            html += `
+                <div class="team-member-card">
+                    <div class="member-info">
+                        <strong>${member.displayName}</strong>
+                        <span class="member-role">${this.roleDefinitions[member.role]?.name}</span>
+                    </div>
+                    <div class="vacation-status">
+                        ${nextVacation ? `
+                            <div class="next-vacation">
+                                <i class="fas fa-calendar"></i>
+                                ${new Date(nextVacation.startDate).toLocaleDateString('de-DE')} - 
+                                ${new Date(nextVacation.endDate).toLocaleDateString('de-DE')}
+                                <span class="vacation-type">${this.getAbsenceTypeName(nextVacation.absenceType)}</span>
+                            </div>
+                        ` : `
+                            <div class="no-vacation">
+                                <i class="fas fa-check-circle"></i>
+                                Keine geplanten Abwesenheiten
+                            </div>
+                        `}
+                    </div>
+                    <div class="vacation-count">
+                        ${memberRequests.length} Urlaube geplant
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    renderVacationAdministration() {
+        // Populate entitlements overview
+        const entitlementsContainer = document.getElementById('entitlementsOverview');
+        if (entitlementsContainer) {
+            const currentUser = this.getCurrentUser();
+            
+            if (!['admin', 'root-admin'].includes(currentUser.role)) {
+                entitlementsContainer.innerHTML = `
+                    <div class="access-denied">
+                        <i class="fas fa-lock"></i>
+                        <p>Keine Berechtigung für Verwaltungsfunktionen.</p>
+                    </div>
+                `;
+            } else {
+                let html = '<div class="entitlements-list">';
+                Object.values(this.vacationAccounts).forEach(account => {
+                    const user = this.users.find(u => u.id === account.userId);
+                    if (user) {
+                        html += `
+                            <div class="entitlement-item">
+                                <div class="employee-name">${user.displayName}</div>
+                                <div class="entitlement-details">
+                                    <span>${account.totalDays} Tage</span>
+                                    <span class="used">${account.usedDays} verbraucht</span>
+                                    <span class="remaining">${account.remainingDays} verfügbar</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                html += '</div>';
+                entitlementsContainer.innerHTML = html;
+            }
+        }
+
+        // Populate holidays overview
+        const holidaysContainer = document.getElementById('holidaysOverview');
+        if (holidaysContainer) {
+            holidaysContainer.innerHTML = `
+                <div class="holidays-list">
+                    <div class="holiday-item">
+                        <span class="holiday-date">01.01.2024</span>
+                        <span class="holiday-name">Neujahr</span>
+                    </div>
+                    <div class="holiday-item">
+                        <span class="holiday-date">29.03.2024</span>
+                        <span class="holiday-name">Karfreitag</span>
+                    </div>
+                    <div class="holiday-item">
+                        <span class="holiday-date">01.04.2024</span>
+                        <span class="holiday-name">Ostermontag</span>
+                    </div>
+                    <div class="holiday-item">
+                        <span class="holiday-date">01.05.2024</span>
+                        <span class="holiday-name">Tag der Arbeit</span>
+                    </div>
+                    <div class="holiday-item">
+                        <span class="holiday-date">09.05.2024</span>
+                        <span class="holiday-name">Christi Himmelfahrt</span>
+                    </div>
+                    <div class="holiday-item">
+                        <span class="holiday-date">20.05.2024</span>
+                        <span class="holiday-name">Pfingstmontag</span>
+                    </div>
+                    <div class="holiday-item">
+                        <span class="holiday-date">03.10.2024</span>
+                        <span class="holiday-name">Tag der Deutschen Einheit</span>
+                    </div>
+                    <div class="holiday-item">
+                        <span class="holiday-date">25.12.2024</span>
+                        <span class="holiday-name">1. Weihnachtsfeiertag</span>
+                    </div>
+                    <div class="holiday-item">
+                        <span class="holiday-date">26.12.2024</span>
+                        <span class="holiday-name">2. Weihnachtsfeiertag</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Populate reports overview
+        const reportsContainer = document.getElementById('reportsOverview');
+        if (reportsContainer) {
+            const totalRequests = this.vacationRequests.length;
+            const pendingRequests = this.vacationRequests.filter(r => r.status === 'eingereicht').length;
+            const approvedRequests = this.vacationRequests.filter(r => r.status === 'genehmigt').length;
+
+            reportsContainer.innerHTML = `
+                <div class="reports-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${totalRequests}</div>
+                        <div class="stat-label">Gesamt Anträge</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${pendingRequests}</div>
+                        <div class="stat-label">Ausstehend</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${approvedRequests}</div>
+                        <div class="stat-label">Genehmigt</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Setup event listeners for admin buttons
+        console.log('🔧 Setting up vacation administration event listeners...');
+        
+        const exportBtn = document.getElementById('exportDataBtn');
+        const reportsBtn = document.getElementById('generateReportsBtn');
+        const holidaysBtn = document.getElementById('manageHolidaysBtn');
+        const specialRulesBtn = document.getElementById('specialRulesBtn');
+        
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                console.log('📊 Export button clicked');
+                this.exportVacationData();
+            });
+            console.log('✅ Export button event listener added');
+        } else {
+            console.warn('⚠️ Export button not found');
+        }
+        
+        if (reportsBtn) {
+            reportsBtn.addEventListener('click', () => {
+                console.log('📈 Reports button clicked');
+                this.generateVacationReport();
+            });
+            console.log('✅ Reports button event listener added');
+        } else {
+            console.warn('⚠️ Reports button not found');
+        }
+        
+        if (holidaysBtn) {
+            holidaysBtn.addEventListener('click', () => {
+                console.log('🎄 Holidays management button clicked');
+                this.showHolidaysManagement();
+            });
+            console.log('✅ Holidays management button event listener added');
+        } else {
+            console.warn('⚠️ Holidays management button not found');
+        }
+        
+        if (specialRulesBtn) {
+            specialRulesBtn.addEventListener('click', () => {
+                console.log('⚙️ Special rules button clicked');
+                this.showSpecialRulesManagement();
+            });
+            console.log('✅ Special rules button event listener added');
+        } else {
+            console.warn('⚠️ Special rules button not found');
+        }
+    }
+
+    validateVacationDates() {
+        const startInput = document.getElementById('vacationStartDate');
+        const endInput = document.getElementById('vacationEndDate');
+        
+        if (!startInput || !endInput) return;
+
+        const startDate = new Date(startInput.value);
+        const endDate = new Date(endInput.value);
+        
+        if (startDate && endDate && endDate < startDate) {
+            endInput.setCustomValidity('Enddatum muss nach dem Startdatum liegen');
+        } else {
+            endInput.setCustomValidity('');
+        }
+    }
+
+    calculateVacationDays() {
+        const startInput = document.getElementById('vacationStartDate');
+        const endInput = document.getElementById('vacationEndDate');
+        const daysInput = document.getElementById('vacationDays');
+        
+        if (!startInput || !endInput || !daysInput) return;
+
+        if (startInput.value && endInput.value) {
+            const workingDays = this.calculateWorkingDays(startInput.value, endInput.value);
+            daysInput.value = workingDays;
+            
+            // Update summary if elements exist
+            const summaryDays = document.getElementById('summaryDays');
+            const summaryPeriod = document.getElementById('summaryPeriod');
+            
+            if (summaryDays) summaryDays.textContent = workingDays;
+            if (summaryPeriod) {
+                const startDate = new Date(startInput.value).toLocaleDateString('de-DE');
+                const endDate = new Date(endInput.value).toLocaleDateString('de-DE');
+                summaryPeriod.textContent = `${startDate} - ${endDate}`;
+            }
+        } else {
+            daysInput.value = '';
+            const summaryDays = document.getElementById('summaryDays');
+            const summaryPeriod = document.getElementById('summaryPeriod');
+            if (summaryDays) summaryDays.textContent = '0';
+            if (summaryPeriod) summaryPeriod.textContent = '-';
+        }
+    }
+
+    showDayVacationDetails(date) {
+        const vacations = this.getVacationsForDate(new Date(date));
+        
+        if (vacations.length === 0) {
+            alert('Keine Urlaubseinträge für diesen Tag.');
+            return;
+        }
+
+        const details = vacations.map(v => `${v.employee}: ${this.getAbsenceTypeName(v.type)}`).join('\n');
+        alert(`Urlaubseinträge für ${new Date(date).toLocaleDateString('de-DE')}:\n\n${details}`);
+    }
+
+    showVacationDetails(requestId) {
+        const request = this.vacationRequests.find(r => r.id === requestId);
+        if (!request) return;
+
+        const modal = document.getElementById('vacationDetailsModal');
+        if (!modal) {
+            alert('Details-Modal nicht gefunden.');
+            return;
+        }
+
+        // Populate modal with request details
+        const user = this.users.find(u => u.id === request.userId);
+        document.getElementById('detailEmployeeName').textContent = user ? user.displayName : 'Unbekannt';
+        document.getElementById('detailVacationType').textContent = this.getAbsenceTypeName(request.absenceType);
+        document.getElementById('detailStartDate').textContent = new Date(request.startDate).toLocaleDateString('de-DE');
+        document.getElementById('detailEndDate').textContent = new Date(request.endDate).toLocaleDateString('de-DE');
+        document.getElementById('detailWorkingDays').textContent = request.workingDays;
+        document.getElementById('detailStatus').textContent = request.status;
+        document.getElementById('detailReason').textContent = request.reason || 'Kein Grund angegeben';
+
+        modal.style.display = 'block';
+    }
+
+    approveVacationRequest(requestId) {
+        const request = this.vacationRequests.find(r => r.id === requestId);
+        if (!request) return;
+
+        const currentUser = this.getCurrentUser();
+        
+        // Update request status
+        request.status = 'genehmigt';
+        request.updatedAt = new Date().toISOString();
+        request.workflow.push({
+            action: 'genehmigt',
+            timestamp: new Date().toISOString(),
+            userId: currentUser.id,
+            comment: 'Antrag genehmigt'
+        });
+
+        // Update vacation account
+        if (request.absenceType === 'urlaub') {
+            const userAccount = this.vacationAccounts[request.userId];
+            if (userAccount) {
+                userAccount.usedDays += request.workingDays;
+                userAccount.pendingDays -= request.workingDays;
+                userAccount.remainingDays = userAccount.totalDays - userAccount.usedDays;
+                this.saveVacationAccountsToStorage();
+            }
+        }
+
+        this.saveVacationRequestsToStorage();
+        this.renderVacationApprovals();
+        this.updateVacationStats();
+
+        alert(`Urlaubsantrag von ${this.getUserDisplayName(request.userId)} wurde genehmigt.`);
+    }
+
+    rejectVacationRequest(requestId) {
+        const request = this.vacationRequests.find(r => r.id === requestId);
+        if (!request) return;
+
+        const reason = prompt('Grund für die Ablehnung (optional):');
+        const currentUser = this.getCurrentUser();
+        
+        // Update request status
+        request.status = 'abgelehnt';
+        request.updatedAt = new Date().toISOString();
+        request.workflow.push({
+            action: 'abgelehnt',
+            timestamp: new Date().toISOString(),
+            userId: currentUser.id,
+            comment: reason || 'Antrag abgelehnt'
+        });
+
+        // Update vacation account (remove pending days)
+        if (request.absenceType === 'urlaub') {
+            const userAccount = this.vacationAccounts[request.userId];
+            if (userAccount) {
+                userAccount.pendingDays -= request.workingDays;
+                this.saveVacationAccountsToStorage();
+            }
+        }
+
+        this.saveVacationRequestsToStorage();
+        this.renderVacationApprovals();
+        this.updateVacationStats();
+
+        alert(`Urlaubsantrag von ${this.getUserDisplayName(request.userId)} wurde abgelehnt.`);
+    }
+
+    cancelVacationRequest(requestId) {
+        if (!confirm('Möchten Sie den Urlaubsantrag wirklich zurückziehen?')) return;
+
+        const request = this.vacationRequests.find(r => r.id === requestId);
+        if (!request) return;
+
+        const currentUser = this.getCurrentUser();
+        
+        // Update request status
+        request.status = 'storniert';
+        request.updatedAt = new Date().toISOString();
+        request.workflow.push({
+            action: 'storniert',
+            timestamp: new Date().toISOString(),
+            userId: currentUser.id,
+            comment: 'Antrag zurückgezogen'
+        });
+
+        // Update vacation account (remove pending days)
+        if (request.absenceType === 'urlaub') {
+            const userAccount = this.vacationAccounts[request.userId];
+            if (userAccount) {
+                userAccount.pendingDays -= request.workingDays;
+                this.saveVacationAccountsToStorage();
+            }
+        }
+
+        this.saveVacationRequestsToStorage();
+        this.renderMyVacationRequests();
+        this.updateVacationStats();
+
+        alert('Urlaubsantrag wurde zurückgezogen.');
+    }
+
+    editVacationRequest(requestId) {
+        const request = this.vacationRequests.find(r => r.id === requestId);
+        if (!request) return;
+
+        // Pre-fill the modal with existing data
+        document.getElementById('vacationStartDate').value = request.startDate;
+        document.getElementById('vacationEndDate').value = request.endDate;
+        document.getElementById('vacationType').value = request.absenceType;
+        document.getElementById('vacationReason').value = request.reason;
+        document.getElementById('vacationSubstitute').value = request.substitute || '';
+
+        // Set editing mode
+        this.editingVacationRequestId = requestId;
+        
+        this.showVacationRequestModal();
+    }
+
+    showVacationApprovalModal(requestId) {
+        const modal = document.getElementById('vacationApprovalModal');
+        if (!modal) {
+            alert('Approval-Modal nicht gefunden.');
+            return;
+        }
+
+        const request = this.vacationRequests.find(r => r.id === requestId);
+        if (!request) return;
+
+        // Store current request ID for approval
+        this.currentApprovalRequestId = requestId;
+
+        modal.style.display = 'block';
+    }
+
+    showTeamVacationView() {
+        // Switch to team tab
+        const teamTab = document.querySelector('.vacation-tab-btn[data-tab="team"]');
+        if (teamTab) {
+            teamTab.click();
+        }
+    }
+
+    showVacationApprovalView() {
+        // Switch to approval tab
+        const approvalTab = document.querySelector('.vacation-tab-btn[data-tab="approval"]');
+        if (approvalTab) {
+            approvalTab.click();
+        }
+    }
+
+    showVacationOverview() {
+        console.log('📊 Opening vacation overview...');
+        
+        // Create modal for vacation overview
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'vacationOverviewModal';
+        modal.style.display = 'block';
+        
+        const currentYear = new Date().getFullYear();
+        const allRequests = this.vacationRequests || [];
+        const yearRequests = allRequests.filter(r => 
+            new Date(r.startDate).getFullYear() === currentYear
+        );
+        
+        // Calculate statistics
+        const stats = {
+            total: yearRequests.length,
+            pending: yearRequests.filter(r => r.status === 'eingereicht').length,
+            approved: yearRequests.filter(r => r.status === 'genehmigt').length,
+            rejected: yearRequests.filter(r => r.status === 'abgelehnt').length,
+            cancelled: yearRequests.filter(r => r.status === 'zurueckgezogen').length
+        };
+        
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-bar"></i> Urlaubsübersicht ${currentYear}</h2>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="vacation-overview">
+                        <div class="overview-stats">
+                            <h3>Jahresstatistik ${currentYear}</h3>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-number">${stats.total}</div>
+                                    <div class="stat-label">Gesamt Anträge</div>
+                                </div>
+                                <div class="stat-item pending">
+                                    <div class="stat-number">${stats.pending}</div>
+                                    <div class="stat-label">Ausstehend</div>
+                                </div>
+                                <div class="stat-item approved">
+                                    <div class="stat-number">${stats.approved}</div>
+                                    <div class="stat-label">Genehmigt</div>
+                                </div>
+                                <div class="stat-item rejected">
+                                    <div class="stat-number">${stats.rejected}</div>
+                                    <div class="stat-label">Abgelehnt</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="overview-chart">
+                            <h3>Monatsverteilung</h3>
+                            <div class="month-chart">
+                                ${this.renderMonthlyVacationChart(yearRequests)}
+                            </div>
+                        </div>
+                        
+                        <div class="overview-departments">
+                            <h3>Nach Abteilungen</h3>
+                            <div class="departments-list">
+                                ${this.renderDepartmentVacationStats(yearRequests)}
+                            </div>
+                        </div>
+                        
+                        <div class="overview-actions">
+                            <button class="btn-primary" onclick="window.qhseDashboard.generateVacationReport()">
+                                <i class="fas fa-file-alt"></i> Bericht generieren
+                            </button>
+                            <button class="btn-secondary" onclick="window.qhseDashboard.exportVacationData()">
+                                <i class="fas fa-download"></i> Daten exportieren
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Close modal on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    renderMonthlyVacationChart(requests) {
+        const months = [
+            'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+        ];
+        
+        const monthlyData = Array(12).fill(0);
+        requests.forEach(request => {
+            const month = new Date(request.startDate).getMonth();
+            monthlyData[month]++;
+        });
+        
+        const maxValue = Math.max(...monthlyData, 1);
+        
+        return months.map((month, index) => {
+            const height = (monthlyData[index] / maxValue) * 100;
+            return `
+                <div class="month-bar">
+                    <div class="bar-fill" style="height: ${height}%"></div>
+                    <div class="month-label">${month}</div>
+                    <div class="month-value">${monthlyData[index]}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    renderDepartmentVacationStats(requests) {
+        const departments = {};
+        
+        requests.forEach(request => {
+            const user = this.users.find(u => u.id === request.userId);
+            const dept = user ? user.department : 'Unbekannt';
+            
+            if (!departments[dept]) {
+                departments[dept] = { total: 0, approved: 0, pending: 0 };
+            }
+            
+            departments[dept].total++;
+            if (request.status === 'genehmigt') departments[dept].approved++;
+            if (request.status === 'eingereicht') departments[dept].pending++;
+        });
+        
+        return Object.entries(departments).map(([dept, stats]) => `
+            <div class="department-stat">
+                <div class="department-name">${dept}</div>
+                <div class="department-numbers">
+                    <span class="total">${stats.total} gesamt</span>
+                    <span class="approved">${stats.approved} genehmigt</span>
+                    <span class="pending">${stats.pending} ausstehend</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    exportVacationData() {
+        const data = {
+            requests: this.vacationRequests,
+            accounts: this.vacationAccounts,
+            exportDate: new Date().toISOString(),
+            users: this.users.map(u => ({ id: u.id, displayName: u.displayName, department: u.department }))
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `urlaubsdaten_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        alert('Urlaubsdaten wurden exportiert.');
+    }
+
+    generateVacationReport() {
+        const currentYear = new Date().getFullYear();
+        const yearRequests = this.vacationRequests.filter(r => 
+            new Date(r.startDate).getFullYear() === currentYear
+        );
+        
+        let report = `URLAUBSBERICHT ${currentYear}\n`;
+        report += `===========================================\n\n`;
+        report += `Gesamtstatistiken:\n`;
+        report += `- Anträge gesamt: ${yearRequests.length}\n`;
+        report += `- Genehmigt: ${yearRequests.filter(r => r.status === 'genehmigt').length}\n`;
+        report += `- Abgelehnt: ${yearRequests.filter(r => r.status === 'abgelehnt').length}\n`;
+        report += `- Ausstehend: ${yearRequests.filter(r => r.status === 'eingereicht').length}\n\n`;
+        
+        // Group by department
+        const departments = {};
+        yearRequests.forEach(request => {
+            const user = this.users.find(u => u.id === request.userId);
+            const dept = user ? user.department : 'Unbekannt';
+            if (!departments[dept]) departments[dept] = [];
+            departments[dept].push(request);
+        });
+        
+        report += `Nach Abteilungen:\n`;
+        Object.entries(departments).forEach(([dept, requests]) => {
+            report += `- ${dept}: ${requests.length} Anträge\n`;
+        });
+        
+        const blob = new Blob([report], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `urlaubsbericht_${currentYear}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        alert('Urlaubsbericht wurde erstellt.');
+    }
+
+    showHolidaysManagement() {
+        console.log('🎄 Opening holidays management...');
+        
+        // Create modal for holidays management
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'holidaysManagementModal';
+        modal.style.display = 'block';
+        
+        const currentYear = new Date().getFullYear();
+        const holidays = this.loadHolidaysFromStorage();
+        
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-calendar-plus"></i> Feiertage verwalten - ${currentYear}</h2>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="holidays-management">
+                        <div class="holidays-form">
+                            <h3>Neuen Feiertag hinzufügen</h3>
+                            <form id="addHolidayForm">
+                                <div class="form-group">
+                                    <label for="holidayDate">Datum:</label>
+                                    <input type="date" id="holidayDate" name="holidayDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="holidayName">Name:</label>
+                                    <input type="text" id="holidayName" name="holidayName" placeholder="z.B. Neujahr" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="holidayType">Typ:</label>
+                                    <select id="holidayType" name="holidayType">
+                                        <option value="national">Bundesfeiertag</option>
+                                        <option value="regional">Regionaler Feiertag</option>
+                                        <option value="company">Betriebsfeiertag</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn-primary">
+                                    <i class="fas fa-plus"></i> Hinzufügen
+                                </button>
+                            </form>
+                        </div>
+                        <div class="holidays-list">
+                            <h3>Aktuelle Feiertage ${currentYear}</h3>
+                            <div id="holidaysList">
+                                ${this.renderHolidaysList(holidays)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Setup event listeners for the form
+        const form = document.getElementById('addHolidayForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.addHoliday();
+            });
+        }
+        
+        // Close modal on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    showSpecialRulesManagement() {
+        console.log('⚙️ Opening special rules management...');
+        
+        // Create modal for special rules management
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'specialRulesModal';
+        modal.style.display = 'block';
+        
+        const specialRules = this.loadSpecialRulesFromStorage();
+        
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-cogs"></i> Sonderregelungen verwalten</h2>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="special-rules-management">
+                        <div class="rules-form">
+                            <h3>Neue Sonderregelung hinzufügen</h3>
+                            <form id="addSpecialRuleForm">
+                                <div class="form-group">
+                                    <label for="ruleTitle">Titel:</label>
+                                    <input type="text" id="ruleTitle" name="ruleTitle" placeholder="z.B. Homeoffice-Regelung" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ruleDescription">Beschreibung:</label>
+                                    <textarea id="ruleDescription" name="ruleDescription" rows="3" 
+                                              placeholder="Beschreibung der Sonderregelung..." required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ruleCategory">Kategorie:</label>
+                                    <select id="ruleCategory" name="ruleCategory">
+                                        <option value="vacation">Urlaubsregelung</option>
+                                        <option value="working_time">Arbeitszeit</option>
+                                        <option value="approval">Genehmigungsverfahren</option>
+                                        <option value="calculation">Berechnung</option>
+                                        <option value="other">Sonstiges</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ruleApplicable">Gültig für:</label>
+                                    <select id="ruleApplicable" name="ruleApplicable" multiple>
+                                        ${this.getAllDepartments().map(dept => 
+                                            `<option value="${dept}">${dept}</option>`
+                                        ).join('')}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="ruleActive" name="ruleActive" checked>
+                                        Regel aktiv
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn-primary">
+                                    <i class="fas fa-plus"></i> Hinzufügen
+                                </button>
+                            </form>
+                        </div>
+                        <div class="rules-list">
+                            <h3>Aktuelle Sonderregelungen</h3>
+                            <div id="specialRulesList">
+                                ${this.renderSpecialRulesList(specialRules)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Setup event listeners for the form
+        const form = document.getElementById('addSpecialRuleForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.addSpecialRule();
+            });
+        }
+        
+        // Close modal on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    // ====================================
+    // HOLIDAYS & SPECIAL RULES MANAGEMENT
+    // ====================================
+
+    loadHolidaysFromStorage() {
+        try {
+            const holidays = JSON.parse(localStorage.getItem('qhse_holidays') || '[]');
+            // Initialize with default German holidays if empty
+            if (holidays.length === 0) {
+                return this.getDefaultGermanHolidays();
+            }
+            return holidays;
+        } catch (error) {
+            console.error('Error loading holidays:', error);
+            return this.getDefaultGermanHolidays();
+        }
+    }
+
+    saveHolidaysToStorage(holidays = this.holidays) {
+        localStorage.setItem('qhse_holidays', JSON.stringify(holidays));
+    }
+
+    getDefaultGermanHolidays() {
+        const currentYear = new Date().getFullYear();
+        return [
+            { id: 'new-year', date: `${currentYear}-01-01`, name: 'Neujahr', type: 'national' },
+            { id: 'good-friday', date: `${currentYear}-03-29`, name: 'Karfreitag', type: 'national' },
+            { id: 'easter-monday', date: `${currentYear}-04-01`, name: 'Ostermontag', type: 'national' },
+            { id: 'labor-day', date: `${currentYear}-05-01`, name: 'Tag der Arbeit', type: 'national' },
+            { id: 'ascension', date: `${currentYear}-05-09`, name: 'Christi Himmelfahrt', type: 'national' },
+            { id: 'whit-monday', date: `${currentYear}-05-20`, name: 'Pfingstmontag', type: 'national' },
+            { id: 'german-unity', date: `${currentYear}-10-03`, name: 'Tag der Deutschen Einheit', type: 'national' },
+            { id: 'christmas-eve', date: `${currentYear}-12-24`, name: 'Heiligabend', type: 'company' },
+            { id: 'christmas', date: `${currentYear}-12-25`, name: '1. Weihnachtstag', type: 'national' },
+            { id: 'boxing-day', date: `${currentYear}-12-26`, name: '2. Weihnachtstag', type: 'national' },
+            { id: 'new-years-eve', date: `${currentYear}-12-31`, name: 'Silvester', type: 'company' }
+        ];
+    }
+
+    renderHolidaysList(holidays) {
+        if (!holidays || holidays.length === 0) {
+            return '<div class="no-holidays">Keine Feiertage definiert</div>';
+        }
+
+        return holidays.map(holiday => {
+            const date = new Date(holiday.date);
+            const formattedDate = date.toLocaleDateString('de-DE');
+            const typeIcon = {
+                'national': '🇩🇪',
+                'regional': '🏛️',
+                'company': '🏢'
+            }[holiday.type] || '📅';
+
+            return `
+                <div class="holiday-item" data-holiday-id="${holiday.id}">
+                    <div class="holiday-info">
+                        <span class="holiday-icon">${typeIcon}</span>
+                        <span class="holiday-date">${formattedDate}</span>
+                        <span class="holiday-name">${holiday.name}</span>
+                        <span class="holiday-type">${holiday.type}</span>
+                    </div>
+                    <div class="holiday-actions">
+                        <button class="btn-secondary btn-small" onclick="window.qhseDashboard.editHoliday('${holiday.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-danger btn-small" onclick="window.qhseDashboard.deleteHoliday('${holiday.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    addHoliday() {
+        const form = document.getElementById('addHolidayForm');
+        if (!form) return;
+
+        const formData = new FormData(form);
+        const holidayData = {
+            id: 'holiday-' + Date.now(),
+            date: formData.get('holidayDate'),
+            name: formData.get('holidayName'),
+            type: formData.get('holidayType'),
+            createdAt: new Date().toISOString()
+        };
+
+        const holidays = this.loadHolidaysFromStorage();
+        holidays.push(holidayData);
+        this.saveHolidaysToStorage(holidays);
+
+        // Update display
+        const holidaysList = document.getElementById('holidaysList');
+        if (holidaysList) {
+            holidaysList.innerHTML = this.renderHolidaysList(holidays);
+        }
+
+        // Reset form
+        form.reset();
+        
+        console.log('✅ Holiday added:', holidayData);
+        alert('Feiertag wurde hinzugefügt!');
+    }
+
+    deleteHoliday(holidayId) {
+        if (!confirm('Möchten Sie diesen Feiertag wirklich löschen?')) return;
+
+        let holidays = this.loadHolidaysFromStorage();
+        holidays = holidays.filter(h => h.id !== holidayId);
+        this.saveHolidaysToStorage(holidays);
+
+        // Update display
+        const holidaysList = document.getElementById('holidaysList');
+        if (holidaysList) {
+            holidaysList.innerHTML = this.renderHolidaysList(holidays);
+        }
+
+        console.log('✅ Holiday deleted:', holidayId);
+        alert('Feiertag wurde gelöscht!');
+    }
+
+    editHoliday(holidayId) {
+        const holidays = this.loadHolidaysFromStorage();
+        const holiday = holidays.find(h => h.id === holidayId);
+        if (!holiday) return;
+
+        // Pre-fill form with existing data
+        document.getElementById('holidayDate').value = holiday.date;
+        document.getElementById('holidayName').value = holiday.name;
+        document.getElementById('holidayType').value = holiday.type;
+
+        // Remove old holiday and let user re-add with changes
+        this.deleteHoliday(holidayId);
+    }
+
+    // Special Rules Management
+    loadSpecialRulesFromStorage() {
+        try {
+            return JSON.parse(localStorage.getItem('qhse_special_rules') || '[]');
+        } catch (error) {
+            console.error('Error loading special rules:', error);
+            return [];
+        }
+    }
+
+    saveSpecialRulesToStorage(rules) {
+        localStorage.setItem('qhse_special_rules', JSON.stringify(rules));
+    }
+
+    renderSpecialRulesList(rules) {
+        if (!rules || rules.length === 0) {
+            return '<div class="no-rules">Keine Sonderregelungen definiert</div>';
+        }
+
+        return rules.map(rule => {
+            const statusIcon = rule.active ? '✅' : '❌';
+            const categoryIcon = {
+                'vacation': '🏖️',
+                'working_time': '⏰',
+                'approval': '✅',
+                'calculation': '🧮',
+                'other': '📋'
+            }[rule.category] || '📋';
+
+            return `
+                <div class="rule-item ${rule.active ? 'active' : 'inactive'}" data-rule-id="${rule.id}">
+                    <div class="rule-header">
+                        <span class="rule-icon">${categoryIcon}</span>
+                        <h4 class="rule-title">${rule.title}</h4>
+                        <span class="rule-status">${statusIcon}</span>
+                    </div>
+                    <div class="rule-description">${rule.description}</div>
+                    <div class="rule-meta">
+                        <span class="rule-category">Kategorie: ${rule.category}</span>
+                        <span class="rule-departments">Gültig für: ${rule.applicableDepartments?.join(', ') || 'Alle'}</span>
+                    </div>
+                    <div class="rule-actions">
+                        <button class="btn-secondary btn-small" onclick="window.qhseDashboard.editSpecialRule('${rule.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-${rule.active ? 'warning' : 'success'} btn-small" 
+                                onclick="window.qhseDashboard.toggleSpecialRule('${rule.id}')">
+                            <i class="fas fa-${rule.active ? 'pause' : 'play'}"></i>
+                        </button>
+                        <button class="btn-danger btn-small" onclick="window.qhseDashboard.deleteSpecialRule('${rule.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    addSpecialRule() {
+        const form = document.getElementById('addSpecialRuleForm');
+        if (!form) return;
+
+        const formData = new FormData(form);
+        const ruleData = {
+            id: 'rule-' + Date.now(),
+            title: formData.get('ruleTitle'),
+            description: formData.get('ruleDescription'),
+            category: formData.get('ruleCategory'),
+            applicableDepartments: Array.from(formData.getAll('ruleApplicable')),
+            active: formData.get('ruleActive') === 'on',
+            createdAt: new Date().toISOString(),
+            createdBy: this.getCurrentUser().id
+        };
+
+        const rules = this.loadSpecialRulesFromStorage();
+        rules.push(ruleData);
+        this.saveSpecialRulesToStorage(rules);
+
+        // Update display
+        const rulesList = document.getElementById('specialRulesList');
+        if (rulesList) {
+            rulesList.innerHTML = this.renderSpecialRulesList(rules);
+        }
+
+        // Reset form
+        form.reset();
+        
+        console.log('✅ Special rule added:', ruleData);
+        alert('Sonderregelung wurde hinzugefügt!');
+    }
+
+    deleteSpecialRule(ruleId) {
+        if (!confirm('Möchten Sie diese Sonderregelung wirklich löschen?')) return;
+
+        let rules = this.loadSpecialRulesFromStorage();
+        rules = rules.filter(r => r.id !== ruleId);
+        this.saveSpecialRulesToStorage(rules);
+
+        // Update display
+        const rulesList = document.getElementById('specialRulesList');
+        if (rulesList) {
+            rulesList.innerHTML = this.renderSpecialRulesList(rules);
+        }
+
+        console.log('✅ Special rule deleted:', ruleId);
+        alert('Sonderregelung wurde gelöscht!');
+    }
+
+    toggleSpecialRule(ruleId) {
+        const rules = this.loadSpecialRulesFromStorage();
+        const rule = rules.find(r => r.id === ruleId);
+        if (!rule) return;
+
+        rule.active = !rule.active;
+        rule.updatedAt = new Date().toISOString();
+        rule.updatedBy = this.getCurrentUser().id;
+
+        this.saveSpecialRulesToStorage(rules);
+
+        // Update display
+        const rulesList = document.getElementById('specialRulesList');
+        if (rulesList) {
+            rulesList.innerHTML = this.renderSpecialRulesList(rules);
+        }
+
+        console.log('✅ Special rule toggled:', rule);
+        alert(`Sonderregelung wurde ${rule.active ? 'aktiviert' : 'deaktiviert'}!`);
+    }
+
+    editSpecialRule(ruleId) {
+        const rules = this.loadSpecialRulesFromStorage();
+        const rule = rules.find(r => r.id === ruleId);
+        if (!rule) return;
+
+        // Pre-fill form with existing data
+        document.getElementById('ruleTitle').value = rule.title;
+        document.getElementById('ruleDescription').value = rule.description;
+        document.getElementById('ruleCategory').value = rule.category;
+        document.getElementById('ruleActive').checked = rule.active;
+
+        // Set multiple select values
+        const departmentSelect = document.getElementById('ruleApplicable');
+        if (departmentSelect && rule.applicableDepartments) {
+            Array.from(departmentSelect.options).forEach(option => {
+                option.selected = rule.applicableDepartments.includes(option.value);
+            });
+        }
+
+        // Remove old rule and let user re-add with changes
+        this.deleteSpecialRule(ruleId);
+    }
+
+    getAllDepartments() {
+        return [...new Set(this.users.map(user => user.department).filter(dept => dept))];
+    }
+
+    resetVacationYear() {
+        if (!confirm('Möchten Sie wirklich ein neues Urlaubsjahr starten? Dies setzt alle Urlaubskonten zurück.')) {
+            return;
+        }
+        
+        const currentYear = new Date().getFullYear();
+        
+        // Reset all vacation accounts for new year
+        Object.keys(this.vacationAccounts).forEach(userId => {
+            const account = this.vacationAccounts[userId];
+            account.year = currentYear;
+            account.usedDays = 0;
+            account.pendingDays = 0;
+            account.remainingDays = account.totalDays + account.carryOverDays;
+            account.carryOverDays = Math.min(account.remainingDays, account.carryOverLimit);
+            account.updatedAt = new Date().toISOString();
+        });
+        
+        this.saveVacationAccountsToStorage();
+        this.updateVacationStats();
+        
+        alert('Neues Urlaubsjahr wurde initialisiert.');
     }
 
 }

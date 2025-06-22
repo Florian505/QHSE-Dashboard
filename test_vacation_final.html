@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 URLAUBSPLANUNG - FINALE FUNKTIONS-TESTS</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            margin-bottom: 30px; 
+            text-align: center; 
+        }
+        .card { 
+            background: white; 
+            padding: 25px; 
+            margin: 20px 0; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }
+        .success { border-left: 6px solid #28a745; background: linear-gradient(90deg, #d4edda, #ffffff); }
+        .btn { 
+            padding: 12px 24px; 
+            margin: 8px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.3s; 
+            text-decoration: none; 
+            display: inline-block; 
+        }
+        .btn-primary { background: linear-gradient(45deg, #007bff, #0056b3); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,123,255,0.4); }
+        .btn-success { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(40,167,69,0.4); }
+        .btn-warning { background: linear-gradient(45deg, #ffc107, #e0a800); color: #212529; }
+        .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,193,7,0.4); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .test-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .test-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .test-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .console-output { 
+            background: #1e1e1e; 
+            color: #00ff00; 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 12px; 
+            max-height: 400px; 
+            overflow-y: auto; 
+            margin: 15px 0; 
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-error { background: #f8d7da; color: #721c24; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 URLAUBSPLANUNG - FINALE FUNKTIONS-TESTS</h1>
+            <p style="font-size: 1.2em; color: #666; margin: 20px 0;">
+                Umfassende Validierung aller reparierte Funktionen
+            </p>
+            <div style="font-size: 3em;">🏖️ ⚡ 🚀</div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Test-Progress</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <p id="progressText">Bereit für Tests...</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🎯 Automatische Tests</h3>
+                <button class="btn btn-primary" onclick="runAllTests()">
+                    🚀 Alle Tests starten
+                </button>
+                <button class="btn btn-success" onclick="runQuickTests()">
+                    ⚡ Quick-Tests
+                </button>
+                <button class="btn btn-warning" onclick="runDetailedTests()">
+                    🔍 Detaillierte Tests
+                </button>
+                <div id="autoTestResults" class="test-result"></div>
+            </div>
+
+            <div class="card">
+                <h3>🎮 Manuelle Tests</h3>
+                <button class="btn btn-primary" onclick="testQuickActions()">
+                    ⚡ Quick-Actions testen
+                </button>
+                <button class="btn btn-primary" onclick="testTabNavigation()">
+                    📑 Tab-Navigation testen
+                </button>
+                <button class="btn btn-primary" onclick="testModalFunctions()">
+                    📱 Modal-Funktionen testen
+                </button>
+                <div id="manualTestResults" class="test-result"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📋 Test-Ergebnisse</h3>
+            <div id="testResultsList"></div>
+        </div>
+
+        <div class="card">
+            <h3>💻 Live-Konsole</h3>
+            <div class="console-output" id="console">
+Bereit für Tests...<br>
+            </div>
+            <button class="btn btn-warning" onclick="clearConsole()">🧹 Konsole leeren</button>
+        </div>
+
+        <div class="card success">
+            <h3>🚀 Zur Hauptanwendung</h3>
+            <p>Nach erfolgreichem Test können Sie das vollständig funktionsfähige Urlaubsplanungs-Modul nutzen:</p>
+            <button class="btn btn-primary" onclick="window.open('index.html', '_blank')">
+                🏖️ Urlaubsplanung öffnen
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let testProgress = 0;
+        let totalTests = 0;
+
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'info': '#74c0fc',
+                'success': '#51cf66',
+                'error': '#ff6b6b',
+                'warning': '#ffd43b'
+            };
+            console.innerHTML += `<span style="color: ${colors[type]};">[${timestamp}] ${message}</span><br>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = 'Konsole geleert...<br>';
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const percentage = totalTests > 0 ? (testProgress / totalTests * 100) : 0;
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = `${testProgress}/${totalTests} Tests abgeschlossen (${Math.round(percentage)}%)`;
+        }
+
+        function addTestResult(name, success, details = '') {
+            testResults.push({ name, success, details, timestamp: new Date() });
+            const resultsList = document.getElementById('testResultsList');
+            const badge = success ? 'badge-success' : 'badge-error';
+            const icon = success ? '✅' : '❌';
+            
+            resultsList.innerHTML += `
+                <div class="test-result ${success ? 'test-success' : 'test-error'}">
+                    ${icon} <strong>${name}</strong>
+                    <span class="status-badge ${badge}">${success ? 'ERFOLGREICH' : 'FEHLGESCHLAGEN'}</span>
+                    ${details ? `<br><small>${details}</small>` : ''}
+                </div>
+            `;
+            
+            testProgress++;
+            updateProgress();
+        }
+
+        async function runAllTests() {
+            log('🚀 Starte vollständige Test-Suite...', 'info');
+            testResults = [];
+            testProgress = 0;
+            totalTests = 15;
+            document.getElementById('testResultsList').innerHTML = '';
+            
+            await runQuickTests();
+            await runDetailedTests();
+            
+            const successCount = testResults.filter(r => r.success).length;
+            const failCount = testResults.filter(r => !r.success).length;
+            
+            log(`✅ Tests abgeschlossen: ${successCount} erfolgreich, ${failCount} fehlgeschlagen`, 
+                failCount > 0 ? 'warning' : 'success');
+                
+            if (failCount === 0) {
+                log('🎉 ALLE TESTS ERFOLGREICH! Urlaubsplanung ist vollständig funktionsfähig!', 'success');
+            }
+        }
+
+        async function runQuickTests() {
+            log('⚡ Starte Quick-Tests...', 'info');
+            
+            // Test 1: Check if main app is loaded
+            const appLoaded = window.qhseDashboard !== undefined;
+            addTestResult('QHSE Dashboard geladen', appLoaded, 
+                appLoaded ? 'window.qhseDashboard verfügbar' : 'Dashboard nicht initialisiert');
+            
+            if (!appLoaded) {
+                log('❌ Hauptanwendung nicht geladen - öffnen Sie zuerst index.html', 'error');
+                return;
+            }
+
+            // Test 2: Vacation management initialized
+            const vacationInitialized = typeof window.qhseDashboard.setupVacationManagement === 'function';
+            addTestResult('Vacation Management verfügbar', vacationInitialized,
+                vacationInitialized ? 'setupVacationManagement Methode gefunden' : 'Vacation Management fehlt');
+
+            // Test 3: Essential elements exist
+            const elements = [
+                'quickVacationRequestBtn',
+                'quickTeamViewBtn', 
+                'quickApprovalBtn',
+                'vacationCalendarGrid',
+                'vacationCurrentMonth'
+            ];
+            
+            let elementsFound = 0;
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) elementsFound++;
+            });
+            
+            addTestResult('UI-Elemente vorhanden', elementsFound === elements.length,
+                `${elementsFound}/${elements.length} Elemente gefunden`);
+
+            // Test 4: Tab navigation
+            const tabButtons = document.querySelectorAll('.vacation-tab-btn');
+            const tabPanels = document.querySelectorAll('.vacation-tab-panel');
+            addTestResult('Tab-System vorhanden', tabButtons.length > 0 && tabPanels.length > 0,
+                `${tabButtons.length} Buttons, ${tabPanels.length} Panels`);
+
+            // Test 5: Modal exists
+            const modal = document.getElementById('vacationRequestModal');
+            addTestResult('Vacation Request Modal vorhanden', !!modal,
+                modal ? 'Modal gefunden' : 'Modal fehlt');
+
+            log('⚡ Quick-Tests abgeschlossen', 'success');
+        }
+
+        async function runDetailedTests() {
+            log('🔍 Starte detaillierte Tests...', 'info');
+            
+            if (!window.qhseDashboard) {
+                log('❌ Dashboard nicht verfügbar für detaillierte Tests', 'error');
+                return;
+            }
+
+            // Test 6: Method availability
+            const methods = [
+                'showVacationRequestModal',
+                'showTeamVacationView',
+                'showVacationApprovalView',
+                'renderVacationCalendar',
+                'setupVacationTabs'
+            ];
+            
+            let methodsAvailable = 0;
+            methods.forEach(method => {
+                if (typeof window.qhseDashboard[method] === 'function') {
+                    methodsAvailable++;
+                }
+            });
+            
+            addTestResult('Vacation Methoden verfügbar', methodsAvailable === methods.length,
+                `${methodsAvailable}/${methods.length} Methoden gefunden`);
+
+            // Test 7: Data structures
+            const hasRequests = Array.isArray(window.qhseDashboard.vacationRequests);
+            const hasAccounts = typeof window.qhseDashboard.vacationAccounts === 'object';
+            addTestResult('Datenstrukturen initialisiert', hasRequests && hasAccounts,
+                `Requests: ${hasRequests}, Accounts: ${hasAccounts}`);
+
+            // Test 8: Role permissions
+            const currentUser = window.qhseDashboard.getCurrentUser();
+            const hasVacationAccess = currentUser && 
+                window.qhseDashboard.roleDefinitions[currentUser.role]?.allowedSections?.includes('urlaubsplanung');
+            addTestResult('Rollenberechtigung für Urlaubsplanung', hasVacationAccess,
+                hasVacationAccess ? `User ${currentUser.displayName} hat Zugriff` : 'Keine Berechtigung');
+
+            // Test 9: Calendar functionality
+            try {
+                if (typeof window.qhseDashboard.renderVacationCalendar === 'function') {
+                    window.qhseDashboard.renderVacationCalendar();
+                    addTestResult('Kalender-Rendering', true, 'renderVacationCalendar erfolgreich ausgeführt');
+                } else {
+                    addTestResult('Kalender-Rendering', false, 'renderVacationCalendar Methode fehlt');
+                }
+            } catch (error) {
+                addTestResult('Kalender-Rendering', false, `Fehler: ${error.message}`);
+            }
+
+            // Test 10: Event listeners
+            const quickBtn = document.getElementById('quickVacationRequestBtn');
+            const hasEventListener = quickBtn && quickBtn.onclick !== null;
+            addTestResult('Event Listeners registriert', hasEventListener,
+                hasEventListener ? 'Quick-Action Button hat Event Listener' : 'Event Listener fehlt');
+
+            log('🔍 Detaillierte Tests abgeschlossen', 'success');
+        }
+
+        function testQuickActions() {
+            log('⚡ Teste Quick-Actions...', 'info');
+            
+            const actions = [
+                { id: 'quickVacationRequestBtn', name: 'Vacation Request', method: 'showVacationRequestModal' },
+                { id: 'quickTeamViewBtn', name: 'Team View', method: 'showTeamVacationView' },
+                { id: 'quickApprovalBtn', name: 'Approval View', method: 'showVacationApprovalView' }
+            ];
+            
+            let results = [];
+            actions.forEach(action => {
+                const button = document.getElementById(action.id);
+                if (button) {
+                    try {
+                        // Test if method exists and is callable
+                        if (window.qhseDashboard && typeof window.qhseDashboard[action.method] === 'function') {
+                            results.push(`✅ ${action.name}: Button und Methode verfügbar`);
+                            
+                            // Simulate click for testing
+                            log(`Teste ${action.name} Button...`, 'info');
+                            button.click();
+                            
+                        } else {
+                            results.push(`❌ ${action.name}: Methode ${action.method} fehlt`);
+                        }
+                    } catch (error) {
+                        results.push(`❌ ${action.name}: Fehler - ${error.message}`);
+                    }
+                } else {
+                    results.push(`❌ ${action.name}: Button nicht gefunden`);
+                }
+            });
+            
+            document.getElementById('manualTestResults').innerHTML = 
+                '<div class="test-success">' + results.join('<br>') + '</div>';
+                
+            log('⚡ Quick-Actions Test abgeschlossen', 'success');
+        }
+
+        function testTabNavigation() {
+            log('📑 Teste Tab-Navigation...', 'info');
+            
+            const tabs = document.querySelectorAll('.vacation-tab-btn');
+            let results = [];
+            
+            tabs.forEach((tab, index) => {
+                const tabName = tab.getAttribute('data-tab') || `Tab ${index}`;
+                try {
+                    log(`Teste Tab: ${tabName}`, 'info');
+                    tab.click();
+                    results.push(`✅ Tab ${tabName}: Click erfolgreich`);
+                } catch (error) {
+                    results.push(`❌ Tab ${tabName}: Fehler - ${error.message}`);
+                }
+            });
+            
+            document.getElementById('manualTestResults').innerHTML = 
+                '<div class="test-success">' + results.join('<br>') + '</div>';
+                
+            log('📑 Tab-Navigation Test abgeschlossen', 'success');
+        }
+
+        function testModalFunctions() {
+            log('📱 Teste Modal-Funktionen...', 'info');
+            
+            if (!window.qhseDashboard) {
+                document.getElementById('manualTestResults').innerHTML = 
+                    '<div class="test-error">❌ QHSE Dashboard nicht verfügbar</div>';
+                return;
+            }
+            
+            let results = [];
+            
+            // Test vacation request modal
+            try {
+                window.qhseDashboard.showVacationRequestModal();
+                results.push('✅ Vacation Request Modal: Erfolgreich geöffnet');
+                
+                // Close modal after test
+                setTimeout(() => {
+                    const modal = document.getElementById('vacationRequestModal');
+                    if (modal) modal.style.display = 'none';
+                }, 1000);
+                
+            } catch (error) {
+                results.push(`❌ Vacation Request Modal: Fehler - ${error.message}`);
+            }
+            
+            // Test form elements
+            const form = document.getElementById('vacationRequestForm');
+            if (form) {
+                results.push('✅ Vacation Request Form: Gefunden');
+            } else {
+                results.push('❌ Vacation Request Form: Nicht gefunden');
+            }
+            
+            document.getElementById('manualTestResults').innerHTML = 
+                '<div class="test-success">' + results.join('<br>') + '</div>';
+                
+            log('📱 Modal-Funktionen Test abgeschlossen', 'success');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🧪 Test-Seite geladen', 'success');
+            log('Bereit für Urlaubsplanung-Tests', 'info');
+            
+            // Check if main app is available
+            if (window.qhseDashboard) {
+                log('✅ QHSE Dashboard erkannt', 'success');
+            } else {
+                log('⚠️ QHSE Dashboard nicht erkannt - öffnen Sie zuerst index.html in einem anderen Tab', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

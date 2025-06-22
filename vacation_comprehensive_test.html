@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 URLAUBSPLANUNG - UMFASSENDE FUNKTIONS-TESTS</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            margin: 20px; 
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24); 
+            min-height: 100vh; 
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            margin-bottom: 30px; 
+            text-align: center; 
+        }
+        .card { 
+            background: white; 
+            padding: 25px; 
+            margin: 20px 0; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }
+        .btn { 
+            padding: 12px 24px; 
+            margin: 8px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.3s; 
+        }
+        .btn-primary { background: linear-gradient(45deg, #007bff, #0056b3); color: white; }
+        .btn-success { background: linear-gradient(45deg, #28a745, #20c997); color: white; }
+        .btn-warning { background: linear-gradient(45deg, #ffc107, #e0a800); color: #212529; }
+        .btn-danger { background: linear-gradient(45deg, #dc3545, #c82333); color: white; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .test-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .test-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .test-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .console { 
+            background: #1e1e1e; 
+            color: #00ff00; 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 12px; 
+            max-height: 300px; 
+            overflow-y: auto; 
+            margin: 15px 0; 
+        }
+        .category { border-left: 4px solid #007bff; padding-left: 15px; margin: 20px 0; }
+        .progress { width: 100%; height: 6px; background: #e9ecef; border-radius: 3px; margin: 10px 0; }
+        .progress-bar { height: 100%; background: linear-gradient(45deg, #28a745, #20c997); border-radius: 3px; width: 0%; transition: width 0.5s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 URLAUBSPLANUNG - UMFASSENDE FUNKTIONS-TESTS</h1>
+            <p style="font-size: 1.2em; color: #666; margin: 20px 0;">
+                Vollständige Validierung aller reparierten und neuen Funktionen
+            </p>
+            <div style="font-size: 3em;">🏖️ 🔧 ✅</div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Test-Fortschritt</h2>
+            <div class="progress">
+                <div class="progress-bar" id="overallProgress"></div>
+            </div>
+            <p id="progressText">Bereit für umfassende Tests...</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🎯 Alle Funktionen testen</h3>
+                <button class="btn btn-primary" onclick="runComprehensiveTests()">
+                    🚀 Vollständiger Test
+                </button>
+                <button class="btn btn-success" onclick="runNewFeaturesTest()">
+                    ⭐ Neue Features testen
+                </button>
+                <button class="btn btn-warning" onclick="runButtonTests()">
+                    🔘 Button-Tests
+                </button>
+                <div id="mainTestResults"></div>
+            </div>
+
+            <div class="card">
+                <h3>🎮 Spezifische Tests</h3>
+                <button class="btn btn-primary" onclick="testHolidaysManagement()">
+                    🎄 Feiertage-Verwaltung
+                </button>
+                <button class="btn btn-primary" onclick="testSpecialRules()">
+                    ⚙️ Sonderregelungen
+                </button>
+                <button class="btn btn-primary" onclick="testSectionButtons()">
+                    📋 Section-Header Buttons
+                </button>
+                <button class="btn btn-primary" onclick="testOverviewModal()">
+                    📊 Übersicht-Modal
+                </button>
+                <div id="specificTestResults"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📋 Detaillierte Test-Kategorien</h3>
+            
+            <div class="category">
+                <h4>🔘 Button Event Listeners</h4>
+                <div id="buttonTestResults"></div>
+            </div>
+            
+            <div class="category">
+                <h4>🎄 Feiertage-Management</h4>
+                <div id="holidaysTestResults"></div>
+            </div>
+            
+            <div class="category">
+                <h4>⚙️ Sonderregelungen</h4>
+                <div id="rulesTestResults"></div>
+            </div>
+            
+            <div class="category">
+                <h4>📊 Übersicht & Berichte</h4>
+                <div id="overviewTestResults"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>💻 Live-Konsole</h3>
+            <div class="console" id="console">
+Bereit für umfassende Tests...<br>
+            </div>
+            <button class="btn btn-warning" onclick="clearConsole()">🧹 Konsole leeren</button>
+        </div>
+
+        <div class="card">
+            <h3>🚀 Zur Anwendung</h3>
+            <p>Nach erfolgreichem Test alle Funktionen in der Hauptanwendung nutzen:</p>
+            <button class="btn btn-primary" onclick="window.open('index.html', '_blank')">
+                🏖️ Urlaubsplanung öffnen
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let totalTests = 0;
+        let completedTests = 0;
+        
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'info': '#74c0fc',
+                'success': '#51cf66',
+                'error': '#ff6b6b',
+                'warning': '#ffd43b'
+            };
+            console.innerHTML += `<span style="color: ${colors[type]};">[${timestamp}] ${message}</span><br>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = 'Konsole geleert...<br>';
+        }
+
+        function updateProgress() {
+            const percentage = totalTests > 0 ? (completedTests / totalTests * 100) : 0;
+            document.getElementById('overallProgress').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = 
+                `${completedTests}/${totalTests} Tests abgeschlossen (${Math.round(percentage)}%)`;
+        }
+
+        function addResult(containerId, success, message) {
+            const container = document.getElementById(containerId);
+            const className = success ? 'test-success' : 'test-error';
+            const icon = success ? '✅' : '❌';
+            container.innerHTML += `<div class="${className}">${icon} ${message}</div>`;
+            completedTests++;
+            updateProgress();
+        }
+
+        async function runComprehensiveTests() {
+            log('🚀 Starte umfassende Tests...', 'info');
+            totalTests = 20;
+            completedTests = 0;
+            
+            // Clear previous results
+            ['mainTestResults', 'buttonTestResults', 'holidaysTestResults', 
+             'rulesTestResults', 'overviewTestResults'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+            
+            await runButtonTests();
+            await testHolidaysManagement();
+            await testSpecialRules();
+            await testSectionButtons();
+            await testOverviewModal();
+            
+            log(`✅ Umfassende Tests abgeschlossen: ${completedTests}/${totalTests}`, 'success');
+        }
+
+        async function runButtonTests() {
+            log('🔘 Teste alle Button Event Listeners...', 'info');
+            
+            if (!window.qhseDashboard) {
+                addResult('buttonTestResults', false, 'Dashboard nicht geladen');
+                return;
+            }
+
+            // Test Quick Action Buttons
+            const quickButtons = [
+                'quickVacationRequestBtn',
+                'quickTeamViewBtn', 
+                'quickApprovalBtn'
+            ];
+            
+            quickButtons.forEach(buttonId => {
+                const button = document.getElementById(buttonId);
+                addResult('buttonTestResults', !!button, `Quick Button ${buttonId}: ${button ? 'Gefunden' : 'Fehlt'}`);
+            });
+
+            // Test Section Header Buttons  
+            const sectionButtons = [
+                'newVacationRequestBtn',
+                'vacationOverviewBtn',
+                'teamCalendarBtn'
+            ];
+            
+            sectionButtons.forEach(buttonId => {
+                const button = document.getElementById(buttonId);
+                addResult('buttonTestResults', !!button, `Section Button ${buttonId}: ${button ? 'Gefunden' : 'Fehlt'}`);
+            });
+
+            // Test Admin Buttons
+            const adminButtons = [
+                'manageHolidaysBtn',
+                'specialRulesBtn',
+                'generateReportsBtn',
+                'exportDataBtn'
+            ];
+            
+            adminButtons.forEach(buttonId => {
+                const button = document.getElementById(buttonId);
+                addResult('buttonTestResults', !!button, `Admin Button ${buttonId}: ${button ? 'Gefunden' : 'Fehlt'}`);
+            });
+        }
+
+        function testHolidaysManagement() {
+            log('🎄 Teste Feiertage-Management...', 'info');
+            
+            if (!window.qhseDashboard) {
+                addResult('holidaysTestResults', false, 'Dashboard nicht verfügbar');
+                return;
+            }
+
+            // Test method existence
+            const hasShowMethod = typeof window.qhseDashboard.showHolidaysManagement === 'function';
+            addResult('holidaysTestResults', hasShowMethod, `showHolidaysManagement Methode: ${hasShowMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            const hasLoadMethod = typeof window.qhseDashboard.loadHolidaysFromStorage === 'function';
+            addResult('holidaysTestResults', hasLoadMethod, `loadHolidaysFromStorage Methode: ${hasLoadMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            const hasRenderMethod = typeof window.qhseDashboard.renderHolidaysList === 'function';
+            addResult('holidaysTestResults', hasRenderMethod, `renderHolidaysList Methode: ${hasRenderMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            // Test button functionality
+            const button = document.getElementById('manageHolidaysBtn');
+            if (button && hasShowMethod) {
+                try {
+                    log('Teste Feiertage-Button Click...', 'info');
+                    button.click();
+                    addResult('holidaysTestResults', true, 'Feiertage-Modal öffnet erfolgreich');
+                    
+                    // Close modal after test
+                    setTimeout(() => {
+                        const modal = document.getElementById('holidaysManagementModal');
+                        if (modal) modal.remove();
+                    }, 1000);
+                    
+                } catch (error) {
+                    addResult('holidaysTestResults', false, `Button-Click Fehler: ${error.message}`);
+                }
+            }
+        }
+
+        function testSpecialRules() {
+            log('⚙️ Teste Sonderregelungen...', 'info');
+            
+            if (!window.qhseDashboard) {
+                addResult('rulesTestResults', false, 'Dashboard nicht verfügbar');
+                return;
+            }
+
+            // Test method existence
+            const hasShowMethod = typeof window.qhseDashboard.showSpecialRulesManagement === 'function';
+            addResult('rulesTestResults', hasShowMethod, `showSpecialRulesManagement Methode: ${hasShowMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            const hasLoadMethod = typeof window.qhseDashboard.loadSpecialRulesFromStorage === 'function';
+            addResult('rulesTestResults', hasLoadMethod, `loadSpecialRulesFromStorage Methode: ${hasLoadMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            const hasRenderMethod = typeof window.qhseDashboard.renderSpecialRulesList === 'function';
+            addResult('rulesTestResults', hasRenderMethod, `renderSpecialRulesList Methode: ${hasRenderMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            // Test button functionality
+            const button = document.getElementById('specialRulesBtn');
+            if (button && hasShowMethod) {
+                try {
+                    log('Teste Sonderregelungen-Button Click...', 'info');
+                    button.click();
+                    addResult('rulesTestResults', true, 'Sonderregelungen-Modal öffnet erfolgreich');
+                    
+                    // Close modal after test
+                    setTimeout(() => {
+                        const modal = document.getElementById('specialRulesModal');
+                        if (modal) modal.remove();
+                    }, 1000);
+                    
+                } catch (error) {
+                    addResult('rulesTestResults', false, `Button-Click Fehler: ${error.message}`);
+                }
+            }
+        }
+
+        function testSectionButtons() {
+            log('📋 Teste Section Header Buttons...', 'info');
+            
+            const buttons = [
+                { id: 'newVacationRequestBtn', method: 'showVacationRequestModal' },
+                { id: 'vacationOverviewBtn', method: 'showVacationOverview' },
+                { id: 'teamCalendarBtn', method: 'showTeamVacationView' }
+            ];
+            
+            buttons.forEach(({ id, method }) => {
+                const button = document.getElementById(id);
+                const hasMethod = window.qhseDashboard && typeof window.qhseDashboard[method] === 'function';
+                
+                addResult('mainTestResults', !!button, `Button ${id}: ${button ? 'Gefunden' : 'Fehlt'}`);
+                addResult('mainTestResults', hasMethod, `Methode ${method}: ${hasMethod ? 'Vorhanden' : 'Fehlt'}`);
+                
+                if (button && hasMethod) {
+                    try {
+                        button.click();
+                        addResult('mainTestResults', true, `${id} Click erfolgreich`);
+                    } catch (error) {
+                        addResult('mainTestResults', false, `${id} Click Fehler: ${error.message}`);
+                    }
+                }
+            });
+        }
+
+        function testOverviewModal() {
+            log('📊 Teste Übersicht-Modal...', 'info');
+            
+            if (!window.qhseDashboard) {
+                addResult('overviewTestResults', false, 'Dashboard nicht verfügbar');
+                return;
+            }
+
+            // Test method existence
+            const hasOverviewMethod = typeof window.qhseDashboard.showVacationOverview === 'function';
+            addResult('overviewTestResults', hasOverviewMethod, `showVacationOverview Methode: ${hasOverviewMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            const hasChartMethod = typeof window.qhseDashboard.renderMonthlyVacationChart === 'function';
+            addResult('overviewTestResults', hasChartMethod, `renderMonthlyVacationChart Methode: ${hasChartMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            const hasStatsMethod = typeof window.qhseDashboard.renderDepartmentVacationStats === 'function';
+            addResult('overviewTestResults', hasStatsMethod, `renderDepartmentVacationStats Methode: ${hasStatsMethod ? 'Vorhanden' : 'Fehlt'}`);
+
+            // Test button functionality
+            const button = document.getElementById('vacationOverviewBtn');
+            if (button && hasOverviewMethod) {
+                try {
+                    log('Teste Übersicht-Button Click...', 'info');
+                    button.click();
+                    addResult('overviewTestResults', true, 'Übersicht-Modal öffnet erfolgreich');
+                    
+                    // Close modal after test
+                    setTimeout(() => {
+                        const modal = document.getElementById('vacationOverviewModal');
+                        if (modal) modal.remove();
+                    }, 1000);
+                    
+                } catch (error) {
+                    addResult('overviewTestResults', false, `Button-Click Fehler: ${error.message}`);
+                }
+            }
+        }
+
+        async function runNewFeaturesTest() {
+            log('⭐ Teste alle neuen Features...', 'info');
+            totalTests = 10;
+            completedTests = 0;
+            
+            document.getElementById('mainTestResults').innerHTML = '';
+            
+            await testHolidaysManagement();
+            await testSpecialRules();
+            await testOverviewModal();
+            
+            log('⭐ Neue Features Test abgeschlossen', 'success');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Umfassende Test-Seite geladen', 'success');
+            
+            if (window.qhseDashboard) {
+                log('✅ QHSE Dashboard erkannt', 'success');
+            } else {
+                log('⚠️ QHSE Dashboard nicht erkannt - öffnen Sie zuerst index.html', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

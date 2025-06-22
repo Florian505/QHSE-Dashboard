@@ -11805,6 +11805,117 @@ input[type="checkbox"] {
     gap: 0.5rem;
 }
 
+/* Certificate Management Styles */
+.certificate-field {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: #f8fafc;
+}
+
+.certificate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.certificate-header h4 {
+    margin: 0;
+    color: #334155;
+}
+
+.certificate-preview {
+    margin-top: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: white;
+}
+
+.preview-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.preview-icon {
+    font-size: 2rem;
+    color: #dc2626;
+}
+
+.preview-icon.fa-file-image {
+    color: #059669;
+}
+
+.preview-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.preview-name {
+    font-weight: 500;
+    color: #334155;
+}
+
+.preview-size {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: white;
+    border: 1px solid #dc2626;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* File input styling */
+input[type="file"] {
+    margin-bottom: 0.5rem;
+}
+
+input[type="file"]::file-selector-button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-right: 1rem;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: #2563eb;
+}
+
+.no-file-text {
+    color: #64748b;
+    font-style: italic;
+    font-size: 0.875rem;
+}
+
 /* Print Styles for Supplier Management */
 @media print {
     .supplier-tabs,
@@ -11824,5 +11935,1045 @@ input[type="checkbox"] {
     .supplier-tab-panel {
         display: block !important;
         padding: 0;
+    }
+}
+
+/* ====================================
+   VACATION PLANNING & ABSENCE MANAGEMENT STYLES
+   ==================================== */
+
+/* Vacation Dashboard */
+.vacation-dashboard {
+    margin-bottom: 2rem;
+}
+
+.vacation-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.vacation-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quick-action-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.quick-action-card h4 {
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.quick-action-card p {
+    color: #64748b;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Vacation Tabs */
+.vacation-tabs {
+    display: flex;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.vacation-tab-btn {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.vacation-tab-btn:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.vacation-tab-btn.active {
+    background: white;
+    color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.vacation-tab-btn i {
+    margin-right: 0.5rem;
+}
+
+/* Tab Panels */
+.vacation-tab-panel {
+    display: none;
+}
+
+.vacation-tab-panel.active {
+    display: block;
+}
+
+/* Calendar Styles */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-navigation {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.calendar-navigation h3 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.25rem;
+    min-width: 150px;
+    text-align: center;
+}
+
+.calendar-views {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-btn {
+    background: #f1f5f9;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.view-btn:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.view-btn.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.calendar-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.calendar-filters select {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    color: #374151;
+}
+
+/* Calendar Legend */
+.calendar-legend {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-color.urlaub {
+    background: #3b82f6;
+}
+
+.legend-color.sonderurlaub {
+    background: #8b5cf6;
+}
+
+.legend-color.schulung {
+    background: #10b981;
+}
+
+.legend-color.krankheit {
+    background: #ef4444;
+}
+
+.legend-color.gleitzeit {
+    background: #f59e0b;
+}
+
+/* Calendar Grid */
+.calendar-grid {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.calendar-weekday {
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-day {
+    min-height: 120px;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    position: relative;
+    background: white;
+    transition: background-color 0.2s;
+}
+
+.calendar-day:hover {
+    background: #f8fafc;
+}
+
+.calendar-day.other-month {
+    background: #f8fafc;
+    color: #9ca3af;
+}
+
+.calendar-day.today {
+    background: #dbeafe;
+}
+
+.calendar-day-number {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+
+.calendar-day.other-month .calendar-day-number {
+    color: #9ca3af;
+}
+
+.calendar-day.today .calendar-day-number {
+    color: #3b82f6;
+}
+
+.calendar-events {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.calendar-event {
+    background: #3b82f6;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.calendar-event:hover {
+    opacity: 0.8;
+}
+
+.calendar-event.urlaub {
+    background: #3b82f6;
+}
+
+.calendar-event.sonderurlaub {
+    background: #8b5cf6;
+}
+
+.calendar-event.schulung {
+    background: #10b981;
+}
+
+.calendar-event.krankheit {
+    background: #ef4444;
+}
+
+.calendar-event.gleitzeit {
+    background: #f59e0b;
+}
+
+/* Vacation Balance */
+.vacation-balance {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.vacation-balance h4 {
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.balance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.balance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.balance-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.balance-value {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.balance-value.available {
+    color: #10b981;
+}
+
+/* Requests List */
+.requests-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.requests-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.requests-filters select {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    color: #374151;
+}
+
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.request-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.request-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.request-info h4 {
+    margin: 0 0 0.25rem 0;
+    color: #1e293b;
+}
+
+.request-period {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.request-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-badge.pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.approved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge.rejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.cancelled {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.request-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.detail-value {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.request-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Approval Styles */
+.approval-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.approval-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pending-approvals {
+    margin-bottom: 2rem;
+}
+
+.approvals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.approval-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #f59e0b;
+}
+
+.approval-card.urgent {
+    border-left-color: #ef4444;
+}
+
+.approval-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.approval-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Team Overview */
+.team-overview {
+    margin-top: 2rem;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.team-member-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.team-member-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.team-member-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.team-member-role {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.team-member-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.team-member-status.available {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.team-member-status.absent {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.team-member-absence {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* Conflict Warnings */
+.conflict-warnings {
+    margin-bottom: 1.5rem;
+}
+
+.conflict-warning {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.conflict-warning.critical {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+.conflict-warning h5 {
+    margin: 0 0 0.5rem 0;
+    color: #92400e;
+}
+
+.conflict-warning.critical h5 {
+    color: #991b1b;
+}
+
+.conflict-details {
+    font-size: 0.875rem;
+    color: #78350f;
+}
+
+.conflict-warning.critical .conflict-details {
+    color: #7f1d1d;
+}
+
+/* Administration Styles */
+.admin-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.admin-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-section h4 {
+    margin: 0 0 1rem 0;
+    color: #1e293b;
+}
+
+.admin-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.entitlements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.entitlement-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.entitlement-employee {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.entitlement-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.holidays-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.holiday-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.holiday-name {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.holiday-date {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.report-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.report-card:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.report-icon {
+    font-size: 2rem;
+    color: #3b82f6;
+    margin-bottom: 0.5rem;
+}
+
+.report-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.report-description {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* Modal Enhancements for Vacation */
+.vacation-summary {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid #e2e8f0;
+}
+
+.vacation-summary h4 {
+    margin: 0 0 1rem 0;
+    color: #1e293b;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary-label {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.conflict-check {
+    margin-top: 1rem;
+}
+
+.conflict-alert {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.conflict-alert.error {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+.conflict-alert h6 {
+    margin: 0 0 0.25rem 0;
+    color: #92400e;
+}
+
+.conflict-alert.error h6 {
+    color: #991b1b;
+}
+
+.approval-details {
+    margin-bottom: 1.5rem;
+}
+
+.request-info {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.info-value {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.team-impact {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.vacation-details {
+    background: white;
+}
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.request-id {
+    font-family: monospace;
+    font-size: 0.875rem;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.detail-section h4 {
+    margin: 0 0 1rem 0;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.workflow-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.workflow-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.workflow-step.completed {
+    background: #d1fae5;
+}
+
+.workflow-step.current {
+    background: #dbeafe;
+}
+
+.workflow-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: white;
+    background: #9ca3af;
+}
+
+.workflow-step.completed .workflow-icon {
+    background: #10b981;
+}
+
+.workflow-step.current .workflow-icon {
+    background: #3b82f6;
+}
+
+.workflow-content {
+    flex: 1;
+}
+
+.workflow-title {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 0.875rem;
+}
+
+.workflow-date {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.details-comments {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.comments-section {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vacation-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .vacation-quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .calendar-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .calendar-navigation {
+        justify-content: center;
+    }
+    
+    .calendar-views,
+    .calendar-filters {
+        justify-content: center;
+    }
+    
+    .vacation-tabs {
+        flex-direction: column;
+    }
+    
+    .vacation-tab-btn {
+        text-align: center;
+    }
+    
+    .balance-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .request-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .request-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .entitlements-grid,
+    .reports-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles for Vacation Management */
+@media print {
+    .vacation-tabs,
+    .section-actions,
+    .calendar-header,
+    .request-actions,
+    .approval-actions,
+    .admin-controls {
+        display: none;
+    }
+    
+    .vacation-tab-panel {
+        display: block !important;
+    }
+    
+    .request-card,
+    .approval-card,
+    .team-member-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .calendar-grid {
+        box-shadow: none;
+        border: 1px solid #000;
     }
 }

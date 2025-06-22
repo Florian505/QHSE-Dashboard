@@ -125,6 +125,10 @@
                         <i class="fas fa-truck"></i>
                         <span>Lieferantenbewertung</span>
                     </li>
+                    <li class="menu-item static-item" data-section="urlaubsplanung" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,mitarbeiter,techniker,admin,root-admin">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Urlaubsplanung</span>
+                    </li>
                     <li class="menu-item static-item" data-section="einstellungen" data-roles="root-admin">
                         <i class="fas fa-cog"></i>
                         <span>Einstellungen</span>
@@ -348,13 +352,13 @@
                                     <div class="profile-form">
                                         <div class="form-group">
                                             <label for="emailNotifications">
-                                                <input type="checkbox" id="emailNotifications"> 
+                                                <input type="checkbox" id="emailNotifications" name="emailNotifications" autocomplete="off"> 
                                                 E-Mail-Benachrichtigungen erhalten
                                             </label>
                                         </div>
                                         <div class="form-group">
                                             <label for="systemNotifications">
-                                                <input type="checkbox" id="systemNotifications"> 
+                                                <input type="checkbox" id="systemNotifications" name="systemNotifications" autocomplete="off"> 
                                                 System-Benachrichtigungen erhalten
                                             </label>
                                         </div>
@@ -401,7 +405,7 @@
                             <div class="documents-header">
                                 <h3>Sicherheitsdokumente</h3>
                                 <div class="documents-actions" data-roles="admin,root-admin">
-                                    <input type="file" id="safetyPdfUpload" accept=".pdf" style="display: none;">
+                                    <input type="file" id="safetyPdfUpload" name="safetyPdfUpload" accept=".pdf" style="display: none;" autocomplete="off">
                                     <button id="uploadSafetyPdfBtn" class="btn-primary btn-sm">
                                         <i class="fas fa-upload"></i> PDF hochladen
                                     </button>
@@ -846,7 +850,7 @@
                             <div class="upload-zone">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <p>Dateien hier ablegen oder klicken zum Hochladen</p>
-                                <input type="file" id="fileUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                <input type="file" id="fileUpload" name="fileUpload" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" autocomplete="off">
                             </div>
                             <div class="upload-categories">
                                 <select id="documentCategory" aria-label="Dokument-Kategorie auswählen">
@@ -1454,10 +1458,10 @@
                                 </div>
                                 
                                 <div class="bulk-actions">
-                                    <button id="selectAllUsersBtn" class="btn-secondary">
+                                    <button id="denyAllUsersBtn" class="btn-secondary">
                                         <i class="fas fa-ban"></i> Allen sichtbaren Zugriff verweigern
                                     </button>
-                                    <button id="deselectAllUsersBtn" class="btn-secondary">
+                                    <button id="grantAllUsersBtn" class="btn-secondary">
                                         <i class="fas fa-check"></i> Allen sichtbaren Zugriff erlauben
                                     </button>
                                     <div class="bulk-info">
@@ -2471,23 +2475,6 @@
                                 </div>
                             </div>
 
-                            <!-- Evaluations Tab -->
-                            <div id="supplier-evaluations" class="supplier-tab-panel">
-                                <div class="evaluations-header">
-                                    <h3>Lieferantenbewertungen</h3>
-                                    <div class="evaluation-controls">
-                                        <button id="newEvaluationBtn" class="btn-primary" onclick="qhseDashboard.openEvaluationModal()">
-                                            <i class="fas fa-star"></i> Neue Bewertung
-                                        </button>
-                                        <button id="evaluationReportBtn" class="btn-secondary">
-                                            <i class="fas fa-chart-line"></i> Bewertungsreport
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="supplierEvaluationsList" class="evaluations-list">
-                                    <!-- Evaluation items will be populated here -->
-                                </div>
-                            </div>
 
                             <!-- Audits Tab -->
                             <div id="supplier-audits" class="supplier-tab-panel">
@@ -2504,6 +2491,323 @@
                                 </div>
                                 <div id="supplierAuditsList" class="audits-list">
                                     <!-- Audit items will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Urlaubsplanung & Abwesenheitsmanagement Section -->
+                <section id="urlaubsplanung-section" class="content-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-calendar-alt"></i> Urlaubsplanung & Abwesenheitsmanagement</h2>
+                        <div class="section-actions">
+                            <button id="newVacationRequestBtn" class="btn-primary">
+                                <i class="fas fa-plus"></i> Neuer Antrag
+                            </button>
+                            <button id="vacationOverviewBtn" class="btn-secondary">
+                                <i class="fas fa-chart-bar"></i> Übersicht
+                            </button>
+                            <button id="teamCalendarBtn" class="btn-secondary">
+                                <i class="fas fa-users"></i> Team-Kalender
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Vacation Dashboard -->
+                    <div class="vacation-dashboard">
+                        <!-- Statistics Cards -->
+                        <div class="vacation-stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="totalVacationDays">25</h3>
+                                    <p>Gesamt Urlaubstage</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-minus"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="usedVacationDays">8</h3>
+                                    <p>Verbrauchte Tage</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="remainingVacationDays">17</h3>
+                                    <p>Verbleibende Tage</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h3 id="pendingRequests">2</h3>
+                                    <p>Offene Anträge</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="vacation-quick-actions">
+                            <div class="quick-action-card">
+                                <h4>Antrag stellen</h4>
+                                <p>Neuen Urlaubsantrag einreichen</p>
+                                <button id="quickVacationRequestBtn" class="btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Beantragen
+                                </button>
+                            </div>
+                            <div class="quick-action-card">
+                                <h4>Team anzeigen</h4>
+                                <p>Abwesenheiten des Teams einsehen</p>
+                                <button id="quickTeamViewBtn" class="btn-secondary">
+                                    <i class="fas fa-users"></i> Team ansehen
+                                </button>
+                            </div>
+                            <div class="quick-action-card">
+                                <h4>Anträge verwalten</h4>
+                                <p>Urlaubsanträge genehmigen/ablehnen</p>
+                                <button id="quickApprovalBtn" class="btn-secondary" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,admin,root-admin">
+                                    <i class="fas fa-check-circle"></i> Verwalten
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vacation Content Areas -->
+                    <div class="vacation-content">
+                        <!-- Tab Navigation -->
+                        <div class="vacation-tabs">
+                            <button class="vacation-tab-btn active" data-tab="calendar">
+                                <i class="fas fa-calendar"></i> Kalender
+                            </button>
+                            <button class="vacation-tab-btn" data-tab="requests">
+                                <i class="fas fa-file-alt"></i> Meine Anträge
+                            </button>
+                            <button class="vacation-tab-btn" data-tab="approval" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,admin,root-admin">
+                                <i class="fas fa-check-double"></i> Genehmigungen
+                            </button>
+                            <button class="vacation-tab-btn" data-tab="team">
+                                <i class="fas fa-users"></i> Team
+                            </button>
+                            <button class="vacation-tab-btn" data-tab="administration" data-roles="admin,root-admin">
+                                <i class="fas fa-cogs"></i> Administration
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="vacation-tab-content">
+                            <!-- Calendar Tab -->
+                            <div id="vacation-calendar" class="vacation-tab-panel active">
+                                <div class="calendar-header">
+                                    <div class="calendar-navigation">
+                                        <button id="vacationPrevMonthBtn" class="btn-secondary">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <h3 id="vacationCurrentMonth">Januar 2024</h3>
+                                        <button id="vacationNextMonthBtn" class="btn-secondary">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <button id="vacationTodayBtn" class="btn-secondary">
+                                            <i class="fas fa-calendar-day"></i> Heute
+                                        </button>
+                                    </div>
+                                    <div class="calendar-views">
+                                        <button class="view-btn active" data-view="month">Monat</button>
+                                        <button class="view-btn" data-view="week">Woche</button>
+                                        <button class="view-btn" data-view="day">Tag</button>
+                                    </div>
+                                    <div class="calendar-filters">
+                                        <select id="calendarDepartmentFilter" name="calendarDepartmentFilter" autocomplete="off">
+                                            <option value="">Alle Abteilungen</option>
+                                        </select>
+                                        <select id="calendarTypeFilter" name="calendarTypeFilter" autocomplete="off">
+                                            <option value="">Alle Typen</option>
+                                            <option value="urlaub">Urlaub</option>
+                                            <option value="sonderurlaub">Sonderurlaub</option>
+                                            <option value="schulung">Schulung</option>
+                                            <option value="krankheit">Krankheit</option>
+                                            <option value="gleitzeit">Gleitzeit</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="calendar-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color urlaub"></span>
+                                        <span>Urlaub</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color sonderurlaub"></span>
+                                        <span>Sonderurlaub</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color schulung"></span>
+                                        <span>Schulung</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color krankheit"></span>
+                                        <span>Krankheit</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color gleitzeit"></span>
+                                        <span>Gleitzeit</span>
+                                    </div>
+                                </div>
+                                <div id="vacationCalendarGrid" class="calendar-grid">
+                                    <!-- Calendar will be generated here -->
+                                </div>
+                            </div>
+
+                            <!-- My Requests Tab -->
+                            <div id="vacation-requests" class="vacation-tab-panel">
+                                <div class="requests-header">
+                                    <h3>Meine Urlaubsanträge</h3>
+                                    <div class="requests-filters">
+                                        <select id="requestStatusFilter" name="requestStatusFilter" autocomplete="off">
+                                            <option value="">Alle Status</option>
+                                            <option value="pending">Ausstehend</option>
+                                            <option value="approved">Genehmigt</option>
+                                            <option value="rejected">Abgelehnt</option>
+                                            <option value="cancelled">Zurückgezogen</option>
+                                        </select>
+                                        <select id="requestYearFilter" name="requestYearFilter" autocomplete="off">
+                                            <option value="2024">2024</option>
+                                            <option value="2023">2023</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="vacation-balance">
+                                    <h4>Urlaubskonto 2024</h4>
+                                    <div class="balance-grid">
+                                        <div class="balance-item">
+                                            <span class="balance-label">Jahresanspruch:</span>
+                                            <span class="balance-value" id="yearlyEntitlement">25 Tage</span>
+                                        </div>
+                                        <div class="balance-item">
+                                            <span class="balance-label">Übertrag aus 2023:</span>
+                                            <span class="balance-value" id="carryOver">3 Tage</span>
+                                        </div>
+                                        <div class="balance-item">
+                                            <span class="balance-label">Verbraucht:</span>
+                                            <span class="balance-value" id="usedDays">8 Tage</span>
+                                        </div>
+                                        <div class="balance-item">
+                                            <span class="balance-label">Geplant:</span>
+                                            <span class="balance-value" id="plannedDays">5 Tage</span>
+                                        </div>
+                                        <div class="balance-item">
+                                            <span class="balance-label">Verfügbar:</span>
+                                            <span class="balance-value available" id="availableDays">15 Tage</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="myVacationRequests" class="requests-list">
+                                    <!-- Requests will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Approval Tab -->
+                            <div id="vacation-approval" class="vacation-tab-panel">
+                                <div class="approval-header">
+                                    <h3>Genehmigungen</h3>
+                                    <div class="approval-filters">
+                                        <select id="approvalDepartmentFilter" name="approvalDepartmentFilter" autocomplete="off">
+                                            <option value="">Alle Abteilungen</option>
+                                        </select>
+                                        <select id="approvalStatusFilter" name="approvalStatusFilter" autocomplete="off">
+                                            <option value="pending">Ausstehend</option>
+                                            <option value="all">Alle</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="pending-approvals">
+                                    <h4>Ausstehende Genehmigungen</h4>
+                                    <div id="pendingApprovalsList" class="approvals-list">
+                                        <!-- Pending approvals will be populated here -->
+                                    </div>
+                                </div>
+                                <div class="team-overview">
+                                    <h4>Team-Übersicht</h4>
+                                    <div id="teamAbsenceOverview" class="team-grid">
+                                        <!-- Team overview will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Team Tab -->
+                            <div id="vacation-team" class="vacation-tab-panel">
+                                <div class="team-header">
+                                    <h3>Team-Abwesenheiten</h3>
+                                    <div class="team-filters">
+                                        <select id="teamDepartmentFilter" name="teamDepartmentFilter" autocomplete="off">
+                                            <option value="">Meine Abteilung</option>
+                                        </select>
+                                        <input type="date" id="teamDateFilter" name="teamDateFilter" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="conflict-warnings" id="conflictWarnings">
+                                    <!-- Conflict warnings will be shown here -->
+                                </div>
+                                <div id="teamAbsencesList" class="team-absences">
+                                    <!-- Team absences will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- Administration Tab -->
+                            <div id="vacation-administration" class="vacation-tab-panel">
+                                <div class="admin-sections">
+                                    <div class="admin-section">
+                                        <h4>Urlaubskontingente verwalten</h4>
+                                        <div class="admin-controls">
+                                            <button id="manageEntitlementsBtn" class="btn-primary">
+                                                <i class="fas fa-edit"></i> Kontingente bearbeiten
+                                            </button>
+                                            <button id="bulkImportBtn" class="btn-secondary">
+                                                <i class="fas fa-upload"></i> Massenimport
+                                            </button>
+                                        </div>
+                                        <div id="entitlementsOverview" class="entitlements-grid">
+                                            <!-- Entitlements overview will be populated here -->
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="admin-section">
+                                        <h4>Feiertage & Sonderregelungen</h4>
+                                        <div class="admin-controls">
+                                            <button id="manageHolidaysBtn" class="btn-primary">
+                                                <i class="fas fa-calendar-plus"></i> Feiertage verwalten
+                                            </button>
+                                            <button id="specialRulesBtn" class="btn-secondary">
+                                                <i class="fas fa-cogs"></i> Sonderregelungen
+                                            </button>
+                                        </div>
+                                        <div id="holidaysOverview" class="holidays-list">
+                                            <!-- Holidays will be populated here -->
+                                        </div>
+                                    </div>
+
+                                    <div class="admin-section">
+                                        <h4>Berichte & Auswertungen</h4>
+                                        <div class="admin-controls">
+                                            <button id="generateReportsBtn" class="btn-primary">
+                                                <i class="fas fa-chart-bar"></i> Berichte erstellen
+                                            </button>
+                                            <button id="exportDataBtn" class="btn-secondary">
+                                                <i class="fas fa-download"></i> Daten exportieren
+                                            </button>
+                                        </div>
+                                        <div id="reportsOverview" class="reports-grid">
+                                            <!-- Reports will be populated here -->
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2586,7 +2890,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button id="saveProfileBtn" class="btn-primary">Speichern</button>
+                <button id="saveUserProfileBtn" class="btn-primary">Speichern</button>
                 <button id="cancelProfileBtn" class="btn-secondary">Abbrechen</button>
             </div>
         </div>
@@ -3472,7 +3776,7 @@
                                     <i class="fas fa-plus"></i> Zertifikat hinzufügen
                                 </button>
                             </div>
-                            <div id="certificatesList" class="certificates-list">
+                            <div id="modalCertificatesList" class="certificates-list">
                                 <!-- Certificates will be added here dynamically -->
                             </div>
                         </div>
@@ -3484,40 +3788,40 @@
                             <h3>Lieferantenbewertung</h3>
                             <div class="evaluation-criteria">
                                 <div class="criterion">
-                                    <label for="qualityScore">Qualität (0-100%)</label>
+                                    <label for="supplierQualityScore">Qualität (0-100%)</label>
                                     <div class="score-input">
-                                        <input type="range" id="qualityScore" name="qualityScore" 
+                                        <input type="range" id="supplierQualityScore" name="supplierQualityScore" 
                                                min="0" max="100" value="75">
-                                        <span id="qualityScoreValue">75%</span>
+                                        <span id="supplierQualityScoreValue">75%</span>
                                     </div>
                                 </div>
                                 <div class="criterion">
-                                    <label for="deliveryScore">Lieferperformance (0-100%)</label>
+                                    <label for="supplierDeliveryScore">Lieferperformance (0-100%)</label>
                                     <div class="score-input">
-                                        <input type="range" id="deliveryScore" name="deliveryScore" 
+                                        <input type="range" id="supplierDeliveryScore" name="supplierDeliveryScore" 
                                                min="0" max="100" value="75">
-                                        <span id="deliveryScoreValue">75%</span>
+                                        <span id="supplierDeliveryScoreValue">75%</span>
                                     </div>
                                 </div>
                                 <div class="criterion">
-                                    <label for="priceScore">Preis-Leistung (0-100%)</label>
+                                    <label for="supplierPriceScore">Preis-Leistung (0-100%)</label>
                                     <div class="score-input">
-                                        <input type="range" id="priceScore" name="priceScore" 
+                                        <input type="range" id="supplierPriceScore" name="supplierPriceScore" 
                                                min="0" max="100" value="75">
-                                        <span id="priceScoreValue">75%</span>
+                                        <span id="supplierPriceScoreValue">75%</span>
                                     </div>
                                 </div>
                                 <div class="criterion">
-                                    <label for="serviceScore">Service (0-100%)</label>
+                                    <label for="supplierServiceScore">Service (0-100%)</label>
                                     <div class="score-input">
-                                        <input type="range" id="serviceScore" name="serviceScore" 
+                                        <input type="range" id="supplierServiceScore" name="supplierServiceScore" 
                                                min="0" max="100" value="75">
-                                        <span id="serviceScoreValue">75%</span>
+                                        <span id="supplierServiceScoreValue">75%</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="overall-score">
-                                <h4>Gesamtbewertung: <span id="overallScore">75%</span></h4>
+                                <h4>Gesamtbewertung: <span id="supplierOverallScore">75%</span></h4>
                             </div>
                             <div class="form-group">
                                 <label for="evaluationNotes">Bewertungsnotizen</label>
@@ -3661,6 +3965,263 @@
                     <i class="fas fa-file-csv"></i> CSV Export
                 </button>
                 <button type="button" class="btn-primary" onclick="document.getElementById('supplierReportsModal').style.display='none'">
+                    Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vacation Request Modal -->
+    <div id="vacationRequestModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="vacationRequestModalTitle">
+                    <i class="fas fa-calendar-plus"></i> 
+                    <span id="vacationRequestModalTitleText">Neuer Urlaubsantrag</span>
+                </h2>
+                <button class="modal-close" onclick="document.getElementById('vacationRequestModal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="vacationRequestForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="vacationStartDate">Von *</label>
+                            <input type="date" id="vacationStartDate" name="vacationStartDate" 
+                                   autocomplete="off" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vacationEndDate">Bis *</label>
+                            <input type="date" id="vacationEndDate" name="vacationEndDate" 
+                                   autocomplete="off" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vacationType">Art der Abwesenheit *</label>
+                            <select id="vacationType" name="vacationType" autocomplete="off" required>
+                                <option value="">Bitte wählen...</option>
+                                <option value="urlaub">Erholungsurlaub</option>
+                                <option value="sonderurlaub">Sonderurlaub</option>
+                                <option value="schulung">Schulung/Weiterbildung</option>
+                                <option value="gleitzeit">Gleitzeitausgleich</option>
+                                <option value="krankheit">Krankheit</option>
+                                <option value="pflegezeit">Pflegezeit</option>
+                                <option value="mutterschutz">Mutterschutz</option>
+                                <option value="vaterzeit">Vaterzeit</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="vacationDays">Arbeitstage</label>
+                            <input type="number" id="vacationDays" name="vacationDays" 
+                                   autocomplete="off" readonly>
+                            <small>Wird automatisch berechnet</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vacationReason">Begründung</label>
+                        <textarea id="vacationReason" name="vacationReason" 
+                                  autocomplete="off" rows="3"
+                                  placeholder="Optional: Zusätzliche Informationen oder Begründung..."></textarea>
+                    </div>
+
+                    <div class="form-group" id="substituteSection">
+                        <label for="vacationSubstitute">Vertretung</label>
+                        <select id="vacationSubstitute" name="vacationSubstitute" autocomplete="off">
+                            <option value="">Keine Vertretung erforderlich</option>
+                            <!-- Will be populated with team members -->
+                        </select>
+                    </div>
+
+                    <div class="vacation-summary">
+                        <h4>Zusammenfassung</h4>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <span class="summary-label">Zeitraum:</span>
+                                <span class="summary-value" id="summaryPeriod">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Arbeitstage:</span>
+                                <span class="summary-value" id="summaryDays">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Verfügbare Tage:</span>
+                                <span class="summary-value" id="summaryAvailable">25</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Nach Antrag:</span>
+                                <span class="summary-value" id="summaryRemaining">25</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="conflict-check" id="conflictCheck">
+                        <!-- Conflict warnings will be displayed here -->
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="document.getElementById('vacationRequestModal').style.display='none'">
+                    Abbrechen
+                </button>
+                <button type="submit" form="vacationRequestForm" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Antrag stellen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vacation Approval Modal -->
+    <div id="vacationApprovalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-check-circle"></i> Urlaubsantrag prüfen</h2>
+                <button class="modal-close" onclick="document.getElementById('vacationApprovalModal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="approval-details">
+                    <div class="request-info">
+                        <h4>Antragsdetails</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Mitarbeiter:</span>
+                                <span class="info-value" id="approvalEmployee">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Zeitraum:</span>
+                                <span class="info-value" id="approvalPeriod">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Art:</span>
+                                <span class="info-value" id="approvalType">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Arbeitstage:</span>
+                                <span class="info-value" id="approvalDays">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Begründung:</span>
+                                <span class="info-value" id="approvalReason">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="team-impact">
+                        <h4>Team-Auswirkungen</h4>
+                        <div id="teamImpactAnalysis">
+                            <!-- Team impact analysis will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="approvalForm">
+                    <div class="form-group">
+                        <label for="approvalDecision">Entscheidung *</label>
+                        <select id="approvalDecision" name="approvalDecision" autocomplete="off" required>
+                            <option value="">Bitte wählen...</option>
+                            <option value="approved">Genehmigen</option>
+                            <option value="rejected">Ablehnen</option>
+                            <option value="conditional">Bedingt genehmigen</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="approvalComments">Kommentar</label>
+                        <textarea id="approvalComments" name="approvalComments" 
+                                  autocomplete="off" rows="3"
+                                  placeholder="Optional: Kommentar zur Entscheidung..."></textarea>
+                    </div>
+
+                    <div class="form-group" id="substituteApprovalSection">
+                        <label for="approvedSubstitute">Vertretung bestätigen</label>
+                        <select id="approvedSubstitute" name="approvedSubstitute" autocomplete="off">
+                            <option value="">Keine Vertretung erforderlich</option>
+                            <!-- Will be populated with team members -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="document.getElementById('vacationApprovalModal').style.display='none'">
+                    Abbrechen
+                </button>
+                <button type="submit" form="approvalForm" class="btn-primary">
+                    <i class="fas fa-save"></i> Entscheidung speichern
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vacation Details Modal -->
+    <div id="vacationDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar"></i> Antragsdetails</h2>
+                <button class="modal-close" onclick="document.getElementById('vacationDetailsModal').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="vacation-details">
+                    <div class="details-header">
+                        <div class="status-badge" id="detailsStatus">Ausstehend</div>
+                        <div class="request-id" id="detailsId">#VR-2024-001</div>
+                    </div>
+                    
+                    <div class="details-grid">
+                        <div class="detail-section">
+                            <h4>Antragsdetails</h4>
+                            <div class="detail-item">
+                                <span class="detail-label">Mitarbeiter:</span>
+                                <span class="detail-value" id="detailsEmployee">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Art:</span>
+                                <span class="detail-value" id="detailsType">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Von:</span>
+                                <span class="detail-value" id="detailsStartDate">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Bis:</span>
+                                <span class="detail-value" id="detailsEndDate">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Arbeitstage:</span>
+                                <span class="detail-value" id="detailsDays">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Vertretung:</span>
+                                <span class="detail-value" id="detailsSubstitute">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>Workflow</h4>
+                            <div class="workflow-timeline" id="workflowTimeline">
+                                <!-- Workflow steps will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="details-comments">
+                        <h4>Begründung/Kommentare</h4>
+                        <div id="detailsComments" class="comments-section">
+                            <!-- Comments will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cancelRequestBtn" class="btn-danger" style="display: none;">
+                    <i class="fas fa-times"></i> Antrag zurückziehen
+                </button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('vacationDetailsModal').style.display='none'">
                     Schließen
                 </button>
             </div>
