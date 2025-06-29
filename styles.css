@@ -5,10 +5,232 @@
     box-sizing: border-box;
 }
 
+/* CSS Variables for Color Themes */
+:root {
+    /* Default Theme */
+    --primary-bg: #1e293b;
+    --primary-bg-gradient: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    --secondary-bg: #f8fafc;
+    --accent-color: #3b82f6;
+    --text-primary: #334155;
+    --text-secondary: #e2e8f0;
+    --border-color: #334155;
+    --card-bg: #ffffff;
+    --hover-bg: rgba(59, 130, 246, 0.1);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --primary-bg: #0f172a;
+    --primary-bg-gradient: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+    --secondary-bg: #1f2937;
+    --accent-color: #1e40af;
+    --text-primary: #f8fafc;
+    --text-secondary: #e2e8f0;
+    --border-color: #374151;
+    --card-bg: #111827;
+    --hover-bg: rgba(30, 64, 175, 0.1);
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --primary-bg: #f8fafc;
+    --primary-bg-gradient: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    --secondary-bg: #ffffff;
+    --accent-color: #2563eb;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --border-color: #e2e8f0;
+    --card-bg: #ffffff;
+    --hover-bg: rgba(37, 99, 235, 0.1);
+}
+
+/* Green Theme */
+[data-theme="green"] {
+    --primary-bg: #064e3b;
+    --primary-bg-gradient: linear-gradient(180deg, #064e3b 0%, #022c22 100%);
+    --secondary-bg: #ecfdf5;
+    --accent-color: #059669;
+    --text-primary: #065f46;
+    --text-secondary: #d1fae5;
+    --border-color: #047857;
+    --card-bg: #f0fdf4;
+    --hover-bg: rgba(5, 150, 105, 0.1);
+}
+
+/* Blue Theme */
+[data-theme="blue"] {
+    --primary-bg: #1e3a8a;
+    --primary-bg-gradient: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+    --secondary-bg: #eff6ff;
+    --accent-color: #3b82f6;
+    --text-primary: #1e40af;
+    --text-secondary: #dbeafe;
+    --border-color: #2563eb;
+    --card-bg: #f0f9ff;
+    --hover-bg: rgba(59, 130, 246, 0.1);
+}
+
+/* Red Theme */
+[data-theme="red"] {
+    --primary-bg: #7f1d1d;
+    --primary-bg-gradient: linear-gradient(180deg, #7f1d1d 0%, #991b1b 100%);
+    --secondary-bg: #fef2f2;
+    --accent-color: #dc2626;
+    --text-primary: #991b1b;
+    --text-secondary: #fecaca;
+    --border-color: #dc2626;
+    --card-bg: #fef2f2;
+    --hover-bg: rgba(220, 38, 38, 0.1);
+}
+
+/* Purple Theme */
+[data-theme="purple"] {
+    --primary-bg: #581c87;
+    --primary-bg-gradient: linear-gradient(180deg, #581c87 0%, #7c3aed 100%);
+    --secondary-bg: #faf5ff;
+    --accent-color: #8b5cf6;
+    --text-primary: #6b21a8;
+    --text-secondary: #e9d5ff;
+    --border-color: #8b5cf6;
+    --card-bg: #faf5ff;
+    --hover-bg: rgba(139, 92, 246, 0.1);
+}
+
+/* Orange Theme */
+[data-theme="orange"] {
+    --primary-bg: #9a3412;
+    --primary-bg-gradient: linear-gradient(180deg, #9a3412 0%, #ea580c 100%);
+    --secondary-bg: #fff7ed;
+    --accent-color: #f97316;
+    --text-primary: #c2410c;
+    --text-secondary: #fed7aa;
+    --border-color: #f97316;
+    --card-bg: #fff7ed;
+    --hover-bg: rgba(249, 115, 22, 0.1);
+}
+
+/* Cyan Theme */
+[data-theme="cyan"] {
+    --primary-bg: #164e63;
+    --primary-bg-gradient: linear-gradient(180deg, #164e63 0%, #0891b2 100%);
+    --secondary-bg: #ecfeff;
+    --accent-color: #06b6d4;
+    --text-primary: #0e7490;
+    --text-secondary: #a5f3fc;
+    --border-color: #06b6d4;
+    --card-bg: #ecfeff;
+    --hover-bg: rgba(6, 182, 212, 0.1);
+}
+
+/* Pink Theme */
+[data-theme="pink"] {
+    --primary-bg: #9d174d;
+    --primary-bg-gradient: linear-gradient(180deg, #9d174d 0%, #e91e63 100%);
+    --secondary-bg: #fdf2f8;
+    --accent-color: #ec4899;
+    --text-primary: #be185d;
+    --text-secondary: #f9a8d4;
+    --border-color: #ec4899;
+    --card-bg: #fdf2f8;
+    --hover-bg: rgba(236, 72, 153, 0.1);
+}
+
+/* Yellow Theme */
+[data-theme="yellow"] {
+    --primary-bg: #a16207;
+    --primary-bg-gradient: linear-gradient(180deg, #a16207 0%, #eab308 100%);
+    --secondary-bg: #fefce8;
+    --accent-color: #facc15;
+    --text-primary: #a16207;
+    --text-secondary: #fef3c7;
+    --border-color: #facc15;
+    --card-bg: #fefce8;
+    --hover-bg: rgba(250, 204, 21, 0.1);
+}
+
+/* Indigo Theme */
+[data-theme="indigo"] {
+    --primary-bg: #3730a3;
+    --primary-bg-gradient: linear-gradient(180deg, #3730a3 0%, #4f46e5 100%);
+    --secondary-bg: #eef2ff;
+    --accent-color: #6366f1;
+    --text-primary: #4338ca;
+    --text-secondary: #c7d2fe;
+    --border-color: #6366f1;
+    --card-bg: #eef2ff;
+    --hover-bg: rgba(99, 102, 241, 0.1);
+}
+
+/* Teal Theme */
+[data-theme="teal"] {
+    --primary-bg: #134e4a;
+    --primary-bg-gradient: linear-gradient(180deg, #134e4a 0%, #0f766e 100%);
+    --secondary-bg: #f0fdfa;
+    --accent-color: #14b8a6;
+    --text-primary: #0f766e;
+    --text-secondary: #99f6e4;
+    --border-color: #14b8a6;
+    --card-bg: #f0fdfa;
+    --hover-bg: rgba(20, 184, 166, 0.1);
+}
+
+/* Rose Theme */
+[data-theme="rose"] {
+    --primary-bg: #9f1239;
+    --primary-bg-gradient: linear-gradient(180deg, #9f1239 0%, #e11d48 100%);
+    --secondary-bg: #fff1f2;
+    --accent-color: #f43f5e;
+    --text-primary: #be123c;
+    --text-secondary: #fda4af;
+    --border-color: #f43f5e;
+    --card-bg: #fff1f2;
+    --hover-bg: rgba(244, 63, 94, 0.1);
+}
+
+/* Emerald Theme */
+[data-theme="emerald"] {
+    --primary-bg: #064e3b;
+    --primary-bg-gradient: linear-gradient(180deg, #064e3b 0%, #047857 100%);
+    --secondary-bg: #ecfdf5;
+    --accent-color: #10b981;
+    --text-primary: #065f46;
+    --text-secondary: #a7f3d0;
+    --border-color: #10b981;
+    --card-bg: #ecfdf5;
+    --hover-bg: rgba(16, 185, 129, 0.1);
+}
+
+/* Sky Theme */
+[data-theme="sky"] {
+    --primary-bg: #0c4a6e;
+    --primary-bg-gradient: linear-gradient(180deg, #0c4a6e 0%, #0284c7 100%);
+    --secondary-bg: #f0f9ff;
+    --accent-color: #0ea5e9;
+    --text-primary: #0369a1;
+    --text-secondary: #bae6fd;
+    --border-color: #0ea5e9;
+    --card-bg: #f0f9ff;
+    --hover-bg: rgba(14, 165, 233, 0.1);
+}
+
+/* Slate Theme */
+[data-theme="slate"] {
+    --primary-bg: #334155;
+    --primary-bg-gradient: linear-gradient(180deg, #334155 0%, #475569 100%);
+    --secondary-bg: #f8fafc;
+    --accent-color: #64748b;
+    --text-primary: #475569;
+    --text-secondary: #cbd5e1;
+    --border-color: #64748b;
+    --card-bg: #f8fafc;
+    --hover-bg: rgba(100, 116, 139, 0.1);
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #f8fafc;
-    color: #334155;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
     line-height: 1.6;
 }
 
@@ -21,8 +243,8 @@ body {
 /* Sidebar Styles */
 .sidebar {
     width: 280px;
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    color: #e2e8f0;
+    background: var(--primary-bg-gradient);
+    color: var(--text-secondary);
     position: fixed;
     height: 100vh;
     overflow-y: auto;
@@ -32,7 +254,7 @@ body {
 
 .sidebar-header {
     padding: 2rem 1.5rem;
-    border-bottom: 1px solid #334155;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .company-logo {
@@ -44,7 +266,7 @@ body {
 
 .company-logo i {
     font-size: 2rem;
-    color: #3b82f6;
+    color: var(--accent-color);
 }
 
 .company-info h2 {
@@ -1292,9 +1514,9 @@ body[data-role="putzkraft"] .document-item:not(.putzkraft-only) {
     padding: 0;
     border-radius: 1rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 800px;
-    max-height: 85vh;
+    width: 95%;
+    max-width: 960px;
+    max-height: 90vh;
     overflow-y: auto;
 }
 
@@ -1544,9 +1766,9 @@ body[data-role="putzkraft"] .document-item:not(.putzkraft-only) {
 /* Responsive Modal */
 @media (max-width: 768px) {
     .modal-content {
-        width: 95%;
-        margin: 2% auto;
-        max-height: 95vh;
+        width: 98%;
+        margin: 1% auto;
+        max-height: 98vh;
     }
     
     .modal-header,
@@ -2427,7 +2649,7 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 
 /* Time Entry Modal Enhancements */
 #timeEntryModal .modal-content {
-    max-width: 600px;
+    max-width: 720px;
 }
 
 /* Responsive Design for Time Tracking */
@@ -3832,9 +4054,9 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 
 /* User Profile Styles */
 .profile-modal .modal-content {
-    max-width: 800px;
-    width: 90%;
-    max-height: 90vh;
+    max-width: 960px;
+    width: 95%;
+    max-height: 95vh;
     overflow-y: auto;
 }
 
@@ -4495,8 +4717,8 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 /* Responsive Design */
 @media (max-width: 768px) {
     .profile-modal .modal-content {
-        width: 95%;
-        max-height: 95vh;
+        width: 98%;
+        max-height: 98vh;
     }
     
     .form-row {
@@ -5275,9 +5497,9 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 }
 
 .large-modal .modal-content {
-    width: 95vw;
-    max-width: 1200px;
-    height: 90vh;
+    width: 98vw;
+    max-width: 1440px;
+    height: 95vh;
     max-height: none;
     background: white;
     border-radius: 8px;
@@ -5550,8 +5772,8 @@ body[data-role="root-admin"] .documents-actions[data-roles*="root-admin"] {
 
 /* User Profile Modal Styles */
 #userProfileViewModal .modal-content {
-    max-width: 900px;
-    width: 95%;
+    max-width: 1080px;
+    width: 98%;
 }
 
 .user-profile-tabs {
@@ -6001,9 +6223,9 @@ body[data-role="root-admin"] .documents-actions[data-roles*="root-admin"] {
 /* Substance Modal Styles */
 #substanceModal .modal-content,
 #substanceDetailsModal .modal-content {
-    max-width: 1200px;
-    width: 95%;
-    max-height: 90vh;
+    max-width: 1440px;
+    width: 98%;
+    max-height: 95vh;
 }
 
 .form-tabs {
@@ -7127,9 +7349,9 @@ input:disabled + .toggle-slider:before {
 
 /* Specific styling for PDF viewer modal */
 #pdfViewerModal .modal-content {
-    width: 95vw;
-    max-width: 1400px;
-    height: 95vh;
+    width: 98vw;
+    max-width: 1680px;
+    height: 98vh;
     max-height: none;
     display: flex;
     flex-direction: column;
@@ -7277,8 +7499,8 @@ input:disabled + .toggle-slider:before {
 }
 
 .sub-modal .modal-content {
-    max-width: 800px;
-    max-height: 90vh;
+    max-width: 960px;
+    max-height: 95vh;
     overflow-y: auto;
 }
 
@@ -9896,7 +10118,7 @@ input[type="checkbox"] {
 /* Responsive Design for Training Modals */
 @media (max-width: 768px) {
     .large-modal {
-        max-width: 95%;
+        max-width: 98%;
         width: 100%;
     }
     
@@ -10793,7 +11015,7 @@ input[type="checkbox"] {
 
 /* Supplier Modal Specific Styles */
 .supplier-modal .modal-content {
-    max-width: 800px;
+    max-width: 960px;
 }
 
 .form-tabs {
@@ -12976,4 +13198,690 @@ input[type="file"]::file-selector-button:hover {
         box-shadow: none;
         border: 1px solid #000;
     }
+}
+
+/* Color Theme Selection Styles */
+.color-theme-preview {
+    margin: 1rem 0;
+}
+
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--card-bg);
+}
+
+.theme-option:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-option.selected {
+    border-color: var(--accent-color);
+    background: var(--hover-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.theme-colors {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.color-primary,
+.color-secondary,
+.color-accent {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-option span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+/* Theme Selection Active State */
+.theme-option.active {
+    border-color: var(--accent-color);
+    background: var(--hover-bg);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.theme-option.active span {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* Color Mode Selector */
+.color-mode-selector {
+    margin: 1rem 0;
+}
+
+.mode-tabs {
+    display: flex;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.mode-tab {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.mode-tab:hover {
+    background: rgba(var(--accent-color), 0.1);
+    color: var(--accent-color);
+}
+
+.mode-tab.active {
+    background: var(--accent-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.color-mode-content {
+    margin: 1rem 0;
+}
+
+/* Section Color Settings */
+.section-color-settings {
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.section-color-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.section-color-item:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.section-info i {
+    width: 20px;
+    text-align: center;
+    color: var(--accent-color);
+    font-size: 16px;
+}
+
+.section-info span {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.section-color-select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    color: var(--text-primary);
+    font-size: 14px;
+    min-width: 120px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.section-color-select:hover {
+    border-color: var(--accent-color);
+}
+
+.section-color-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Individual Section Color Overrides */
+.menu-item[data-section="dashboard"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="dashboard"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="dashboard"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="dashboard"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="dashboard"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="dashboard"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="dashboard"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="mein-profil"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="mein-profil"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="mein-profil"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="mein-profil"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="mein-profil"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="mein-profil"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="mein-profil"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="arbeitsschutz"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="arbeitsschutz"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="arbeitsschutz"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="arbeitsschutz"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="arbeitsschutz"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="arbeitsschutz"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="arbeitsschutz"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="qualitaet"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="qualitaet"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="qualitaet"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="qualitaet"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="qualitaet"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="qualitaet"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="qualitaet"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="umwelt"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="umwelt"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="umwelt"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="umwelt"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="umwelt"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="umwelt"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="umwelt"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="datenschutz"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="datenschutz"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="datenschutz"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="datenschutz"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="datenschutz"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="datenschutz"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="datenschutz"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="gesundheit"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="gesundheit"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="gesundheit"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="gesundheit"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="gesundheit"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="gesundheit"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="gesundheit"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="maschinen"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="maschinen"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="maschinen"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="maschinen"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="maschinen"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="maschinen"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="maschinen"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="gefahrstoffe"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="gefahrstoffe"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="gefahrstoffe"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="gefahrstoffe"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="gefahrstoffe"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="gefahrstoffe"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="gefahrstoffe"].color-pink { --section-accent: #ec4899; }
+
+.menu-item[data-section="schulungen"].color-blue { --section-accent: #3b82f6; }
+.menu-item[data-section="schulungen"].color-green { --section-accent: #10b981; }
+.menu-item[data-section="schulungen"].color-purple { --section-accent: #8b5cf6; }
+.menu-item[data-section="schulungen"].color-orange { --section-accent: #f97316; }
+.menu-item[data-section="schulungen"].color-red { --section-accent: #dc2626; }
+.menu-item[data-section="schulungen"].color-cyan { --section-accent: #06b6d4; }
+.menu-item[data-section="schulungen"].color-pink { --section-accent: #ec4899; }
+
+/* Apply section-specific colors */
+.menu-item.color-blue:hover,
+.menu-item.color-blue.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-left-color: #3b82f6;
+}
+
+.menu-item.color-blue i {
+    color: #3b82f6;
+}
+
+.menu-item.color-green:hover,
+.menu-item.color-green.active {
+    background: rgba(16, 185, 129, 0.1);
+    border-left-color: #10b981;
+}
+
+.menu-item.color-green i {
+    color: #10b981;
+}
+
+.menu-item.color-purple:hover,
+.menu-item.color-purple.active {
+    background: rgba(139, 92, 246, 0.1);
+    border-left-color: #8b5cf6;
+}
+
+.menu-item.color-purple i {
+    color: #8b5cf6;
+}
+
+.menu-item.color-orange:hover,
+.menu-item.color-orange.active {
+    background: rgba(249, 115, 22, 0.1);
+    border-left-color: #f97316;
+}
+
+.menu-item.color-orange i {
+    color: #f97316;
+}
+
+.menu-item.color-red:hover,
+.menu-item.color-red.active {
+    background: rgba(220, 38, 38, 0.1);
+    border-left-color: #dc2626;
+}
+
+.menu-item.color-red i {
+    color: #dc2626;
+}
+
+.menu-item.color-cyan:hover,
+.menu-item.color-cyan.active {
+    background: rgba(6, 182, 212, 0.1);
+    border-left-color: #06b6d4;
+}
+
+.menu-item.color-cyan i {
+    color: #06b6d4;
+}
+
+.menu-item.color-pink:hover,
+.menu-item.color-pink.active {
+    background: rgba(236, 72, 153, 0.1);
+    border-left-color: #ec4899;
+}
+
+.menu-item.color-pink i {
+    color: #ec4899;
+}
+
+/* GHS Pictogram Selection Styles */
+.ghs-pictogram-selection {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.pictogram-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.pictogram-item {
+    display: block;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.pictogram-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pictogram-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.pictogram-item input[type="checkbox"] {
+    display: none;
+}
+
+.pictogram-item input[type="checkbox"]:checked + .pictogram-container {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ghs-pictogram {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.pictogram-item:hover .ghs-pictogram {
+    transform: scale(1.05);
+}
+
+.pictogram-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: center;
+    line-height: 1.2;
+}
+
+.pictogram-item input[type="checkbox"]:checked + .pictogram-container .pictogram-label {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+/* Enhanced form grid for hazardous substances */
+.tab-content .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Improved form styling for detailed substance information */
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input[type="date"] {
+    cursor: pointer;
+}
+
+/* Physical and chemical properties styling */
+.form-group input[placeholder*="°C"],
+.form-group input[placeholder*="g/mol"],
+.form-group input[placeholder*="g/cm³"],
+.form-group input[placeholder*="kPa"] {
+    font-family: 'Courier New', monospace;
+    background: #f8f9fa;
+}
+
+/* Responsive design for substance form */
+@media (max-width: 768px) {
+    .pictogram-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .ghs-pictogram {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .pictogram-container {
+        padding: 0.75rem;
+    }
+    
+    .pictogram-label {
+        font-size: 0.75rem;
+    }
+    
+    .tab-content .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Enhanced styling for detailed hazardous substance forms */
+.form-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 2rem;
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 0.75rem 1rem;
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tab-btn:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.tab-btn.active {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Section headers within tabs */
+.tab-content h4 {
+    margin: 1.5rem 0 1rem 0;
+    color: #2563eb;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.tab-content h4:first-child {
+    margin-top: 0;
+}
+
+/* Checkbox groups for exposure routes */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+}
+
+.checkbox-item:hover {
+    background: #f8f9fa;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.checkbox-item span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Specialized form styling for scientific data */
+.form-group input[placeholder*="mg/kg"],
+.form-group input[placeholder*="mg/L"],
+.form-group input[placeholder*="ppm"],
+.form-group input[placeholder*="mg/m³"],
+.form-group input[placeholder*="BCF"],
+.form-group input[placeholder*="log"],
+.form-group input[placeholder*="LC50"],
+.form-group input[placeholder*="LD50"],
+.form-group input[placeholder*="NOEC"],
+.form-group input[placeholder*="GWP"] {
+    font-family: 'Courier New', monospace;
+    background: #f0f8ff;
+    font-weight: 500;
+}
+
+/* Toxicology and exposure limits styling */
+.form-group select[id*="toxicity"],
+.form-group select[id*="Toxicity"],
+.form-group select[id*="sensitization"],
+.form-group select[id*="carcinogenicity"],
+.form-group select[id*="mutagenicity"] {
+    background: #fff5f5;
+    border-left: 4px solid #dc2626;
+}
+
+.form-group select[id*="exposure"],
+.form-group select[id*="biomonitoring"],
+.form-group select[id*="surveillance"] {
+    background: #f0fdf4;
+    border-left: 4px solid #16a34a;
+}
+
+/* Environment-related field styling */
+.form-group select[id*="aquatic"],
+.form-group select[id*="biodegradation"],
+.form-group select[id*="persistency"],
+.form-group select[id*="bioaccumulation"],
+.form-group input[id*="aquatic"] {
+    background: #ecfdf5;
+    border-left: 4px solid #059669;
+}
+
+/* Emergency field styling */
+.form-group textarea[id*="firstAid"],
+.form-group textarea[id*="extinguishing"],
+.form-group textarea[id*="spill"],
+.form-group input[id*="emergency"],
+.form-group input[id*="Emergency"] {
+    background: #fef2f2;
+    border-left: 4px solid #dc2626;
+}
+
+/* Modal size adjustment for detailed forms */
+.modal-content {
+    max-width: 95vw;
+    width: 1200px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-body {
+    max-height: calc(90vh - 120px);
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+/* Improved tab navigation for mobile */
+@media (max-width: 768px) {
+    .form-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    .tab-btn {
+        min-width: 100px;
+        font-size: 0.8rem;
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .checkbox-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95vw;
+        max-width: none;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+}
+
+/* Scrollbar styling for modal */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }

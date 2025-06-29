@@ -63,6 +63,9 @@ class QHSEDashboard {
         this.setupUserProfiles();
         this.loadCustomLabels();
         
+        // Apply saved color theme on load
+        this.loadAndApplyColorTheme();
+        
         // Make dashboard globally available for onclick handlers
         window.qhseDashboard = this;
         
@@ -3309,13 +3312,13 @@ PLZ Ort">${user.address || ''}</textarea>
                 </div>
             </div>
             <div class="document-actions">
-                <button class="preview-btn" onclick="dashboard.previewDocument('${doc.id}')">
+                <button class="preview-btn" onclick="window.qhseDashboard.previewDocument('${doc.id}')">
                     <i class="fas fa-eye"></i> Anzeigen
                 </button>
-                <button class="download-btn" onclick="dashboard.downloadDocument('${doc.id}')">
+                <button class="download-btn" onclick="window.qhseDashboard.downloadDocument('${doc.id}')">
                     <i class="fas fa-download"></i> Download
                 </button>
-                <button class="delete-btn" onclick="dashboard.deleteDocument('${doc.id}')">
+                <button class="delete-btn" onclick="window.qhseDashboard.deleteDocument('${doc.id}')">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -3488,7 +3491,7 @@ PLZ Ort">${user.address || ''}</textarea>
         
         const revisionsHtml = doc.revisions.map(revision => `
             <div class="revision-item">
-                <button class="revision-download-btn" onclick="dashboard.downloadRevision('${doc.id}', ${revision.version})">
+                <button class="revision-download-btn" onclick="window.qhseDashboard.downloadRevision('${doc.id}', ${revision.version})">
                     <i class="fas fa-download"></i> Download
                 </button>
                 <div class="revision-header">
@@ -8014,11 +8017,11 @@ PLZ Ort">${user.address || ''}</textarea>
                 </div>
             </div>
             <div class="user-item-actions">
-                <button class="edit-user-btn" onclick="dashboard.editUser('${user.id}')">
+                <button class="edit-user-btn" onclick="window.qhseDashboard.editUser('${user.id}')">
                     <i class="fas fa-edit"></i> Bearbeiten
                 </button>
                 ${user.canBeDeleted !== false ? `
-                    <button class="delete-user-btn" onclick="dashboard.deleteUser('${user.id}')">
+                    <button class="delete-user-btn" onclick="window.qhseDashboard.deleteUser('${user.id}')">
                         <i class="fas fa-trash"></i> Löschen
                     </button>
                 ` : `
@@ -8758,7 +8761,7 @@ PLZ Ort">${user.address || ''}</textarea>
         
         function startEditing() {
             // Double check permissions
-            const user = dashboard.getCurrentUser();
+            const user = window.qhseDashboard.getCurrentUser();
             if (!user || user.role !== 'root-admin') {
                 alert('Nur der System Administrator kann den Firmennamen ändern.');
                 return;
@@ -8827,6 +8830,10 @@ PLZ Ort">${user.address || ''}</textarea>
         const saveDashboardNameBtn = document.getElementById('saveDashboardNameBtn');
         const resetDashboardNameBtn = document.getElementById('resetDashboardNameBtn');
         const settingsDashboardName = document.getElementById('settingsDashboardName');
+        
+        // Color Theme Settings
+        const saveColorThemeBtn = document.getElementById('saveColorThemeBtn');
+        const resetColorThemeBtn = document.getElementById('resetColorThemeBtn');
         
         // Initialize Company Name Settings
         if (saveCompanyNameBtn && resetCompanyNameBtn && settingsCompanyName) {
@@ -8952,6 +8959,11 @@ PLZ Ort">${user.address || ''}</textarea>
             });
         }
         
+        // Color Theme Settings
+        if (saveColorThemeBtn && resetColorThemeBtn) {
+            this.setupColorThemeManagement();
+        }
+        
         // Module Management Settings
         this.setupModuleManagement();
         
@@ -8961,6 +8973,180 @@ PLZ Ort">${user.address || ''}</textarea>
         } catch (error) {
             console.error('Error setting up user module permissions:', error);
         }
+    }
+
+    setupColorThemeManagement() {
+        const saveColorThemeBtn = document.getElementById('saveColorThemeBtn');
+        const resetColorThemeBtn = document.getElementById('resetColorThemeBtn');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        const modeTabs = document.querySelectorAll('.mode-tab');
+        const colorModeContents = document.querySelectorAll('.color-mode-content');
+        const sectionColorSelects = document.querySelectorAll('.section-color-select');
+        
+        // Load current theme from localStorage
+        const savedTheme = localStorage.getItem('qhse_color_theme') || 'default';
+        const savedSectionColors = JSON.parse(localStorage.getItem('qhse_section_colors') || '{}');
+        
+        this.applyColorTheme(savedTheme);
+        this.applySectionColors(savedSectionColors);
+        
+        // Setup mode tabs (Global vs Individual)
+        modeTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const mode = tab.dataset.mode;
+                
+                // Update active tab
+                modeTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show/hide content
+                colorModeContents.forEach(content => {
+                    if (content.id === mode + 'ColorMode') {
+                        content.style.display = 'block';
+                    } else {
+                        content.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Load saved section colors
+        sectionColorSelects.forEach(select => {
+            const section = select.dataset.section;
+            if (savedSectionColors[section]) {
+                select.value = savedSectionColors[section];
+            }
+        });
+        
+        // Set active theme option
+        themeOptions.forEach(option => {
+            const theme = option.dataset.theme;
+            if (theme === savedTheme) {
+                option.classList.add('active');
+            }
+            
+            // Add click event listener
+            option.addEventListener('click', () => {
+                // Remove active class from all options
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                // Add active class to clicked option
+                option.classList.add('active');
+            });
+        });
+        
+        // Save color theme
+        saveColorThemeBtn.addEventListener('click', () => {
+            const currentUser = this.getCurrentUser();
+            if (!currentUser || currentUser.role !== 'root-admin') {
+                alert('Nur der System Administrator kann Einstellungen ändern.');
+                return;
+            }
+            
+            // Check which mode is active
+            const activeMode = document.querySelector('.mode-tab.active').dataset.mode;
+            
+            if (activeMode === 'global') {
+                // Save global theme
+                const activeOption = document.querySelector('.theme-option.active');
+                if (activeOption) {
+                    const selectedTheme = activeOption.dataset.theme;
+                    localStorage.setItem('qhse_color_theme', selectedTheme);
+                    this.applyColorTheme(selectedTheme);
+                    alert('Globales Farbschema wurde erfolgreich gespeichert!');
+                } else {
+                    alert('Bitte wählen Sie ein Farbschema aus.');
+                }
+            } else {
+                // Save individual section colors
+                const sectionColors = {};
+                sectionColorSelects.forEach(select => {
+                    const section = select.dataset.section;
+                    const color = select.value;
+                    sectionColors[section] = color;
+                });
+                
+                localStorage.setItem('qhse_section_colors', JSON.stringify(sectionColors));
+                this.applySectionColors(sectionColors);
+                alert('Individuelle Bereichsfarben wurden erfolgreich gespeichert!');
+            }
+        });
+        
+        // Reset color theme
+        resetColorThemeBtn.addEventListener('click', () => {
+            const currentUser = this.getCurrentUser();
+            if (!currentUser || currentUser.role !== 'root-admin') {
+                alert('Nur der System Administrator kann Einstellungen ändern.');
+                return;
+            }
+            
+            const activeMode = document.querySelector('.mode-tab.active').dataset.mode;
+            
+            if (activeMode === 'global') {
+                if (confirm('Möchten Sie das globale Farbschema auf Standard zurücksetzen?')) {
+                    localStorage.setItem('qhse_color_theme', 'default');
+                    this.applyColorTheme('default');
+                    
+                    // Reset active option
+                    themeOptions.forEach(opt => opt.classList.remove('active'));
+                    const defaultOption = document.querySelector('.theme-option[data-theme="default"]');
+                    if (defaultOption) {
+                        defaultOption.classList.add('active');
+                    }
+                    
+                    alert('Globales Farbschema wurde auf Standard zurückgesetzt!');
+                }
+            } else {
+                if (confirm('Möchten Sie alle individuellen Bereichsfarben zurücksetzen?')) {
+                    localStorage.removeItem('qhse_section_colors');
+                    this.applySectionColors({});
+                    
+                    // Reset all selects to default
+                    sectionColorSelects.forEach(select => {
+                        select.value = 'default';
+                    });
+                    
+                    alert('Individuelle Bereichsfarben wurden zurückgesetzt!');
+                }
+            }
+        });
+    }
+
+    loadAndApplyColorTheme() {
+        const savedTheme = localStorage.getItem('qhse_color_theme') || 'default';
+        const savedSectionColors = JSON.parse(localStorage.getItem('qhse_section_colors') || '{}');
+        this.applyColorTheme(savedTheme);
+        this.applySectionColors(savedSectionColors);
+    }
+
+    applyColorTheme(theme) {
+        // Apply theme to document body
+        document.body.setAttribute('data-theme', theme);
+        
+        // Also apply to html element for better coverage
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        console.log('Color theme applied:', theme);
+    }
+
+    applySectionColors(sectionColors) {
+        // Remove all existing color classes from menu items
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.classList.remove('color-blue', 'color-green', 'color-purple', 'color-orange', 'color-red', 'color-cyan', 'color-pink');
+        });
+        
+        // Apply individual section colors
+        Object.keys(sectionColors).forEach(section => {
+            const color = sectionColors[section];
+            if (color && color !== 'default') {
+                const menuItem = document.querySelector(`.menu-item[data-section="${section}"]`);
+                if (menuItem) {
+                    menuItem.classList.add(`color-${color}`);
+                }
+            }
+        });
+        
+        console.log('Section colors applied:', sectionColors);
     }
     
     setupModuleManagement() {
@@ -9613,11 +9799,11 @@ PLZ Ort">${user.address || ''}</textarea>
                 <div class="area-roles">${roleChips}</div>
             </div>
             <div class="area-item-actions">
-                <button class="edit-area-btn" onclick="dashboard.editArea('${area.id}')">
+                <button class="edit-area-btn" onclick="window.qhseDashboard.editArea('${area.id}')">
                     <i class="fas fa-edit"></i> Bearbeiten
                 </button>
                 ${!area.isDefault ? `
-                    <button class="delete-area-btn" onclick="dashboard.deleteArea('${area.id}')">
+                    <button class="delete-area-btn" onclick="window.qhseDashboard.deleteArea('${area.id}')">
                         <i class="fas fa-trash"></i> Löschen
                     </button>
                 ` : `
@@ -9909,10 +10095,10 @@ PLZ Ort">${user.address || ''}</textarea>
                 <div class="department-description">${department.description}</div>
             </div>
             <div class="department-item-actions">
-                <button class="edit-department-btn" onclick="dashboard.editDepartment('${department.id}')">
+                <button class="edit-department-btn" onclick="window.qhseDashboard.editDepartment('${department.id}')">
                     <i class="fas fa-edit"></i> Bearbeiten
                 </button>
-                <button class="delete-department-btn" onclick="dashboard.deleteDepartment('${department.id}')">
+                <button class="delete-department-btn" onclick="window.qhseDashboard.deleteDepartment('${department.id}')">
                     <i class="fas fa-trash"></i> Löschen
                 </button>
             </div>
@@ -10366,7 +10552,7 @@ PLZ Ort">${user.address || ''}</textarea>
             const minutes = entry.workMinutes % 60;
 
             return `
-                <div class="time-entry-item" onclick="dashboard.editTimeEntry('${entry.id}')">
+                <div class="time-entry-item" onclick="window.qhseDashboard.editTimeEntry('${entry.id}')">
                     <div class="entry-date">
                         <div class="day-name">${dayName}</div>
                         <div class="date">${dateStr}</div>
@@ -10848,10 +11034,10 @@ PLZ Ort">${user.address || ''}</textarea>
                             <span>${createdDate}</span>
                         </div>
                         <div class="announcement-actions">
-                            <button class="btn-secondary btn-sm" onclick="dashboard.editAnnouncement('${announcement.id}')">
+                            <button class="btn-secondary btn-sm" onclick="window.qhseDashboard.editAnnouncement('${announcement.id}')">
                                 <i class="fas fa-edit"></i> Bearbeiten
                             </button>
-                            <button class="btn-danger btn-sm" onclick="dashboard.deleteAnnouncement('${announcement.id}')">
+                            <button class="btn-danger btn-sm" onclick="window.qhseDashboard.deleteAnnouncement('${announcement.id}')">
                                 <i class="fas fa-trash"></i> Löschen
                             </button>
                         </div>
@@ -10864,7 +11050,7 @@ PLZ Ort">${user.address || ''}</textarea>
                         ${announcement.text.replace(/\n/g, '<br>')}
                     </div>
                     ${announcement.text.length > 100 ? 
-                        `<button class="expand-btn" onclick="dashboard.toggleAnnouncementPreview('${announcement.id}')">
+                        `<button class="expand-btn" onclick="window.qhseDashboard.toggleAnnouncementPreview('${announcement.id}')">
                             Vollständig anzeigen
                         </button>` : ''
                     }
@@ -11146,14 +11332,14 @@ PLZ Ort">${user.address || ''}</textarea>
                         </div>
                     </div>
                     <div class="pdf-actions">
-                        <button class="btn-primary btn-sm view-pdf-btn" onclick="dashboard.viewSafetyPdf('${pdf.id}')" title="PDF anzeigen">
+                        <button class="btn-primary btn-sm view-pdf-btn" onclick="window.qhseDashboard.viewSafetyPdf('${pdf.id}')" title="PDF anzeigen">
                             <i class="fas fa-eye"></i> Anzeigen
                         </button>
-                        <button class="btn-secondary btn-sm download-pdf-btn" onclick="dashboard.downloadSafetyPdf('${pdf.id}')" title="PDF herunterladen">
+                        <button class="btn-secondary btn-sm download-pdf-btn" onclick="window.qhseDashboard.downloadSafetyPdf('${pdf.id}')" title="PDF herunterladen">
                             <i class="fas fa-download"></i> Download
                         </button>
                         ${isAdmin ? 
-                            `<button class="btn-danger btn-sm delete-pdf-btn" onclick="dashboard.deleteSafetyPdf('${pdf.id}')" title="PDF löschen">
+                            `<button class="btn-danger btn-sm delete-pdf-btn" onclick="window.qhseDashboard.deleteSafetyPdf('${pdf.id}')" title="PDF löschen">
                                 <i class="fas fa-trash"></i> Löschen
                             </button>` : ''
                         }
@@ -11252,7 +11438,7 @@ PLZ Ort">${user.address || ''}</textarea>
                                     <button onclick="window.open('${pdf.content}')" class="btn-primary">
                                         <i class="fas fa-external-link-alt"></i> In neuem Fenster öffnen
                                     </button>
-                                    <button onclick="dashboard.downloadSafetyPdf('${pdf.id}')" class="btn-secondary">
+                                    <button onclick="window.qhseDashboard.downloadSafetyPdf('${pdf.id}')" class="btn-secondary">
                                         <i class="fas fa-download"></i> Herunterladen
                                     </button>
                                 </div>
@@ -11442,6 +11628,13 @@ PLZ Ort">${user.address || ''}</textarea>
         if (addMachineBtn) {
             addMachineBtn.addEventListener('click', () => this.showAddMachineModal());
         }
+        
+        // Setup save button event listener for the existing modal
+        const saveMachineBtn = document.getElementById('saveMachineBtn');
+        if (saveMachineBtn) {
+            saveMachineBtn.addEventListener('click', () => this.saveExistingMachineModal());
+        }
+        
         this.renderMachinesList();
         this.updateMachineStats();
     }
@@ -11593,7 +11786,7 @@ PLZ Ort">${user.address || ''}</textarea>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button onclick="window.dashboard.addMachine()" class="btn-primary">
+                        <button onclick="window.qhseDashboard.addMachine()" class="btn-primary">
                             <i class="fas fa-save"></i> Maschine speichern
                         </button>
                         <button onclick="this.closest('.modal').remove()" class="btn-secondary">
@@ -11706,6 +11899,57 @@ PLZ Ort">${user.address || ''}</textarea>
         }
     }
 
+    saveExistingMachineModal() {
+        console.log('saveExistingMachineModal() aufgerufen');
+        
+        // Get form data from the existing modal
+        const name = document.getElementById('machineName')?.value?.trim();
+        const type = document.getElementById('machineType')?.value;
+        const location = document.getElementById('machineLocation')?.value?.trim();
+        const status = document.getElementById('machineStatus')?.value;
+        const notes = document.getElementById('machineNotes')?.value?.trim();
+        
+        if (!name || !type || !location || !status) {
+            alert('Bitte füllen Sie alle Pflichtfelder aus.');
+            return;
+        }
+        
+        const machine = {
+            id: Date.now().toString(),
+            name: name,
+            type: type,
+            location: location,
+            status: status,
+            notes: notes,
+            createdAt: new Date().toISOString(),
+            createdBy: this.currentUserId || 'unknown',
+            updatedAt: new Date().toISOString(),
+            updatedBy: this.currentUserId || 'unknown'
+        };
+        
+        // Initialize machines array if needed
+        if (!Array.isArray(this.machines)) {
+            this.machines = [];
+        }
+        
+        this.machines.push(machine);
+        this.saveMachinesToStorage();
+        this.renderMachinesList();
+        this.updateMachineStats();
+        
+        // Close modal and reset form
+        const modal = document.getElementById('machineModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        const form = document.getElementById('machineForm');
+        if (form) {
+            form.reset();
+        }
+        
+        alert('Maschine erfolgreich hinzugefügt!');
+    }
+
     renderMachinesList() {
         const container = document.getElementById('machinesList');
         if (!container) return;
@@ -11789,13 +12033,13 @@ PLZ Ort">${user.address || ''}</textarea>
                     </div>
                     
                     <div class="machine-actions">
-                        <button onclick="dashboard.viewMachineDetails('${machine.id}')" class="btn-info">
+                        <button onclick="window.qhseDashboard.viewMachineDetails('${machine.id}')" class="btn-info">
                             <i class="fas fa-eye"></i> Details
                         </button>
-                        <button onclick="dashboard.editMachine('${machine.id}')" class="btn-secondary">
+                        <button onclick="window.qhseDashboard.editMachine('${machine.id}')" class="btn-secondary">
                             <i class="fas fa-edit"></i> Bearbeiten
                         </button>
-                        <button onclick="dashboard.deleteMachine('${machine.id}')" class="btn-danger">
+                        <button onclick="window.qhseDashboard.deleteMachine('${machine.id}')" class="btn-danger">
                             <i class="fas fa-trash"></i> Löschen
                         </button>
                     </div>
@@ -11931,7 +12175,7 @@ PLZ Ort">${user.address || ''}</textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button onclick="dashboard.editMachine('${machine.id}')" class="btn-secondary">
+                        <button onclick="window.qhseDashboard.editMachine('${machine.id}')" class="btn-secondary">
                             <i class="fas fa-edit"></i> Bearbeiten
                         </button>
                         <button onclick="this.closest('.modal').remove()" class="btn-primary">
@@ -12119,7 +12363,7 @@ PLZ Ort">${user.address || ''}</textarea>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button onclick="dashboard.reportIssue()" class="btn-primary" ${this.machines && this.machines.length === 0 ? 'disabled' : ''}>
+                        <button onclick="window.qhseDashboard.reportIssue()" class="btn-primary" ${this.machines && this.machines.length === 0 ? 'disabled' : ''}>
                             <i class="fas fa-paper-plane"></i> Störung melden
                         </button>
                         <button onclick="this.closest('.modal').remove()" class="btn-secondary">
@@ -12363,7 +12607,7 @@ PLZ Ort">${user.address || ''}</textarea>
                         
                         ${issue.photo ? `
                             <div class="issue-photo">
-                                <img src="${issue.photo}" alt="Störungsfoto" onclick="dashboard.showImageModal('${issue.photo}', '${issue.title}')">
+                                <img src="${issue.photo}" alt="Störungsfoto" onclick="window.qhseDashboard.showImageModal('${issue.photo}', '${issue.title}')">
                             </div>
                         ` : ''}
                     </div>
@@ -12374,25 +12618,25 @@ PLZ Ort">${user.address || ''}</textarea>
                     </div>
                     
                     <div class="issue-actions">
-                        <button onclick="dashboard.viewIssueDetails('${issue.id}')" class="btn-info">
+                        <button onclick="window.qhseDashboard.viewIssueDetails('${issue.id}')" class="btn-info">
                             <i class="fas fa-eye"></i> Details
                         </button>
                         ${issue.status === 'open' ? `
-                            <button onclick="dashboard.updateIssueStatus('${issue.id}', 'in-progress')" class="btn-warning">
+                            <button onclick="window.qhseDashboard.updateIssueStatus('${issue.id}', 'in-progress')" class="btn-warning">
                                 <i class="fas fa-wrench"></i> In Bearbeitung
                             </button>
                         ` : ''}
                         ${issue.status === 'in-progress' ? `
-                            <button onclick="dashboard.updateIssueStatus('${issue.id}', 'resolved')" class="btn-success">
+                            <button onclick="window.qhseDashboard.updateIssueStatus('${issue.id}', 'resolved')" class="btn-success">
                                 <i class="fas fa-check"></i> Behoben
                             </button>
                         ` : ''}
                         ${issue.status === 'resolved' ? `
-                            <button onclick="dashboard.updateIssueStatus('${issue.id}', 'open')" class="btn-secondary">
+                            <button onclick="window.qhseDashboard.updateIssueStatus('${issue.id}', 'open')" class="btn-secondary">
                                 <i class="fas fa-undo"></i> Wieder öffnen
                             </button>
                         ` : ''}
-                        <button onclick="dashboard.deleteIssue('${issue.id}')" class="btn-danger">
+                        <button onclick="window.qhseDashboard.deleteIssue('${issue.id}')" class="btn-danger">
                             <i class="fas fa-trash"></i> Löschen
                         </button>
                     </div>
@@ -12535,7 +12779,7 @@ PLZ Ort">${user.address || ''}</textarea>
                                 <div class="details-section full-width">
                                     <h3>Foto</h3>
                                     <div class="issue-photo-large">
-                                        <img src="${issue.photo}" alt="Störungsfoto" onclick="dashboard.showImageModal('${issue.photo}', '${issue.title}')">
+                                        <img src="${issue.photo}" alt="Störungsfoto" onclick="window.qhseDashboard.showImageModal('${issue.photo}', '${issue.title}')">
                                     </div>
                                 </div>
                             ` : ''}
@@ -12543,12 +12787,12 @@ PLZ Ort">${user.address || ''}</textarea>
                     </div>
                     <div class="modal-footer">
                         ${issue.status === 'open' ? `
-                            <button onclick="dashboard.updateIssueStatus('${issue.id}', 'in-progress'); this.closest('.modal').remove();" class="btn-warning">
+                            <button onclick="window.qhseDashboard.updateIssueStatus('${issue.id}', 'in-progress'); this.closest('.modal').remove();" class="btn-warning">
                                 <i class="fas fa-wrench"></i> In Bearbeitung setzen
                             </button>
                         ` : ''}
                         ${issue.status === 'in-progress' ? `
-                            <button onclick="dashboard.updateIssueStatus('${issue.id}', 'resolved'); this.closest('.modal').remove();" class="btn-success">
+                            <button onclick="window.qhseDashboard.updateIssueStatus('${issue.id}', 'resolved'); this.closest('.modal').remove();" class="btn-success">
                                 <i class="fas fa-check"></i> Als behoben markieren
                             </button>
                         ` : ''}
@@ -13088,7 +13332,7 @@ PLZ Ort">${user.address || ''}</textarea>
                     </div>
                     
                     <div class="share-modal-actions">
-                        <button onclick="dashboard.saveSharing('${category}')" class="btn-primary">
+                        <button onclick="window.qhseDashboard.saveSharing('${category}')" class="btn-primary">
                             <i class="fas fa-save"></i> Freigaben speichern
                         </button>
                         <button onclick="this.closest('.share-modal').remove()" class="btn-secondary">
@@ -13128,7 +13372,7 @@ PLZ Ort">${user.address || ''}</textarea>
                     return user ? `
                         <div class="shared-user-tag">
                             ${user.displayName}
-                            <button class="remove-share-btn" onclick="dashboard.removeShare('${category}', '${userId}')" title="Freigabe entfernen">
+                            <button class="remove-share-btn" onclick="window.qhseDashboard.removeShare('${category}', '${userId}')" title="Freigabe entfernen">
                                 &times;
                             </button>
                         </div>
@@ -13460,10 +13704,10 @@ PLZ Ort">${user.address || ''}</textarea>
                     </div>
                 </div>
                 <div class="document-actions">
-                    <button onclick="dashboard.viewAuditDocument('${doc.id}')" class="btn-primary btn-sm">
+                    <button onclick="window.qhseDashboard.viewAuditDocument('${doc.id}')" class="btn-primary btn-sm">
                         <i class="fas fa-eye"></i> Anzeigen
                     </button>
-                    ${isRootAdmin ? `<button onclick="dashboard.deleteAuditFile('${doc.id}', 'documents')" class="btn-danger btn-sm">
+                    ${isRootAdmin ? `<button onclick="window.qhseDashboard.deleteAuditFile('${doc.id}', 'documents')" class="btn-danger btn-sm">
                         <i class="fas fa-trash"></i> Löschen
                     </button>` : ''}
                 </div>
@@ -13488,16 +13732,16 @@ PLZ Ort">${user.address || ''}</textarea>
         const imagesHtml = this.auditContent.images.map(img => `
             <div class="image-item">
                 <div class="image-preview">
-                    <img src="${img.data}" alt="${img.name}" onclick="dashboard.viewAuditImage('${img.id}')">
+                    <img src="${img.data}" alt="${img.name}" onclick="window.qhseDashboard.viewAuditImage('${img.id}')">
                 </div>
                 <div class="image-info">
                     <h4>${img.name}</h4>
                     <p>Größe: ${this.formatFileSize(img.size)}</p>
                     <div class="image-actions">
-                        <button onclick="dashboard.viewAuditImage('${img.id}')" class="btn-primary btn-sm">
+                        <button onclick="window.qhseDashboard.viewAuditImage('${img.id}')" class="btn-primary btn-sm">
                             <i class="fas fa-eye"></i> Anzeigen
                         </button>
-                        ${isRootAdmin ? `<button onclick="dashboard.deleteAuditFile('${img.id}', 'images')" class="btn-danger btn-sm">
+                        ${isRootAdmin ? `<button onclick="window.qhseDashboard.deleteAuditFile('${img.id}', 'images')" class="btn-danger btn-sm">
                             <i class="fas fa-trash"></i> Löschen
                         </button>` : ''}
                     </div>
@@ -14191,10 +14435,10 @@ PLZ Ort">${user.address || ''}</textarea>
                     </div>
                 </div>
                 <div class="kpi-actions">
-                    <button onclick="dashboard.editCustomKpi(${kpi.id})" class="btn-secondary btn-sm">
+                    <button onclick="window.qhseDashboard.editCustomKpi(${kpi.id})" class="btn-secondary btn-sm">
                         <i class="fas fa-edit"></i> Bearbeiten
                     </button>
-                    <button onclick="dashboard.deleteCustomKpi(${kpi.id})" class="btn-danger btn-sm">
+                    <button onclick="window.qhseDashboard.deleteCustomKpi(${kpi.id})" class="btn-danger btn-sm">
                         <i class="fas fa-trash"></i> Löschen
                     </button>
                 </div>
@@ -14637,10 +14881,10 @@ PLZ Ort">${user.address || ''}</textarea>
                     <strong>${cert.name}</strong> - ${cert.validity}
                 </div>
                 <div class="certification-actions">
-                    <button onclick="dashboard.editCertification(${cert.id})" class="btn-secondary btn-sm">
+                    <button onclick="window.qhseDashboard.editCertification(${cert.id})" class="btn-secondary btn-sm">
                         <i class="fas fa-edit"></i> Bearbeiten
                     </button>
-                    <button onclick="dashboard.deleteCertification(${cert.id})" class="btn-danger btn-sm">
+                    <button onclick="window.qhseDashboard.deleteCertification(${cert.id})" class="btn-danger btn-sm">
                         <i class="fas fa-trash"></i> Löschen
                     </button>
                 </div>
@@ -14666,13 +14910,13 @@ PLZ Ort">${user.address || ''}</textarea>
                     <small>Datum: ${new Date(audit.date).toLocaleDateString('de-DE')} | Status: ${audit.status}</small>
                 </div>
                 <div class="audit-actions">
-                    <button onclick="dashboard.editAuditResults(${audit.id}, 'internal')" class="btn-secondary btn-sm">
+                    <button onclick="window.qhseDashboard.editAuditResults(${audit.id}, 'internal')" class="btn-secondary btn-sm">
                         <i class="fas fa-clipboard-list"></i> Ergebnisse
                     </button>
-                    <button onclick="dashboard.editInternalAudit(${audit.id})" class="btn-secondary btn-sm">
+                    <button onclick="window.qhseDashboard.editInternalAudit(${audit.id})" class="btn-secondary btn-sm">
                         <i class="fas fa-edit"></i> Bearbeiten
                     </button>
-                    <button onclick="dashboard.deleteInternalAudit(${audit.id})" class="btn-danger btn-sm">
+                    <button onclick="window.qhseDashboard.deleteInternalAudit(${audit.id})" class="btn-danger btn-sm">
                         <i class="fas fa-trash"></i> Löschen
                     </button>
                 </div>
@@ -14714,7 +14958,7 @@ PLZ Ort">${user.address || ''}</textarea>
         }
 
         const auditsHtml = this.auditCertifications.internalAudits.map(audit => `
-            <div class="audit-item" onclick="dashboard.viewAuditDetails(${audit.id}, 'internal')">
+            <div class="audit-item" onclick="window.qhseDashboard.viewAuditDetails(${audit.id}, 'internal')">
                 <span class="audit-type">${audit.title}</span>
                 <span class="audit-date">${new Date(audit.date).toLocaleDateString('de-DE')}</span>
                 <span class="audit-result audit-${audit.status}">${audit.status}</span>
@@ -14735,7 +14979,7 @@ PLZ Ort">${user.address || ''}</textarea>
         }
 
         const auditsHtml = this.auditCertifications.externalAudits.map(audit => `
-            <div class="audit-item" onclick="dashboard.viewAuditDetails(${audit.id}, 'external')">
+            <div class="audit-item" onclick="window.qhseDashboard.viewAuditDetails(${audit.id}, 'external')">
                 <span class="audit-type">${audit.title} (${audit.auditor})</span>
                 <span class="audit-date">${new Date(audit.date).toLocaleDateString('de-DE')}</span>
                 <span class="audit-result audit-${audit.status}">${audit.status}</span>
@@ -14762,13 +15006,13 @@ PLZ Ort">${user.address || ''}</textarea>
                     <small>Datum: ${new Date(audit.date).toLocaleDateString('de-DE')} | Status: ${audit.status}</small>
                 </div>
                 <div class="audit-actions">
-                    <button onclick="dashboard.editAuditResults(${audit.id}, 'external')" class="btn-secondary btn-sm">
+                    <button onclick="window.qhseDashboard.editAuditResults(${audit.id}, 'external')" class="btn-secondary btn-sm">
                         <i class="fas fa-clipboard-list"></i> Ergebnisse
                     </button>
-                    <button onclick="dashboard.editExternalAudit(${audit.id})" class="btn-secondary btn-sm">
+                    <button onclick="window.qhseDashboard.editExternalAudit(${audit.id})" class="btn-secondary btn-sm">
                         <i class="fas fa-edit"></i> Bearbeiten
                     </button>
-                    <button onclick="dashboard.deleteExternalAudit(${audit.id})" class="btn-danger btn-sm">
+                    <button onclick="window.qhseDashboard.deleteExternalAudit(${audit.id})" class="btn-danger btn-sm">
                         <i class="fas fa-trash"></i> Löschen
                     </button>
                 </div>
@@ -15128,7 +15372,7 @@ PLZ Ort">${user.address || ''}</textarea>
             
             // Optional: Show storage manager button in console
             if (totalSize > 5 * 1024 * 1024) { // 5MB
-                console.log('Run dashboard.showStorageManager() to clean up storage');
+                console.log('Run window.qhseDashboard.showStorageManager() to clean up storage');
             }
         } catch (error) {
             console.error('Error calculating storage usage:', error);
@@ -15721,15 +15965,38 @@ PLZ Ort">${user.address || ''}</textarea>
     }
 
     populateSubstanceForm(substance) {
-        // Basic information
+        // Tab 1: Stammdaten (Basic Information)
         this.setFormValue('substanceName', substance.name);
+        this.setFormValue('tradeName', substance.tradeName);
         this.setFormValue('casNumber', substance.casNumber);
         this.setFormValue('ecNumber', substance.ecNumber);
+        this.setFormValue('indexNumber', substance.indexNumber);
+        this.setFormValue('reachNumber', substance.reachNumber);
+        this.setFormValue('chemicalFormula', substance.chemicalFormula);
+        this.setFormValue('molecularWeight', substance.molecularWeight);
         this.setFormValue('supplier', substance.supplier);
+        this.setFormValue('supplierAddress', substance.supplierAddress);
+        this.setFormValue('emergencyPhone', substance.emergencyPhone);
         this.setFormValue('purpose', substance.purpose);
         this.setFormValue('substanceDepartment', substance.department);
 
-        // Classification
+        // Tab 2: Physik/Chemie (Physical/Chemical Properties)
+        this.setFormValue('physicalState', substance.physicalState);
+        this.setFormValue('color', substance.color);
+        this.setFormValue('odor', substance.odor);
+        this.setFormValue('odorThreshold', substance.odorThreshold);
+        this.setFormValue('meltingPoint', substance.meltingPoint);
+        this.setFormValue('boilingPoint', substance.boilingPoint);
+        this.setFormValue('flashPoint', substance.flashPoint);
+        this.setFormValue('autoIgnitionTemp', substance.autoIgnitionTemp);
+        this.setFormValue('explosionLimits', substance.explosionLimits);
+        this.setFormValue('vaporPressure', substance.vaporPressure);
+        this.setFormValue('density', substance.density);
+        this.setFormValue('solubility', substance.solubility);
+        this.setFormValue('phValue', substance.phValue);
+        this.setFormValue('viscosity', substance.viscosity);
+
+        // Tab 3: Klassifizierung (Classification)
         if (substance.ghsSymbols) {
             substance.ghsSymbols.forEach(symbol => {
                 const checkbox = document.querySelector(`input[name="ghsSymbols"][value="${symbol}"]`);
@@ -15740,29 +16007,83 @@ PLZ Ort">${user.address || ''}</textarea>
         this.setFormValue('hPhrases', substance.hPhrases);
         this.setFormValue('pPhrases', substance.pPhrases);
         this.setFormValue('wgkClass', substance.wgkClass);
+        this.setFormValue('transportClass', substance.transportClass);
+        this.setFormValue('unNumber', substance.unNumber);
+        this.setFormValue('packingGroup', substance.packingGroup);
 
-        // Storage
+        // Tab 4: Toxikologie (Toxicology)
+        this.setFormValue('acuteToxicityOral', substance.acuteToxicityOral);
+        this.setFormValue('acuteToxicityDermal', substance.acuteToxicityDermal);
+        this.setFormValue('acuteToxicityInhalation', substance.acuteToxicityInhalation);
+        this.setFormValue('skinCorrosion', substance.skinCorrosion);
+        this.setFormValue('eyeDamage', substance.eyeDamage);
+        this.setFormValue('respiratorySensitization', substance.respiratorySensitization);
+        this.setFormValue('skinSensitization', substance.skinSensitization);
+        this.setFormValue('mutagenicity', substance.mutagenicity);
+        this.setFormValue('carcinogenicity', substance.carcinogenicity);
+        this.setFormValue('reproductiveToxicity', substance.reproductiveToxicity);
+        this.setFormValue('organToxicity', substance.organToxicity);
+        this.setFormValue('aspirationHazard', substance.aspirationHazard);
+
+        // Tab 5: Grenzwerte (Exposure Limits)
+        this.setFormValue('workplaceLimit', substance.workplaceLimit);
+        this.setFormValue('biologicalLimit', substance.biologicalLimit);
+        this.setFormValue('dnelWorker', substance.dnelWorker);
+        this.setFormValue('dnelConsumer', substance.dnelConsumer);
+        this.setFormValue('pnecSoil', substance.pnecSoil);
+        this.setFormValue('pnecWater', substance.pnecWater);
+        this.setFormValue('exposureScenarios', substance.exposureScenarios);
+
+        // Tab 6: Lagerung (Storage)
         this.setFormValue('storageAmount', substance.storageAmount);
         this.setFormValue('storageLocation', substance.storageLocation);
         this.setFormValue('storageClass', substance.storageClass);
         this.setFormValue('storageTemperature', substance.storageTemperature);
+        this.setFormValue('storageHumidity', substance.storageHumidity);
         this.setFormValue('ventilationRequired', substance.ventilationRequired);
         this.setFormValue('incompatibilities', substance.incompatibilities);
+        this.setFormValue('containerMaterial', substance.containerMaterial);
+        this.setFormValue('shelfLife', substance.shelfLife);
+        this.setFormValue('stabilityConditions', substance.stabilityConditions);
 
-        // Safety
+        // Tab 7: Sicherheit (Safety)
         if (substance.requiredPPE) {
             substance.requiredPPE.forEach(ppe => {
                 const checkbox = document.querySelector(`input[name="ppe"][value="${ppe}"]`);
                 if (checkbox) checkbox.checked = true;
             });
         }
-        this.setFormValue('workplaceLimit', substance.workplaceLimit);
+        this.setFormValue('engineeringControls', substance.engineeringControls);
         this.setFormValue('usageInstructions', substance.usageInstructions);
-        this.setFormValue('emergencyMeasures', substance.emergencyMeasures);
+        this.setFormValue('handlingPrecautions', substance.handlingPrecautions);
         this.setFormValue('riskAssessmentRequired', substance.riskAssessmentRequired);
         this.setFormValue('substitutionCheck', substance.substitutionCheck);
+        this.setFormValue('medicalSurveillance', substance.medicalSurveillance);
 
-        // Documents and comments
+        // Tab 8: Umwelt (Environment)
+        this.setFormValue('ecotoxicity', substance.ecotoxicity);
+        this.setFormValue('persistence', substance.persistence);
+        this.setFormValue('bioaccumulation', substance.bioaccumulation);
+        this.setFormValue('mobility', substance.mobility);
+        this.setFormValue('pbtAssessment', substance.pbtAssessment);
+        this.setFormValue('endocrineDisruption', substance.endocrineDisruption);
+        this.setFormValue('environmentalFate', substance.environmentalFate);
+        this.setFormValue('wasteDisposal', substance.wasteDisposal);
+        this.setFormValue('wasteCode', substance.wasteCode);
+        this.setFormValue('specialDisposal', substance.specialDisposal);
+
+        // Tab 9: Notfall (Emergency)
+        this.setFormValue('emergencyMeasures', substance.emergencyMeasures);
+        this.setFormValue('firstAidEyes', substance.firstAidEyes);
+        this.setFormValue('firstAidSkin', substance.firstAidSkin);
+        this.setFormValue('firstAidInhalation', substance.firstAidInhalation);
+        this.setFormValue('firstAidIngestion', substance.firstAidIngestion);
+        this.setFormValue('fireExtinguishing', substance.fireExtinguishing);
+        this.setFormValue('spillCleanup', substance.spillCleanup);
+        this.setFormValue('emergencyContact', substance.emergencyContact);
+        this.setFormValue('poisonCenter', substance.poisonCenter);
+
+        // Tab 10: Dokumente (Documents) and Tab 11: Kommentare (Comments)
         this.displayUploadedDocuments(substance.documents);
         this.displaySubstanceComments(substance.comments);
     }
@@ -15841,43 +16162,120 @@ PLZ Ort">${user.address || ''}</textarea>
     collectSubstanceFormData() {
         const data = {};
 
-        // Basic information
-        data.name = document.getElementById('substanceName').value.trim();
-        data.casNumber = document.getElementById('casNumber').value.trim();
-        data.ecNumber = document.getElementById('ecNumber').value.trim();
-        data.supplier = document.getElementById('supplier').value.trim();
-        data.purpose = document.getElementById('purpose').value.trim();
-        data.department = document.getElementById('substanceDepartment').value;
+        // Tab 1: Stammdaten (Basic Information)
+        data.name = document.getElementById('substanceName')?.value.trim() || '';
+        data.tradeName = document.getElementById('tradeName')?.value.trim() || '';
+        data.casNumber = document.getElementById('casNumber')?.value.trim() || '';
+        data.ecNumber = document.getElementById('ecNumber')?.value.trim() || '';
+        data.indexNumber = document.getElementById('indexNumber')?.value.trim() || '';
+        data.reachNumber = document.getElementById('reachNumber')?.value.trim() || '';
+        data.chemicalFormula = document.getElementById('chemicalFormula')?.value.trim() || '';
+        data.molecularWeight = document.getElementById('molecularWeight')?.value.trim() || '';
+        data.supplier = document.getElementById('supplier')?.value.trim() || '';
+        data.supplierAddress = document.getElementById('supplierAddress')?.value.trim() || '';
+        data.emergencyPhone = document.getElementById('emergencyPhone')?.value.trim() || '';
+        data.purpose = document.getElementById('purpose')?.value.trim() || '';
+        data.department = document.getElementById('substanceDepartment')?.value || '';
 
-        // Classification
+        // Tab 2: Physik/Chemie (Physical/Chemical Properties)
+        data.physicalState = document.getElementById('physicalState')?.value || '';
+        data.color = document.getElementById('color')?.value.trim() || '';
+        data.odor = document.getElementById('odor')?.value.trim() || '';
+        data.odorThreshold = document.getElementById('odorThreshold')?.value.trim() || '';
+        data.meltingPoint = document.getElementById('meltingPoint')?.value.trim() || '';
+        data.boilingPoint = document.getElementById('boilingPoint')?.value.trim() || '';
+        data.flashPoint = document.getElementById('flashPoint')?.value.trim() || '';
+        data.autoIgnitionTemp = document.getElementById('autoIgnitionTemp')?.value.trim() || '';
+        data.explosionLimits = document.getElementById('explosionLimits')?.value.trim() || '';
+        data.vaporPressure = document.getElementById('vaporPressure')?.value.trim() || '';
+        data.density = document.getElementById('density')?.value.trim() || '';
+        data.solubility = document.getElementById('solubility')?.value.trim() || '';
+        data.phValue = document.getElementById('phValue')?.value.trim() || '';
+        data.viscosity = document.getElementById('viscosity')?.value.trim() || '';
+
+        // Tab 3: Klassifizierung (Classification)
         data.ghsSymbols = Array.from(document.querySelectorAll('input[name="ghsSymbols"]:checked'))
             .map(cb => cb.value);
-        data.signalWord = document.getElementById('signalWord').value;
-        data.hPhrases = document.getElementById('hPhrases').value.trim();
-        data.pPhrases = document.getElementById('pPhrases').value.trim();
-        data.wgkClass = document.getElementById('wgkClass').value;
+        data.signalWord = document.getElementById('signalWord')?.value || '';
+        data.hPhrases = document.getElementById('hPhrases')?.value.trim() || '';
+        data.pPhrases = document.getElementById('pPhrases')?.value.trim() || '';
+        data.wgkClass = document.getElementById('wgkClass')?.value || '';
+        data.transportClass = document.getElementById('transportClass')?.value || '';
+        data.unNumber = document.getElementById('unNumber')?.value.trim() || '';
+        data.packingGroup = document.getElementById('packingGroup')?.value || '';
 
-        // Storage
-        data.storageAmount = document.getElementById('storageAmount').value.trim();
-        data.storageLocation = document.getElementById('storageLocation').value.trim();
-        data.storageClass = document.getElementById('storageClass').value;
-        data.storageTemperature = document.getElementById('storageTemperature').value.trim();
-        data.ventilationRequired = document.getElementById('ventilationRequired').value;
-        data.incompatibilities = document.getElementById('incompatibilities').value.trim();
+        // Tab 4: Toxikologie (Toxicology)
+        data.acuteToxicityOral = document.getElementById('acuteToxicityOral')?.value.trim() || '';
+        data.acuteToxicityDermal = document.getElementById('acuteToxicityDermal')?.value.trim() || '';
+        data.acuteToxicityInhalation = document.getElementById('acuteToxicityInhalation')?.value.trim() || '';
+        data.skinCorrosion = document.getElementById('skinCorrosion')?.value || '';
+        data.eyeDamage = document.getElementById('eyeDamage')?.value || '';
+        data.respiratorySensitization = document.getElementById('respiratorySensitization')?.value || '';
+        data.skinSensitization = document.getElementById('skinSensitization')?.value || '';
+        data.mutagenicity = document.getElementById('mutagenicity')?.value || '';
+        data.carcinogenicity = document.getElementById('carcinogenicity')?.value || '';
+        data.reproductiveToxicity = document.getElementById('reproductiveToxicity')?.value || '';
+        data.organToxicity = document.getElementById('organToxicity')?.value || '';
+        data.aspirationHazard = document.getElementById('aspirationHazard')?.value || '';
 
-        // Safety
+        // Tab 5: Grenzwerte (Exposure Limits)
+        data.workplaceLimit = document.getElementById('workplaceLimit')?.value.trim() || '';
+        data.biologicalLimit = document.getElementById('biologicalLimit')?.value.trim() || '';
+        data.dnelWorker = document.getElementById('dnelWorker')?.value.trim() || '';
+        data.dnelConsumer = document.getElementById('dnelConsumer')?.value.trim() || '';
+        data.pnecSoil = document.getElementById('pnecSoil')?.value.trim() || '';
+        data.pnecWater = document.getElementById('pnecWater')?.value.trim() || '';
+        data.exposureScenarios = document.getElementById('exposureScenarios')?.value.trim() || '';
+
+        // Tab 6: Lagerung (Storage)
+        data.storageAmount = document.getElementById('storageAmount')?.value.trim() || '';
+        data.storageLocation = document.getElementById('storageLocation')?.value.trim() || '';
+        data.storageClass = document.getElementById('storageClass')?.value || '';
+        data.storageTemperature = document.getElementById('storageTemperature')?.value.trim() || '';
+        data.storageHumidity = document.getElementById('storageHumidity')?.value.trim() || '';
+        data.ventilationRequired = document.getElementById('ventilationRequired')?.value || '';
+        data.incompatibilities = document.getElementById('incompatibilities')?.value.trim() || '';
+        data.containerMaterial = document.getElementById('containerMaterial')?.value.trim() || '';
+        data.shelfLife = document.getElementById('shelfLife')?.value.trim() || '';
+        data.stabilityConditions = document.getElementById('stabilityConditions')?.value.trim() || '';
+
+        // Tab 7: Sicherheit (Safety)
         data.requiredPPE = Array.from(document.querySelectorAll('input[name="ppe"]:checked'))
             .map(cb => cb.value);
-        data.workplaceLimit = document.getElementById('workplaceLimit').value.trim();
-        data.usageInstructions = document.getElementById('usageInstructions').value.trim();
-        data.emergencyMeasures = document.getElementById('emergencyMeasures').value.trim();
-        data.riskAssessmentRequired = document.getElementById('riskAssessmentRequired').value;
-        data.substitutionCheck = document.getElementById('substitutionCheck').value;
+        data.engineeringControls = document.getElementById('engineeringControls')?.value.trim() || '';
+        data.usageInstructions = document.getElementById('usageInstructions')?.value.trim() || '';
+        data.handlingPrecautions = document.getElementById('handlingPrecautions')?.value.trim() || '';
+        data.riskAssessmentRequired = document.getElementById('riskAssessmentRequired')?.value || '';
+        data.substitutionCheck = document.getElementById('substitutionCheck')?.value || '';
+        data.medicalSurveillance = document.getElementById('medicalSurveillance')?.value || '';
 
-        // Documents (handled separately in file upload methods)
+        // Tab 8: Umwelt (Environment)
+        data.ecotoxicity = document.getElementById('ecotoxicity')?.value.trim() || '';
+        data.persistence = document.getElementById('persistence')?.value || '';
+        data.bioaccumulation = document.getElementById('bioaccumulation')?.value || '';
+        data.mobility = document.getElementById('mobility')?.value || '';
+        data.pbtAssessment = document.getElementById('pbtAssessment')?.value || '';
+        data.endocrineDisruption = document.getElementById('endocrineDisruption')?.value || '';
+        data.environmentalFate = document.getElementById('environmentalFate')?.value.trim() || '';
+        data.wasteDisposal = document.getElementById('wasteDisposal')?.value.trim() || '';
+        data.wasteCode = document.getElementById('wasteCode')?.value.trim() || '';
+        data.specialDisposal = document.getElementById('specialDisposal')?.value.trim() || '';
+
+        // Tab 9: Notfall (Emergency)
+        data.emergencyMeasures = document.getElementById('emergencyMeasures')?.value.trim() || '';
+        data.firstAidEyes = document.getElementById('firstAidEyes')?.value.trim() || '';
+        data.firstAidSkin = document.getElementById('firstAidSkin')?.value.trim() || '';
+        data.firstAidInhalation = document.getElementById('firstAidInhalation')?.value.trim() || '';
+        data.firstAidIngestion = document.getElementById('firstAidIngestion')?.value.trim() || '';
+        data.fireExtinguishing = document.getElementById('fireExtinguishing')?.value.trim() || '';
+        data.spillCleanup = document.getElementById('spillCleanup')?.value.trim() || '';
+        data.emergencyContact = document.getElementById('emergencyContact')?.value.trim() || '';
+        data.poisonCenter = document.getElementById('poisonCenter')?.value.trim() || '';
+
+        // Tab 10: Dokumente (Documents) - handled separately in file upload methods
         data.documents = this.currentSubstanceDocuments || [];
         
-        // Comments (handled separately)
+        // Tab 11: Kommentare (Comments) - handled separately
         data.comments = this.currentSubstanceComments || [];
 
         return data;
@@ -15923,19 +16321,37 @@ PLZ Ort">${user.address || ''}</textarea>
             <div class="substance-details">
                 <div class="detail-tabs">
                     <div class="tab-buttons">
-                        <button class="tab-btn active" data-tab="overview">Übersicht</button>
+                        <button class="tab-btn active" data-tab="basic">Stammdaten</button>
+                        <button class="tab-btn" data-tab="physical">Physik/Chemie</button>
                         <button class="tab-btn" data-tab="classification">Klassifizierung</button>
+                        <button class="tab-btn" data-tab="toxicology">Toxikologie</button>
+                        <button class="tab-btn" data-tab="limits">Grenzwerte</button>
                         <button class="tab-btn" data-tab="storage">Lagerung</button>
                         <button class="tab-btn" data-tab="safety">Sicherheit</button>
+                        <button class="tab-btn" data-tab="environment">Umwelt</button>
+                        <button class="tab-btn" data-tab="emergency">Notfall</button>
                         <button class="tab-btn" data-tab="documents">Dokumente</button>
+                        <button class="tab-btn" data-tab="comments">Kommentare</button>
                     </div>
                     
-                    <div class="tab-content active" data-tab="overview">
-                        ${this.generateOverviewTab(substance)}
+                    <div class="tab-content active" data-tab="basic">
+                        ${this.generateBasicDataTab(substance)}
+                    </div>
+                    
+                    <div class="tab-content" data-tab="physical">
+                        ${this.generatePhysicalChemicalTab(substance)}
                     </div>
                     
                     <div class="tab-content" data-tab="classification">
                         ${this.generateClassificationTab(substance)}
+                    </div>
+                    
+                    <div class="tab-content" data-tab="toxicology">
+                        ${this.generateToxicologyTab(substance)}
+                    </div>
+                    
+                    <div class="tab-content" data-tab="limits">
+                        ${this.generateExposureLimitsTab(substance)}
                     </div>
                     
                     <div class="tab-content" data-tab="storage">
@@ -15946,20 +16362,36 @@ PLZ Ort">${user.address || ''}</textarea>
                         ${this.generateSafetyTab(substance)}
                     </div>
                     
+                    <div class="tab-content" data-tab="environment">
+                        ${this.generateEnvironmentTab(substance)}
+                    </div>
+                    
+                    <div class="tab-content" data-tab="emergency">
+                        ${this.generateEmergencyTab(substance)}
+                    </div>
+                    
                     <div class="tab-content" data-tab="documents">
                         ${this.generateDocumentsTab(substance)}
+                    </div>
+                    
+                    <div class="tab-content" data-tab="comments">
+                        ${this.generateCommentsTab(substance)}
                     </div>
                 </div>
             </div>
         `;
     }
 
-    generateOverviewTab(substance) {
+    generateBasicDataTab(substance) {
         return `
             <div class="detail-grid">
                 <div class="detail-item">
-                    <label>Name:</label>
+                    <label>Substanzname:</label>
                     <span>${substance.name || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Handelsname:</label>
+                    <span>${substance.tradeName || 'Nicht angegeben'}</span>
                 </div>
                 <div class="detail-item">
                     <label>CAS-Nummer:</label>
@@ -15970,16 +16402,40 @@ PLZ Ort">${user.address || ''}</textarea>
                     <span>${substance.ecNumber || 'Nicht angegeben'}</span>
                 </div>
                 <div class="detail-item">
-                    <label>Hersteller:</label>
+                    <label>Index-Nummer:</label>
+                    <span>${substance.indexNumber || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>REACH-Registrierung:</label>
+                    <span>${substance.reachNumber || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Chemische Formel:</label>
+                    <span>${substance.chemicalFormula || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Molekulargewicht:</label>
+                    <span>${substance.molecularWeight || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Hersteller/Lieferant:</label>
                     <span>${substance.supplier || 'Nicht angegeben'}</span>
                 </div>
                 <div class="detail-item">
-                    <label>Abteilung:</label>
-                    <span>${this.getDepartmentName(substance.department) || 'Nicht zugeordnet'}</span>
+                    <label>Lieferantenadresse:</label>
+                    <span>${substance.supplierAddress || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Notrufnummer:</label>
+                    <span>${substance.emergencyPhone || 'Nicht angegeben'}</span>
                 </div>
                 <div class="detail-item">
                     <label>Verwendungszweck:</label>
                     <span>${substance.purpose || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Abteilung:</label>
+                    <span>${this.getDepartmentName(substance.department) || 'Nicht zugeordnet'}</span>
                 </div>
                 <div class="detail-item">
                     <label>Erstellt am:</label>
@@ -15988,6 +16444,69 @@ PLZ Ort">${user.address || ''}</textarea>
                 <div class="detail-item">
                     <label>Zuletzt aktualisiert:</label>
                     <span>${substance.lastUpdated ? new Date(substance.lastUpdated).toLocaleDateString('de-DE') : 'Unbekannt'}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    generatePhysicalChemicalTab(substance) {
+        return `
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Aggregatzustand:</label>
+                    <span>${substance.physicalState || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Farbe:</label>
+                    <span>${substance.color || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Geruch:</label>
+                    <span>${substance.odor || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Geruchsschwelle:</label>
+                    <span>${substance.odorThreshold || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Schmelzpunkt:</label>
+                    <span>${substance.meltingPoint || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Siedepunkt:</label>
+                    <span>${substance.boilingPoint || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Flammpunkt:</label>
+                    <span>${substance.flashPoint || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Selbstentzündungstemperatur:</label>
+                    <span>${substance.autoIgnitionTemp || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Explosionsgrenzen:</label>
+                    <span>${substance.explosionLimits || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Dampfdruck:</label>
+                    <span>${substance.vaporPressure || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Dichte:</label>
+                    <span>${substance.density || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Wasserlöslichkeit:</label>
+                    <span>${substance.solubility || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>pH-Wert:</label>
+                    <span>${substance.phValue || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Viskosität:</label>
+                    <span>${substance.viscosity || 'Nicht angegeben'}</span>
                 </div>
             </div>
         `;
@@ -16022,6 +16541,108 @@ PLZ Ort">${user.address || ''}</textarea>
                     <label>WGK-Klassifizierung:</label>
                     <span>${substance.wgkClass || 'Nicht angegeben'}</span>
                 </div>
+                <div class="detail-item">
+                    <label>Transportklasse:</label>
+                    <span>${substance.transportClass || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>UN-Nummer:</label>
+                    <span>${substance.unNumber || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Verpackungsgruppe:</label>
+                    <span>${substance.packingGroup || 'Nicht angegeben'}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    generateToxicologyTab(substance) {
+        return `
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Akute Toxizität oral (LD50):</label>
+                    <span>${substance.acuteToxicityOral || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Akute Toxizität dermal (LD50):</label>
+                    <span>${substance.acuteToxicityDermal || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Akute Toxizität inhalativ (LC50):</label>
+                    <span>${substance.acuteToxicityInhalation || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Hautverätzung/-reizung:</label>
+                    <span>${substance.skinCorrosion || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Augenschädigung/-reizung:</label>
+                    <span>${substance.eyeDamage || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Sensibilisierung Atemwege:</label>
+                    <span>${substance.respiratorySensitization || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Sensibilisierung Haut:</label>
+                    <span>${substance.skinSensitization || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Keimzellmutagenität:</label>
+                    <span>${substance.mutagenicity || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Karzinogenität:</label>
+                    <span>${substance.carcinogenicity || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Reproduktionstoxizität:</label>
+                    <span>${substance.reproductiveToxicity || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Organtoxizität:</label>
+                    <span>${substance.organToxicity || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Aspirationsgefahr:</label>
+                    <span>${substance.aspirationHazard || 'Nicht angegeben'}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    generateExposureLimitsTab(substance) {
+        return `
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Arbeitsplatzgrenzwert (AGW):</label>
+                    <span>${substance.workplaceLimit || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Biologischer Grenzwert (BGW):</label>
+                    <span>${substance.biologicalLimit || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>DNEL Arbeitsplatz:</label>
+                    <span>${substance.dnelWorker || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>DNEL Verbraucher:</label>
+                    <span>${substance.dnelConsumer || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>PNEC Boden:</label>
+                    <span>${substance.pnecSoil || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>PNEC Wasser:</label>
+                    <span>${substance.pnecWater || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Expositionsszenarien:</label>
+                    <span>${substance.exposureScenarios || 'Nicht angegeben'}</span>
+                </div>
             </div>
         `;
     }
@@ -16046,12 +16667,28 @@ PLZ Ort">${user.address || ''}</textarea>
                     <span>${substance.storageTemperature || 'Nicht angegeben'}</span>
                 </div>
                 <div class="detail-item">
+                    <label>Luftfeuchtigkeit:</label>
+                    <span>${substance.storageHumidity || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
                     <label>Lüftungspflicht:</label>
                     <span>${substance.ventilationRequired || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Behältermaterial:</label>
+                    <span>${substance.containerMaterial || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Haltbarkeit:</label>
+                    <span>${substance.shelfLife || 'Nicht angegeben'}</span>
                 </div>
                 <div class="detail-item full-width">
                     <label>Unverträglichkeiten:</label>
                     <span>${substance.incompatibilities || 'Keine angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Stabilitätsbedingungen:</label>
+                    <span>${substance.stabilityConditions || 'Nicht angegeben'}</span>
                 </div>
             </div>
         `;
@@ -16078,10 +16715,6 @@ PLZ Ort">${user.address || ''}</textarea>
                     <span>${ppeHTML}</span>
                 </div>
                 <div class="detail-item">
-                    <label>Arbeitsplatzgrenzwert:</label>
-                    <span>${substance.workplaceLimit || 'Nicht angegeben'}</span>
-                </div>
-                <div class="detail-item">
                     <label>Gefährdungsbeurteilung:</label>
                     <span>${substance.riskAssessmentRequired || 'Nicht angegeben'}</span>
                 </div>
@@ -16089,13 +16722,111 @@ PLZ Ort">${user.address || ''}</textarea>
                     <label>Substitutionsprüfung:</label>
                     <span>${substance.substitutionCheck || 'Nicht angegeben'}</span>
                 </div>
+                <div class="detail-item">
+                    <label>Arbeitsmedizinische Vorsorge:</label>
+                    <span>${substance.medicalSurveillance || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Technische Schutzmaßnahmen:</label>
+                    <span>${substance.engineeringControls || 'Nicht angegeben'}</span>
+                </div>
                 <div class="detail-item full-width">
                     <label>Verwendungsanweisungen:</label>
                     <span>${substance.usageInstructions || 'Keine angegeben'}</span>
                 </div>
                 <div class="detail-item full-width">
-                    <label>Notfallmaßnahmen:</label>
-                    <span>${substance.emergencyMeasures || 'Keine angegeben'}</span>
+                    <label>Handhabungshinweise:</label>
+                    <span>${substance.handlingPrecautions || 'Nicht angegeben'}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    generateEnvironmentTab(substance) {
+        return `
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Ökotoxizität:</label>
+                    <span>${substance.ecotoxicity || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Persistenz:</label>
+                    <span>${substance.persistence || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Bioakkumulation:</label>
+                    <span>${substance.bioaccumulation || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Mobilität:</label>
+                    <span>${substance.mobility || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>PBT-Bewertung:</label>
+                    <span>${substance.pbtAssessment || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Endokrine Wirkung:</label>
+                    <span>${substance.endocrineDisruption || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Abfallschlüssel:</label>
+                    <span>${substance.wasteCode || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Umweltverhalten:</label>
+                    <span>${substance.environmentalFate || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Entsorgungshinweise:</label>
+                    <span>${substance.wasteDisposal || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Besondere Entsorgung:</label>
+                    <span>${substance.specialDisposal || 'Nicht angegeben'}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    generateEmergencyTab(substance) {
+        return `
+            <div class="detail-grid">
+                <div class="detail-item full-width">
+                    <label>Allgemeine Notfallmaßnahmen:</label>
+                    <span>${substance.emergencyMeasures || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Erste Hilfe bei Augenkontakt:</label>
+                    <span>${substance.firstAidEyes || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Erste Hilfe bei Hautkontakt:</label>
+                    <span>${substance.firstAidSkin || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Erste Hilfe bei Einatmen:</label>
+                    <span>${substance.firstAidInhalation || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Erste Hilfe bei Verschlucken:</label>
+                    <span>${substance.firstAidIngestion || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Löschmittel:</label>
+                    <span>${substance.fireExtinguishing || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Maßnahmen bei Verschütten:</label>
+                    <span>${substance.spillCleanup || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Notfallkontakt:</label>
+                    <span>${substance.emergencyContact || 'Nicht angegeben'}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Giftnotruf:</label>
+                    <span>${substance.poisonCenter || 'Nicht angegeben'}</span>
                 </div>
             </div>
         `;
@@ -16133,6 +16864,28 @@ PLZ Ort">${user.address || ''}</textarea>
                                 <i class="fas fa-download"></i>
                             </button>
                         </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    generateCommentsTab(substance) {
+        const comments = substance.comments || [];
+        
+        if (comments.length === 0) {
+            return '<p>Keine Kommentare vorhanden.</p>';
+        }
+
+        return `
+            <div class="comments-list">
+                ${comments.map(comment => `
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <strong>${comment.author || 'Unbekannt'}</strong>
+                            <span class="comment-date">${new Date(comment.date).toLocaleDateString('de-DE')}</span>
+                        </div>
+                        <div class="comment-content">${comment.text || ''}</div>
                     </div>
                 `).join('')}
             </div>
@@ -16972,10 +17725,10 @@ PLZ Ort">${user.address || ''}</textarea>
                 <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: #f59e0b;"></i>
                 <h3 style="margin: 0 0 1rem 0; color: #374151;">PDF konnte nicht angezeigt werden</h3>
                 <p style="margin: 0 0 1.5rem 0; color: #6b7280;">Aufgrund von Browser-Sicherheitsrichtlinien kann die PDF-Datei nicht direkt angezeigt werden.</p>
-                <button onclick="dashboard.downloadSubstanceDocument('${documentId}')" class="btn-primary" style="margin-right: 0.5rem;">
+                <button onclick="window.qhseDashboard.downloadSubstanceDocument('${documentId}')" class="btn-primary" style="margin-right: 0.5rem;">
                     <i class="fas fa-download"></i> Datei herunterladen
                 </button>
-                <button onclick="dashboard.openPdfInNewTab('${documentId}')" class="btn-secondary">
+                <button onclick="window.qhseDashboard.openPdfInNewTab('${documentId}')" class="btn-secondary">
                     <i class="fas fa-external-link-alt"></i> In neuem Tab öffnen
                 </button>
             </div>
@@ -17254,91 +18007,540 @@ PLZ Ort">${user.address || ''}</textarea>
         const defaultSuppliers = [
             {
                 id: 'SUP001',
-                number: 'L-2024-001',
-                name: 'Mustermann Stahl GmbH',
-                type: 'warenlieferant',
-                status: 'freigegeben',
+                
+                // Tab 1: Stammdaten (Basic Data)
+                basic: {
+                    number: 'L-2024-001',
+                    name: 'Mustermann Stahl GmbH',
+                    legalForm: 'GmbH',
+                    foundingYear: '1985',
+                    employeeCount: '250',
+                    turnover: '50 Millionen EUR',
+                    mainActivity: 'Stahlproduktion und Metallverarbeitung',
+                    description: 'Führender Anbieter von hochwertigen Stahlprodukten und Metallverarbeitungsdienstleistungen',
+                    status: 'freigegeben'
+                },
+                
+                // Tab 2: Kontakt & Struktur (Contact & Structure)
                 contact: {
-                    person: 'Max Mustermann',
+                    headquarters: 'Hamburg, Deutschland',
+                    address: 'Musterstraße 1, 20095 Hamburg',
+                    website: 'www.mustermann-stahl.de',
+                    contactPerson: 'Max Mustermann',
                     email: 'max@mustermann-stahl.de',
                     phone: '+49 40 123456',
-                    address: 'Musterstraße 1, 20095 Hamburg'
+                    fax: '+49 40 123457',
+                    emergencyContact: 'Klaus Weber',
+                    emergencyPhone: '+49 40 123458',
+                    subsidiaries: 'Mustermann Stahl Nord GmbH (Bremen), Mustermann International Ltd. (London)',
+                    organizationChart: 'Geschäftsführung, Produktionsleitung, Qualitätssicherung, Vertrieb',
+                    keyPersonnel: 'Max Mustermann (CEO), Anna Weber (CTO), Klaus Schmidt (Produktionsleiter)'
                 },
-                products: ['Stahlprodukte', 'Metallverarbeitung'],
-                certificates: [
-                    { name: 'ISO 9001', validUntil: '2025-12-31', status: 'gültig' }
-                ],
-                evaluation: {
-                    score: 85,
-                    lastEvaluated: '2024-01-15',
-                    criteria: {
-                        quality: 90,
-                        delivery: 85,
-                        price: 80,
-                        service: 85
-                    }
+                
+                // Tab 3: Geschäftsdaten (Business Data)
+                business: {
+                    taxId: 'DE123456789',
+                    vatId: 'DE987654321',
+                    commercialRegister: 'HRB 123456',
+                    handelsregisterNumber: 'Hamburg HRB 123456',
+                    dunsNumber: '123456789',
+                    bankDetails: 'Hamburger Sparkasse, IBAN: DE89 2005 0550 1234 5678 90',
+                    creditRating: 'AAA (Excellent)',
+                    insurance: 'Allianz Versicherung AG',
+                    liabilityInsurance: '10 Millionen EUR Deckung'
                 },
-                createdAt: '2024-01-01',
-                updatedAt: '2024-01-15'
+                
+                // Tab 4: Produkte & Kapazitäten (Products & Capacities)
+                products: {
+                    mainProducts: ['Stahlprodukte', 'Metallverarbeitung', 'Edelstahl', 'Konstruktionsstahl'],
+                    productCategories: 'Stahlproduktion, Metallverarbeitung, Oberflächenbehandlung',
+                    capacity: '5000 Tonnen/Monat',
+                    maxCapacity: '7000 Tonnen/Monat',
+                    deliveryTime: '2-3 Wochen',
+                    minimumOrderQuantity: '500 kg',
+                    technicalSpecifications: 'DIN EN 10025, DIN EN 10204, kundenspezifische Anforderungen',
+                    innovation: 'Entwicklung neuer Legierungen, additive Fertigung',
+                    rdCapabilities: 'Eigenes F&E-Labor, Kooperationen mit TU Hamburg'
+                },
+                
+                // Tab 5: Qualitätssystem (Quality System)
+                quality: {
+                    qualityStandards: 'ISO 9001:2015, DIN EN 1090, ASME',
+                    qualityPolicy: 'Kontinuierliche Verbesserung und Null-Fehler-Prinzip',
+                    qualityObjectives: '99.5% Qualitätsrate, Kundenzufriedenheit >95%',
+                    qualityResponsible: 'Anna Weber (Qualitätsmanagerin)',
+                    testingCapabilities: 'Zugprüfung, Härteprüfung, Ultraschallprüfung, Spektralanalyse',
+                    qualityDocumentation: 'Vollständige Dokumentation nach ISO 9001',
+                    improvementProcesses: 'KVP-Programm, Lean Manufacturing',
+                    customerComplaints: 'Strukturiertes Beschwerdemanagement, 24h-Reaktionszeit',
+                    qualityKpis: 'Ausschussrate <0.5%, Reklamationsquote <0.1%'
+                },
+                
+                // Tab 6: Zertifizierungen (Certifications)
+                certifications: {
+                    iso9001: 'Gültig bis 31.12.2025',
+                    iso14001: 'Gültig bis 15.08.2025',
+                    iso45001: 'Gültig bis 20.06.2025',
+                    additionalCertifications: 'DIN EN 1090, ASME Code, CE-Kennzeichnung',
+                    certificationBodies: 'TÜV Nord, DQS, Bureau Veritas',
+                    certificates: [
+                        { name: 'ISO 9001', validUntil: '2025-12-31', status: 'gültig' },
+                        { name: 'DIN EN 1090', validUntil: '2025-09-15', status: 'gültig' }
+                    ]
+                },
+                
+                // Tab 7: Compliance & Recht (Compliance & Legal)
+                compliance: {
+                    gdprCompliance: 'Vollständig implementiert, Datenschutzbeauftragter bestellt',
+                    antiCorruption: 'Code of Conduct implementiert, jährliche Schulungen',
+                    exportControlCompliance: 'Export-Compliance-Programm nach deutschen Außenwirtschaftsgesetzen',
+                    sanctionsCompliance: 'Sanktionslisten-Screening implementiert',
+                    conflictMinerals: 'Rohstoffe aus konfliktfreien Quellen',
+                    codeOfConduct: 'Unternehmens-Verhaltenskodex für alle Mitarbeiter',
+                    legalStructure: 'GmbH nach deutschem Recht',
+                    contractualRequirements: 'Standard-AGB, individuelle Vertragsgestaltung möglich',
+                    litigationHistory: 'Keine relevanten Rechtsstreitigkeiten in den letzten 5 Jahren'
+                },
+                
+                // Tab 8: Nachhaltigkeit (Sustainability)
+                sustainability: {
+                    environmentalPolicy: 'Umweltmanagementsystem nach ISO 14001',
+                    co2Footprint: 'CO2-neutral bis 2030, aktuell 15% Reduktion p.a.',
+                    energyManagement: '80% erneuerbare Energien, Energieeffizienzprogramm',
+                    wasteManagement: '95% Recyclingquote, Kreislaufwirtschaft implementiert',
+                    waterManagement: 'Wassersparende Produktionsverfahren, Aufbereitungsanlage',
+                    socialResponsibility: 'Ausbildungsplätze, lokale Beschaffung, Charity-Programme',
+                    sustainabilityGoals: 'CO2-Neutralität 2030, 100% Kreislaufwirtschaft 2028',
+                    sustainabilityReporting: 'Jährlicher Nachhaltigkeitsbericht nach GRI-Standards',
+                    greenProducts: '60% der Produkte aus recycelten Materialien'
+                },
+                
+                // Tab 9: Risikobewertung (Risk Assessment)
+                risk: {
+                    businessRisk: 'Niedrig - etabliertes Unternehmen mit diversifiziertem Portfolio',
+                    financialRisk: 'Niedrig - solide Finanzlage, AAA-Rating',
+                    operationalRisk: 'Mittel - Abhängigkeit von Rohstoffpreisen',
+                    reputationalRisk: 'Niedrig - ausgezeichneter Ruf in der Branche',
+                    geoRisk: 'Niedrig - Standort in Deutschland',
+                    supplyChainRisk: 'Mittel - Diversifizierte Lieferkette implementiert',
+                    riskMitigation: 'Risikomanagement-System, Notfallpläne vorhanden',
+                    businessContinuity: 'BCP implementiert, regelmäßige Tests',
+                    emergencyPlanning: '24/7 Notfallbereitschaft, Backup-Systeme'
+                },
+                
+                // Tab 10: Performance-Bewertung (Performance Evaluation)
+                performance: {
+                    qualityScore: 90,
+                    deliveryScore: 85,
+                    priceScore: 80,
+                    serviceScore: 85,
+                    innovationScore: 88,
+                    sustainabilityScore: 92,
+                    flexibilityScore: 82,
+                    communicationScore: 87,
+                    overallScore: 86,
+                    performanceHistory: 'Konstant hohe Leistung über 3 Jahre',
+                    kpiTracking: 'Monatliche KPI-Reviews, Trend-Analyse',
+                    benchmarking: 'Top 10% der Branche in allen Kategorien'
+                },
+                
+                // Tab 11: Audit & Monitoring (Audit & Monitoring)
+                audit: {
+                    lastAuditDate: '2024-01-15',
+                    nextAuditDate: '2025-01-15',
+                    auditFrequency: 'Jährlich',
+                    auditType: 'Umfassendes Lieferantenaudit (Qualität, Umwelt, Arbeitsschutz)',
+                    auditResults: 'Sehr gut (95/100 Punkte)',
+                    auditFindings: '2 Verbesserungsvorschläge, keine kritischen Befunde',
+                    correctiveActions: 'Alle Maßnahmen fristgerecht umgesetzt',
+                    monitoringActivities: 'Quartalsweise Leistungsberichte, monatliche KPI-Tracking',
+                    auditReports: 'Vollständige Dokumentation aller Audits verfügbar'
+                },
+                
+                // Tab 12: Dokumentation (Documentation)
+                documentation: {
+                    contracts: 'Rahmenvertrag, Qualitätsvereinbarung, Lieferverträge',
+                    specifications: 'Technische Spezifikationen für alle Produktgruppen',
+                    drawings: 'CAD-Zeichnungen, Konstruktionspläne digital verfügbar',
+                    procedures: 'Arbeitsanweisungen, Qualitätsprüfpläne, Notfallprozeduren',
+                    reports: 'Monatliche Leistungsberichte, Qualitätsberichte',
+                    correspondenceLog: 'Vollständige E-Mail-Kommunikation archiviert',
+                    documentControl: 'Dokumentenmanagementsystem ISO konform',
+                    retentionPolicy: '10 Jahre Aufbewahrung aller relevanten Dokumente',
+                    accessControl: 'Rollenbasierte Zugriffskontrolle implementiert'
+                },
+                
+                // Tab 13: Kommunikation (Communication)
+                communication: {
+                    communicationChannels: 'E-Mail, Telefon, Videokonferenz, persönliche Meetings',
+                    meetingFrequency: 'Monatliche Abstimmungsmeetings, quartalsweise Reviews',
+                    escalationProcedures: 'Strukturiertes Eskalationsverfahren implementiert',
+                    feedbackMechanisms: 'Regelmäßige Feedbackgespräche, Online-Bewertungssystem',
+                    partnershipLevel: 'Strategischer Partner',
+                    strategicAlignment: 'Gemeinsame Entwicklungsprojekte, langfristige Roadmap',
+                    jointDevelopment: 'Neue Legierungen, nachhaltige Produktionsmethoden',
+                    futureOpportunities: 'Expansion in neue Märkte, Digitalisierungsprojekte',
+                    relationshipManager: 'Klaus Weber (Key Account Manager)'
+                },
+                
+                // Metadata
+                metadata: {
+                    createdAt: '2024-01-01T00:00:00.000Z',
+                    updatedAt: '2024-01-15T10:30:00.000Z',
+                    version: 3,
+                    lastEvaluatedBy: 'Anna Schmidt',
+                    notes: 'Ausgezeichneter strategischer Partner mit kontinuierlich hoher Leistung'
+                }
             },
+            
             {
                 id: 'SUP002',
-                number: 'L-2024-002',
-                name: 'Technik Service Nord',
-                type: 'dienstleister',
-                status: 'kritisch',
+                
+                // Tab 1: Stammdaten (Basic Data)
+                basic: {
+                    number: 'L-2024-002',
+                    name: 'Technik Service Nord',
+                    legalForm: 'GmbH & Co. KG',
+                    foundingYear: '1992',
+                    employeeCount: '85',
+                    turnover: '12 Millionen EUR',
+                    mainActivity: 'Technische Dienstleistungen und Wartung',
+                    description: 'Spezialisiert auf Wartung und Reparatur von Industrieanlagen',
+                    status: 'kritisch'
+                },
+                
                 contact: {
-                    person: 'Anna Schmidt',
+                    headquarters: 'Hamburg, Deutschland',
+                    address: 'Industrieweg 5, 20097 Hamburg',
+                    website: 'www.technik-service-nord.de',
+                    contactPerson: 'Anna Schmidt',
                     email: 'a.schmidt@technik-service.de',
                     phone: '+49 40 987654',
-                    address: 'Industrieweg 5, 20097 Hamburg'
+                    fax: '+49 40 987655',
+                    emergencyContact: 'Bernd Mueller',
+                    emergencyPhone: '+49 40 987656',
+                    subsidiaries: 'Service Nord Bremen GmbH',
+                    organizationChart: 'Geschäftsführung, Technik, Service, Verwaltung',
+                    keyPersonnel: 'Anna Schmidt (Geschäftsführerin), Bernd Mueller (Serviceleiter)'
                 },
-                products: ['Wartung', 'Reparaturen', 'Technischer Support'],
-                certificates: [
-                    { name: 'ISO 45001', validUntil: '2024-06-30', status: 'läuft ab' }
-                ],
-                evaluation: {
-                    score: 65,
-                    lastEvaluated: '2024-01-10',
-                    criteria: {
-                        quality: 70,
-                        delivery: 60,
-                        price: 70,
-                        service: 60
-                    }
+                
+                business: {
+                    taxId: 'DE456789123',
+                    vatId: 'DE321654987',
+                    commercialRegister: 'HRA 456789',
+                    handelsregisterNumber: 'Hamburg HRA 456789',
+                    dunsNumber: '987654321',
+                    bankDetails: 'Commerzbank Hamburg, IBAN: DE12 2004 0000 0123 4567 89',
+                    creditRating: 'BBB (Good)',
+                    insurance: 'R+V Versicherung',
+                    liabilityInsurance: '5 Millionen EUR Deckung'
                 },
-                createdAt: '2024-01-01',
-                updatedAt: '2024-01-10'
+                
+                products: {
+                    mainProducts: ['Wartung', 'Reparaturen', 'Technischer Support', 'Instandhaltung'],
+                    productCategories: 'Industrieservice, Anlagenwartung, Notfallreparaturen',
+                    capacity: '50 Servicetechniker',
+                    maxCapacity: '65 Servicetechniker (mit Subunternehmern)',
+                    deliveryTime: '24-48 Stunden (Notfall: 4 Stunden)',
+                    minimumOrderQuantity: 'Keine Mindestbestellmenge',
+                    technicalSpecifications: 'Zertifiziert für alle gängigen Industrieanlagen',
+                    innovation: 'Predictive Maintenance, IoT-Sensoren',
+                    rdCapabilities: 'Begrenztes F&E-Budget, Fokus auf Anwendung'
+                },
+                
+                quality: {
+                    qualityStandards: 'ISO 9001:2015 (in Implementierung)',
+                    qualityPolicy: 'Zuverlässiger Service und Kundenzufriedenheit',
+                    qualityObjectives: '95% Kundenzufriedenheit, <5% Nacharbeit',
+                    qualityResponsible: 'Bernd Mueller (Serviceleiter)',
+                    testingCapabilities: 'Grundlegende Prüfverfahren, mobile Prüfgeräte',
+                    qualityDocumentation: 'Ausbaufähiges Dokumentationssystem',
+                    improvementProcesses: 'Monatliche Teammeetings',
+                    customerComplaints: 'Informelles Beschwerdemanagement',
+                    qualityKpis: 'Kundenzufriedenheit 92%, Nacharbeitsquote 8%'
+                },
+                
+                certifications: {
+                    iso9001: 'In Implementierung (Zertifizierung bis Q3 2024)',
+                    iso14001: '',
+                    iso45001: 'Gültig bis 30.06.2024 (Verlängerung erforderlich)',
+                    additionalCertifications: 'Elektrofachkraft-Zertifizierung',
+                    certificationBodies: 'TÜV Rheinland',
+                    certificates: [
+                        { name: 'ISO 45001', validUntil: '2024-06-30', status: 'läuft ab' }
+                    ]
+                },
+                
+                compliance: {
+                    gdprCompliance: 'Grundlagen implementiert, Verbesserungsbedarf',
+                    antiCorruption: 'Informelle Richtlinien',
+                    exportControlCompliance: 'Nicht relevant',
+                    sanctionsCompliance: 'Grundlegende Prüfungen',
+                    conflictMinerals: 'Nicht relevant',
+                    codeOfConduct: 'In Entwicklung',
+                    legalStructure: 'GmbH & Co. KG nach deutschem Recht',
+                    contractualRequirements: 'Standard-AGB vorhanden',
+                    litigationHistory: '1 kleinere Rechtsstreitigkeit (beigelegt)'
+                },
+                
+                sustainability: {
+                    environmentalPolicy: 'Grundlegende Umweltrichtlinien',
+                    co2Footprint: 'Noch nicht gemessen',
+                    energyManagement: 'Konventionelle Energieversorgung',
+                    wasteManagement: 'Gesetzliche Mindestanforderungen',
+                    waterManagement: 'Standard',
+                    socialResponsibility: '3 Ausbildungsplätze',
+                    sustainabilityGoals: 'Noch nicht definiert',
+                    sustainabilityReporting: 'Kein separater Bericht',
+                    greenProducts: 'Umweltfreundliche Reinigungsmittel'
+                },
+                
+                risk: {
+                    businessRisk: 'Mittel - Abhängigkeit von wenigen Großkunden',
+                    financialRisk: 'Mittel - schwankende Auftragslage',
+                    operationalRisk: 'Hoch - Fachkräftemangel',
+                    reputationalRisk: 'Mittel - vereinzelte Qualitätsprobleme',
+                    geoRisk: 'Niedrig - lokaler Markt',
+                    supplyChainRisk: 'Mittel - Abhängigkeit von Ersatzteillieferanten',
+                    riskMitigation: 'Informelle Risikobetrachtung',
+                    businessContinuity: 'Grundlegende Notfallpläne',
+                    emergencyPlanning: 'Bereitschaftsdienst verfügbar'
+                },
+                
+                performance: {
+                    qualityScore: 70,
+                    deliveryScore: 60,
+                    priceScore: 70,
+                    serviceScore: 60,
+                    innovationScore: 55,
+                    sustainabilityScore: 45,
+                    flexibilityScore: 75,
+                    communicationScore: 65,
+                    overallScore: 63,
+                    performanceHistory: 'Schwankende Leistung, Verbesserungstrend',
+                    kpiTracking: 'Monatliche Grundauswertung',
+                    benchmarking: 'Unterdurchschnittlich'
+                },
+                
+                audit: {
+                    lastAuditDate: '2024-01-10',
+                    nextAuditDate: '2024-07-10',
+                    auditFrequency: 'Halbjährlich (wegen kritischem Status)',
+                    auditType: 'Fokus-Audit (Qualität und Arbeitsschutz)',
+                    auditResults: 'Befriedigend (65/100 Punkte)',
+                    auditFindings: '5 Verbesserungsmaßnahmen, 1 kritischer Befund',
+                    correctiveActions: '60% umgesetzt, 2 Maßnahmen überfällig',
+                    monitoringActivities: 'Monatliche Überwachung erforderlich',
+                    auditReports: 'Auditberichte verfügbar'
+                },
+                
+                documentation: {
+                    contracts: 'Basis-Servicevertrag',
+                    specifications: 'Technische Unterlagen teilweise vorhanden',
+                    drawings: 'Begrenzte technische Dokumentation',
+                    procedures: 'Grundlegende Arbeitsanweisungen',
+                    reports: 'Monatliche Serviceberichte',
+                    correspondenceLog: 'E-Mail-Archivierung teilweise',
+                    documentControl: 'Verbesserungsbedürftig',
+                    retentionPolicy: '5 Jahre Aufbewahrung',
+                    accessControl: 'Grundlegende Zugriffskontrolle'
+                },
+                
+                communication: {
+                    communicationChannels: 'Telefon, E-Mail, gelegentliche Meetings',
+                    meetingFrequency: 'Quartalsweise (sollte häufiger sein)',
+                    escalationProcedures: 'Informelle Eskalation',
+                    feedbackMechanisms: 'Direktes Feedback bei Problemen',
+                    partnershipLevel: 'Operativer Lieferant',
+                    strategicAlignment: 'Begrenzt',
+                    jointDevelopment: 'Keine gemeinsamen Projekte',
+                    futureOpportunities: 'Verbesserung der Servicequalität',
+                    relationshipManager: 'Anna Schmidt (Geschäftsführerin)'
+                },
+                
+                metadata: {
+                    createdAt: '2024-01-01T00:00:00.000Z',
+                    updatedAt: '2024-01-10T14:20:00.000Z',
+                    version: 2,
+                    lastEvaluatedBy: 'Klaus Weber',
+                    notes: 'Verbesserungsmaßnahmen erforderlich, erhöhte Überwachung notwendig'
+                }
             },
+            
             {
                 id: 'SUP003',
-                number: 'L-2024-003',
-                name: 'Entsorgung Hamburg GmbH',
-                type: 'entsorger',
-                status: 'freigegeben',
+                
+                // Tab 1: Stammdaten (Basic Data)
+                basic: {
+                    number: 'L-2024-003',
+                    name: 'Entsorgung Hamburg GmbH',
+                    legalForm: 'GmbH',
+                    foundingYear: '1978',
+                    employeeCount: '180',
+                    turnover: '28 Millionen EUR',
+                    mainActivity: 'Abfallentsorgung und Recycling',
+                    description: 'Führender Entsorger für alle Arten von Industrieabfällen und Recycling',
+                    status: 'freigegeben'
+                },
+                
                 contact: {
-                    person: 'Peter Müller',
+                    headquarters: 'Hamburg, Deutschland',
+                    address: 'Hafenstraße 10, 20459 Hamburg',
+                    website: 'www.entsorgung-hamburg.de',
+                    contactPerson: 'Peter Müller',
                     email: 'p.mueller@entsorgung-hh.de',
                     phone: '+49 40 555777',
-                    address: 'Hafenstraße 10, 20459 Hamburg'
+                    fax: '+49 40 555778',
+                    emergencyContact: 'Notfall-Hotline',
+                    emergencyPhone: '+49 40 555999',
+                    subsidiaries: 'Recycling Nord GmbH (Bremen), EcoService Süd GmbH (München)',
+                    organizationChart: 'Geschäftsführung, Betrieb, Umwelt, Sicherheit, Verwaltung',
+                    keyPersonnel: 'Peter Müller (CEO), Dr. Susanne Green (Umweltmanagerin)'
                 },
-                products: ['Abfallentsorgung', 'Recycling', 'Sonderabfall'],
-                certificates: [
-                    { name: 'Entsorgungsnachweis', validUntil: '2025-03-31', status: 'gültig' },
-                    { name: 'ISO 14001', validUntil: '2025-08-15', status: 'gültig' }
-                ],
-                evaluation: {
-                    score: 92,
-                    lastEvaluated: '2024-01-20',
-                    criteria: {
-                        quality: 95,
-                        delivery: 90,
-                        price: 85,
-                        service: 95
-                    }
+                
+                business: {
+                    taxId: 'DE789123456',
+                    vatId: 'DE654987321',
+                    commercialRegister: 'HRB 789123',
+                    handelsregisterNumber: 'Hamburg HRB 789123',
+                    dunsNumber: '456789123',
+                    bankDetails: 'Deutsche Bank Hamburg, IBAN: DE34 2007 0000 0567 8901 23',
+                    creditRating: 'AA (Very Good)',
+                    insurance: 'Zurich Versicherung',
+                    liabilityInsurance: '20 Millionen EUR Umwelthaftpflicht'
                 },
-                createdAt: '2024-01-01',
-                updatedAt: '2024-01-20'
+                
+                products: {
+                    mainProducts: ['Abfallentsorgung', 'Recycling', 'Sonderabfall', 'Beratung'],
+                    productCategories: 'Gefährliche Abfälle, Wertstoffe, Elektronikschrott, Beratung',
+                    capacity: '50.000 Tonnen/Jahr',
+                    maxCapacity: '65.000 Tonnen/Jahr',
+                    deliveryTime: '24 Stunden (Notfall: 2 Stunden)',
+                    minimumOrderQuantity: 'Abhängig von Abfallart',
+                    technicalSpecifications: 'Alle erforderlichen Genehmigungen vorhanden',
+                    innovation: 'Neue Recyclingverfahren, Kreislaufwirtschaft',
+                    rdCapabilities: 'Kooperation mit Umweltforschungsinstituten'
+                },
+                
+                quality: {
+                    qualityStandards: 'ISO 9001:2015, ISO 14001:2015, EMAS',
+                    qualityPolicy: 'Umweltschutz und nachhaltige Entsorgung',
+                    qualityObjectives: '99% ordnungsgemäße Entsorgung, Null Umweltvorfälle',
+                    qualityResponsible: 'Dr. Susanne Green',
+                    testingCapabilities: 'Vollausgestattetes Labor, Schadstoffanalytik',
+                    qualityDocumentation: 'Umfassendes QM-System',
+                    improvementProcesses: 'Kontinuierlicher Verbesserungsprozess',
+                    customerComplaints: 'Strukturiertes System, 24h-Hotline',
+                    qualityKpis: 'Entsorgungsquote 99.8%, Null Umweltvorfälle'
+                },
+                
+                certifications: {
+                    iso9001: 'Gültig bis 31.12.2025',
+                    iso14001: 'Gültig bis 15.08.2025',
+                    iso45001: 'Gültig bis 20.09.2025',
+                    additionalCertifications: 'EMAS, Entsorgungsfachbetrieb, ADR-Zertifikat',
+                    certificationBodies: 'TÜV Nord, DEKRA',
+                    certificates: [
+                        { name: 'Entsorgungsnachweis', validUntil: '2025-03-31', status: 'gültig' },
+                        { name: 'ISO 14001', validUntil: '2025-08-15', status: 'gültig' },
+                        { name: 'EMAS', validUntil: '2025-12-31', status: 'gültig' }
+                    ]
+                },
+                
+                compliance: {
+                    gdprCompliance: 'Vollständig implementiert, extern auditiert',
+                    antiCorruption: 'Umfassender Compliance-Kodex',
+                    exportControlCompliance: 'Abfallexport nach Basel-Konvention',
+                    sanctionsCompliance: 'Vollständige Compliance-Prüfung',
+                    conflictMinerals: 'Nicht relevant für Entsorgungsgeschäft',
+                    codeOfConduct: 'Umfassender Verhaltenskodex',
+                    legalStructure: 'GmbH nach deutschem Recht',
+                    contractualRequirements: 'Umfassende Vertragswerke',
+                    litigationHistory: 'Keine relevanten Rechtsstreitigkeiten'
+                },
+                
+                sustainability: {
+                    environmentalPolicy: 'Vorreiter in nachhaltiger Entsorgung',
+                    co2Footprint: 'CO2-neutral seit 2020',
+                    energyManagement: '100% erneuerbare Energien',
+                    wasteManagement: '98% Recyclingquote, Null Deponierung',
+                    waterManagement: 'Geschlossene Wasserkreisläufe',
+                    socialResponsibility: '15 Ausbildungsplätze, Umweltbildungsprogramme',
+                    sustainabilityGoals: 'Kreislaufwirtschaft 2025, Innovationsführer',
+                    sustainabilityReporting: 'Jährlicher Umweltbericht, EMAS-validiert',
+                    greenProducts: '100% der Services umweltorientiert'
+                },
+                
+                risk: {
+                    businessRisk: 'Niedrig - stabiler Markt, regulatorischer Schutz',
+                    financialRisk: 'Niedrig - diversifizierte Kundenbasis',
+                    operationalRisk: 'Mittel - Umgang mit gefährlichen Stoffen',
+                    reputationalRisk: 'Niedrig - ausgezeichneter Umweltruf',
+                    geoRisk: 'Niedrig - stabiler Standort',
+                    supplyChainRisk: 'Niedrig - wenig externe Abhängigkeiten',
+                    riskMitigation: 'Umfassendes Risikomanagement',
+                    businessContinuity: 'Redundante Systeme, Notfallpläne',
+                    emergencyPlanning: '24/7 Bereitschaft, spezialisierte Teams'
+                },
+                
+                performance: {
+                    qualityScore: 95,
+                    deliveryScore: 90,
+                    priceScore: 85,
+                    serviceScore: 95,
+                    innovationScore: 88,
+                    sustainabilityScore: 98,
+                    flexibilityScore: 92,
+                    communicationScore: 90,
+                    overallScore: 92,
+                    performanceHistory: 'Kontinuierlich excellente Leistung',
+                    kpiTracking: 'Umfassendes KPI-System, monatliche Reviews',
+                    benchmarking: 'Branchenführer in allen Kategorien'
+                },
+                
+                audit: {
+                    lastAuditDate: '2024-01-20',
+                    nextAuditDate: '2025-01-20',
+                    auditFrequency: 'Jährlich',
+                    auditType: 'Umfassendes Audit (Qualität, Umwelt, Sicherheit)',
+                    auditResults: 'Ausgezeichnet (98/100 Punkte)',
+                    auditFindings: 'Keine kritischen Befunde, 1 Verbesserungsvorschlag',
+                    correctiveActions: 'Alle Maßnahmen zeitnah umgesetzt',
+                    monitoringActivities: 'Quartalsweise Reviews, kontinuierliches Monitoring',
+                    auditReports: 'Vollständige Dokumentation verfügbar'
+                },
+                
+                documentation: {
+                    contracts: 'Rahmenvertrag Entsorgung, Sonderverträge für Projekte',
+                    specifications: 'Detaillierte Entsorgungsverfahren dokumentiert',
+                    drawings: 'Anlagenpläne, Verfahrensschemata',
+                    procedures: 'Umfassende Verfahrensanweisungen',
+                    reports: 'Monatliche Entsorgungsberichte, Umweltberichte',
+                    correspondenceLog: 'Vollständige Kommunikationshistorie',
+                    documentControl: 'ISO-konformes Dokumentenmanagement',
+                    retentionPolicy: '30 Jahre Aufbewahrung (gesetzlich)',
+                    accessControl: 'Höchste Sicherheitsstandards'
+                },
+                
+                communication: {
+                    communicationChannels: 'Multi-Channel (digital und persönlich)',
+                    meetingFrequency: 'Monatliche Abstimmungen, quartalsweise Strategiemeetings',
+                    escalationProcedures: 'Klare Eskalationswege implementiert',
+                    feedbackMechanisms: 'Strukturierte Feedbackprozesse',
+                    partnershipLevel: 'Strategischer Partner',
+                    strategicAlignment: 'Gemeinsame Nachhaltigkeitsziele',
+                    jointDevelopment: 'Neue Recyclingverfahren, Kreislaufwirtschaft',
+                    futureOpportunities: 'Expansion der Partnerschaft, neue Services',
+                    relationshipManager: 'Dr. Susanne Green (Umweltmanagerin)'
+                },
+                
+                metadata: {
+                    createdAt: '2024-01-01T00:00:00.000Z',
+                    updatedAt: '2024-01-20T16:45:00.000Z',
+                    version: 4,
+                    lastEvaluatedBy: 'Dr. Maria Weber',
+                    notes: 'Ausgezeichneter Partner mit höchsten Standards in allen Bereichen'
+                }
             }
         ];
 
@@ -17465,41 +18667,169 @@ PLZ Ort">${user.address || ''}</textarea>
         const supplier = this.suppliers.find(s => s.id === supplierId);
         if (!supplier) return;
 
-        // Basic information
-        document.getElementById('supplierNumber').value = supplier.number || '';
-        document.getElementById('supplierName').value = supplier.name || '';
-        document.getElementById('supplierType').value = supplier.type || '';
-        document.getElementById('supplierStatus').value = supplier.status || 'neu';
-        document.getElementById('supplierDescription').value = supplier.description || '';
-
-        // Contact information
-        document.getElementById('contactPerson').value = supplier.contact?.person || '';
-        document.getElementById('contactEmail').value = supplier.contact?.email || '';
-        document.getElementById('contactPhone').value = supplier.contact?.phone || '';
-        document.getElementById('contactFax').value = supplier.contact?.fax || '';
-        document.getElementById('supplierAddress').value = supplier.contact?.address || '';
-        document.getElementById('supplierWebsite').value = supplier.contact?.website || '';
-        document.getElementById('supplierTaxId').value = supplier.contact?.taxId || '';
-
-        // Products
-        document.getElementById('supplierProducts').value = supplier.products?.join(', ') || '';
-        document.getElementById('supplierCapacity').value = supplier.capacity || '';
-        document.getElementById('supplierDeliveryTime').value = supplier.deliveryTime || '';
-        document.getElementById('supplierQualityStandards').value = supplier.qualityStandards || '';
-
-        // Evaluation scores
-        const evaluation = supplier.evaluation || {};
-        const criteria = evaluation.criteria || {};
+        // Handle both old and new data structures for backward compatibility
+        const isOldStructure = supplier.number !== undefined; // Old structure has direct properties
         
-        document.getElementById('supplierQualityScore').value = criteria.quality || 75;
-        document.getElementById('supplierDeliveryScore').value = criteria.delivery || 75;
-        document.getElementById('supplierPriceScore').value = criteria.price || 75;
-        document.getElementById('supplierServiceScore').value = criteria.service || 75;
-        document.getElementById('evaluationNotes').value = evaluation.notes || '';
+        // Helper function to get value from either old or new structure
+        const getValue = (newPath, oldPath, defaultValue = '') => {
+            if (isOldStructure) {
+                return this.getNestedValue(supplier, oldPath) || defaultValue;
+            } else {
+                return this.getNestedValue(supplier, newPath) || defaultValue;
+            }
+        };
 
-        // Update score displays
-        this.updateOverallScore();
-        ['supplierQualityScore', 'supplierDeliveryScore', 'supplierPriceScore', 'supplierServiceScore'].forEach(id => {
+        // Tab 1: Stammdaten (Basic Data)
+        this.setInputValue('supplierNumber', getValue('basic.number', 'number'));
+        this.setInputValue('supplierName', getValue('basic.name', 'name'));
+        this.setInputValue('legalForm', getValue('basic.legalForm', ''));
+        this.setInputValue('foundingYear', getValue('basic.foundingYear', ''));
+        this.setInputValue('employeeCount', getValue('basic.employeeCount', ''));
+        this.setInputValue('turnover', getValue('basic.turnover', ''));
+        this.setInputValue('mainActivity', getValue('basic.mainActivity', ''));
+        this.setInputValue('supplierDescription', getValue('basic.description', 'description'));
+        this.setInputValue('supplierStatus', getValue('basic.status', 'status', 'neu'));
+
+        // Tab 2: Kontakt & Struktur (Contact & Structure)
+        this.setInputValue('headquarters', getValue('contact.headquarters', ''));
+        this.setInputValue('supplierAddress', getValue('contact.address', 'contact.address'));
+        this.setInputValue('supplierWebsite', getValue('contact.website', 'contact.website'));
+        this.setInputValue('contactPerson', getValue('contact.contactPerson', 'contact.person'));
+        this.setInputValue('contactEmail', getValue('contact.email', 'contact.email'));
+        this.setInputValue('contactPhone', getValue('contact.phone', 'contact.phone'));
+        this.setInputValue('contactFax', getValue('contact.fax', 'contact.fax'));
+        this.setInputValue('emergencyContact', getValue('contact.emergencyContact', ''));
+        this.setInputValue('emergencyPhone', getValue('contact.emergencyPhone', ''));
+        this.setInputValue('subsidiaries', getValue('contact.subsidiaries', ''));
+        this.setInputValue('organizationChart', getValue('contact.organizationChart', ''));
+        this.setInputValue('keyPersonnel', getValue('contact.keyPersonnel', ''));
+
+        // Tab 3: Geschäftsdaten (Business Data)
+        this.setInputValue('supplierTaxId', getValue('business.taxId', 'contact.taxId'));
+        this.setInputValue('vatId', getValue('business.vatId', ''));
+        this.setInputValue('commercialRegister', getValue('business.commercialRegister', ''));
+        this.setInputValue('handelsregisterNumber', getValue('business.handelsregisterNumber', ''));
+        this.setInputValue('dunsNumber', getValue('business.dunsNumber', ''));
+        this.setInputValue('bankDetails', getValue('business.bankDetails', ''));
+        this.setInputValue('creditRating', getValue('business.creditRating', ''));
+        this.setInputValue('insurance', getValue('business.insurance', ''));
+        this.setInputValue('liabilityInsurance', getValue('business.liabilityInsurance', ''));
+
+        // Tab 4: Produkte & Kapazitäten (Products & Capacities)
+        const products = getValue('products.mainProducts', 'products');
+        this.setInputValue('supplierProducts', Array.isArray(products) ? products.join(', ') : products);
+        this.setInputValue('productCategories', getValue('products.productCategories', ''));
+        this.setInputValue('supplierCapacity', getValue('products.capacity', 'capacity'));
+        this.setInputValue('maxCapacity', getValue('products.maxCapacity', ''));
+        this.setInputValue('supplierDeliveryTime', getValue('products.deliveryTime', 'deliveryTime'));
+        this.setInputValue('minimumOrderQuantity', getValue('products.minimumOrderQuantity', ''));
+        this.setInputValue('technicalSpecifications', getValue('products.technicalSpecifications', ''));
+        this.setInputValue('innovation', getValue('products.innovation', ''));
+        this.setInputValue('rdCapabilities', getValue('products.rdCapabilities', ''));
+
+        // Tab 5: Qualitätssystem (Quality System)
+        this.setInputValue('supplierQualityStandards', getValue('quality.qualityStandards', 'qualityStandards'));
+        this.setInputValue('qualityPolicy', getValue('quality.qualityPolicy', ''));
+        this.setInputValue('qualityObjectives', getValue('quality.qualityObjectives', ''));
+        this.setInputValue('qualityResponsible', getValue('quality.qualityResponsible', ''));
+        this.setInputValue('testingCapabilities', getValue('quality.testingCapabilities', ''));
+        this.setInputValue('qualityDocumentation', getValue('quality.qualityDocumentation', ''));
+        this.setInputValue('improvementProcesses', getValue('quality.improvementProcesses', ''));
+        this.setInputValue('customerComplaints', getValue('quality.customerComplaints', ''));
+        this.setInputValue('qualityKpis', getValue('quality.qualityKpis', ''));
+
+        // Tab 6: Zertifizierungen (Certifications)
+        this.setInputValue('iso9001', getValue('certifications.iso9001', ''));
+        this.setInputValue('iso14001', getValue('certifications.iso14001', ''));
+        this.setInputValue('iso45001', getValue('certifications.iso45001', ''));
+        this.setInputValue('additionalCertifications', getValue('certifications.additionalCertifications', ''));
+        this.setInputValue('certificationBodies', getValue('certifications.certificationBodies', ''));
+
+        // Tab 7: Compliance & Recht (Compliance & Legal)
+        this.setInputValue('gdprCompliance', getValue('compliance.gdprCompliance', ''));
+        this.setInputValue('antiCorruption', getValue('compliance.antiCorruption', ''));
+        this.setInputValue('exportControlCompliance', getValue('compliance.exportControlCompliance', ''));
+        this.setInputValue('sanctionsCompliance', getValue('compliance.sanctionsCompliance', ''));
+        this.setInputValue('conflictMinerals', getValue('compliance.conflictMinerals', ''));
+        this.setInputValue('codeOfConduct', getValue('compliance.codeOfConduct', ''));
+        this.setInputValue('legalStructure', getValue('compliance.legalStructure', ''));
+        this.setInputValue('contractualRequirements', getValue('compliance.contractualRequirements', ''));
+        this.setInputValue('litigationHistory', getValue('compliance.litigationHistory', ''));
+
+        // Tab 8: Nachhaltigkeit (Sustainability)
+        this.setInputValue('environmentalPolicy', getValue('sustainability.environmentalPolicy', ''));
+        this.setInputValue('co2Footprint', getValue('sustainability.co2Footprint', ''));
+        this.setInputValue('energyManagement', getValue('sustainability.energyManagement', ''));
+        this.setInputValue('wasteManagement', getValue('sustainability.wasteManagement', ''));
+        this.setInputValue('waterManagement', getValue('sustainability.waterManagement', ''));
+        this.setInputValue('socialResponsibility', getValue('sustainability.socialResponsibility', ''));
+        this.setInputValue('sustainabilityGoals', getValue('sustainability.sustainabilityGoals', ''));
+        this.setInputValue('sustainabilityReporting', getValue('sustainability.sustainabilityReporting', ''));
+        this.setInputValue('greenProducts', getValue('sustainability.greenProducts', ''));
+
+        // Tab 9: Risikobewertung (Risk Assessment)
+        this.setInputValue('businessRisk', getValue('risk.businessRisk', ''));
+        this.setInputValue('financialRisk', getValue('risk.financialRisk', ''));
+        this.setInputValue('operationalRisk', getValue('risk.operationalRisk', ''));
+        this.setInputValue('reputationalRisk', getValue('risk.reputationalRisk', ''));
+        this.setInputValue('geoRisk', getValue('risk.geoRisk', ''));
+        this.setInputValue('supplyChainRisk', getValue('risk.supplyChainRisk', ''));
+        this.setInputValue('riskMitigation', getValue('risk.riskMitigation', ''));
+        this.setInputValue('businessContinuity', getValue('risk.businessContinuity', ''));
+        this.setInputValue('emergencyPlanning', getValue('risk.emergencyPlanning', ''));
+
+        // Tab 10: Performance-Bewertung (Performance Evaluation)
+        this.setInputValue('supplierQualityScore', getValue('performance.qualityScore', 'evaluation.criteria.quality', 75));
+        this.setInputValue('supplierDeliveryScore', getValue('performance.deliveryScore', 'evaluation.criteria.delivery', 75));
+        this.setInputValue('supplierPriceScore', getValue('performance.priceScore', 'evaluation.criteria.price', 75));
+        this.setInputValue('supplierServiceScore', getValue('performance.serviceScore', 'evaluation.criteria.service', 75));
+        this.setInputValue('innovationScore', getValue('performance.innovationScore', '', 75));
+        this.setInputValue('sustainabilityScore', getValue('performance.sustainabilityScore', '', 75));
+        this.setInputValue('flexibilityScore', getValue('performance.flexibilityScore', '', 75));
+        this.setInputValue('communicationScore', getValue('performance.communicationScore', '', 75));
+        this.setInputValue('performanceHistory', getValue('performance.performanceHistory', ''));
+        this.setInputValue('kpiTracking', getValue('performance.kpiTracking', ''));
+        this.setInputValue('benchmarking', getValue('performance.benchmarking', ''));
+
+        // Tab 11: Audit & Monitoring (Audit & Monitoring)
+        this.setInputValue('lastAuditDate', getValue('audit.lastAuditDate', ''));
+        this.setInputValue('nextAuditDate', getValue('audit.nextAuditDate', ''));
+        this.setInputValue('auditFrequency', getValue('audit.auditFrequency', ''));
+        this.setInputValue('auditType', getValue('audit.auditType', ''));
+        this.setInputValue('auditResults', getValue('audit.auditResults', ''));
+        this.setInputValue('auditFindings', getValue('audit.auditFindings', ''));
+        this.setInputValue('correctiveActions', getValue('audit.correctiveActions', ''));
+        this.setInputValue('monitoringActivities', getValue('audit.monitoringActivities', ''));
+        this.setInputValue('auditReports', getValue('audit.auditReports', ''));
+
+        // Tab 12: Dokumentation (Documentation)
+        this.setInputValue('contracts', getValue('documentation.contracts', ''));
+        this.setInputValue('specifications', getValue('documentation.specifications', ''));
+        this.setInputValue('drawings', getValue('documentation.drawings', ''));
+        this.setInputValue('procedures', getValue('documentation.procedures', ''));
+        this.setInputValue('reports', getValue('documentation.reports', ''));
+        this.setInputValue('correspondenceLog', getValue('documentation.correspondenceLog', ''));
+        this.setInputValue('documentControl', getValue('documentation.documentControl', ''));
+        this.setInputValue('retentionPolicy', getValue('documentation.retentionPolicy', ''));
+        this.setInputValue('accessControl', getValue('documentation.accessControl', ''));
+
+        // Tab 13: Kommunikation (Communication)
+        this.setInputValue('communicationChannels', getValue('communication.communicationChannels', ''));
+        this.setInputValue('meetingFrequency', getValue('communication.meetingFrequency', ''));
+        this.setInputValue('escalationProcedures', getValue('communication.escalationProcedures', ''));
+        this.setInputValue('feedbackMechanisms', getValue('communication.feedbackMechanisms', ''));
+        this.setInputValue('partnershipLevel', getValue('communication.partnershipLevel', ''));
+        this.setInputValue('strategicAlignment', getValue('communication.strategicAlignment', ''));
+        this.setInputValue('jointDevelopment', getValue('communication.jointDevelopment', ''));
+        this.setInputValue('futureOpportunities', getValue('communication.futureOpportunities', ''));
+        this.setInputValue('relationshipManager', getValue('communication.relationshipManager', ''));
+
+        // Evaluation notes (from metadata)
+        this.setInputValue('evaluationNotes', getValue('metadata.notes', 'evaluation.notes'));
+
+        // Update score displays for all performance sliders
+        ['supplierQualityScore', 'supplierDeliveryScore', 'supplierPriceScore', 'supplierServiceScore',
+         'innovationScore', 'sustainabilityScore', 'flexibilityScore', 'communicationScore'].forEach(id => {
             const slider = document.getElementById(id);
             const valueSpan = document.getElementById(id + 'Value');
             if (slider && valueSpan) {
@@ -17507,62 +18837,290 @@ PLZ Ort">${user.address || ''}</textarea>
             }
         });
 
+        // Update overall score display
+        this.updateOverallScore();
+
         // Store current editing ID
         this.currentEditingSupplierId = supplierId;
     }
 
+    // Helper function to safely set input values
+    setInputValue(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.value = value || '';
+        }
+    }
+
+    // Helper function to get nested object values safely
+    getNestedValue(obj, path) {
+        return path.split('.').reduce((current, key) => current && current[key], obj);
+    }
+
+    // Custom validation function that handles hidden fields
+    validateSupplierForm() {
+        const requiredFields = [
+            { id: 'supplierNumber', name: 'Lieferantennummer', tab: 'basic' },
+            { id: 'supplierName', name: 'Lieferantenname', tab: 'basic' }
+        ];
+        
+        // Check basic required fields
+        for (const field of requiredFields) {
+            const element = document.getElementById(field.id);
+            if (!element || !element.value.trim()) {
+                this.showValidationError(field.name + ' ist erforderlich.', field.tab);
+                return false;
+            }
+        }
+        
+        // Validate certificate fields (only if they have content)
+        const certificateFields = document.querySelectorAll('.certificate-field');
+        for (const field of certificateFields) {
+            const certId = field.getAttribute('data-cert-id');
+            const nameInput = document.getElementById(`certName_${certId}`);
+            const validUntilInput = document.getElementById(`certValidUntil_${certId}`);
+            
+            // If certificate name is filled, date is required
+            if (nameInput && nameInput.value.trim()) {
+                if (!validUntilInput || !validUntilInput.value) {
+                    this.showValidationError('Gültigkeitsdatum ist erforderlich für Zertifikat: ' + nameInput.value, 'certifications');
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    // Show validation error and switch to appropriate tab
+    showValidationError(message, tabName) {
+        alert(message);
+        
+        // Switch to the tab containing the error
+        if (tabName) {
+            const tabButton = document.querySelector(`[data-tab="${tabName}"]`);
+            if (tabButton) {
+                tabButton.click();
+            }
+        }
+    }
+
     saveSupplier() {
         const form = document.getElementById('supplierForm');
-        if (!form.checkValidity()) {
-            form.reportValidity();
+        
+        // Custom validation that handles hidden fields properly
+        const isValid = this.validateSupplierForm();
+        if (!isValid) {
             return;
         }
 
         const formData = new FormData(form);
+        
+        // Comprehensive supplier data structure for all 13 tabs
         const supplierData = {
             id: this.currentEditingSupplierId || 'SUP' + Date.now(),
-            number: formData.get('supplierNumber'),
-            name: formData.get('supplierName'),
-            type: formData.get('supplierType'),
-            status: formData.get('supplierStatus'),
-            description: formData.get('supplierDescription'),
+            
+            // Tab 1: Stammdaten (Basic Data)
+            basic: {
+                number: formData.get('supplierNumber'),
+                name: formData.get('supplierName'),
+                legalForm: formData.get('legalForm'),
+                foundingYear: formData.get('foundingYear'),
+                employeeCount: formData.get('employeeCount'),
+                turnover: formData.get('turnover'),
+                mainActivity: formData.get('mainActivity'),
+                description: formData.get('supplierDescription'),
+                status: formData.get('supplierStatus')
+            },
+            
+            // Tab 2: Kontakt & Struktur (Contact & Structure)
             contact: {
-                person: formData.get('contactPerson'),
+                headquarters: formData.get('headquarters'),
+                address: formData.get('supplierAddress'),
+                website: formData.get('supplierWebsite'),
+                contactPerson: formData.get('contactPerson'),
                 email: formData.get('contactEmail'),
                 phone: formData.get('contactPhone'),
                 fax: formData.get('contactFax'),
-                address: formData.get('supplierAddress'),
-                website: formData.get('supplierWebsite'),
-                taxId: formData.get('supplierTaxId')
+                emergencyContact: formData.get('emergencyContact'),
+                emergencyPhone: formData.get('emergencyPhone'),
+                subsidiaries: formData.get('subsidiaries'),
+                organizationChart: formData.get('organizationChart'),
+                keyPersonnel: formData.get('keyPersonnel')
             },
-            products: formData.get('supplierProducts').split(',').map(p => p.trim()).filter(p => p),
-            capacity: formData.get('supplierCapacity'),
-            deliveryTime: formData.get('supplierDeliveryTime'),
-            qualityStandards: formData.get('supplierQualityStandards'),
-            certificates: this.collectCertificateData(),
-            evaluation: {
-                score: Math.round((
-                    parseInt(formData.get('supplierQualityScore')) +
-                    parseInt(formData.get('supplierDeliveryScore')) +
-                    parseInt(formData.get('supplierPriceScore')) +
-                    parseInt(formData.get('supplierServiceScore'))
-                ) / 4),
-                lastEvaluated: new Date().toISOString(),
-                criteria: {
-                    quality: parseInt(formData.get('supplierQualityScore')),
-                    delivery: parseInt(formData.get('supplierDeliveryScore')),
-                    price: parseInt(formData.get('supplierPriceScore')),
-                    service: parseInt(formData.get('supplierServiceScore'))
-                },
+            
+            // Tab 3: Geschäftsdaten (Business Data)
+            business: {
+                taxId: formData.get('supplierTaxId'),
+                vatId: formData.get('vatId'),
+                commercialRegister: formData.get('commercialRegister'),
+                handelsregisterNumber: formData.get('handelsregisterNumber'),
+                dunsNumber: formData.get('dunsNumber'),
+                bankDetails: formData.get('bankDetails'),
+                creditRating: formData.get('creditRating'),
+                insurance: formData.get('insurance'),
+                liabilityInsurance: formData.get('liabilityInsurance')
+            },
+            
+            // Tab 4: Produkte & Kapazitäten (Products & Capacities)
+            products: {
+                mainProducts: formData.get('supplierProducts') ? formData.get('supplierProducts').split(',').map(p => p.trim()).filter(p => p) : [],
+                productCategories: formData.get('productCategories'),
+                capacity: formData.get('supplierCapacity'),
+                maxCapacity: formData.get('maxCapacity'),
+                deliveryTime: formData.get('supplierDeliveryTime'),
+                minimumOrderQuantity: formData.get('minimumOrderQuantity'),
+                technicalSpecifications: formData.get('technicalSpecifications'),
+                innovation: formData.get('innovation'),
+                rdCapabilities: formData.get('rdCapabilities')
+            },
+            
+            // Tab 5: Qualitätssystem (Quality System)
+            quality: {
+                qualityStandards: formData.get('supplierQualityStandards'),
+                qualityPolicy: formData.get('qualityPolicy'),
+                qualityObjectives: formData.get('qualityObjectives'),
+                qualityResponsible: formData.get('qualityResponsible'),
+                testingCapabilities: formData.get('testingCapabilities'),
+                qualityDocumentation: formData.get('qualityDocumentation'),
+                improvementProcesses: formData.get('improvementProcesses'),
+                customerComplaints: formData.get('customerComplaints'),
+                qualityKpis: formData.get('qualityKpis')
+            },
+            
+            // Tab 6: Zertifizierungen (Certifications)
+            certifications: {
+                iso9001: formData.get('iso9001'),
+                iso14001: formData.get('iso14001'),
+                iso45001: formData.get('iso45001'),
+                additionalCertifications: formData.get('additionalCertifications'),
+                certificationBodies: formData.get('certificationBodies'),
+                certificates: this.collectCertificateData()
+            },
+            
+            // Tab 7: Compliance & Recht (Compliance & Legal)
+            compliance: {
+                gdprCompliance: formData.get('gdprCompliance'),
+                antiCorruption: formData.get('antiCorruption'),
+                exportControlCompliance: formData.get('exportControlCompliance'),
+                sanctionsCompliance: formData.get('sanctionsCompliance'),
+                conflictMinerals: formData.get('conflictMinerals'),
+                codeOfConduct: formData.get('codeOfConduct'),
+                legalStructure: formData.get('legalStructure'),
+                contractualRequirements: formData.get('contractualRequirements'),
+                litigationHistory: formData.get('litigationHistory')
+            },
+            
+            // Tab 8: Nachhaltigkeit (Sustainability)
+            sustainability: {
+                environmentalPolicy: formData.get('environmentalPolicy'),
+                co2Footprint: formData.get('co2Footprint'),
+                energyManagement: formData.get('energyManagement'),
+                wasteManagement: formData.get('wasteManagement'),
+                waterManagement: formData.get('waterManagement'),
+                socialResponsibility: formData.get('socialResponsibility'),
+                sustainabilityGoals: formData.get('sustainabilityGoals'),
+                sustainabilityReporting: formData.get('sustainabilityReporting'),
+                greenProducts: formData.get('greenProducts')
+            },
+            
+            // Tab 9: Risikobewertung (Risk Assessment)
+            risk: {
+                businessRisk: formData.get('businessRisk'),
+                financialRisk: formData.get('financialRisk'),
+                operationalRisk: formData.get('operationalRisk'),
+                reputationalRisk: formData.get('reputationalRisk'),
+                geoRisk: formData.get('geoRisk'),
+                supplyChainRisk: formData.get('supplyChainRisk'),
+                riskMitigation: formData.get('riskMitigation'),
+                businessContinuity: formData.get('businessContinuity'),
+                emergencyPlanning: formData.get('emergencyPlanning')
+            },
+            
+            // Tab 10: Performance-Bewertung (Performance Evaluation)
+            performance: {
+                qualityScore: parseInt(formData.get('supplierQualityScore')) || 0,
+                deliveryScore: parseInt(formData.get('supplierDeliveryScore')) || 0,
+                priceScore: parseInt(formData.get('supplierPriceScore')) || 0,
+                serviceScore: parseInt(formData.get('supplierServiceScore')) || 0,
+                innovationScore: parseInt(formData.get('innovationScore')) || 0,
+                sustainabilityScore: parseInt(formData.get('sustainabilityScore')) || 0,
+                flexibilityScore: parseInt(formData.get('flexibilityScore')) || 0,
+                communicationScore: parseInt(formData.get('communicationScore')) || 0,
+                overallScore: 0, // Will be calculated
+                performanceHistory: formData.get('performanceHistory'),
+                kpiTracking: formData.get('kpiTracking'),
+                benchmarking: formData.get('benchmarking')
+            },
+            
+            // Tab 11: Audit & Monitoring (Audit & Monitoring)
+            audit: {
+                lastAuditDate: formData.get('lastAuditDate'),
+                nextAuditDate: formData.get('nextAuditDate'),
+                auditFrequency: formData.get('auditFrequency'),
+                auditType: formData.get('auditType'),
+                auditResults: formData.get('auditResults'),
+                auditFindings: formData.get('auditFindings'),
+                correctiveActions: formData.get('correctiveActions'),
+                monitoringActivities: formData.get('monitoringActivities'),
+                auditReports: formData.get('auditReports')
+            },
+            
+            // Tab 12: Dokumentation (Documentation)
+            documentation: {
+                contracts: formData.get('contracts'),
+                specifications: formData.get('specifications'),
+                drawings: formData.get('drawings'),
+                procedures: formData.get('procedures'),
+                reports: formData.get('reports'),
+                correspondenceLog: formData.get('correspondenceLog'),
+                documentControl: formData.get('documentControl'),
+                retentionPolicy: formData.get('retentionPolicy'),
+                accessControl: formData.get('accessControl')
+            },
+            
+            // Tab 13: Kommunikation (Communication)
+            communication: {
+                communicationChannels: formData.get('communicationChannels'),
+                meetingFrequency: formData.get('meetingFrequency'),
+                escalationProcedures: formData.get('escalationProcedures'),
+                feedbackMechanisms: formData.get('feedbackMechanisms'),
+                partnershipLevel: formData.get('partnershipLevel'),
+                strategicAlignment: formData.get('strategicAlignment'),
+                jointDevelopment: formData.get('jointDevelopment'),
+                futureOpportunities: formData.get('futureOpportunities'),
+                relationshipManager: formData.get('relationshipManager')
+            },
+            
+            // Metadata
+            metadata: {
+                createdAt: this.currentEditingSupplierId ? 
+                    this.suppliers.find(s => s.id === this.currentEditingSupplierId)?.metadata?.createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                version: this.currentEditingSupplierId ? 
+                    ((this.suppliers.find(s => s.id === this.currentEditingSupplierId)?.metadata?.version || 0) + 1) : 1,
+                lastEvaluatedBy: this.getCurrentUser()?.name || 'Unknown',
                 notes: formData.get('evaluationNotes')
-            },
-            createdAt: this.currentEditingSupplierId ? 
-                this.suppliers.find(s => s.id === this.currentEditingSupplierId)?.createdAt : new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            }
         };
+        
+        // Calculate overall performance score
+        const scores = [
+            supplierData.performance.qualityScore,
+            supplierData.performance.deliveryScore,
+            supplierData.performance.priceScore,
+            supplierData.performance.serviceScore,
+            supplierData.performance.innovationScore,
+            supplierData.performance.sustainabilityScore,
+            supplierData.performance.flexibilityScore,
+            supplierData.performance.communicationScore
+        ].filter(score => score > 0);
+        
+        supplierData.performance.overallScore = scores.length > 0 ? 
+            Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
 
         // Check for duplicate supplier number (only for new suppliers or when number changed)
-        const existingSupplier = this.suppliers.find(s => s.number === supplierData.number);
+        const existingSupplier = this.suppliers.find(s => s.basic?.number === supplierData.basic.number);
         if (existingSupplier && (!this.currentEditingSupplierId || existingSupplier.id !== this.currentEditingSupplierId)) {
             alert('Diese Lieferantennummer ist bereits vergeben. Bitte wählen Sie eine andere.');
             return;
@@ -17590,7 +19148,7 @@ PLZ Ort">${user.address || ''}</textarea>
         document.getElementById('supplierModal').style.display = 'none';
         this.currentEditingSupplierId = null;
 
-        alert(`Lieferant "${supplierData.name}" wurde erfolgreich ${action}.`);
+        alert(`Lieferant "${supplierData.basic.name}" wurde erfolgreich ${action}.`);
     }
 
     filterSuppliers() {
@@ -18044,9 +19602,9 @@ PLZ Ort">${user.address || ''}</textarea>
                            placeholder="z.B. ISO 9001">
                 </div>
                 <div class="form-group">
-                    <label for="certValidUntil_${certId}">Gültig bis *</label>
+                    <label for="certValidUntil_${certId}">Gültig bis</label>
                     <input type="date" id="certValidUntil_${certId}" name="certValidUntil_${certId}" 
-                           autocomplete="off" required>
+                           autocomplete="off">
                 </div>
             </div>
             <div class="form-group">
@@ -18980,7 +20538,7 @@ PLZ Ort">${user.address || ''}</textarea>
         this.setupVacationForms();
         
         // Render initial content
-        console.log('🎨 Rendering vacation dashboard...');
+        console.log('🎨 Rendering vacation window.qhseDashboard...');
         this.renderVacationDashboard();
         this.updateVacationBalance();
         
@@ -21125,64 +22683,136 @@ function printSection(sectionId) {
     printWindow.print();
 }
 
-// Global dashboard instance for onclick handlers
-// Dashboard will be initialized in index.html
-// This allows for proper global access to the instance
+// Simple Machine Management Functions (Global functions)
+let machines = JSON.parse(localStorage.getItem('qhse_machines') || '[]');
 
-// Additional utility functions
-function formatDate(date) {
-    return new Date(date).toLocaleDateString('de-DE');
+function openMachineModal() {
+    console.log('🔧 Opening machine modal...');
+    const modal = document.getElementById('machineModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Focus first input
+        setTimeout(() => {
+            const firstInput = modal.querySelector('input');
+            if (firstInput) firstInput.focus();
+        }, 100);
+    }
 }
 
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+function closeMachineModal() {
+    const modal = document.getElementById('machineModal');
+    if (modal) {
+        modal.style.display = 'none';
+        // Reset form
+        const form = document.getElementById('machineForm');
+        if (form) form.reset();
+    }
 }
 
-// Export functionality for reports
-function exportToCSV(data, filename) {
-    const csv = data.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
+function saveMachine() {
+    const form = document.getElementById('machineForm');
+    if (!form) return;
+    
+    // Get form data
+    const machineData = {
+        id: Date.now().toString(),
+        name: document.getElementById('machineName').value.trim(),
+        type: document.getElementById('machineType').value,
+        location: document.getElementById('machineLocation').value.trim(),
+        status: document.getElementById('machineStatus').value,
+        notes: document.getElementById('machineNotes').value.trim(),
+        createdAt: new Date().toISOString()
+    };
+    
+    // Validate required fields
+    if (!machineData.name || !machineData.type || !machineData.location || !machineData.status) {
+        alert('Bitte füllen Sie alle Pflichtfelder (*) aus!');
+        return;
+    }
+    
+    // Add to machines array
+    machines.push(machineData);
+    
+    // Save to storage
+    localStorage.setItem('qhse_machines', JSON.stringify(machines));
+    
+    // Update UI
+    updateMachineStats();
+    renderMachinesList();
+    
+    // Close modal
+    closeMachineModal();
+    
+    // Show success message
+    alert(`✅ Maschine "${machineData.name}" wurde erfolgreich hinzugefügt!`);
 }
 
-// Print functionality
-function printSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <title>QHSE Bericht - Hoffmann & Voss GmbH</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .no-print { display: none; }
-                    @media print {
-                        .no-print { display: none !important; }
-                    }
-                </style>
-            </head>
-            <body>
-                <h1>Hoffmann & Voss GmbH - QHSE Management System</h1>
-                <p>Erstellt am: ${new Date().toLocaleDateString('de-DE')}</p>
-                <hr>
-                ${section.innerHTML}
-            </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
+function updateMachineStats() {
+    const total = machines.length;
+    const active = machines.filter(m => m.status === 'In Betrieb').length;
+    const maintenance = machines.filter(m => m.status === 'Wartung').length;
+    
+    const totalElement = document.getElementById('totalMachines');
+    const activeElement = document.getElementById('activeMachines');
+    const maintenanceElement = document.getElementById('maintenanceMachines');
+    
+    if (totalElement) totalElement.textContent = total;
+    if (activeElement) activeElement.textContent = active;
+    if (maintenanceElement) maintenanceElement.textContent = maintenance;
 }
 
-// Initialize dashboard when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    window.qhseDashboard = new QHSEDashboard();
-});
+function renderMachinesList() {
+    const container = document.getElementById('machinesList');
+    if (!container) return;
+    
+    if (machines.length === 0) {
+        container.innerHTML = `
+            <div class="no-items-message">
+                <i class="fas fa-cogs"></i>
+                <p>Noch keine Maschinen vorhanden</p>
+                <button class="btn-primary" onclick="openMachineModal()">
+                    <i class="fas fa-plus"></i> Erste Maschine hinzufügen
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = machines.map(machine => `
+        <div class="item-card">
+            <div class="item-header">
+                <h4>${machine.name}</h4>
+                <span class="status-badge status-${machine.status.toLowerCase().replace(' ', '-')}">${machine.status}</span>
+            </div>
+            <div class="item-details">
+                <p><strong>Typ:</strong> ${machine.type}</p>
+                <p><strong>Standort:</strong> ${machine.location}</p>
+                ${machine.notes ? `<p><strong>Bemerkungen:</strong> ${machine.notes}</p>` : ''}
+                <p><small>Erstellt: ${new Date(machine.createdAt).toLocaleDateString('de-DE')}</small></p>
+            </div>
+            <div class="item-actions">
+                <button onclick="deleteMachine('${machine.id}')" class="btn-danger btn-sm">
+                    <i class="fas fa-trash"></i> Löschen
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteMachine(machineId) {
+    const machine = machines.find(m => m.id === machineId);
+    if (!machine) return;
+    
+    if (confirm(`Möchten Sie die Maschine "${machine.name}" wirklich löschen?`)) {
+        machines = machines.filter(m => m.id !== machineId);
+        localStorage.setItem('qhse_machines', JSON.stringify(machines));
+        updateMachineStats();
+        renderMachinesList();
+        alert('✅ Maschine wurde erfolgreich gelöscht!');
+    }
+}
+
+// Setup machine management when DOM is loaded
+
+// Dashboard initialization is handled in index.html
+// to ensure proper timing with DOM elements
