@@ -28,6 +28,7 @@ class QHSEDashboard {
         this.supplierEvaluations = this.loadSupplierEvaluationsFromStorage();
         this.supplierDocuments = this.loadSupplierDocumentsFromStorage();
         this.supplierAudits = this.loadSupplierAuditsFromStorage();
+        this.riskAssessments = this.loadRiskAssessmentsFromStorage();
         this.initializeRootAdmin();
         this.initializeDefaultAreas();
         this.initializeDefaultDepartments();
@@ -61,6 +62,7 @@ class QHSEDashboard {
         this.setupSupplierManagement();
         this.setupVacationManagement();
         this.setupUserProfiles();
+        this.setupRiskAssessment();
         this.loadCustomLabels();
         
         // Apply saved color theme on load
@@ -2086,7 +2088,7 @@ PLZ Ort">${user.address || ''}</textarea>
         this.roleDefinitions = {
             'root-admin': {
                 name: 'Root Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'einstellungen', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'einstellungen', 'mein-profil'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2094,7 +2096,7 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             admin: {
                 name: 'Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2102,27 +2104,27 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             geschaeftsfuehrung: {
                 name: 'Geschäftsführung',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 1,
                 canSupervise: ['betriebsleiter', 'qhse']
             },
             betriebsleiter: {
                 name: 'Betriebsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 2,
                 canSupervise: ['abteilungsleiter'],
                 mustHaveSupervisor: ['geschaeftsfuehrung']
             },
             abteilungsleiter: {
                 name: 'Abteilungsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 3,
                 canSupervise: ['mitarbeiter'],
                 mustHaveSupervisor: ['betriebsleiter']
             },
             qhse: {
                 name: 'QHSE-Mitarbeiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
                 hierarchyLevel: 2,
                 isStaffPosition: true,
                 mustHaveSupervisor: ['geschaeftsfuehrung']
@@ -2315,8 +2317,27 @@ PLZ Ort">${user.address || ''}</textarea>
                 // Show target section
                 sections.forEach(section => section.classList.remove('active'));
                 const targetSectionElement = document.getElementById(targetSection + '-section');
+                
+                console.log('🔍 Navigation debug:', {
+                    targetSection,
+                    elementId: targetSection + '-section',
+                    elementFound: !!targetSectionElement,
+                    elementClasses: targetSectionElement ? targetSectionElement.className : 'not found'
+                });
+                
                 if (targetSectionElement) {
                     targetSectionElement.classList.add('active');
+                    console.log('✅ Section activated:', targetSection);
+                    
+                    // Special handling for specific sections
+                    if (targetSection === 'gefahrstoffe') {
+                        console.log('🧪 Gefahrstoffe section activated - re-initializing...');
+                        setTimeout(() => {
+                            this.setupHazardousSubstances();
+                        }, 100);
+                    }
+                } else {
+                    console.error('❌ Section element not found:', targetSection + '-section');
                 }
 
                 // Update page title
@@ -8721,19 +8742,48 @@ PLZ Ort">${user.address || ''}</textarea>
     // Setup Form Tabs
     setupFormTabs() {
         const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
         
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const targetTab = btn.getAttribute('data-tab');
+                const modalContainer = btn.closest('.modal-content, .content-section');
                 
-                // Remove active class from all tabs and contents
-                tabBtns.forEach(b => b.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
+                if (!modalContainer) return;
                 
-                // Add active class to clicked tab and corresponding content
+                // Remove active class from tabs and contents within this container only
+                const containerTabBtns = modalContainer.querySelectorAll('.tab-btn');
+                const containerTabContents = modalContainer.querySelectorAll('.tab-content');
+                
+                containerTabBtns.forEach(b => b.classList.remove('active'));
+                containerTabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
                 btn.classList.add('active');
-                document.getElementById(targetTab + '-tab').classList.add('active');
+                
+                // Find matching tab content within the same container
+                let targetContent = null;
+                
+                // Try different approaches to find the content
+                if (modalContainer.querySelector(`#${targetTab}-tab`)) {
+                    targetContent = modalContainer.querySelector(`#${targetTab}-tab`);
+                } else if (modalContainer.querySelector(`#tab-${targetTab}`)) {
+                    targetContent = modalContainer.querySelector(`#tab-${targetTab}`);
+                } else if (modalContainer.querySelector(`#${targetTab}`)) {
+                    targetContent = modalContainer.querySelector(`#${targetTab}`);
+                } else {
+                    // Try data-tab attribute matching
+                    targetContent = modalContainer.querySelector(`[data-tab="${targetTab}"].tab-content`);
+                }
+                
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                } else {
+                    // Only warn if this is not in a closed modal
+                    const modal = btn.closest('.modal');
+                    if (!modal || modal.style.display !== 'none') {
+                        console.warn(`Tab content not found for: ${targetTab} in container`);
+                    }
+                }
             });
         });
     }
@@ -15459,32 +15509,52 @@ PLZ Ort">${user.address || ''}</textarea>
     }
 
     setupHazardousSubstances() {
-        // Setup event listeners
-        this.setupSubstanceEventListeners();
+        console.log('🧪 Setting up Hazardous Substances module...');
         
-        // Initialize UI
-        this.populateSubstanceDepartmentDropdowns();
-        this.renderSubstancesList();
-        this.updateSubstanceStatistics();
-        
-        // Setup form tabs
-        this.setupSubstanceFormTabs();
-        
-        // Setup file uploads
-        this.setupSubstanceFileUploads();
+        // Delay setup to ensure DOM is ready and avoid conflicts
+        setTimeout(() => {
+            // Setup event listeners
+            this.setupSubstanceEventListeners();
+            
+            // Initialize UI
+            this.populateSubstanceDepartmentDropdowns();
+            this.renderSubstancesList();
+            this.updateSubstanceStatistics();
+            
+            // Setup form tabs
+            this.setupSubstanceFormTabs();
+            
+            // Setup file uploads
+            this.setupSubstanceFileUploads();
+            
+            console.log('🧪 Hazardous Substances module setup complete');
+        }, 100);
     }
 
     setupSubstanceEventListeners() {
+        console.log('🧪 Setting up substance event listeners...');
+        
         // Main action buttons
         const addSubstanceBtn = document.getElementById('addSubstanceBtn');
         const substanceReportsBtn = document.getElementById('substanceReportsBtn');
         
+        console.log('🧪 Found addSubstanceBtn:', !!addSubstanceBtn);
+        console.log('🧪 Found substanceReportsBtn:', !!substanceReportsBtn);
+        
         if (addSubstanceBtn) {
-            addSubstanceBtn.addEventListener('click', () => this.openSubstanceModal());
+            // Remove existing listeners to avoid duplicates
+            addSubstanceBtn.removeEventListener('click', this.openSubstanceModal);
+            addSubstanceBtn.addEventListener('click', () => {
+                console.log('🧪 Add substance button clicked!');
+                this.openSubstanceModal();
+            });
+        } else {
+            console.error('🧪 addSubstanceBtn not found in DOM!');
         }
         
         if (substanceReportsBtn) {
             console.log('🧪 DEBUGGING: Setting up reports button listener');
+            substanceReportsBtn.removeEventListener('click', this.openSubstanceReports);
             substanceReportsBtn.addEventListener('click', () => {
                 console.log('🧪 DEBUGGING: Reports button clicked!');
                 this.openSubstanceReports();
@@ -15691,13 +15761,23 @@ PLZ Ort">${user.address || ''}</textarea>
     }
 
     renderSubstancesList() {
+        console.log('🧪 Rendering substances list...');
         const tableBody = document.getElementById('substanceTableBody');
         const noSubstancesMessage = document.getElementById('noSubstancesMessage');
         
-        if (!tableBody) return;
+        console.log('🧪 Found elements:', {
+            tableBody: !!tableBody,
+            noSubstancesMessage: !!noSubstancesMessage
+        });
+        
+        if (!tableBody) {
+            console.error('🧪 substanceTableBody not found!');
+            return;
+        }
 
         // Apply current filters
         const filteredSubstances = this.getFilteredSubstances();
+        console.log('🧪 Filtered substances count:', filteredSubstances.length);
 
         if (filteredSubstances.length === 0) {
             tableBody.innerHTML = '';
@@ -15843,13 +15923,24 @@ PLZ Ort">${user.address || ''}</textarea>
     }
 
     updateSubstanceStatistics() {
+        console.log('🧪 Updating substance statistics...');
+        console.log('🧪 Total substances:', this.hazardousSubstances.length);
+        
         const totalSubstances = document.getElementById('totalSubstances');
         const highRiskSubstances = document.getElementById('highRiskSubstances');
         const expiredSDS = document.getElementById('expiredSDS');
         const storageLocations = document.getElementById('storageLocations');
 
+        console.log('🧪 Found stat elements:', {
+            totalSubstances: !!totalSubstances,
+            highRiskSubstances: !!highRiskSubstances,
+            expiredSDS: !!expiredSDS,
+            storageLocations: !!storageLocations
+        });
+
         if (totalSubstances) {
             totalSubstances.textContent = this.hazardousSubstances.length;
+            console.log('🧪 Set total substances to:', this.hazardousSubstances.length);
         }
 
         if (highRiskSubstances) {
@@ -17880,6 +17971,2483 @@ PLZ Ort">${user.address || ''}</textarea>
             console.error('Error loading supplier audits:', error);
             return [];
         }
+    }
+
+    loadRiskAssessmentsFromStorage() {
+        const data = localStorage.getItem('qhse_risk_assessments');
+        return data ? JSON.parse(data) : [];
+    }
+
+    setupRiskAssessment() {
+        console.log('🔧 Setting up Risk Assessment module...');
+        setTimeout(() => {
+            this.updateRiskAssessmentDashboard();
+            this.setupRiskAssessmentEventListeners();
+        }, 100);
+    }
+
+    updateRiskAssessmentDashboard() {
+        // Update dashboard statistics
+        const totalAssessments = this.riskAssessments.length;
+        const overdueAssessments = this.riskAssessments.filter(ra => 
+            new Date(ra.nextReview) < new Date()
+        ).length;
+        const highRiskAssessments = this.riskAssessments.filter(ra => 
+            ra.riskLevel === 'high' || ra.riskLevel === 'very-high'
+        ).length;
+        
+        // Update stat numbers if elements exist
+        const statElements = {
+            'totalRiskAssessments': totalAssessments,
+            'expiredRiskAssessments': overdueAssessments,
+            'inProgressRiskAssessments': this.riskAssessments.filter(ra => ra.status === 'draft').length,
+            'approvedRiskAssessments': this.riskAssessments.filter(ra => ra.status === 'approved').length
+        };
+        
+        Object.entries(statElements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = value;
+        });
+        
+        // Render risk assessments table
+        this.renderRiskAssessmentTable();
+    }
+
+    setupRiskAssessmentEventListeners() {
+        // Setup new assessment button (fallback for direct event listener)
+        const newAssessmentBtn = document.getElementById('newRiskAssessmentBtn');
+        if (newAssessmentBtn) {
+            newAssessmentBtn.addEventListener('click', () => this.openRiskAssessmentModal());
+        }
+        
+        // Setup modal close handlers
+        const modal = document.getElementById('riskAssessmentModal');
+        if (modal) {
+            const closeBtn = modal.querySelector('#closeRiskAssessmentModal');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => this.closeRiskAssessmentModal());
+            }
+            
+            // Close on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeRiskAssessmentModal();
+                }
+            });
+        }
+        
+        // Setup tab switching (will be re-initialized when modal opens)
+        this.setupTabEventListeners();
+
+        // Setup hazard selection checkboxes
+        this.setupHazardCheckboxEventListeners();
+        
+        // Setup risk calculation listeners
+        this.setupRiskCalculationListeners();
+        
+        // Setup form submission
+        const form = document.getElementById('riskAssessmentForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveRiskAssessment();
+            });
+        }
+
+        // Setup save button event listeners
+        const saveBtn = document.getElementById('saveRiskAssessmentBtn');
+        const saveAndCloseBtn = document.getElementById('saveAndCloseRiskAssessmentBtn');
+        const cancelBtn = document.getElementById('cancelRiskAssessmentBtn');
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.saveRiskAssessment(false); // Save but keep modal open
+            });
+        }
+
+        if (saveAndCloseBtn) {
+            saveAndCloseBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.saveRiskAssessment(true); // Save and close modal
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeRiskAssessmentModal();
+            });
+        }
+    }
+
+    setupRiskCalculationListeners() {
+        console.log('🔧 Setting up risk calculation listeners...');
+        
+        // Setup automatic risk calculation
+        const riskInputs = ['riskSeverity', 'riskProbability', 'riskAvoidability'];
+        
+        riskInputs.forEach(inputName => {
+            const inputs = document.querySelectorAll(`input[name="${inputName}"]`);
+            console.log(`Found ${inputs.length} inputs for ${inputName}`);
+            
+            inputs.forEach(input => {
+                // Remove existing listeners to avoid duplicates
+                const boundCalculateRisk = this.calculateRisk.bind(this);
+                input.removeEventListener('change', boundCalculateRisk);
+                
+                // Add new listener with proper this binding
+                input.addEventListener('change', () => {
+                    console.log(`Risk input changed: ${inputName} = ${input.value}`);
+                    this.calculateRisk();
+                });
+            });
+        });
+        
+        // Also setup listeners for the individual radio buttons by ID
+        const radioIds = [
+            'severity-1', 'severity-2', 'severity-3', 'severity-4',
+            'probability-1', 'probability-2', 'probability-3', 'probability-4',
+            'avoidability-1', 'avoidability-2', 'avoidability-3', 'avoidability-4'
+        ];
+        
+        radioIds.forEach(id => {
+            const radio = document.getElementById(id);
+            if (radio) {
+                const boundCalculateRisk = this.calculateRisk.bind(this);
+                radio.removeEventListener('change', boundCalculateRisk);
+                radio.addEventListener('change', () => {
+                    console.log(`Radio changed: ${id} = ${radio.value}`);
+                    this.calculateRisk();
+                });
+                console.log(`Added listener to ${id}`);
+            } else {
+                console.warn(`Radio button ${id} not found`);
+            }
+        });
+    }
+
+    calculateRisk() {
+        console.log('🔢 Calculating risk...');
+        
+        const severity = this.getSelectedValue('riskSeverity');
+        const probability = this.getSelectedValue('riskProbability');
+        const avoidability = this.getSelectedValue('riskAvoidability');
+        
+        console.log(`Values: S=${severity}, W=${probability}, V=${avoidability}`);
+        
+        // Update display values - check if elements exist
+        const severityElement = document.getElementById('selectedSeverity');
+        const probabilityElement = document.getElementById('selectedProbability');
+        const avoidabilityElement = document.getElementById('selectedAvoidability');
+        
+        if (severityElement) severityElement.textContent = severity || '-';
+        if (probabilityElement) probabilityElement.textContent = probability || '-';
+        if (avoidabilityElement) avoidabilityElement.textContent = avoidability || '-';
+        
+        if (severity && probability && avoidability) {
+            const riskValue = parseInt(severity) * parseInt(probability) * parseInt(avoidability);
+            const riskLevel = this.getRiskLevel(riskValue);
+            const requiredActions = this.getRequiredActions(riskValue);
+            
+            console.log(`Risk calculation: ${severity} × ${probability} × ${avoidability} = ${riskValue} (${riskLevel})`);
+            
+            // Update calculation display
+            const calculatedRiskElement = document.getElementById('calculatedRisk');
+            if (calculatedRiskElement) {
+                calculatedRiskElement.textContent = riskValue;
+                calculatedRiskElement.className = `risk-result ${riskLevel}`;
+            }
+            
+            // Update risk level display
+            const riskLevelElement = document.getElementById('riskLevel');
+            if (riskLevelElement) {
+                riskLevelElement.textContent = this.getRiskLevelText(riskLevel);
+                riskLevelElement.className = `risk-badge ${riskLevel}`;
+            }
+            
+            // Update required actions
+            const requiredActionsElement = document.getElementById('requiredActions');
+            if (requiredActionsElement) {
+                requiredActionsElement.textContent = requiredActions;
+            }
+            
+            console.log(`✅ Risk calculated: S=${severity} × W=${probability} × V=${avoidability} = ${riskValue} (${riskLevel})`);
+        } else {
+            // Reset display if not all values selected
+            const calculatedRiskElement = document.getElementById('calculatedRisk');
+            const riskLevelElement = document.getElementById('riskLevel');
+            const requiredActionsElement = document.getElementById('requiredActions');
+            
+            if (calculatedRiskElement) calculatedRiskElement.textContent = '-';
+            if (riskLevelElement) {
+                riskLevelElement.textContent = 'Nicht bewertet';
+                riskLevelElement.className = 'risk-badge';
+            }
+            if (requiredActionsElement) requiredActionsElement.textContent = 'Bitte Bewertung durchführen';
+            
+            console.log('⚠️ Risk calculation incomplete - missing values');
+        }
+    }
+
+    getSelectedValue(inputName) {
+        const selected = document.querySelector(`input[name="${inputName}"]:checked`);
+        const value = selected ? selected.value : null;
+        console.log(`Getting value for ${inputName}: ${value}`);
+        return value;
+    }
+
+    getRiskLevel(riskValue) {
+        if (riskValue >= 16) return 'kritisch';
+        if (riskValue >= 8) return 'hoch';
+        if (riskValue >= 4) return 'mittel';
+        if (riskValue >= 1) return 'niedrig';
+        return 'unbewertet';
+    }
+
+    getRiskLevelText(level) {
+        const texts = {
+            'niedrig': 'Niedriges Risiko',
+            'mittel': 'Mittleres Risiko',
+            'hoch': 'Hohes Risiko',
+            'kritisch': 'Kritisches Risiko',
+            'unbewertet': 'Nicht bewertet'
+        };
+        return texts[level] || level;
+    }
+
+    getRequiredActions(riskValue) {
+        if (riskValue >= 16) {
+            return 'SOFORTIGE MASSNAHMEN ZWINGEND! Betrieb einstellen bis Lösung vorhanden.';
+        } else if (riskValue >= 8) {
+            return 'Maßnahmen zur Risikoreduktion erforderlich. Zeitnahe Umsetzung notwendig.';
+        } else if (riskValue >= 4) {
+            return 'Überwachung erforderlich. Verbesserungen anstreben, wenn verhältnismäßig.';
+        } else if (riskValue >= 1) {
+            return 'Akzeptabel - Keine zusätzlichen Maßnahmen erforderlich. Bestehende Maßnahmen aufrechterhalten.';
+        }
+        return 'Bitte Bewertung durchführen';
+    }
+
+    renderRiskAssessmentTable() {
+        const tableBody = document.getElementById('riskAssessmentTableBody');
+        if (!tableBody) return;
+        
+        if (this.riskAssessments.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Keine Gefährdungsbeurteilungen vorhanden</td></tr>';
+            return;
+        }
+        
+        tableBody.innerHTML = this.riskAssessments.map(assessment => `
+            <tr>
+                <td>${assessment.title || 'Unbenannt'}</td>
+                <td>${assessment.workplace || '-'}</td>
+                <td>${assessment.department || '-'}</td>
+                <td><span class="gbu-risk-badge ${assessment.riskLevel}">${this.getRiskLevelText(assessment.riskLevel)}</span></td>
+                <td>${assessment.assessor || '-'}</td>
+                <td>${assessment.lastReview ? new Date(assessment.lastReview).toLocaleDateString('de-DE') : '-'}</td>
+                <td class="actions">
+                    <button class="btn-icon btn-view" onclick="qhseDashboard.viewRiskAssessment('${assessment.id}')" title="Anzeigen">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-icon btn-edit" onclick="qhseDashboard.editRiskAssessment('${assessment.id}')" title="Bearbeiten">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-icon btn-delete" onclick="qhseDashboard.deleteRiskAssessment('${assessment.id}')" title="Löschen">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    getRiskLevelText(level) {
+        const texts = {
+            'low': 'Niedrig',
+            'medium': 'Mittel',
+            'high': 'Hoch',
+            'very-high': 'Sehr Hoch'
+        };
+        return texts[level] || level;
+    }
+
+    openRiskAssessmentModal(assessmentId = null) {
+        const modal = document.getElementById('riskAssessmentModal');
+        if (modal) {
+            // Show modal by changing display style
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+            
+            if (assessmentId) {
+                // Load existing assessment data
+                const assessment = this.riskAssessments.find(ra => ra.id === assessmentId);
+                if (assessment) {
+                    this.populateRiskAssessmentForm(assessment);
+                }
+            } else {
+                // Clear form for new assessment
+                this.clearRiskAssessmentForm();
+            }
+            
+            // Switch to first tab - using correct tab name
+            this.switchRiskAssessmentTab('grunddaten');
+
+            // Re-setup event listeners for this modal instance
+            setTimeout(() => {
+                this.setupTabEventListeners();
+                this.setupHazardCheckboxEventListeners();
+                this.setupRiskCalculationListeners();
+                this.setupRiskAssessmentInteractions();
+                
+                // Test risk calculation setup
+                this.testRiskCalculationSetup();
+            }, 500);
+        } else {
+            console.error('Risk Assessment Modal not found in DOM');
+        }
+    }
+
+    closeRiskAssessmentModal() {
+        const modal = document.getElementById('riskAssessmentModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+        }
+    }
+
+    switchRiskAssessmentTab(tabName) {
+        // Update tab buttons (correct selector for the modal)
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(tab => {
+            tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
+        });
+        
+        // Update tab content (correct selector)
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => {
+            content.classList.toggle('active', content.id === `tab-${tabName}`);
+        });
+
+        // Special handling for specific tabs
+        if (tabName === 'risikobewertung') {
+            // Initialize risk assessment tab when switched to
+            setTimeout(() => {
+                const selectedHazards = this.getSelectedHazards();
+                this.updateRiskAssessmentTab(selectedHazards);
+                // Re-setup risk calculation listeners when switching to this tab
+                this.setupRiskCalculationListeners();
+                console.log('🔄 Risk assessment tab activated, listeners setup');
+            }, 100);
+        }
+
+        if (tabName === 'gefaehrdungsanalyse') {
+            // Re-setup hazard selection when switched to this tab
+            setTimeout(() => {
+                this.setupHazardCheckboxEventListeners();
+            }, 100);
+        }
+    }
+
+    clearRiskAssessmentForm() {
+        const form = document.getElementById('riskAssessmentForm');
+        if (form) {
+            form.reset();
+            // Auto-generate GBU number for new assessments
+            const gbuNummer = document.getElementById('gbuNummer');
+            if (gbuNummer) {
+                gbuNummer.value = this.generateGBUNumber();
+            }
+            // Set current date
+            const gbuDatum = document.getElementById('gbuDatum');
+            if (gbuDatum) {
+                gbuDatum.value = new Date().toISOString().split('T')[0];
+            }
+            // Set current user as creator
+            const gbuErsteller = document.getElementById('gbuErsteller');
+            if (gbuErsteller) {
+                const currentUser = this.getCurrentUser();
+                gbuErsteller.value = currentUser ? currentUser.displayName : '';
+            }
+            // Populate dropdowns
+            this.populateGBUDropdowns();
+        }
+    }
+
+    populateGBUDropdowns() {
+        // Populate departments dropdown
+        const bereichSelect = document.getElementById('gbuBereich');
+        if (bereichSelect) {
+            bereichSelect.innerHTML = '<option value="">Bitte wählen...</option>';
+            this.departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.id;
+                option.textContent = dept.name;
+                bereichSelect.appendChild(option);
+            });
+        }
+
+        // Populate responsible person dropdown
+        const verantwortlicherSelect = document.getElementById('gbuVerantwortlicher');
+        if (verantwortlicherSelect) {
+            verantwortlicherSelect.innerHTML = '<option value="">Bitte wählen...</option>';
+            this.users.filter(user => user.isActive).forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.displayName;
+                verantwortlicherSelect.appendChild(option);
+            });
+        }
+    }
+
+    populateRiskAssessmentForm(assessment) {
+        // This would populate form fields with existing assessment data
+        // Implementation depends on the specific form structure
+    }
+
+    saveRiskAssessment(closeAfterSave = true) {
+        const form = document.getElementById('riskAssessmentForm');
+        if (!form) {
+            alert('Formular nicht gefunden!');
+            return;
+        }
+
+        // Validate required fields
+        const requiredFields = form.querySelectorAll('[required]');
+        let hasErrors = false;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.style.borderColor = '#dc2626';
+                hasErrors = true;
+            } else {
+                field.style.borderColor = '';
+            }
+        });
+
+        if (hasErrors) {
+            alert('Bitte füllen Sie alle erforderlichen Felder aus!');
+            return;
+        }
+        
+        const formData = new FormData(form);
+        
+        // Collect selected hazards
+        const selectedHazards = this.getSelectedHazards();
+        
+        // Collect risk assessments
+        const riskAssessments = {};
+        selectedHazards.forEach(hazard => {
+            const probability = document.querySelector(`select[name="probability_${hazard.id}"]`)?.value;
+            const severity = document.querySelector(`select[name="severity_${hazard.id}"]`)?.value;
+            if (probability && severity) {
+                riskAssessments[hazard.id] = {
+                    hazard: hazard,
+                    probability: parseInt(probability),
+                    severity: parseInt(severity),
+                    riskValue: parseInt(probability) * parseInt(severity),
+                    riskLevel: this.getRiskLevelFromValue(parseInt(probability) * parseInt(severity))
+                };
+            }
+        });
+
+        // Collect protective measures
+        const protectiveMeasures = [];
+        const measureElements = document.querySelectorAll('.protective-measure');
+        measureElements.forEach(element => {
+            const measureId = element.id;
+            const description = element.querySelector(`textarea[name*="${measureId}"]`)?.value;
+            const responsible = element.querySelector(`select[name*="responsible_${measureId}"]`)?.value;
+            const deadline = element.querySelector(`input[name*="deadline_${measureId}"]`)?.value;
+            const status = element.querySelector(`select[name*="status_${measureId}"]`)?.value;
+            const priority = element.querySelector(`select[name*="priority_${measureId}"]`)?.value;
+            
+            if (description) {
+                protectiveMeasures.push({
+                    id: measureId,
+                    description,
+                    responsible,
+                    deadline,
+                    status,
+                    priority
+                });
+            }
+        });
+        
+        // Collect data from all form fields
+        const assessment = {
+            id: Date.now().toString(),
+            // Grunddaten
+            nummer: formData.get('gbuNummer') || this.generateGBUNumber(),
+            title: formData.get('gbuTitel') || 'Neue Gefährdungsbeurteilung',
+            bereich: formData.get('gbuBereich') || '',
+            abteilung: formData.get('gbuAbteilung') || '',
+            ersteller: formData.get('gbuErsteller') || '',
+            datum: formData.get('gbuDatum') || new Date().toISOString().split('T')[0],
+            // Arbeitsplatz
+            arbeitsplatz: formData.get('arbeitsplatzBezeichnung') || '',
+            ort: formData.get('arbeitsplatzOrt') || '',
+            // Gefährdungen und Risikobewertung
+            selectedHazards: selectedHazards,
+            riskAssessments: riskAssessments,
+            protectiveMeasures: protectiveMeasures,
+            // Status und Bewertung
+            riskLevel: this.calculateOverallRiskFromAssessments(riskAssessments),
+            status: 'draft',
+            lastReview: new Date().toISOString(),
+            nextReview: formData.get('naechstePruefung') || '',
+            // Metadata
+            createdAt: new Date().toISOString(),
+            createdBy: this.currentUserId
+        };
+        
+        // Check if editing existing assessment
+        const existingIndex = this.riskAssessments.findIndex(ra => ra.id === formData.get('assessmentId'));
+        
+        if (existingIndex >= 0) {
+            // Update existing
+            this.riskAssessments[existingIndex] = { ...this.riskAssessments[existingIndex], ...assessment };
+            alert('Gefährdungsbeurteilung erfolgreich aktualisiert!');
+        } else {
+            // Add new
+            this.riskAssessments.push(assessment);
+            alert('Gefährdungsbeurteilung erfolgreich erstellt!');
+        }
+        
+        this.saveRiskAssessmentsToStorage();
+        this.updateRiskAssessmentDashboard();
+        
+        if (closeAfterSave) {
+            this.closeRiskAssessmentModal();
+        }
+    }
+
+    generateGBUNumber() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const count = this.riskAssessments.length + 1;
+        return `GBU-${year}-${count.toString().padStart(3, '0')}`;
+    }
+
+    calculateOverallRisk(formData) {
+        // Simple risk calculation - can be enhanced later
+        // For now, return medium as default
+        return 'medium';
+    }
+
+    calculateOverallRiskFromAssessments(riskAssessments) {
+        if (!riskAssessments || Object.keys(riskAssessments).length === 0) {
+            return 'medium';
+        }
+
+        // Find the highest risk level
+        let highestRisk = 0;
+        Object.values(riskAssessments).forEach(assessment => {
+            if (assessment.riskValue > highestRisk) {
+                highestRisk = assessment.riskValue;
+            }
+        });
+
+        return this.getRiskLevelFromValue(highestRisk);
+    }
+
+    setupHazardSelection() {
+        // Only setup if we're actually in the risk assessment modal
+        const riskModal = document.getElementById('riskAssessmentModal');
+        if (!riskModal || riskModal.style.display === 'none') {
+            console.log('Risk Assessment modal not active, skipping hazard selection setup');
+            return;
+        }
+
+        // Setup event listeners for hazard category checkboxes
+        const hazardCheckboxes = document.querySelectorAll('#tab-gefaehrdungsanalyse input[type="checkbox"]');
+        console.log(`Setting up hazard selection for ${hazardCheckboxes.length} checkboxes`);
+        
+        hazardCheckboxes.forEach((checkbox, index) => {
+            // Remove existing listeners to avoid duplicates
+            checkbox.removeEventListener('change', this.onHazardSelectionChange);
+            
+            console.log(`Checkbox ${index}: name=${checkbox.name}, value=${checkbox.value}`);
+            checkbox.addEventListener('change', (e) => {
+                console.log(`Checkbox changed: ${e.target.name}=${e.target.value}, checked=${e.target.checked}`);
+                this.onHazardSelectionChange();
+            });
+        });
+
+        // Also add click listener to labels to ensure proper interaction
+        const labels = document.querySelectorAll('#tab-gefaehrdungsanalyse label');
+        labels.forEach(label => {
+            label.addEventListener('click', (e) => {
+                // Small delay to ensure checkbox state has changed
+                setTimeout(() => {
+                    this.onHazardSelectionChange();
+                }, 10);
+            });
+        });
+    }
+
+    setupTabEventListeners() {
+        // Setup tab switching within the modal
+        const tabs = document.querySelectorAll('#riskAssessmentModal .tab-btn');
+        tabs.forEach(tab => {
+            // Remove existing listeners to prevent duplicates
+            tab.removeEventListener('click', this.handleTabClick);
+            
+            // Add new listener
+            this.handleTabClick = (e) => {
+                e.preventDefault();
+                const targetTab = tab.getAttribute('data-tab');
+                console.log(`🔧 Tab clicked: ${targetTab}`);
+                this.switchRiskAssessmentTab(targetTab);
+            };
+            
+            tab.addEventListener('click', this.handleTabClick);
+        });
+        
+        console.log(`🔧 Setup ${tabs.length} tab event listeners`);
+    }
+
+    setupHazardCheckboxEventListeners() {
+        // Setup event listeners for all hazard checkboxes
+        const hazardCheckboxes = document.querySelectorAll('#tab-gefaehrdungsanalyse input[type="checkbox"]');
+        hazardCheckboxes.forEach(checkbox => {
+            // Create a unique handler for each checkbox
+            const handleHazardChange = () => {
+                console.log(`Hazard checkbox changed: ${checkbox.name} - ${checkbox.value} - ${checkbox.checked}`);
+                
+                // Update label styling based on checkbox state
+                const label = checkbox.closest('label');
+                if (label) {
+                    if (checkbox.checked) {
+                        label.classList.add('checked');
+                    } else {
+                        label.classList.remove('checked');
+                    }
+                }
+                
+                this.onHazardSelectionChange();
+            };
+            
+            // Remove any existing listener and add new one
+            checkbox.removeEventListener('change', handleHazardChange);
+            checkbox.addEventListener('change', handleHazardChange);
+            
+            // Store reference for potential cleanup
+            checkbox._hazardChangeHandler = handleHazardChange;
+        });
+        
+        console.log(`🔧 Setup ${hazardCheckboxes.length} hazard checkbox event listeners`);
+    }
+
+    setupRiskAssessmentInteractions() {
+        // Only setup if we're actually in the risk assessment modal
+        const riskModal = document.getElementById('riskAssessmentModal');
+        if (!riskModal || riskModal.style.display === 'none') {
+            console.log('Risk Assessment modal not active, skipping risk interactions setup');
+            return;
+        }
+
+        // Setup probability and severity dropdowns
+        const riskInputs = document.querySelectorAll('#tab-risikobewertung select, #tab-risikobewertung input');
+        riskInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                this.updateRiskCalculation();
+            });
+        });
+    }
+
+    onHazardSelectionChange() {
+        const selectedHazards = this.getSelectedHazards();
+        
+        // Update risk assessment tab with selected hazards
+        this.updateRiskAssessmentTab(selectedHazards);
+        
+        // Update protective measures suggestions
+        this.updateProtectiveMeasuresSuggestions(selectedHazards);
+        
+        // Show feedback to user
+        console.log('Selected hazards:', selectedHazards);
+    }
+
+    getSelectedHazards() {
+        const checkboxes = document.querySelectorAll('#tab-gefaehrdungsanalyse input[type="checkbox"]:checked');
+        const selectedHazards = [];
+        
+        checkboxes.forEach(checkbox => {
+            const label = checkbox.nextElementSibling;
+            const uniqueId = `${checkbox.name}_${checkbox.value}`;
+            selectedHazards.push({
+                id: uniqueId,
+                name: checkbox.name,
+                value: checkbox.value,
+                label: label ? label.textContent.trim() : checkbox.value,
+                category: this.getHazardCategoryFromName(checkbox.name)
+            });
+        });
+        
+        return selectedHazards;
+    }
+
+    getHazardCategory(checkbox) {
+        // Find the parent category group
+        const categoryGroup = checkbox.closest('.hazard-category-group');
+        if (categoryGroup) {
+            const categoryTitle = categoryGroup.querySelector('h4');
+            return categoryTitle ? categoryTitle.textContent.trim() : 'Unbekannt';
+        }
+        return 'Unbekannt';
+    }
+
+    getHazardCategoryFromName(hazardName) {
+        const categoryNames = {
+            'hazard_mechanical': 'Mechanische Gefährdungen',
+            'hazard_electrical': 'Elektrische Gefährdungen', 
+            'hazard_thermal': 'Thermische Gefährdungen',
+            'hazard_chemical': 'Chemische Gefährdungen',
+            'hazard_biological': 'Biologische Gefährdungen',
+            'hazard_physical': 'Physikalische Gefährdungen',
+            'hazard_ergonomic': 'Ergonomische Gefährdungen',
+            'hazard_psychosocial': 'Psychische Gefährdungen'
+        };
+        return categoryNames[hazardName] || 'Unbekannte Kategorie';
+    }
+
+    // Erweiterte Gefährdungsanalyse mit Arbeitsplatz-spezifischen Vorschlägen
+    getWorkplaceSpecificHazards(workplaceType) {
+        const workplaceHazards = {
+            'buero': ['hazard_ergonomic', 'hazard_psychosocial', 'hazard_electrical'],
+            'werkstatt': ['hazard_mechanical', 'hazard_electrical', 'hazard_chemical', 'hazard_physical'],
+            'labor': ['hazard_chemical', 'hazard_biological', 'hazard_electrical', 'hazard_physical'],
+            'lager': ['hazard_mechanical', 'hazard_ergonomic', 'hazard_chemical'],
+            'produktion': ['hazard_mechanical', 'hazard_chemical', 'hazard_physical', 'hazard_ergonomic'],
+            'kuche': ['hazard_thermal', 'hazard_mechanical', 'hazard_chemical', 'hazard_biological'],
+            'baustelle': ['hazard_mechanical', 'hazard_thermal', 'hazard_electrical', 'hazard_ergonomic']
+        };
+        
+        return workplaceHazards[workplaceType] || [];
+    }
+
+    updateRiskAssessmentTab(selectedHazards) {
+        const riskContainer = document.getElementById('riskAssessmentContainer');
+        if (!riskContainer) return;
+
+        if (selectedHazards.length === 0) {
+            riskContainer.innerHTML = `
+                <div class="no-hazards-selected">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Bitte wählen Sie zunächst Gefährdungen im Tab "Gefährdungsanalyse" aus.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Create risk assessment interface for selected hazards
+        let html = '<div class="selected-hazards-assessment">';
+        html += '<h4>Risikobewertung für ausgewählte Gefährdungen</h4>';
+        
+        selectedHazards.forEach(hazard => {
+            html += `
+                <div class="hazard-risk-assessment" data-hazard-id="${hazard.id}">
+                    <h5><i class="fas fa-exclamation-triangle"></i> ${hazard.label}</h5>
+                    <div class="risk-assessment-grid">
+                        <div class="assessment-item">
+                            <label>Eintrittswahrscheinlichkeit</label>
+                            <select name="probability_${hazard.id}" class="probability-select">
+                                <option value="">Bitte wählen...</option>
+                                <option value="1">1 - Sehr unwahrscheinlich</option>
+                                <option value="2">2 - Unwahrscheinlich</option>
+                                <option value="3">3 - Möglich</option>
+                                <option value="4">4 - Wahrscheinlich</option>
+                                <option value="5">5 - Sehr wahrscheinlich</option>
+                            </select>
+                        </div>
+                        <div class="assessment-item">
+                            <label>Schadensschwere</label>
+                            <select name="severity_${hazard.id}" class="severity-select">
+                                <option value="">Bitte wählen...</option>
+                                <option value="1">1 - Geringfügig</option>
+                                <option value="2">2 - Gering</option>
+                                <option value="3">3 - Mäßig</option>
+                                <option value="4">4 - Schwer</option>
+                                <option value="5">5 - Sehr schwer</option>
+                            </select>
+                        </div>
+                        <div class="assessment-item">
+                            <label>Risikobewertung</label>
+                            <div class="risk-result" id="risk_result_${hazard.id}">
+                                <span class="risk-badge">Nicht bewertet</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        // Add Nohl-Matrix visualization
+        html += this.generateNohlMatrix();
+        
+        riskContainer.innerHTML = html;
+        
+        // Setup event listeners for the new dropdowns
+        this.setupRiskAssessmentInteractions();
+    }
+
+    generateNohlMatrix() {
+        return `
+            <div class="nohl-matrix">
+                <h4>Nohl-Matrix zur Risikobewertung</h4>
+                <table class="risk-matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Eintrittswahrscheinlichkeit ↓ / Schadensschwere →</th>
+                            <th>1<br>Geringfügig</th>
+                            <th>2<br>Gering</th>
+                            <th>3<br>Mäßig</th>
+                            <th>4<br>Schwer</th>
+                            <th>5<br>Sehr schwer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>5 - Sehr wahrscheinlich</strong></td>
+                            <td class="risk-medium">5</td>
+                            <td class="risk-high">10</td>
+                            <td class="risk-high">15</td>
+                            <td class="risk-very-high">20</td>
+                            <td class="risk-very-high">25</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4 - Wahrscheinlich</strong></td>
+                            <td class="risk-low">4</td>
+                            <td class="risk-medium">8</td>
+                            <td class="risk-high">12</td>
+                            <td class="risk-high">16</td>
+                            <td class="risk-very-high">20</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3 - Möglich</strong></td>
+                            <td class="risk-low">3</td>
+                            <td class="risk-low">6</td>
+                            <td class="risk-medium">9</td>
+                            <td class="risk-high">12</td>
+                            <td class="risk-high">15</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2 - Unwahrscheinlich</strong></td>
+                            <td class="risk-low">2</td>
+                            <td class="risk-low">4</td>
+                            <td class="risk-low">6</td>
+                            <td class="risk-medium">8</td>
+                            <td class="risk-high">10</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1 - Sehr unwahrscheinlich</strong></td>
+                            <td class="risk-low">1</td>
+                            <td class="risk-low">2</td>
+                            <td class="risk-low">3</td>
+                            <td class="risk-low">4</td>
+                            <td class="risk-medium">5</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="risk-legend">
+                    <div class="legend-item"><span class="risk-badge low">1-3: Niedrig</span></div>
+                    <div class="legend-item"><span class="risk-badge medium">4-9: Mittel</span></div>
+                    <div class="legend-item"><span class="risk-badge high">10-15: Hoch</span></div>
+                    <div class="legend-item"><span class="risk-badge very-high">16-25: Sehr hoch</span></div>
+                </div>
+            </div>
+        `;
+    }
+
+    updateRiskCalculation() {
+        const hazardAssessments = document.querySelectorAll('.hazard-risk-assessment');
+        
+        hazardAssessments.forEach(assessment => {
+            const hazardId = assessment.getAttribute('data-hazard-id');
+            const probabilitySelect = assessment.querySelector(`select[name="probability_${hazardId}"]`);
+            const severitySelect = assessment.querySelector(`select[name="severity_${hazardId}"]`);
+            const resultDiv = assessment.querySelector(`#risk_result_${hazardId}`);
+            
+            if (probabilitySelect && severitySelect && resultDiv) {
+                const probability = parseInt(probabilitySelect.value) || 0;
+                const severity = parseInt(severitySelect.value) || 0;
+                
+                if (probability > 0 && severity > 0) {
+                    const riskValue = probability * severity;
+                    const riskLevel = this.getRiskLevelFromValue(riskValue);
+                    const riskLevelText = this.getRiskLevelText(riskLevel);
+                    
+                    resultDiv.innerHTML = `
+                        <span class="risk-badge ${riskLevel}">
+                            ${riskValue} - ${riskLevelText}
+                        </span>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<span class="risk-badge">Nicht bewertet</span>';
+                }
+            }
+        });
+    }
+
+    getRiskLevelFromValue(value) {
+        if (value <= 3) return 'low';
+        if (value <= 9) return 'medium';
+        if (value <= 15) return 'high';
+        return 'very-high';
+    }
+
+    updateProtectiveMeasuresSuggestions(selectedHazards) {
+        console.log('Updating protective measures for hazards:', selectedHazards);
+        
+        if (selectedHazards.length === 0) return;
+
+        // Generate intelligent suggestions based on selected hazards
+        const suggestions = this.generateMeasureSuggestions(selectedHazards);
+        
+        // Display suggestions in the protective measures tab
+        this.displayMeasureSuggestions(suggestions);
+    }
+
+    generateMeasureSuggestions(selectedHazards) {
+        const suggestions = {
+            technical: [],
+            organizational: [],
+            personal: []
+        };
+
+        selectedHazards.forEach(hazard => {
+            const measures = this.getHazardSpecificMeasures(hazard);
+            suggestions.technical.push(...measures.technical);
+            suggestions.organizational.push(...measures.organizational);
+            suggestions.personal.push(...measures.personal);
+        });
+
+        // Remove duplicates
+        Object.keys(suggestions).forEach(type => {
+            suggestions[type] = [...new Set(suggestions[type])];
+        });
+
+        return suggestions;
+    }
+
+    getHazardSpecificMeasures(hazard) {
+        const measureDatabase = {
+            'hazard_mechanical_cutting': {
+                technical: ['Schutzvorrichtungen an Schneidwerkzeugen', 'Messerschutz installieren', 'Automatische Abschaltung'],
+                organizational: ['Arbeitsanweisung für sicheren Umgang', 'Schulung Messersicherheit', 'Wartungsplan für Werkzeuge'],
+                personal: ['Schnittschutzhandschuhe Kategorie 5', 'Schutzbrille', 'Geschlossene Arbeitsschuhe']
+            },
+            'hazard_mechanical_crushing': {
+                technical: ['Zweihandschaltung installieren', 'Lichtvorhänge', 'Druckempfindliche Matten'],
+                organizational: ['Sperrung/Kennzeichnung bei Wartung', 'Einrichterschulung', 'Betriebsanweisung'],
+                personal: ['Sicherheitsschuhe S3', 'Arbeitshandschuhe', 'Eng anliegende Kleidung']
+            },
+            'hazard_electrical_shock': {
+                technical: ['FI-Schutzschalter 30mA', 'Schutzklasse II Geräte', 'Potentialausgleich'],
+                organizational: ['Elektrofachkraft beauftragen', 'Prüffristen einhalten', 'DGUV V3 Prüfung'],
+                personal: ['Isolierte Werkzeuge', 'Elektriker-Handschuhe', 'Isolierte Schuhe']
+            },
+            'hazard_chemical_toxic': {
+                technical: ['Absauganlage am Arbeitsplatz', 'Geschlossene Systeme', 'Notdusche installieren'],
+                organizational: ['Betriebsanweisung nach GefStoffV', 'Arbeitsmedizinische Vorsorge', 'Substitutionsprüfung'],
+                personal: ['Chemikalienschutzhandschuhe', 'Atemschutz FFP3', 'Chemikalienschutzanzug']
+            },
+            'hazard_ergonomic_lifting': {
+                technical: ['Hebevorrichtungen bereitstellen', 'Höhenverstellbare Arbeitsplätze', 'Lastverteilung'],
+                organizational: ['Schulung Hebetechnik', 'Zweipersonenregel >25kg', 'Pausenregelung'],
+                personal: ['Rückenstützgürtel bei Bedarf', 'Rutschfeste Schuhe', 'Arbeitskleidung ohne Behinderung']
+            },
+            'hazard_psychosocial_stress': {
+                technical: ['Ergonomische Arbeitsplätze', 'Lärmschutz', 'Beleuchtungsoptimierung'],
+                organizational: ['Pausenzeiten einhalten', 'Belastungsabbau durch Rotation', 'Führungskräfteschulung'],
+                personal: ['Stressmanagement-Training', 'Work-Life-Balance Beratung', 'Betriebsarzt Kontakt']
+            }
+        };
+
+        const hazardKey = `${hazard.name}_${hazard.value}`;
+        return measureDatabase[hazardKey] || {
+            technical: ['Technische Lösung entwickeln'],
+            organizational: ['Organisatorische Maßnahme definieren'],
+            personal: ['Persönliche Schutzausrüstung prüfen']
+        };
+    }
+
+    displayMeasureSuggestions(suggestions) {
+        // Find or create suggestions container in protective measures tab
+        const measuresTab = document.getElementById('tab-schutzmassnahmen');
+        if (!measuresTab) return;
+
+        let suggestionsContainer = measuresTab.querySelector('.measure-suggestions');
+        if (!suggestionsContainer) {
+            suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'measure-suggestions';
+            suggestionsContainer.innerHTML = `
+                <h4><i class="fas fa-lightbulb"></i> Empfohlene Schutzmaßnahmen</h4>
+                <p>Basierend auf den ausgewählten Gefährdungen werden folgende Maßnahmen empfohlen:</p>
+            `;
+            
+            // Insert after the templates section
+            const templatesSection = measuresTab.querySelector('.measures-templates');
+            if (templatesSection) {
+                templatesSection.insertAdjacentElement('afterend', suggestionsContainer);
+            }
+        }
+
+        // Generate suggestions HTML
+        let suggestionsHtml = '';
+        Object.entries(suggestions).forEach(([type, measures]) => {
+            if (measures.length > 0) {
+                const typeNames = {
+                    technical: 'Technische Maßnahmen',
+                    organizational: 'Organisatorische Maßnahmen', 
+                    personal: 'Persönliche Schutzmaßnahmen'
+                };
+                
+                suggestionsHtml += `
+                    <div class="suggestion-category">
+                        <h5>${typeNames[type]}</h5>
+                        <ul class="suggestion-list">
+                            ${measures.map(measure => `
+                                <li>
+                                    <span class="suggestion-text">${measure}</span>
+                                    <button class="btn-small" onclick="qhseDashboard.addSuggestedMeasure('${type}', '${measure}')">
+                                        <i class="fas fa-plus"></i> Hinzufügen
+                                    </button>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+        });
+
+        suggestionsContainer.innerHTML = `
+            <h4><i class="fas fa-lightbulb"></i> Empfohlene Schutzmaßnahmen</h4>
+            <p>Basierend auf den ausgewählten Gefährdungen werden folgende Maßnahmen empfohlen:</p>
+            ${suggestionsHtml}
+        `;
+    }
+
+    addSuggestedMeasure(type, measureText) {
+        // Add the suggested measure automatically
+        this.addProtectiveMeasure(type);
+        
+        // Pre-fill with suggested text
+        setTimeout(() => {
+            const measures = document.querySelectorAll('.protective-measure');
+            const lastMeasure = measures[measures.length - 1];
+            if (lastMeasure) {
+                const textarea = lastMeasure.querySelector('textarea');
+                if (textarea) {
+                    textarea.value = measureText;
+                    textarea.style.backgroundColor = '#e8f5e8'; // Highlight as suggested
+                }
+            }
+        }, 100);
+    }
+
+    addProtectiveMeasure(type) {
+        // Use the existing structure - target specific measure list based on type
+        const measureListId = type === 'technical' ? 'technicalMeasures' : 
+                             type === 'organizational' ? 'organizationalMeasures' : 
+                             'personalMeasures';
+        
+        const measuresList = document.getElementById(measureListId);
+        if (!measuresList) {
+            alert(`Schutzmaßnahmen-Liste "${measureListId}" nicht gefunden! Bitte wechseln Sie zum Tab "Schutzmaßnahmen".`);
+            return;
+        }
+
+        const measureId = `measure_${Date.now()}`;
+        const measureHtml = `
+            <div class="protective-measure" id="${measureId}">
+                <div class="measure-header">
+                    <h5>
+                        <i class="fas ${this.getMeasureIcon(type)}"></i>
+                        ${this.getMeasureTypeText(type)} Schutzmaßnahme
+                    </h5>
+                    <button class="btn-icon btn-delete" onclick="removeMeasure('${measureId}')" title="Entfernen">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="measure-content">
+                    <div class="form-group">
+                        <label>Beschreibung der Maßnahme *</label>
+                        <textarea name="measure_description_${measureId}" rows="3" 
+                                  placeholder="Beschreiben Sie die konkrete Schutzmaßnahme..." required></textarea>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Verantwortlicher</label>
+                            <select name="measure_responsible_${measureId}">
+                                <option value="">Bitte wählen...</option>
+                                ${this.getUserOptionsHtml()}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Umsetzung bis</label>
+                            <input type="date" name="measure_deadline_${measureId}">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select name="measure_status_${measureId}">
+                                <option value="geplant">Geplant</option>
+                                <option value="in_umsetzung">In Umsetzung</option>
+                                <option value="umgesetzt">Umgesetzt</option>
+                                <option value="ueberprueft">Überprüft</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priorität</label>
+                            <select name="measure_priority_${measureId}">
+                                <option value="hoch">Hoch</option>
+                                <option value="mittel" selected>Mittel</option>
+                                <option value="niedrig">Niedrig</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add the measure to the existing measures list (before the "add" button)
+        const addButton = measuresList.querySelector('.add-measure-btn');
+        if (addButton) {
+            addButton.insertAdjacentHTML('beforebegin', measureHtml);
+        } else {
+            measuresList.insertAdjacentHTML('beforeend', measureHtml);
+        }
+
+        // Scroll to new measure
+        const newMeasure = document.getElementById(measureId);
+        if (newMeasure) {
+            newMeasure.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    removeProtectiveMeasure(measureId) {
+        if (confirm('Möchten Sie diese Schutzmaßnahme wirklich entfernen?')) {
+            const measureElement = document.getElementById(measureId);
+            if (measureElement) {
+                measureElement.remove();
+            }
+        }
+    }
+
+    loadMeasureTemplate(templateType) {
+        const templates = {
+            'maschinenbau': {
+                type: 'mixed',
+                measures: {
+                    'inherent': ['Sichere Konstruktion ohne scharfe Kanten', 'Energiearme Antriebe verwenden'],
+                    'guarding': ['Trennende Schutzeinrichtung um bewegliche Teile', 'Verriegelungseinrichtung an Zugangstüren'],
+                    'safety-tech': ['Not-Aus-Taster in Reichweite', 'Sicherheitssteuerung Kategorie 3'],
+                    'training': ['Maschineneinweisung für alle Bediener', 'Jährliche Nachschulung'],
+                    'procedures': ['Betriebsanweisung erstellen und aushängen', 'Wartungsanweisung befolgen']
+                }
+            },
+            'schweissen': {
+                type: 'mixed',
+                measures: {
+                    'guarding': ['Schweißvorhänge aufstellen', 'Absaugung am Arbeitsplatz'],
+                    'training': ['Schweißerschein nachweisen', 'Unterweisung Brandschutz'],
+                    'head-protection': ['Schweißhelm mit automatischer Verdunkelung'],
+                    'respiratory': ['Atemschutz bei Arbeiten in geschlossenen Räumen'],
+                    'hand-protection': ['Schweißerhandschuhe EN 12477']
+                }
+            },
+            'chemikalien': {
+                type: 'mixed', 
+                measures: {
+                    'inherent': ['Gefährliche Stoffe durch ungefährliche ersetzen'],
+                    'guarding': ['Abzug/Dunstabzugshaube installieren', 'Auffangwannen bereitstellen'],
+                    'safety-tech': ['Augendusche installieren', 'Notdusche bereitstellen'],
+                    'procedures': ['Sicherheitsdatenblätter bereitstellen', 'Betriebsanweisung für jeden Stoff'],
+                    'hand-protection': ['Chemikalienschutzhandschuhe', 'Hautschutzmittel bereitstellen'],
+                    'respiratory': ['Atemschutz bei staubenden Arbeiten']
+                }
+            },
+            'hoehe': {
+                type: 'mixed',
+                measures: {
+                    'guarding': ['Absturzsicherung ab 1m Höhe', 'Geländer an allen Kanten'],
+                    'fall-protection': ['Auffanggurt EN 361', 'Sicherungsseil mit Falldämpfer'],
+                    'procedures': ['Arbeitserlaubnis für Höhenarbeiten', 'Rettungsplan erstellen'],
+                    'training': ['Schulung für Höhenarbeiten', 'Rettungsübungen durchführen']
+                }
+            },
+            'buero': {
+                type: 'mixed',
+                measures: {
+                    'inherent': ['Ergonomische Arbeitsplatzgestaltung', 'Höhenverstellbarer Schreibtisch'],
+                    'procedures': ['Bildschirmarbeitsplatz-Unterweisung', 'Pausenregelung einhalten'],
+                    'training': ['Schulung ergonomisches Arbeiten', 'Brandschutzunterweisung']
+                }
+            },
+            'lager': {
+                type: 'mixed',
+                measures: {
+                    'guarding': ['Regalabsicherung gegen Umfallen', 'Anfahrschutz für Regale'],
+                    'procedures': ['Stapelvorschriften beachten', 'Verkehrswege freihalten'],
+                    'training': ['Gabelstaplerführerschein', 'Ladungssicherung'],
+                    'foot-protection': ['Sicherheitsschuhe S3 mit Durchtrittschutz'],
+                    'head-protection': ['Schutzhelm in Bereichen mit Kranbetrieb']
+                }
+            }
+        };
+        
+        const template = templates[templateType];
+        if (!template) {
+            alert('Keine Vorlage für diesen Bereich verfügbar.');
+            return;
+        }
+        
+        if (template.type === 'mixed') {
+            // Load measures into appropriate categories
+            let totalMeasures = 0;
+            Object.entries(template.measures).forEach(([measureType, measureTexts]) => {
+                measureTexts.forEach((measureText, index) => {
+                    setTimeout(() => {
+                        this.addSpecificMeasure(measureType);
+                        
+                        // Pre-fill the description
+                        setTimeout(() => {
+                            const containers = document.querySelectorAll('.protective-measure');
+                            const lastMeasure = containers[containers.length - 1];
+                            if (lastMeasure) {
+                                const textarea = lastMeasure.querySelector('textarea[name="measureDescription"]');
+                                if (textarea) {
+                                    textarea.value = measureText;
+                                }
+                            }
+                        }, 100);
+                    }, index * 150); // Stagger the additions
+                    totalMeasures++;
+                });
+            });
+            
+            setTimeout(() => {
+                alert(`Vorlage "${templateType}" wurde geladen. ${totalMeasures} Maßnahmen wurden hinzugefügt.`);
+            }, totalMeasures * 150 + 200);
+        }
+    }
+
+    getMeasureIcon(type) {
+        const icons = {
+            'technical': 'fa-cogs',
+            'organizational': 'fa-clipboard-list',
+            'personal': 'fa-user-shield'
+        };
+        return icons[type] || 'fa-shield-alt';
+    }
+
+    getMeasureTypeText(type) {
+        const texts = {
+            'technical': 'Technische',
+            'organizational': 'Organisatorische',
+            'personal': 'Persönliche'
+        };
+        return texts[type] || 'Allgemeine';
+    }
+
+    getUserOptionsHtml() {
+        return this.users.filter(user => user.isActive)
+            .map(user => `<option value="${user.id}">${user.displayName}</option>`)
+            .join('');
+    }
+
+    // ========================================
+    // TOP-PRINZIP MEASURES FUNCTIONS
+    // ========================================
+
+    addSpecificMeasure(measureType) {
+        console.log(`🔧 Adding specific measure: ${measureType}`);
+        
+        // Determine the correct container based on measure type
+        const containerMap = {
+            'inherent': 'inherentSafetyMeasures',
+            'guarding': 'guardingMeasures', 
+            'safety-tech': 'safetyTechMeasures',
+            'training': 'trainingMeasures',
+            'procedures': 'procedureMeasures',
+            'maintenance': 'maintenanceMeasures',
+            'access': 'accessMeasures',
+            'head-protection': 'headProtectionMeasures',
+            'respiratory': 'respiratoryProtectionMeasures',
+            'hand-protection': 'handProtectionMeasures',
+            'foot-protection': 'footProtectionMeasures',
+            'fall-protection': 'fallProtectionMeasures'
+        };
+        
+        const containerId = containerMap[measureType];
+        const container = document.getElementById(containerId);
+        
+        if (!container) {
+            console.error(`Container ${containerId} not found for measure type ${measureType}`);
+            return;
+        }
+        
+        // Create unique ID for this measure
+        const measureId = `measure_${measureType}_${Date.now()}`;
+        
+        // Create measure element
+        const measureElement = document.createElement('div');
+        measureElement.className = 'protective-measure';
+        measureElement.id = measureId;
+        
+        measureElement.innerHTML = `
+            <div class="measure-header">
+                <h6>Schutzmaßnahme ${this.getMeasureTypeLabel(measureType)}</h6>
+                <button class="btn-icon btn-danger" onclick="removeMeasure('${measureId}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="measure-content">
+                <div class="form-group">
+                    <label for="${measureId}_description">Beschreibung der Maßnahme *</label>
+                    <textarea id="${measureId}_description" name="measureDescription" rows="3" required 
+                              placeholder="${this.getMeasurePlaceholder(measureType)}"></textarea>
+                </div>
+                <div class="measure-details">
+                    <div class="form-group">
+                        <label for="${measureId}_responsible">Verantwortlicher</label>
+                        <select id="${measureId}_responsible" name="measureResponsible">
+                            <option value="">Bitte wählen...</option>
+                            <option value="betriebsleitung">Betriebsleitung</option>
+                            <option value="abteilungsleitung">Abteilungsleitung</option>
+                            <option value="meister">Meister/Vorarbeiter</option>
+                            <option value="fasi">Fachkraft für Arbeitssicherheit</option>
+                            <option value="wartung">Instandhaltung</option>
+                            <option value="mitarbeiter">Mitarbeiter</option>
+                            <option value="extern">Externe Firma</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="${measureId}_deadline">Umsetzungstermin</label>
+                        <input type="date" id="${measureId}_deadline" name="measureDeadline">
+                    </div>
+                    <div class="form-group">
+                        <label for="${measureId}_status">Status</label>
+                        <select id="${measureId}_status" name="measureStatus">
+                            <option value="geplant">Geplant</option>
+                            <option value="in_bearbeitung">In Bearbeitung</option>
+                            <option value="umgesetzt">Umgesetzt</option>
+                            <option value="ueberprueft">Überprüft</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="${measureId}_priority">Priorität</label>
+                        <select id="${measureId}_priority" name="measurePriority">
+                            <option value="hoch">Hoch</option>
+                            <option value="mittel" selected>Mittel</option>
+                            <option value="niedrig">Niedrig</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="${measureId}_notes">Anmerkungen/Kosten</label>
+                    <textarea id="${measureId}_notes" name="measureNotes" rows="2" 
+                              placeholder="Zusätzliche Informationen, geschätzte Kosten, etc."></textarea>
+                </div>
+            </div>
+        `;
+        
+        // Insert before the add button
+        const addButton = container.querySelector('.add-measure-btn');
+        container.insertBefore(measureElement, addButton);
+        
+        // Focus on the description textarea
+        setTimeout(() => {
+            const textarea = measureElement.querySelector('textarea[name="measureDescription"]');
+            if (textarea) {
+                textarea.focus();
+            }
+        }, 100);
+        
+        console.log(`✅ Added measure ${measureId} to container ${containerId}`);
+    }
+
+    getMeasureTypeLabel(measureType) {
+        const labels = {
+            'inherent': 'Konstruktive Sicherheit',
+            'guarding': 'Schutzeinrichtung', 
+            'safety-tech': 'Sicherheitstechnik',
+            'training': 'Qualifikation/Schulung',
+            'procedures': 'Arbeitsanweisung',
+            'maintenance': 'Wartung/Instandhaltung',
+            'access': 'Zugangs-/Arbeitsorganisation',
+            'head-protection': 'Kopf-/Gesichtsschutz',
+            'respiratory': 'Atemschutz',
+            'hand-protection': 'Hand-/Hautschutz',
+            'foot-protection': 'Fuß-/Beinschutz',
+            'fall-protection': 'Absturzsicherung'
+        };
+        return labels[measureType] || measureType;
+    }
+
+    getMeasurePlaceholder(measureType) {
+        const placeholders = {
+            'inherent': 'z.B. Verwendung ungefährlicher Stoffe, ergonomische Gestaltung, energiearme Verfahren...',
+            'guarding': 'z.B. Trennende Schutzeinrichtung, Verriegelungseinrichtung, Lichtschranke...',
+            'safety-tech': 'z.B. Not-Aus-System, Sicherheitssteuerung, Überwachungseinrichtung...',
+            'training': 'z.B. Erstunterweisung, regelmäßige Schulung, Qualifikationsnachweis...',
+            'procedures': 'z.B. Betriebsanweisung, Arbeitsverfahren, Notfallplan...',
+            'maintenance': 'z.B. Wartungsplan, Prüffristen, Dokumentation...',
+            'access': 'z.B. Zugangsbeschränkung, Pausenregelung, Alleinarbeitsverbot...',
+            'head-protection': 'z.B. Schutzhelm EN 397, Schutzbrille EN 166, Gesichtsschutz...',
+            'respiratory': 'z.B. Filtermaske FFP2, Vollmaske, umluftunabhängiges Atemschutzgerät...',
+            'hand-protection': 'z.B. Schutzhandschuhe EN 388, Hautschutzmittel, Schutzkleidung...',
+            'foot-protection': 'z.B. Sicherheitsschuhe S3, Schutzstiefel, Knieschutz...',
+            'fall-protection': 'z.B. Auffanggurt EN 361, Sicherungsseil, Höhensicherungsgerät...'
+        };
+        return placeholders[measureType] || 'Beschreiben Sie die Schutzmaßnahme...';
+    }
+
+    removeMeasure(measureId) {
+        if (confirm('Möchten Sie diese Schutzmaßnahme wirklich entfernen?')) {
+            const measureElement = document.getElementById(measureId);
+            if (measureElement) {
+                measureElement.remove();
+                console.log(`🗑️ Removed measure ${measureId}`);
+            }
+        }
+    }
+
+    viewRiskAssessment(id) {
+        const assessment = this.riskAssessments.find(ra => ra.id === id);
+        if (assessment) {
+            this.openRiskAssessmentModal(id);
+        }
+    }
+
+    editRiskAssessment(id) {
+        this.openRiskAssessmentModal(id);
+    }
+
+    deleteRiskAssessment(id) {
+        if (confirm('Möchten Sie diese Gefährdungsbeurteilung wirklich löschen?')) {
+            this.riskAssessments = this.riskAssessments.filter(ra => ra.id !== id);
+            this.saveRiskAssessmentsToStorage();
+            this.updateRiskAssessmentDashboard();
+        }
+    }
+
+    saveRiskAssessmentsToStorage() {
+        localStorage.setItem('qhse_risk_assessments', JSON.stringify(this.riskAssessments));
+    }
+
+    // PDF Export Functions for Risk Assessment
+    generateCompleteGBUReport() {
+        console.log('🔥 Generating complete GBU PDF report...');
+        
+        // Get current assessment data
+        const formData = this.collectRiskAssessmentFormData();
+        
+        // Generate comprehensive PDF using jsPDF
+        this.createDetailedGBUPDF(formData);
+    }
+
+    generateComplianceReport() {
+        console.log('📋 Generating compliance report...');
+        
+        const formData = this.collectRiskAssessmentFormData();
+        this.createCompliancePDF(formData);
+    }
+
+    generateQualificationReport() {
+        console.log('🎓 Generating qualification report...');
+        
+        const formData = this.collectRiskAssessmentFormData();
+        this.createQualificationPDF(formData);
+    }
+
+    collectRiskAssessmentFormData() {
+        // Collect all form data from the modal
+        const formData = {
+            // Basic information
+            gbuNummer: document.getElementById('gbuNummer')?.value || '',
+            title: document.getElementById('gbuTitle')?.value || '',
+            workplace: document.getElementById('gbuWorkplace')?.value || '',
+            department: document.getElementById('gbuDepartment')?.value || '',
+            assessor: document.getElementById('gbuAssessor')?.value || '',
+            reviewDate: document.getElementById('gbuReviewDate')?.value || '',
+            nextReview: document.getElementById('gbuNextReview')?.value || '',
+            
+            // Selected hazards
+            selectedHazards: this.getSelectedHazards(),
+            
+            // Risk assessment data
+            riskMatrix: this.collectRiskMatrixData(),
+            
+            // Protection measures
+            protectionMeasures: this.collectProtectionMeasures(),
+            
+            // Legal foundations
+            legalFoundations: this.collectLegalFoundations(),
+            
+            // Workplace analysis
+            workplaceAnalysis: this.collectWorkplaceAnalysis(),
+            
+            // Qualifications
+            qualifications: this.collectQualificationData(),
+            
+            // Digital signatures
+            signatures: this.collectDigitalSignatures(),
+            
+            // Meta data
+            creationDate: new Date().toLocaleDateString('de-DE'),
+            reportGenerated: new Date().toLocaleString('de-DE')
+        };
+        
+        return formData;
+    }
+
+    createDetailedGBUPDF(data) {
+        // Import jsPDF library dynamically if not available
+        if (typeof window.jsPDF === 'undefined') {
+            this.loadJsPDFLibrary(() => this.createDetailedGBUPDF(data));
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        // PDF Configuration
+        const margin = 20;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const contentWidth = pageWidth - (margin * 2);
+        let yPosition = margin;
+        
+        // Company Header
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('GEFÄHRDUNGSBEURTEILUNG', margin, yPosition);
+        yPosition += 10;
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${document.getElementById('companyName')?.textContent || 'Hoffmann & Voss'}`, margin, yPosition);
+        yPosition += 15;
+        
+        // Document Header with legal compliance note
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TÜV-KONFORME DOKUMENTATION', margin, yPosition);
+        yPosition += 8;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Erstellt gemäß § 5 ArbSchG und TRBS 1111`, margin, yPosition);
+        yPosition += 8;
+        doc.text(`Bericht generiert am: ${data.reportGenerated}`, margin, yPosition);
+        yPosition += 15;
+        
+        // Basic Information Section
+        this.addPDFSection(doc, 'GRUNDDATEN', yPosition, margin, contentWidth);
+        yPosition += 15;
+        
+        const basicInfo = [
+            [`GBU-Nummer:`, data.gbuNummer],
+            [`Titel:`, data.title],
+            [`Arbeitsplatz:`, data.workplace],
+            [`Abteilung:`, data.department],
+            [`Ersteller:`, data.assessor],
+            [`Bewertungsdatum:`, data.reviewDate],
+            [`Nächste Überprüfung:`, data.nextReview]
+        ];
+        
+        basicInfo.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, margin, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(value || '-', margin + 50, yPosition);
+            yPosition += 7;
+        });
+        
+        yPosition += 10;
+        
+        // Legal Foundations Section
+        yPosition = this.addPDFSection(doc, 'RECHTLICHE GRUNDLAGEN', yPosition, margin, contentWidth);
+        
+        const legalTexts = [
+            'Diese Gefährdungsbeurteilung wurde erstellt nach:',
+            '• § 5 Arbeitsschutzgesetz (ArbSchG)',
+            '• TRBS 1111 "Gefährdungsbeurteilung"',
+            '• DIN EN ISO 12100 "Sicherheit von Maschinen"',
+            '• DGUV Vorschrift 1 "Grundsätze der Prävention"',
+            '• EU-Richtlinie 89/391/EWG (Rahmenrichtlinie)',
+            '• Betriebssicherheitsverordnung (BetrSichV)'
+        ];
+        
+        legalTexts.forEach(text => {
+            doc.text(text, margin, yPosition);
+            yPosition += 6;
+        });
+        
+        yPosition += 10;
+        
+        // Hazard Analysis Section
+        if (data.selectedHazards.length > 0) {
+            yPosition = this.addPDFSection(doc, 'GEFÄHRDUNGSANALYSE', yPosition, margin, contentWidth);
+            
+            doc.text('Identifizierte Gefährdungen:', margin, yPosition);
+            yPosition += 8;
+            
+            data.selectedHazards.forEach(hazard => {
+                doc.text(`• ${hazard}`, margin + 5, yPosition);
+                yPosition += 6;
+            });
+            
+            yPosition += 10;
+        }
+        
+        // Risk Assessment Section
+        yPosition = this.addPDFSection(doc, 'RISIKOBEWERTUNG (NOHL-MATRIX)', yPosition, margin, contentWidth);
+        
+        doc.text('Quantitative Risikobewertung nach DIN EN ISO 12100:', margin, yPosition);
+        yPosition += 8;
+        
+        if (data.riskMatrix) {
+            const riskData = [
+                [`Schadensausmaß:`, this.getRiskScaleText('severity', data.riskMatrix.severity)],
+                [`Auftretenswahrscheinlichkeit:`, this.getRiskScaleText('probability', data.riskMatrix.probability)],
+                [`Vermeidbarkeit:`, this.getRiskScaleText('avoidability', data.riskMatrix.avoidability)],
+                [`Risikozahl:`, data.riskMatrix.riskNumber || 'Nicht berechnet'],
+                [`Risikostufe:`, this.getRiskLevelText(data.riskMatrix.riskLevel)]
+            ];
+            
+            riskData.forEach(([label, value]) => {
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, margin, yPosition);
+                doc.setFont('helvetica', 'normal');
+                doc.text(value, margin + 60, yPosition);
+                yPosition += 7;
+            });
+        }
+        
+        yPosition += 10;
+        
+        // Protection Measures Section
+        yPosition = this.addPDFSection(doc, 'SCHUTZMAßNAHMEN NACH TOP-PRINZIP', yPosition, margin, contentWidth);
+        
+        const topCategories = [
+            { key: 'technical', title: '1. TECHNISCHE MAßNAHMEN (Priorität: Höchste)' },
+            { key: 'organizational', title: '2. ORGANISATORISCHE MAßNAHMEN (Priorität: Mittel)' },
+            { key: 'personal', title: '3. PERSÖNLICHE MAßNAHMEN (Priorität: Niedrigste)' }
+        ];
+        
+        topCategories.forEach(category => {
+            if (this.checkPageSpace(doc, yPosition, 30)) {
+                doc.addPage();
+                yPosition = margin;
+            }
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text(category.title, margin, yPosition);
+            yPosition += 10;
+            
+            // Add measures for this category
+            const measures = data.protectionMeasures?.[category.key] || [];
+            if (measures.length > 0) {
+                measures.forEach(measure => {
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`• ${measure.description}`, margin + 5, yPosition);
+                    yPosition += 6;
+                    doc.text(`  Verantwortlich: ${measure.responsible || 'Nicht zugewiesen'}`, margin + 8, yPosition);
+                    yPosition += 6;
+                    doc.text(`  Termin: ${measure.deadline || 'Nicht festgelegt'}`, margin + 8, yPosition);
+                    yPosition += 8;
+                });
+            } else {
+                doc.setFont('helvetica', 'italic');
+                doc.text('Keine Maßnahmen definiert', margin + 5, yPosition);
+                yPosition += 8;
+            }
+            
+            yPosition += 5;
+        });
+        
+        // Digital Signatures Section
+        if (this.checkPageSpace(doc, yPosition, 40)) {
+            doc.addPage();
+            yPosition = margin;
+        }
+        
+        yPosition = this.addPDFSection(doc, 'DIGITALE FREIGABE UND SIGNATUREN', yPosition, margin, contentWidth);
+        
+        const signatureData = data.signatures || {};
+        const signatures = [
+            [`Ersteller:`, `${signatureData.assessor?.name || data.assessor} - ${signatureData.assessor?.date || data.creationDate}`],
+            [`Fachkraft für Arbeitssicherheit:`, `${signatureData.safetyOfficer?.name || 'Ausstehend'} - ${signatureData.safetyOfficer?.date || 'Ausstehend'}`],
+            [`Betriebsarzt:`, `${signatureData.doctor?.name || 'Ausstehend'} - ${signatureData.doctor?.date || 'Ausstehend'}`],
+            [`Vorgesetzter:`, `${signatureData.supervisor?.name || 'Ausstehend'} - ${signatureData.supervisor?.date || 'Ausstehend'}`]
+        ];
+        
+        signatures.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, margin, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(value, margin + 60, yPosition);
+            yPosition += 10;
+        });
+        
+        // Footer with compliance note
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'italic');
+        doc.text('Dieses Dokument wurde automatisch generiert und entspricht den TÜV-Anforderungen.', margin, pageHeight - 15);
+        doc.text(`Seite 1 von ${doc.internal.getNumberOfPages()}`, pageWidth - margin - 30, pageHeight - 15);
+        
+        // Save PDF
+        const fileName = `GBU_${data.gbuNummer || 'UNBENANNT'}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        alert(`PDF-Export erfolgreich: ${fileName}`);
+    }
+
+    addPDFSection(doc, title, yPosition, margin, contentWidth) {
+        // Add section header with background
+        doc.setFillColor(230, 230, 230);
+        doc.rect(margin, yPosition - 5, contentWidth, 10, 'F');
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, margin + 2, yPosition + 2);
+        
+        return yPosition + 15;
+    }
+
+    checkPageSpace(doc, currentY, requiredSpace) {
+        const pageHeight = doc.internal.pageSize.getHeight();
+        return (currentY + requiredSpace) > (pageHeight - 30);
+    }
+
+    getRiskScaleText(type, value) {
+        const scales = {
+            severity: {
+                1: '1 - Leichte Verletzung',
+                2: '2 - Mittlere Verletzung', 
+                3: '3 - Schwere Verletzung',
+                4: '4 - Tödliche Verletzung'
+            },
+            probability: {
+                1: '1 - Sehr unwahrscheinlich',
+                2: '2 - Unwahrscheinlich',
+                3: '3 - Möglich',
+                4: '4 - Wahrscheinlich'
+            },
+            avoidability: {
+                1: '1 - Gut vermeidbar',
+                2: '2 - Vermeidbar',
+                3: '3 - Schwer vermeidbar',
+                4: '4 - Nicht vermeidbar'
+            }
+        };
+        
+        return scales[type]?.[value] || `${value} - Nicht definiert`;
+    }
+
+    loadJsPDFLibrary(callback) {
+        console.log('📚 Loading jsPDF library...');
+        
+        // Check if already loaded
+        if (typeof window.jsPDF !== 'undefined') {
+            console.log('✅ jsPDF already available');
+            callback();
+            return;
+        }
+        
+        // Check if script tag exists but library not loaded yet
+        const existingScript = document.getElementById('jspdf-script');
+        if (existingScript) {
+            console.log('⏳ jsPDF script already loading, waiting...');
+            // Wait a bit longer and try again
+            setTimeout(() => {
+                if (typeof window.jsPDF !== 'undefined') {
+                    console.log('✅ jsPDF loaded successfully');
+                    callback();
+                } else {
+                    console.log('❌ jsPDF failed to load, trying alternative...');
+                    this.loadJsPDFAlternative(callback);
+                }
+            }, 2000);
+            return;
+        }
+        
+        // Load the library
+        const script = document.createElement('script');
+        script.id = 'jspdf-script';
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.crossOrigin = 'anonymous';
+        
+        script.onload = () => {
+            console.log('✅ jsPDF script loaded');
+            // Wait a moment for the library to initialize
+            setTimeout(() => {
+                if (typeof window.jsPDF !== 'undefined') {
+                    console.log('✅ jsPDF library ready');
+                    callback();
+                } else {
+                    console.log('❌ jsPDF object not found after load');
+                    this.loadJsPDFAlternative(callback);
+                }
+            }, 500);
+        };
+        
+        script.onerror = (error) => {
+            console.error('❌ Error loading jsPDF:', error);
+            this.loadJsPDFAlternative(callback);
+        };
+        
+        document.head.appendChild(script);
+        console.log('📦 jsPDF script tag added to head');
+    }
+
+    loadJsPDFAlternative(callback) {
+        console.log('🔄 Trying alternative jsPDF source...');
+        
+        // Remove failed script
+        const failedScript = document.getElementById('jspdf-script');
+        if (failedScript) {
+            failedScript.remove();
+        }
+        
+        // Try alternative CDN
+        const script = document.createElement('script');
+        script.id = 'jspdf-script-alt';
+        script.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        script.crossOrigin = 'anonymous';
+        
+        script.onload = () => {
+            console.log('✅ Alternative jsPDF loaded');
+            setTimeout(() => {
+                if (typeof window.jsPDF !== 'undefined') {
+                    callback();
+                } else {
+                    alert('PDF-Bibliothek konnte nicht geladen werden. Bitte versuchen Sie es später erneut oder überprüfen Sie Ihre Internetverbindung.');
+                }
+            }, 500);
+        };
+        
+        script.onerror = () => {
+            alert('PDF-Bibliothek konnte nicht geladen werden. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.');
+        };
+        
+        document.head.appendChild(script);
+    }
+
+    collectRiskMatrixData() {
+        // Get values from selected radio buttons
+        const severity = this.getSelectedValue('riskSeverity');
+        const probability = this.getSelectedValue('riskProbability');
+        const avoidability = this.getSelectedValue('riskAvoidability');
+        
+        // Calculate risk if all values are present
+        let riskNumber = '';
+        let riskLevel = '';
+        
+        if (severity && probability && avoidability) {
+            const calculatedRisk = parseInt(severity) * parseInt(probability) * parseInt(avoidability);
+            riskNumber = calculatedRisk.toString();
+            riskLevel = this.getRiskLevel(calculatedRisk);
+        } else {
+            // Try to get from display elements if calculation wasn't done
+            riskNumber = document.getElementById('calculatedRisk')?.textContent || '';
+            riskLevel = document.getElementById('riskLevel')?.textContent || '';
+        }
+        
+        console.log(`Collected risk matrix data: S=${severity}, W=${probability}, V=${avoidability}, R=${riskNumber}, Level=${riskLevel}`);
+        
+        return {
+            severity: severity || '',
+            probability: probability || '',
+            avoidability: avoidability || '',
+            riskNumber: riskNumber,
+            riskLevel: riskLevel
+        };
+    }
+
+    collectProtectionMeasures() {
+        const measures = {
+            technical: [],
+            organizational: [],
+            personal: []
+        };
+        
+        // Collect technical measures
+        const technicalContainers = [
+            'inherentSafetyMeasures',
+            'guardingMeasures', 
+            'safetyTechMeasures'
+        ];
+        
+        technicalContainers.forEach(containerId => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                const measureElements = container.querySelectorAll('.protective-measure');
+                measureElements.forEach(element => {
+                    const description = element.querySelector('.measure-description')?.value || '';
+                    const responsible = element.querySelector('.measure-responsible')?.value || '';
+                    const deadline = element.querySelector('.measure-deadline')?.value || '';
+                    
+                    if (description) {
+                        measures.technical.push({ description, responsible, deadline });
+                    }
+                });
+            }
+        });
+        
+        // Collect organizational measures
+        const organizationalContainers = [
+            'trainingMeasures',
+            'procedureMeasures',
+            'maintenanceMeasures',
+            'accessMeasures'
+        ];
+        
+        organizationalContainers.forEach(containerId => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                const measureElements = container.querySelectorAll('.protective-measure');
+                measureElements.forEach(element => {
+                    const description = element.querySelector('.measure-description')?.value || '';
+                    const responsible = element.querySelector('.measure-responsible')?.value || '';
+                    const deadline = element.querySelector('.measure-deadline')?.value || '';
+                    
+                    if (description) {
+                        measures.organizational.push({ description, responsible, deadline });
+                    }
+                });
+            }
+        });
+        
+        // Collect personal measures
+        const personalContainers = [
+            'headProtectionMeasures',
+            'respiratoryMeasures',
+            'handProtectionMeasures',
+            'footProtectionMeasures',
+            'fallProtectionMeasures'
+        ];
+        
+        personalContainers.forEach(containerId => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                const measureElements = container.querySelectorAll('.protective-measure');
+                measureElements.forEach(element => {
+                    const description = element.querySelector('.measure-description')?.value || '';
+                    const responsible = element.querySelector('.measure-responsible')?.value || '';
+                    const deadline = element.querySelector('.measure-deadline')?.value || '';
+                    
+                    if (description) {
+                        measures.personal.push({ description, responsible, deadline });
+                    }
+                });
+            }
+        });
+        
+        return measures;
+    }
+
+    collectLegalFoundations() {
+        const foundations = {};
+        
+        // Collect checked legal categories
+        const legalCategories = document.querySelectorAll('.legal-category input[type="checkbox"]:checked');
+        legalCategories.forEach(checkbox => {
+            const category = checkbox.closest('.legal-category');
+            const title = category.querySelector('h5')?.textContent || '';
+            const items = Array.from(category.querySelectorAll('.legal-items input[type="checkbox"]:checked'))
+                .map(item => item.nextElementSibling?.textContent || '');
+            
+            if (items.length > 0) {
+                foundations[title] = items;
+            }
+        });
+        
+        return foundations;
+    }
+
+    collectWorkplaceAnalysis() {
+        const analysis = {};
+        
+        // Collect workplace sections data
+        const sections = [
+            'arbeitsumgebung',
+            'arbeitsmittel', 
+            'arbeitsorganisation',
+            'qualifikation'
+        ];
+        
+        sections.forEach(section => {
+            const container = document.getElementById(`workplace-${section}`);
+            if (container) {
+                const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+                analysis[section] = Array.from(checkboxes).map(cb => cb.value || cb.nextElementSibling?.textContent || '');
+            }
+        });
+        
+        return analysis;
+    }
+
+    collectQualificationData() {
+        const qualifications = {};
+        
+        // Collect qualification requirements
+        const categories = ['erforderlich', 'vorhanden', 'fehlend'];
+        categories.forEach(category => {
+            const container = document.getElementById(`qualifikation-${category}`);
+            if (container) {
+                const inputs = container.querySelectorAll('input, textarea');
+                qualifications[category] = Array.from(inputs)
+                    .filter(input => input.value.trim())
+                    .map(input => input.value.trim());
+            }
+        });
+        
+        return qualifications;
+    }
+
+    collectDigitalSignatures() {
+        const signatures = {};
+        
+        const signatureRoles = ['assessor', 'safetyOfficer', 'doctor', 'supervisor'];
+        signatureRoles.forEach(role => {
+            const nameField = document.getElementById(`signature-${role}-name`);
+            const dateField = document.getElementById(`signature-${role}-date`);
+            
+            if (nameField && dateField) {
+                signatures[role] = {
+                    name: nameField.value,
+                    date: dateField.value
+                };
+            }
+        });
+        
+        return signatures;
+    }
+
+    createCompliancePDF(data) {
+        console.log('📋 Generating compliance PDF report...');
+        
+        // Import jsPDF library dynamically if not available
+        if (typeof window.jsPDF === 'undefined') {
+            this.loadJsPDFLibrary(() => this.createCompliancePDF(data));
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        // PDF Configuration
+        const margin = 20;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        let yPosition = margin;
+        
+        // Header
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('COMPLIANCE-NACHWEIS GEFÄHRDUNGSBEURTEILUNG', margin, yPosition);
+        yPosition += 15;
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${document.getElementById('companyName')?.textContent || 'Hoffmann & Voss'}`, margin, yPosition);
+        yPosition += 10;
+        doc.text(`Erstellt am: ${data.reportGenerated}`, margin, yPosition);
+        yPosition += 20;
+        
+        // Compliance Checklist
+        doc.setFont('helvetica', 'bold');
+        doc.text('RECHTLICHE COMPLIANCE-PRÜFUNG', margin, yPosition);
+        yPosition += 15;
+        
+        const complianceItems = [
+            { check: true, text: '§ 5 ArbSchG - Gefährdungsbeurteilung durchgeführt' },
+            { check: true, text: 'TRBS 1111 - Anerkanntes Bewertungsverfahren angewendet' },
+            { check: true, text: 'DIN EN ISO 12100 - Maschinensicherheit berücksichtigt' },
+            { check: data.selectedHazards?.length > 0, text: 'Gefährdungsanalyse vollständig dokumentiert' },
+            { check: data.riskMatrix?.riskNumber, text: 'Quantitative Risikobewertung durchgeführt' },
+            { check: data.protectionMeasures && Object.keys(data.protectionMeasures).length > 0, text: 'Schutzmaßnahmen nach TOP-Prinzip definiert' },
+            { check: data.signatures && Object.keys(data.signatures).length > 0, text: 'Digitale Signaturen und Freigabeworkflow' },
+            { check: true, text: 'Dokumentation nachvollziehbar und archivierbar' }
+        ];
+        
+        complianceItems.forEach(item => {
+            doc.setFont('helvetica', 'normal');
+            const symbol = item.check ? '✓' : '✗';
+            const color = item.check ? [0, 128, 0] : [255, 0, 0];
+            
+            doc.setTextColor(...color);
+            doc.text(symbol, margin, yPosition);
+            doc.setTextColor(0, 0, 0);
+            doc.text(item.text, margin + 10, yPosition);
+            yPosition += 8;
+        });
+        
+        yPosition += 10;
+        
+        // Summary
+        const passedItems = complianceItems.filter(item => item.check).length;
+        const totalItems = complianceItems.length;
+        const complianceRate = Math.round((passedItems / totalItems) * 100);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text(`COMPLIANCE-BEWERTUNG: ${complianceRate}% (${passedItems}/${totalItems})`, margin, yPosition);
+        yPosition += 15;
+        
+        if (complianceRate >= 90) {
+            doc.setTextColor(0, 128, 0);
+            doc.text('STATUS: TÜV-KONFORM', margin, yPosition);
+        } else if (complianceRate >= 75) {
+            doc.setTextColor(255, 165, 0);
+            doc.text('STATUS: BEDINGT KONFORM - Nachbesserungen erforderlich', margin, yPosition);
+        } else {
+            doc.setTextColor(255, 0, 0);
+            doc.text('STATUS: NICHT KONFORM - Wesentliche Mängel', margin, yPosition);
+        }
+        
+        // Save PDF
+        const fileName = `Compliance_Nachweis_${data.gbuNummer || 'UNBENANNT'}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        alert(`Compliance-Nachweis erfolgreich erstellt: ${fileName}`);
+    }
+
+    createQualificationPDF(data) {
+        console.log('🎓 Generating qualification PDF report...');
+        
+        // Import jsPDF library dynamically if not available
+        if (typeof window.jsPDF === 'undefined') {
+            this.loadJsPDFLibrary(() => this.createQualificationPDF(data));
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        // PDF Configuration
+        const margin = 20;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        let yPosition = margin;
+        
+        // Header
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('QUALIFIKATIONSNACHWEIS GEFÄHRDUNGSBEURTEILUNG', margin, yPosition);
+        yPosition += 15;
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${document.getElementById('companyName')?.textContent || 'Hoffmann & Voss'}`, margin, yPosition);
+        yPosition += 10;
+        doc.text(`Arbeitsplatz: ${data.workplace || 'Nicht angegeben'}`, margin, yPosition);
+        yPosition += 10;
+        doc.text(`Erstellt am: ${data.reportGenerated}`, margin, yPosition);
+        yPosition += 20;
+        
+        // Required Qualifications
+        doc.setFont('helvetica', 'bold');
+        doc.text('ERFORDERLICHE QUALIFIKATIONEN', margin, yPosition);
+        yPosition += 15;
+        
+        const requiredQualifications = [
+            'Fachkraft für Arbeitssicherheit (SiFa)',
+            'Betriebsarzt oder arbeitsmedizinische Betreuung',
+            'Sachkundige Person für Gefährdungsbeurteilung',
+            'Unterweisung in TRBS 1111',
+            'Kenntnisse DIN EN ISO 12100 (Maschinensicherheit)',
+            'Schulung TOP-Prinzip und Schutzmaßnahmen'
+        ];
+        
+        requiredQualifications.forEach(qual => {
+            doc.setFont('helvetica', 'normal');
+            doc.text(`• ${qual}`, margin + 5, yPosition);
+            yPosition += 7;
+        });
+        
+        yPosition += 15;
+        
+        // Qualification Status
+        doc.setFont('helvetica', 'bold');
+        doc.text('QUALIFIKATIONSSTATUS', margin, yPosition);
+        yPosition += 15;
+        
+        const qualificationData = data.qualifications || {};
+        
+        // Required qualifications
+        if (qualificationData.erforderlich && qualificationData.erforderlich.length > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.text('Erforderlich:', margin, yPosition);
+            yPosition += 8;
+            
+            qualificationData.erforderlich.forEach(qual => {
+                doc.setFont('helvetica', 'normal');
+                doc.text(`• ${qual}`, margin + 5, yPosition);
+                yPosition += 6;
+            });
+            yPosition += 10;
+        }
+        
+        // Available qualifications
+        if (qualificationData.vorhanden && qualificationData.vorhanden.length > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 128, 0);
+            doc.text('Vorhanden:', margin, yPosition);
+            yPosition += 8;
+            
+            qualificationData.vorhanden.forEach(qual => {
+                doc.setFont('helvetica', 'normal');
+                doc.text(`• ${qual}`, margin + 5, yPosition);
+                yPosition += 6;
+            });
+            yPosition += 10;
+        }
+        
+        // Missing qualifications
+        if (qualificationData.fehlend && qualificationData.fehlend.length > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(255, 0, 0);
+            doc.text('Fehlend (Nachschulung erforderlich):', margin, yPosition);
+            yPosition += 8;
+            
+            qualificationData.fehlend.forEach(qual => {
+                doc.setFont('helvetica', 'normal');
+                doc.text(`• ${qual}`, margin + 5, yPosition);
+                yPosition += 6;
+            });
+            yPosition += 10;
+        }
+        
+        // Signatures section
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'bold');
+        doc.text('QUALIFIKATIONSNACHWEISE BESTÄTIGT DURCH:', margin, yPosition);
+        yPosition += 15;
+        
+        const signatures = data.signatures || {};
+        const signatureRoles = [
+            { key: 'assessor', label: 'Ersteller der Gefährdungsbeurteilung' },
+            { key: 'safetyOfficer', label: 'Fachkraft für Arbeitssicherheit' },
+            { key: 'doctor', label: 'Betriebsarzt' },
+            { key: 'supervisor', label: 'Vorgesetzter/Abteilungsleiter' }
+        ];
+        
+        signatureRoles.forEach(role => {
+            const signature = signatures[role.key];
+            doc.setFont('helvetica', 'normal');
+            doc.text(`${role.label}:`, margin, yPosition);
+            doc.text(`${signature?.name || 'Nicht unterzeichnet'}`, margin + 80, yPosition);
+            doc.text(`${signature?.date || 'Datum ausstehend'}`, margin + 140, yPosition);
+            yPosition += 8;
+        });
+        
+        // Save PDF
+        const fileName = `Qualifikationsnachweis_${data.gbuNummer || 'UNBENANNT'}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        alert(`Qualifikationsnachweis erfolgreich erstellt: ${fileName}`);
+    }
+
+    // Enhanced validation for TÜV compliance
+    validateGBUCompleteness() {
+        const errors = [];
+        const warnings = [];
+        
+        // Check mandatory fields
+        const requiredFields = [
+            { id: 'gbuNummer', name: 'GBU-Nummer' },
+            { id: 'gbuTitle', name: 'Titel' },
+            { id: 'gbuWorkplace', name: 'Arbeitsplatz' },
+            { id: 'gbuDepartment', name: 'Abteilung' },
+            { id: 'gbuAssessor', name: 'Ersteller' }
+        ];
+        
+        requiredFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (!element || !element.value.trim()) {
+                errors.push(`${field.name} ist erforderlich`);
+            }
+        });
+        
+        // Check hazard selection
+        const selectedHazards = this.getSelectedHazards();
+        if (selectedHazards.length === 0) {
+            errors.push('Mindestens eine Gefährdung muss ausgewählt werden');
+        }
+        
+        // Check risk assessment
+        const riskData = this.collectRiskMatrixData();
+        if (!riskData.severity || !riskData.probability || !riskData.avoidability) {
+            errors.push('Vollständige Risikobewertung erforderlich');
+        }
+        
+        // Check protection measures
+        const measures = this.collectProtectionMeasures();
+        const totalMeasures = measures.technical.length + measures.organizational.length + measures.personal.length;
+        if (totalMeasures === 0) {
+            warnings.push('Keine Schutzmaßnahmen definiert');
+        }
+        
+        // Check legal foundations
+        const legalFoundations = this.collectLegalFoundations();
+        if (Object.keys(legalFoundations).length === 0) {
+            warnings.push('Keine rechtlichen Grundlagen ausgewählt');
+        }
+        
+        // Show validation results
+        this.showValidationResults(errors, warnings);
+        
+        return errors.length === 0;
+    }
+
+    showValidationResults(errors, warnings) {
+        let message = 'VOLLSTÄNDIGKEITSPRÜFUNG\n\n';
+        
+        if (errors.length === 0 && warnings.length === 0) {
+            message += '✅ Alle erforderlichen Felder sind vollständig ausgefüllt.\n';
+            message += '✅ Die Gefährdungsbeurteilung ist TÜV-konform.';
+        } else {
+            if (errors.length > 0) {
+                message += '❌ FEHLER (müssen behoben werden):\n';
+                errors.forEach(error => message += `• ${error}\n`);
+                message += '\n';
+            }
+            
+            if (warnings.length > 0) {
+                message += '⚠️ WARNUNGEN (sollten behoben werden):\n';
+                warnings.forEach(warning => message += `• ${warning}\n`);
+            }
+        }
+        
+        alert(message);
+        
+        // Enable/disable approve button based on validation
+        const approveBtn = document.getElementById('approveBtn');
+        if (approveBtn) {
+            approveBtn.disabled = errors.length > 0;
+        }
+    }
+
+    requestGBUReview() {
+        if (this.validateGBUCompleteness()) {
+            alert('Gefährdungsbeurteilung zur Prüfung freigegeben.\nStatus: Zur Prüfung freigegeben');
+            this.updateGBUStatus('under-review');
+        }
+    }
+
+    approveGBU() {
+        alert('Gefährdungsbeurteilung endgültig freigegeben.\nStatus: Genehmigt und rechtskräftig');
+        this.updateGBUStatus('approved');
+    }
+
+    rejectGBU() {
+        const reason = prompt('Grund für die Ablehnung:');
+        if (reason) {
+            alert(`Gefährdungsbeurteilung abgelehnt.\nGrund: ${reason}`);
+            this.updateGBUStatus('rejected', reason);
+        }
+    }
+
+    updateGBUStatus(status, note = '') {
+        const statusElement = document.getElementById('currentApprovalStatus');
+        const statusDate = document.getElementById('statusDate');
+        
+        if (statusElement) {
+            statusElement.className = `status-badge status-${status}`;
+            
+            const statusTexts = {
+                'draft': 'Entwurf',
+                'under-review': 'Zur Prüfung freigegeben', 
+                'approved': 'Genehmigt',
+                'rejected': 'Abgelehnt'
+            };
+            
+            statusElement.textContent = statusTexts[status] || status;
+        }
+        
+        if (statusDate) {
+            statusDate.innerHTML = `Status geändert am: <span>${new Date().toLocaleString('de-DE')}</span>`;
+        }
+        
+        // Update history
+        this.addGBUHistoryEntry(status, note);
+    }
+
+    addGBUHistoryEntry(action, note = '') {
+        const historyContainer = document.getElementById('gbuHistoryContainer');
+        if (historyContainer) {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div class="history-date">${new Date().toLocaleString('de-DE')}</div>
+                <div class="history-user">${this.getCurrentUser().name}</div>
+                <div class="history-action">${this.getActionText(action)}</div>
+                ${note ? `<div class="history-note">${note}</div>` : ''}
+            `;
+            
+            historyContainer.insertBefore(historyItem, historyContainer.firstChild);
+        }
+    }
+
+    getActionText(action) {
+        const actions = {
+            'draft': 'Gefährdungsbeurteilung erstellt',
+            'under-review': 'Zur Prüfung freigegeben',
+            'approved': 'Endgültig genehmigt',
+            'rejected': 'Abgelehnt'
+        };
+        
+        return actions[action] || action;
+    }
+
+    testRiskCalculationSetup() {
+        console.log('🧪 Testing risk calculation setup...');
+        
+        // Test if radio buttons exist
+        const radioTests = [
+            'severity-1', 'severity-2', 'severity-3', 'severity-4',
+            'probability-1', 'probability-2', 'probability-3', 'probability-4',
+            'avoidability-1', 'avoidability-2', 'avoidability-3', 'avoidability-4'
+        ];
+        
+        let foundRadios = 0;
+        radioTests.forEach(id => {
+            const radio = document.getElementById(id);
+            if (radio) {
+                foundRadios++;
+                console.log(`✅ Found radio: ${id}`);
+            } else {
+                console.log(`❌ Missing radio: ${id}`);
+            }
+        });
+        
+        console.log(`Found ${foundRadios}/${radioTests.length} radio buttons`);
+        
+        // Test if display elements exist
+        const displayElements = [
+            'selectedSeverity', 'selectedProbability', 'selectedAvoidability',
+            'calculatedRisk', 'riskLevel', 'requiredActions'
+        ];
+        
+        let foundElements = 0;
+        displayElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                foundElements++;
+                console.log(`✅ Found display element: ${id}`);
+            } else {
+                console.log(`❌ Missing display element: ${id}`);
+            }
+        });
+        
+        console.log(`Found ${foundElements}/${displayElements.length} display elements`);
+        
+        // Test manual risk calculation
+        console.log('🔍 Testing manual risk calculation...');
+        this.calculateRisk();
     }
 
     // Supplier Management Setup
@@ -22816,3 +25384,293 @@ function deleteMachine(machineId) {
 
 // Dashboard initialization is handled in index.html
 // to ensure proper timing with DOM elements
+
+// Global functions for onclick handlers
+function openRiskAssessmentModal(gbuId = null) {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.openRiskAssessmentModal(gbuId);
+    }
+}
+
+function generateRiskAssessmentReport() {
+    alert('📊 Bericht wird generiert... (Feature wird noch implementiert)');
+}
+
+function exportRiskAssessments() {
+    alert('📤 Export wird vorbereitet... (Feature wird noch implementiert)');
+}
+
+function searchRiskAssessments() {
+    alert('🔍 Suche wird ausgeführt... (Feature wird noch implementiert)');
+}
+
+function filterRiskAssessments() {
+    alert('🗂️ Filter werden angewendet... (Feature wird noch implementiert)');
+}
+
+function sortRiskAssessments(column) {
+    alert(`📊 Sortierung nach ${column}... (Feature wird noch implementiert)`);
+}
+
+function addMeasure(type) {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.addProtectiveMeasure(type);
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function removeMeasure(measureId) {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.removeProtectiveMeasure(measureId);
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function loadMeasureTemplate(templateType) {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.loadMeasureTemplate(templateType);
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function addSpecificMeasure(measureType) {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.addSpecificMeasure(measureType);
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function removeMeasure(measureId) {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.removeMeasure(measureId);
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function addDigitalSignature(signerType) {
+    const inputId = `${signerType}_unterschrift`;
+    const inputElement = document.getElementById(inputId);
+    if (inputElement) {
+        const currentUser = window.qhseDashboard ? window.qhseDashboard.getCurrentUser() : null;
+        if (currentUser) {
+            const timestamp = new Date().toLocaleString('de-DE');
+            const signature = `Digital signiert von ${currentUser.displayName || currentUser.name} am ${timestamp}`;
+            inputElement.value = signature;
+            inputElement.style.backgroundColor = '#e8f5e8';
+            inputElement.style.fontWeight = 'bold';
+            alert(`Digitale Unterschrift als ${signerType} hinzugefügt.`);
+        } else {
+            alert('Benutzerinformationen nicht verfügbar.');
+        }
+    }
+}
+
+function validateGBUCompleteness() {
+    // Check if required fields are filled
+    const requiredChecks = [
+        { field: 'gbuTitel', name: 'Titel/Bezeichnung' },
+        { field: 'gbuBereich', name: 'Bereich/Abteilung' },
+        { field: 'gbuVerantwortlicher', name: 'Verantwortlicher' },
+        { field: 'arbeitsplatzBezeichnung', name: 'Arbeitsplatz-Bezeichnung' },
+        { field: 'taetigkeitsbeschreibung', name: 'Tätigkeitsbeschreibung' }
+    ];
+    
+    const missingFields = [];
+    requiredChecks.forEach(check => {
+        const element = document.getElementById(check.field);
+        if (element && !element.value.trim()) {
+            missingFields.push(check.name);
+        }
+    });
+    
+    // Check if hazards are selected
+    const selectedHazards = document.querySelectorAll('#tab-gefaehrdungsanalyse input[type="checkbox"]:checked');
+    if (selectedHazards.length === 0) {
+        missingFields.push('Gefährdungsauswahl');
+    }
+    
+    // Check if measures are added
+    const measures = document.querySelectorAll('.protective-measure');
+    if (measures.length === 0) {
+        missingFields.push('Schutzmaßnahmen');
+    }
+    
+    if (missingFields.length > 0) {
+        alert(`Folgende Pflichtfelder sind noch nicht ausgefüllt:\n- ${missingFields.join('\n- ')}`);
+        return false;
+    } else {
+        alert('✅ GBU ist vollständig ausgefüllt und bereit für die Prüfung.');
+        return true;
+    }
+}
+
+function requestGBUReview() {
+    if (validateGBUCompleteness()) {
+        const statusElement = document.getElementById('currentApprovalStatus');
+        if (statusElement) {
+            statusElement.textContent = 'Zur Prüfung';
+            statusElement.className = 'status-badge status-review';
+        }
+        
+        const stepReview = document.getElementById('step-review');
+        if (stepReview) {
+            stepReview.classList.add('completed');
+        }
+        
+        alert('GBU wurde zur fachlichen Prüfung freigegeben.');
+    }
+}
+
+function approveGBU() {
+    const confirmApproval = confirm('Möchten Sie diese Gefährdungsbeurteilung endgültig freigeben?\n\nDadurch wird sie rechtskräftig und verbindlich.');
+    if (confirmApproval) {
+        const statusElement = document.getElementById('currentApprovalStatus');
+        if (statusElement) {
+            statusElement.textContent = 'Freigegeben';
+            statusElement.className = 'status-badge status-approved';
+        }
+        
+        const stepApproval = document.getElementById('step-approval');
+        if (stepApproval) {
+            stepApproval.classList.add('completed');
+        }
+        
+        // Set approval date
+        const freigabeDatum = document.getElementById('freigabe_datum');
+        if (freigabeDatum && !freigabeDatum.value) {
+            freigabeDatum.value = new Date().toISOString().split('T')[0];
+        }
+        
+        alert('✅ Gefährdungsbeurteilung wurde erfolgreich freigegeben und ist ab sofort gültig.');
+    }
+}
+
+function rejectGBU() {
+    const reason = prompt('Bitte geben Sie den Grund für die Ablehnung an:');
+    if (reason) {
+        const statusElement = document.getElementById('currentApprovalStatus');
+        if (statusElement) {
+            statusElement.textContent = 'Abgelehnt';
+            statusElement.className = 'status-badge status-rejected';
+        }
+        
+        const pruefer_kommentar = document.getElementById('pruefer_kommentar');
+        if (pruefer_kommentar) {
+            pruefer_kommentar.value = `ABGELEHNT - ${reason}`;
+        }
+        
+        alert('GBU wurde abgelehnt. Überarbeitung erforderlich.');
+    }
+}
+
+function validateGBUCompleteness() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.validateGBUCompleteness();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+// PDF Export Functions for Risk Assessment
+function generateCompleteGBUReport() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.generateCompleteGBUReport();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function generateComplianceReport() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.generateComplianceReport();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function generateQualificationReport() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.generateQualificationReport();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function validateGBUCompleteness() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.validateGBUCompleteness();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function requestGBUReview() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.requestGBUReview();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function approveGBU() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.approveGBU();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function rejectGBU() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.rejectGBU();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+// Legacy functions (deprecated)
+function generateGBUPDF() {
+    generateCompleteGBUReport();
+}
+
+function generateGBUExcel() {
+    alert('📊 Excel wird generiert... (Feature wird noch implementiert)');
+}
+
+function generateGBUWord() {
+    alert('📝 Word-Dokument wird generiert... (Feature wird noch implementiert)');
+}
+
+function requestRevisionGBU() {
+    requestGBUReview();
+}
+
+// Global functions for GBU action buttons
+function openRiskAssessmentModal() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.openRiskAssessmentModal();
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function generateRiskAssessmentReport() {
+    if (window.qhseDashboard) {
+        alert('📋 Bericht wird erstellt... (Feature wird noch implementiert)');
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function exportRiskAssessments() {
+    if (window.qhseDashboard) {
+        alert('📤 Export wird vorbereitet... (Feature wird noch implementiert)');
+    } else {
+        alert('System wird noch geladen...');
+    }
+}

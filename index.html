@@ -65,6 +65,10 @@
                         <i class="fas fa-cogs"></i>
                         <span>Verfahrensanweisungen</span>
                     </li>
+                    <li class="menu-item static-item" data-section="gefaehrdungsbeurteilung" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,admin,root-admin">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Gefährdungsbeurteilungen</span>
+                    </li>
                     <li class="menu-item static-item" data-section="audits" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,mitarbeiter,techniker,admin,root-admin">
                         <i class="fas fa-search"></i>
                         <span>Auditauswertungen</span>
@@ -739,6 +743,137 @@
                                         <button id="cancelVerfahrensanweisungenNotesBtn" class="btn-secondary btn-sm">
                                             <i class="fas fa-times"></i> Abbrechen
                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="gefaehrdungsbeurteilung-section" class="content-section">
+                    <div class="section-content">
+                        <h2>Gefährdungsbeurteilungen</h2>
+                        <div class="gefaehrdungsbeurteilung-content">
+                            <div class="gbu-header">
+                                <div class="section-header-actions">
+                                    <button class="btn-primary" onclick="openRiskAssessmentModal()">
+                                        <i class="fas fa-plus"></i> Neue Gefährdungsbeurteilung
+                                    </button>
+                                    <button class="btn-secondary" onclick="generateRiskAssessmentReport()">
+                                        <i class="fas fa-file-pdf"></i> Bericht erstellen
+                                    </button>
+                                    <button class="btn-secondary" onclick="exportRiskAssessments()">
+                                        <i class="fas fa-download"></i> Export
+                                    </button>
+                                </div>
+                                <p>Systematische Gefährdungsbeurteilungen nach § 5 ArbSchG, TRBS 1111 und DGUV Vorschrift 1</p>
+                            </div>
+                            
+                            <div class="gbu-dashboard">
+                                <div class="gbu-stats">
+                                    <div class="stat-card">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <h4>Gesamtanzahl</h4>
+                                            <span class="stat-number" id="totalRiskAssessments">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <h4>In Bearbeitung</h4>
+                                            <span class="stat-number" id="inProgressRiskAssessments">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <h4>Freigegeben</h4>
+                                            <span class="stat-number" id="approvedRiskAssessments">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <h4>Überprüfung fällig</h4>
+                                            <span class="stat-number" id="expiredRiskAssessments">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <h4>Hohes Risiko</h4>
+                                            <span class="stat-number" id="highRiskAssessments">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <h4>Arbeitsbereiche</h4>
+                                            <span class="stat-number" id="workAreasCount">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="gbu-controls">
+                                    <div class="search-filter-controls">
+                                        <div class="search-group">
+                                            <input type="text" id="riskAssessmentSearch" placeholder="Suche nach Arbeitsplatz, Tätigkeit, Gefährdung..." class="search-input">
+                                            <button onclick="searchRiskAssessments()" class="search-btn">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                        <div class="filter-group">
+                                            <select id="statusFilter" onchange="filterRiskAssessments()">
+                                                <option value="">Alle Status</option>
+                                                <option value="entwurf">Entwurf</option>
+                                                <option value="bearbeitung">In Bearbeitung</option>
+                                                <option value="pruefung">Zur Prüfung</option>
+                                                <option value="freigegeben">Freigegeben</option>
+                                                <option value="ueberarbeitung">Überarbeitung erforderlich</option>
+                                            </select>
+                                            <select id="departmentFilter" onchange="filterRiskAssessments()">
+                                                <option value="">Alle Bereiche</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="gbu-table-container">
+                                    <table class="gbu-table">
+                                        <thead>
+                                            <tr>
+                                                <th onclick="sortRiskAssessments('nummer')">GBU-Nr. <i class="fas fa-sort"></i></th>
+                                                <th onclick="sortRiskAssessments('titel')">Titel/Arbeitsplatz <i class="fas fa-sort"></i></th>
+                                                <th onclick="sortRiskAssessments('bereich')">Bereich <i class="fas fa-sort"></i></th>
+                                                <th onclick="sortRiskAssessments('risk')">Risiko <i class="fas fa-sort"></i></th>
+                                                <th onclick="sortRiskAssessments('status')">Status <i class="fas fa-sort"></i></th>
+                                                <th onclick="sortRiskAssessments('gueltigBis')">Gültig bis <i class="fas fa-sort"></i></th>
+                                                <th>Verantwortlicher</th>
+                                                <th>Aktionen</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="riskAssessmentTableBody">
+                                            <!-- Risk assessments will be populated here -->
+                                        </tbody>
+                                    </table>
+                                    
+                                    <div id="noRiskAssessmentsMessage" class="no-items-message" style="display: none;">
+                                        <i class="fas fa-clipboard-list"></i>
+                                        <h3>Keine Gefährdungsbeurteilungen vorhanden</h3>
+                                        <p>Erstellen Sie Ihre erste Gefährdungsbeurteilung mit dem Button oben.</p>
                                     </div>
                                 </div>
                             </div>
@@ -6554,5 +6689,1460 @@
         </div>
     </div>
 
+    <!-- Risk Assessment Modal -->
+    <div id="riskAssessmentModal" class="modal" style="display: none;">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2 id="riskAssessmentModalTitle">
+                    <i class="fas fa-exclamation-triangle"></i> Gefährdungsbeurteilung bearbeiten
+                </h2>
+                <span class="close" id="closeRiskAssessmentModal">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form id="riskAssessmentForm">
+                <div class="gbu-tabs">
+                    <button class="tab-btn active" data-tab="grunddaten">
+                        <i class="fas fa-info-circle"></i> Grunddaten
+                    </button>
+                    <button class="tab-btn" data-tab="arbeitsplatz">
+                        <i class="fas fa-map-marker-alt"></i> Arbeitsplatz
+                    </button>
+                    <button class="tab-btn" data-tab="gefaehrdungsanalyse">
+                        <i class="fas fa-search"></i> Gefährdungsanalyse
+                    </button>
+                    <button class="tab-btn" data-tab="risikobewertung">
+                        <i class="fas fa-calculator"></i> Risikobewertung
+                    </button>
+                    <button class="tab-btn" data-tab="schutzmassnahmen">
+                        <i class="fas fa-shield-alt"></i> Schutzmaßnahmen
+                    </button>
+                    <button class="tab-btn" data-tab="ueberwachung">
+                        <i class="fas fa-eye"></i> Überwachung
+                    </button>
+                    <button class="tab-btn" data-tab="dokumentation">
+                        <i class="fas fa-file-alt"></i> Dokumentation
+                    </button>
+                    <button class="tab-btn" data-tab="freigabe">
+                        <i class="fas fa-check-circle"></i> Freigabe
+                    </button>
+                    <button class="tab-btn" data-tab="verlauf">
+                        <i class="fas fa-history"></i> Verlauf
+                    </button>
+                </div>
+                
+                <!-- Tab Content: Grunddaten -->
+                <div id="tab-grunddaten" class="tab-content active">
+                    <h3>Grunddaten der Gefährdungsbeurteilung</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="gbuNummer">GBU-Nummer *</label>
+                            <input type="text" id="gbuNummer" name="gbuNummer" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="gbuTitel">Titel/Bezeichnung *</label>
+                            <input type="text" id="gbuTitel" name="gbuTitel" required placeholder="z.B. Arbeitsplatz Drehbank">
+                        </div>
+                        <div class="form-group">
+                            <label for="gbuBereich">Bereich/Abteilung *</label>
+                            <select id="gbuBereich" name="gbuBereich" required>
+                                <option value="">Bitte wählen...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="gbuVerantwortlicher">Verantwortlicher *</label>
+                            <select id="gbuVerantwortlicher" required>
+                                <option value="">Bitte wählen...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="gbuErsteller">Ersteller</label>
+                            <input type="text" id="gbuErsteller" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="gbuErstelldatum">Erstelldatum</label>
+                            <input type="date" id="gbuErstelldatum">
+                        </div>
+                        <div class="form-group">
+                            <label for="gbuGueltigBis">Gültig bis *</label>
+                            <input type="date" id="gbuGueltigBis" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gbuStatus">Status</label>
+                            <select id="gbuStatus">
+                                <option value="entwurf">Entwurf</option>
+                                <option value="bearbeitung">In Bearbeitung</option>
+                                <option value="pruefung">Zur Prüfung</option>
+                                <option value="freigegeben">Freigegeben</option>
+                                <option value="ueberarbeitung">Überarbeitung erforderlich</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="gbuBeschreibung">Beschreibung/Zweck</label>
+                        <textarea id="gbuBeschreibung" rows="3" placeholder="Kurze Beschreibung der Gefährdungsbeurteilung..."></textarea>
+                    </div>
+                    
+                    <div class="legal-basis">
+                        <h4>Rechtliche Grundlagen und Normenreferenzen</h4>
+                        <p class="legal-note">Wählen Sie alle zutreffenden rechtlichen Grundlagen und Normen aus:</p>
+                        
+                        <div class="legal-categories">
+                            <div class="legal-category">
+                                <h5><i class="fas fa-gavel"></i> Gesetze und Verordnungen</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="gbu_arbschg" checked> § 5 Arbeitsschutzgesetz (ArbSchG)</label>
+                                    <label><input type="checkbox" id="gbu_betrsichv"> Betriebssicherheitsverordnung (BetrSichV)</label>
+                                    <label><input type="checkbox" id="gbu_gefahrstoffv"> Gefahrstoffverordnung (GefStoffV)</label>
+                                    <label><input type="checkbox" id="gbu_laermvibrationsv"> Lärm- und Vibrations-Arbeitsschutzverordnung</label>
+                                    <label><input type="checkbox" id="gbu_bildscharbv"> Bildschirmarbeitsverordnung</label>
+                                    <label><input type="checkbox" id="gbu_lastenhandhabungsv"> Lastenhandhabungsverordnung</label>
+                                    <label><input type="checkbox" id="gbu_arbstaettenv"> Arbeitsstättenverordnung (ArbStättV)</label>
+                                    <label><input type="checkbox" id="gbu_psgv"> Produktsicherheitsgesetz (ProdSG)</label>
+                                </div>
+                            </div>
+                            
+                            <div class="legal-category">
+                                <h5><i class="fas fa-book"></i> Technische Regeln (TRBS/TRGS)</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="gbu_trbs1111"> TRBS 1111 - Gefährdungsbeurteilung</label>
+                                    <label><input type="checkbox" id="gbu_trbs1203"> TRBS 1203 - Befähigte Personen</label>
+                                    <label><input type="checkbox" id="gbu_trbs2121"> TRBS 2121 - Gefährdungen von Personen durch Absturz</label>
+                                    <label><input type="checkbox" id="gbu_trgs400"> TRGS 400 - Gefährdungsbeurteilung für Tätigkeiten mit Gefahrstoffen</label>
+                                    <label><input type="checkbox" id="gbu_trgs500"> TRGS 500 - Schutzmaßnahmen</label>
+                                </div>
+                            </div>
+                            
+                            <div class="legal-category">
+                                <h5><i class="fas fa-shield-alt"></i> DGUV Vorschriften und Regeln</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="gbu_dguv1"> DGUV Vorschrift 1 - Grundsätze der Prävention</label>
+                                    <label><input type="checkbox" id="gbu_dguv3"> DGUV Vorschrift 3 - Elektrische Anlagen und Betriebsmittel</label>
+                                    <label><input type="checkbox" id="gbu_dguv100001"> DGUV Regel 100-001 - Grundsätze der Prävention</label>
+                                    <label><input type="checkbox" id="gbu_dguv112190"> DGUV Information 112-190 - Benutzung von Atemschutzgeräten</label>
+                                </div>
+                            </div>
+                            
+                            <div class="legal-category">
+                                <h5><i class="fas fa-globe-europe"></i> EU-Richtlinien und DIN/EN-Normen</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="gbu_maschinenrichtlinie"> Maschinenrichtlinie 2006/42/EG</label>
+                                    <label><input type="checkbox" id="gbu_psa_richtlinie"> PSA-Verordnung (EU) 2016/425</label>
+                                    <label><input type="checkbox" id="gbu_din_en_iso_12100"> DIN EN ISO 12100 - Sicherheit von Maschinen</label>
+                                    <label><input type="checkbox" id="gbu_din_en_iso_13849"> DIN EN ISO 13849 - Sicherheitsbezogene Teile von Steuerungen</label>
+                                    <label><input type="checkbox" id="gbu_din_en_iso_14121"> DIN EN ISO 14121 - Risikobeurteilung und Risikominderung</label>
+                                    <label><input type="checkbox" id="gbu_din_en_689"> DIN EN 689 - Arbeitsplatzatmosphäre</label>
+                                </div>
+                            </div>
+                            
+                            <div class="legal-category">
+                                <h5><i class="fas fa-industry"></i> Branchenspezifische Vorschriften</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="gbu_vdi2262"> VDI 2262 - Luftbeschaffenheit am Arbeitsplatz</label>
+                                    <label><input type="checkbox" id="gbu_din_iso_45001"> DIN ISO 45001 - Managementsysteme für Sicherheit und Gesundheit</label>
+                                    <label><input type="checkbox" id="gbu_bg_vorschriften"> Weitere BG-Vorschriften (spezifizieren)</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="weitere_rechtsgrundlagen">Weitere anwendbare Rechtsgrundlagen</label>
+                            <textarea id="weitere_rechtsgrundlagen" rows="3" placeholder="Zusätzliche branchen- oder tätigkeitsspezifische Vorschriften, Normen oder interne Regelungen..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Arbeitsplatz -->
+                <div id="tab-arbeitsplatz" class="tab-content">
+                    <h3>Detaillierte Arbeitsplatz- und Tätigkeitsbeschreibung</h3>
+                    
+                    <!-- Grunddaten Arbeitsplatz -->
+                    <div class="workplace-section">
+                        <h4><i class="fas fa-map-marker-alt"></i> Arbeitsplatz-Grunddaten</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="arbeitsplatzBezeichnung">Arbeitsplatz-Bezeichnung *</label>
+                                <input type="text" id="arbeitsplatzBezeichnung" required placeholder="z.B. CNC-Drehmaschine Weiler E30">
+                            </div>
+                            <div class="form-group">
+                                <label for="arbeitsplatzNummer">Arbeitsplatz-Nummer</label>
+                                <input type="text" id="arbeitsplatzNummer" placeholder="z.B. AP-001, Masch-15">
+                            </div>
+                            <div class="form-group">
+                                <label for="arbeitsplatzOrt">Standort/Ort *</label>
+                                <input type="text" id="arbeitsplatzOrt" required placeholder="z.B. Halle 2, Arbeitsplatz 15, GPS-Koordinaten">
+                            </div>
+                            <div class="form-group">
+                                <label for="arbeitsplatzTyp">Arbeitsplatztyp</label>
+                                <select id="arbeitsplatzTyp">
+                                    <option value="">Bitte wählen...</option>
+                                    <option value="maschinenbedienung">Maschinenbedienung</option>
+                                    <option value="handarbeitsplatz">Handarbeitsplatz</option>
+                                    <option value="bueroarbeitsplatz">Büroarbeitsplatz</option>
+                                    <option value="montagearbeitsplatz">Montagearbeitsplatz</option>
+                                    <option value="lagerarbeitsplatz">Lagerarbeitsplatz</option>
+                                    <option value="laborarbeitsplatz">Laborarbeitsplatz</option>
+                                    <option value="wartungsarbeitsplatz">Wartungsarbeitsplatz</option>
+                                    <option value="sonstiger">Sonstiger</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Personengruppen -->
+                    <div class="workplace-section">
+                        <h4><i class="fas fa-users"></i> Betroffene Personengruppen</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="anzahlMitarbeiter">Anzahl Mitarbeiter *</label>
+                                <input type="number" id="anzahlMitarbeiter" min="1" required placeholder="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="qualifikationsniveau">Qualifikationsniveau</label>
+                                <select id="qualifikationsniveau">
+                                    <option value="">Bitte wählen...</option>
+                                    <option value="ungelernt">Ungelernte Kräfte</option>
+                                    <option value="angelernt">Angelernte Mitarbeiter</option>
+                                    <option value="facharbeiter">Facharbeiter/Gesellen</option>
+                                    <option value="meister">Meister/Techniker</option>
+                                    <option value="ingenieur">Ingenieur/Akademiker</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="altersgruppe">Altersgruppe</label>
+                                <select id="altersgruppe">
+                                    <option value="">Bitte wählen...</option>
+                                    <option value="jugendliche">Jugendliche (15-18 Jahre)</option>
+                                    <option value="junge_erwachsene">Junge Erwachsene (18-25 Jahre)</option>
+                                    <option value="erwachsene">Erwachsene (25-55 Jahre)</option>
+                                    <option value="aeltere">Ältere Arbeitnehmer (>55 Jahre)</option>
+                                    <option value="gemischt">Gemischte Altersgruppen</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="arbeitszeit">Arbeitszeit/Schichtmodell *</label>
+                                <select id="arbeitszeit" required>
+                                    <option value="">Bitte wählen...</option>
+                                    <option value="normalzeit">Normalarbeitszeit (6-18 Uhr)</option>
+                                    <option value="zweischicht">Zweischichtbetrieb</option>
+                                    <option value="dreischicht">Dreischichtbetrieb</option>
+                                    <option value="nachtschicht">Nachtschicht</option>
+                                    <option value="wechselschicht">Wechselschicht</option>
+                                    <option value="teilzeit">Teilzeit</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="gefährdete-gruppen">
+                            <h5>Besonders gefährdete Personengruppen</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" id="schwangere"> Schwangere/Stillende</label>
+                                <label><input type="checkbox" id="jugendliche_arbeiter"> Jugendliche Arbeitnehmer</label>
+                                <label><input type="checkbox" id="behinderung"> Menschen mit Behinderung</label>
+                                <label><input type="checkbox" id="zeitarbeiter"> Zeitarbeiter/Leiharbeiter</label>
+                                <label><input type="checkbox" id="neue_mitarbeiter"> Neue Mitarbeiter (< 6 Monate)</label>
+                                <label><input type="checkbox" id="allergiker"> Allergiker/Sensibilisierte Personen</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tätigkeitsbeschreibung -->
+                    <div class="workplace-section">
+                        <h4><i class="fas fa-clipboard-list"></i> Detaillierte Tätigkeitsbeschreibung</h4>
+                        <div class="form-group full-width">
+                            <label for="taetigkeitsbeschreibung">Haupttätigkeiten (Schritt-für-Schritt) *</label>
+                            <textarea id="taetigkeitsbeschreibung" rows="5" required placeholder="1. Werkstück einspannen&#10;2. Programm auswählen und eingeben&#10;3. Maschine starten und überwachen&#10;4. Werkstück entnehmen und prüfen&#10;5. Dokumentation erstellen"></textarea>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="taetigkeitsdauer">Tägliche Tätigkeitsdauer</label>
+                                <input type="text" id="taetigkeitsdauer" placeholder="z.B. 6 Stunden/Tag, 50% der Arbeitszeit">
+                            </div>
+                            <div class="form-group">
+                                <label for="taetigkeitsfrequenz">Häufigkeit der Tätigkeit</label>
+                                <select id="taetigkeitsfrequenz">
+                                    <option value="">Bitte wählen...</option>
+                                    <option value="kontinuierlich">Kontinuierlich</option>
+                                    <option value="regelmaessig">Regelmäßig (täglich)</option>
+                                    <option value="gelegentlich">Gelegentlich (wöchentlich)</option>
+                                    <option value="selten">Selten (monatlich)</option>
+                                    <option value="einmalig">Einmalige Tätigkeiten</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="betriebszustaende">
+                            <h5>Berücksichtigte Betriebszustände</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" id="betrieb_normal" checked> Normalbetrieb</label>
+                                <label><input type="checkbox" id="betrieb_anfahren"> Anfahren/Inbetriebnahme</label>
+                                <label><input type="checkbox" id="betrieb_abfahren"> Abfahren/Stillstand</label>
+                                <label><input type="checkbox" id="betrieb_stoerung"> Störungsbehebung</label>
+                                <label><input type="checkbox" id="betrieb_wartung"> Wartung/Instandhaltung</label>
+                                <label><input type="checkbox" id="betrieb_reinigung"> Reinigung</label>
+                                <label><input type="checkbox" id="betrieb_umruestung"> Umrüstung/Werkzeugwechsel</label>
+                                <label><input type="checkbox" id="betrieb_notfall"> Notfall/Evakuierung</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Arbeitsmittel und Ausrüstung -->
+                    <div class="workplace-section">
+                        <h4><i class="fas fa-tools"></i> Arbeitsmittel und Ausrüstung</h4>
+                        <div class="form-group full-width">
+                            <label for="arbeitsmittel">Maschinen und Anlagen *</label>
+                            <textarea id="arbeitsmittel" rows="3" required placeholder="- CNC-Drehmaschine Weiler E30 (Baujahr, Hersteller)&#10;- Spannsystem Röhm KFD 200&#10;- Kühlmittelpumpe XY..."></textarea>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="werkzeuge">Werkzeuge und Hilfsmittel</label>
+                            <textarea id="werkzeuge" rows="3" placeholder="- Drehmeißel verschiedene Größen&#10;- Messschieber Digital&#10;- Prüflehren DIN 2269..."></textarea>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="gefahrstoffe">Verwendete Gefahrstoffe</label>
+                            <textarea id="gefahrstoffe" rows="3" placeholder="- Kühlschmierstoff Castrol Syntilo 9954 (Sicherheitsdatenblatt beachten)&#10;- Reinigungsmittel..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Arbeitsumgebung -->
+                    <div class="workplace-section">
+                        <h4><i class="fas fa-building"></i> Arbeitsumgebung und Bedingungen</h4>
+                        <div class="umgebung-categories">
+                            <div class="umgebung-category">
+                                <h5>Räumliche Gegebenheiten</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="umgebung_innenbereich"> Innenbereich</label>
+                                    <label><input type="checkbox" id="umgebung_aussenbereich"> Außenbereich</label>
+                                    <label><input type="checkbox" id="umgebung_enge_raeume"> Enge/Begrenzte Räume</label>
+                                    <label><input type="checkbox" id="umgebung_hoehe"> Arbeiten in der Höhe</label>
+                                    <label><input type="checkbox" id="umgebung_tiefe"> Arbeiten in der Tiefe</label>
+                                </div>
+                            </div>
+                            
+                            <div class="umgebung-category">
+                                <h5>Klimatische Bedingungen</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="umgebung_hitze"> Hitzeeinwirkung (>25°C)</label>
+                                    <label><input type="checkbox" id="umgebung_kaelte"> Kälteeinwirkung (<5°C)</label>
+                                    <label><input type="checkbox" id="umgebung_feucht"> Hohe Luftfeuchtigkeit (>70%)</label>
+                                    <label><input type="checkbox" id="umgebung_trocken"> Sehr trockene Luft (<30%)</label>
+                                    <label><input type="checkbox" id="umgebung_zugluft"> Zugluft</label>
+                                </div>
+                            </div>
+                            
+                            <div class="umgebung-category">
+                                <h5>Physikalische Einwirkungen</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="umgebung_laerm"> Lärmbelastung (>80 dB(A))</label>
+                                    <label><input type="checkbox" id="umgebung_vibration"> Vibrationen</label>
+                                    <label><input type="checkbox" id="umgebung_staub"> Staubbelastung</label>
+                                    <label><input type="checkbox" id="umgebung_daempfe"> Dämpfe/Gase</label>
+                                    <label><input type="checkbox" id="umgebung_strahlung"> Strahlung (UV, Infrarot)</label>
+                                    <label><input type="checkbox" id="umgebung_magnetfeld"> Magnetfelder</label>
+                                </div>
+                            </div>
+                            
+                            <div class="umgebung-category">
+                                <h5>Arbeitsorganisation</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" id="umgebung_alleinarbeit"> Alleinarbeit</label>
+                                    <label><input type="checkbox" id="umgebung_teamarbeit"> Teamarbeit</label>
+                                    <label><input type="checkbox" id="umgebung_zeitdruck"> Zeitdruck</label>
+                                    <label><input type="checkbox" id="umgebung_monotonie"> Monotone Tätigkeiten</label>
+                                    <label><input type="checkbox" id="umgebung_wechselnde_arbeitsplaetze"> Wechselnde Arbeitsplätze</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="weitere_umgebungsbedingungen">Weitere spezielle Umgebungsbedingungen</label>
+                            <textarea id="weitere_umgebungsbedingungen" rows="3" placeholder="z.B. Explosionsgefährdete Bereiche, Reinraumbedingungen, besondere hygienische Anforderungen..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Gefährdungsanalyse -->
+                <div id="tab-gefaehrdungsanalyse" class="tab-content">
+                    <h3>Systematische Gefährdungsermittlung</h3>
+                    <p>Wählen Sie alle zutreffenden Gefährdungen aus:</p>
+                    
+                    <div class="hazard-categories">
+                        <div class="hazard-category">
+                            <h4><i class="fas fa-cog"></i> Mechanische Gefährdungen</h4>
+                            <div class="hazard-items">
+                                <label><input type="checkbox" name="hazard_mechanical" value="cutting"> <span>Schneiden, Stechen</span></label>
+                                <label><input type="checkbox" name="hazard_mechanical" value="crushing"> <span>Quetschen, Klemmen</span></label>
+                                <label><input type="checkbox" name="hazard_mechanical" value="impact"> <span>Stoßen, Schlagen</span></label>
+                                <label><input type="checkbox" name="hazard_mechanical" value="falling"> <span>Absturz, herabfallende Gegenstände</span></label>
+                                <label><input type="checkbox" name="hazard_mechanical" value="entanglement"> <span>Erfassen, Einziehen</span></label>
+                            </div>
+                        </div>
+                        
+                        <div class="hazard-category">
+                            <h4><i class="fas fa-bolt"></i> Elektrische Gefährdungen</h4>
+                            <div class="hazard-items">
+                                <label><input type="checkbox" name="hazard_electrical" value="shock"> <span>Elektrischer Schlag</span></label>
+                                <label><input type="checkbox" name="hazard_electrical" value="arc"> <span>Lichtbogen</span></label>
+                                <label><input type="checkbox" name="hazard_electrical" value="static"> <span>Elektrostatische Aufladung</span></label>
+                                <label><input type="checkbox" name="hazard_electrical" value="magnetic"> <span>Magnetische Felder</span></label>
+                            </div>
+                        </div>
+                        
+                        <div class="hazard-category">
+                            <h4><i class="fas fa-thermometer-half"></i> Thermische Gefährdungen</h4>
+                            <div class="hazard-items">
+                                <label><input type="checkbox" name="hazard_thermal" value="heat"> <span>Heiße Oberflächen, Flüssigkeiten</span></label>
+                                <label><input type="checkbox" name="hazard_thermal" value="cold"> <span>Kalte Oberflächen, Flüssigkeiten</span></label>
+                                <label><input type="checkbox" name="hazard_thermal" value="fire"> <span>Brand- und Explosionsgefahr</span></label>
+                            </div>
+                        </div>
+                        
+                        <div class="hazard-category">
+                            <h4><i class="fas fa-flask"></i> Chemische Gefährdungen</h4>
+                            <div class="hazard-items">
+                                <label><input type="checkbox" name="hazard_chemical" value="toxic"> <span>Giftige Stoffe</span></label>
+                                <label><input type="checkbox" name="hazard_chemical" value="corrosive"> <span>Ätzende Stoffe</span></label>
+                                <label><input type="checkbox" name="hazard_chemical" value="irritant"> <span>Reizende Stoffe</span></label>
+                                <label><input type="checkbox" name="hazard_chemical" value="carcinogenic"> <span>Krebserzeugende Stoffe</span></label>
+                                <label><input type="checkbox" name="hazard_chemical" value="allergenic"> <span>Sensibilisierende Stoffe</span></label>
+                            </div>
+                        </div>
+                        
+                        <div class="hazard-category">
+                            <h4><i class="fas fa-virus"></i> Biologische Gefährdungen</h4>
+                            <div class="hazard-items">
+                                <label><input type="checkbox" name="hazard_biological" value="bacteria"> <span>Bakterien, Viren</span></label>
+                                <label><input type="checkbox" name="hazard_biological" value="fungi"> <span>Pilze, Sporen</span></label>
+                                <label><input type="checkbox" name="hazard_biological" value="parasites"> <span>Parasiten</span></label>
+                            </div>
+                        </div>
+                        
+                        <div class="hazard-category">
+                            <h4><i class="fas fa-volume-up"></i> Physikalische Gefährdungen</h4>
+                            <div class="hazard-items">
+                                <label><input type="checkbox" name="hazard_physical" value="noise"> <span>Lärm</span></label>
+                                <label><input type="checkbox" name="hazard_physical" value="vibration"> <span>Vibration, Erschütterung</span></label>
+                                <label><input type="checkbox" name="hazard_physical" value="radiation"> <span>Optische Strahlung</span></label>
+                                <label><input type="checkbox" name="hazard_physical" value="pressure"> <span>Unter-/Überdruck</span></label>
+                            </div>
+                        </div>
+                        
+                        <div class="hazard-category">
+                            <h4><i class="fas fa-user-friends"></i> Ergonomische Gefährdungen</h4>
+                            <div class="hazard-items">
+                                <label><input type="checkbox" name="hazard_ergonomic" value="lifting"> <span>Schweres Heben, Tragen</span></label>
+                                <label><input type="checkbox" name="hazard_ergonomic" value="posture"> <span>Ungünstige Körperhaltung</span></label>
+                                <label><input type="checkbox" name="hazard_ergonomic" value="repetitive"> <span>Repetitive Tätigkeiten</span></label>
+                                <label><input type="checkbox" name="hazard_ergonomic" value="workspace"> <span>Ungeeignete Arbeitsplatzgestaltung</span></label>
+                            </div>
+                        </div>
+                        
+                        <div class="hazard-category">
+                            <h4><i class="fas fa-brain"></i> Psychische Gefährdungen</h4>
+                            <div class="hazard-items">
+                                <label><input type="checkbox" name="hazard_psychosocial" value="stress"> <span>Arbeitsbelastung, Zeitdruck</span></label>
+                                <label><input type="checkbox" name="hazard_psychosocial" value="monotony"> <span>Monotonie, geistige Unterforderung</span></label>
+                                <label><input type="checkbox" name="hazard_psychosocial" value="isolation"> <span>Soziale Isolation</span></label>
+                                <label><input type="checkbox" name="hazard_psychosocial" value="violence"> <span>Gewalt, Aggression</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Risikobewertung -->
+                <div id="tab-risikobewertung" class="tab-content">
+                    <h3>Quantitative Risikobeurteilung nach Nohl-Matrix (DIN EN ISO 12100)</h3>
+                    <p><strong>Risiko (R) = Eintrittswahrscheinlichkeit (E) × Schadensschwere (S)</strong></p>
+                    
+                    <!-- Nohl-Matrix Erklärung -->
+                    <div class="nohl-matrix-explanation">
+                        <div class="matrix-section">
+                            <h4>Eintrittswahrscheinlichkeit (E)</h4>
+                            <div class="probability-scale">
+                                <div class="scale-item">
+                                    <span class="scale-value">E4</span>
+                                    <span class="scale-desc">Sehr wahrscheinlich - Tritt regelmäßig auf (>1x/Jahr)</span>
+                                </div>
+                                <div class="scale-item">
+                                    <span class="scale-value">E3</span>
+                                    <span class="scale-desc">Wahrscheinlich - Tritt gelegentlich auf (1x/1-10 Jahre)</span>
+                                </div>
+                                <div class="scale-item">
+                                    <span class="scale-value">E2</span>
+                                    <span class="scale-desc">Möglich - Kann auftreten (1x/10-100 Jahre)</span>
+                                </div>
+                                <div class="scale-item">
+                                    <span class="scale-value">E1</span>
+                                    <span class="scale-desc">Unwahrscheinlich - Tritt selten auf (<1x/100 Jahre)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="matrix-section">
+                            <h4>Schadensschwere (S)</h4>
+                            <div class="severity-scale">
+                                <div class="scale-item">
+                                    <span class="scale-value">S4</span>
+                                    <span class="scale-desc">Katastrophal - Tod, permanente Invalidität</span>
+                                </div>
+                                <div class="scale-item">
+                                    <span class="scale-value">S3</span>
+                                    <span class="scale-desc">Ernst - Schwere Verletzung, längere Arbeitsunfähigkeit</span>
+                                </div>
+                                <div class="scale-item">
+                                    <span class="scale-value">S2</span>
+                                    <span class="scale-desc">Mäßig - Leichte Verletzung, kurze Arbeitsunfähigkeit</span>
+                                </div>
+                                <div class="scale-item">
+                                    <span class="scale-value">S1</span>
+                                    <span class="scale-desc">Gering - Keine oder sehr leichte Verletzung</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nohl-Matrix Tabelle -->
+                    <div class="nohl-matrix-table">
+                        <h4>Nohl-Matrix zur Risikobewertung</h4>
+                        <table class="risk-matrix">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Eintritts-<br>wahrscheinlichkeit</th>
+                                    <th colspan="4">Schadensschwere (S)</th>
+                                </tr>
+                                <tr>
+                                    <th>S1<br>Gering</th>
+                                    <th>S2<br>Mäßig</th>
+                                    <th>S3<br>Ernst</th>
+                                    <th>S4<br>Katastrophal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>E4</strong><br>Sehr wahrscheinlich</td>
+                                    <td class="risk-value risk-mittel">4<br>Mittel</td>
+                                    <td class="risk-value risk-hoch">8<br>Hoch</td>
+                                    <td class="risk-value risk-hoch">12<br>Hoch</td>
+                                    <td class="risk-value risk-kritisch">16<br>Kritisch</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>E3</strong><br>Wahrscheinlich</td>
+                                    <td class="risk-value risk-niedrig">3<br>Niedrig</td>
+                                    <td class="risk-value risk-mittel">6<br>Mittel</td>
+                                    <td class="risk-value risk-mittel">9<br>Mittel</td>
+                                    <td class="risk-value risk-hoch">12<br>Hoch</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>E2</strong><br>Möglich</td>
+                                    <td class="risk-value risk-niedrig">2<br>Niedrig</td>
+                                    <td class="risk-value risk-niedrig">4<br>Niedrig</td>
+                                    <td class="risk-value risk-mittel">6<br>Mittel</td>
+                                    <td class="risk-value risk-mittel">8<br>Mittel</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>E1</strong><br>Unwahrscheinlich</td>
+                                    <td class="risk-value risk-niedrig">1<br>Niedrig</td>
+                                    <td class="risk-value risk-niedrig">2<br>Niedrig</td>
+                                    <td class="risk-value risk-niedrig">3<br>Niedrig</td>
+                                    <td class="risk-value risk-niedrig">4<br>Niedrig</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Akzeptanzkriterien -->
+                    <div class="acceptance-criteria">
+                        <h4>Akzeptanzkriterien und Maßnahmenanforderungen</h4>
+                        <div class="criteria-grid">
+                            <div class="criteria-item risk-niedrig">
+                                <h5>Niedriges Risiko (R: 1-3)</h5>
+                                <p><strong>Akzeptabel</strong> - Keine zusätzlichen Maßnahmen erforderlich. Bestehende Maßnahmen aufrechterhalten.</p>
+                            </div>
+                            <div class="criteria-item risk-mittel">
+                                <h5>Mittleres Risiko (R: 4-6)</h5>
+                                <p><strong>Tolerable</strong> - Überwachung erforderlich. Verbesserungen anstreben, wenn verhältnismäßig.</p>
+                            </div>
+                            <div class="criteria-item risk-hoch">
+                                <h5>Hohes Risiko (R: 8-12)</h5>
+                                <p><strong>Grenzbereich</strong> - Maßnahmen zur Risikoreduktion erforderlich. Zeitnahme Umsetzung.</p>
+                            </div>
+                            <div class="criteria-item risk-kritisch">
+                                <h5>Kritisches Risiko (R: 16)</h5>
+                                <p><strong>Inakzeptabel</strong> - Sofortige Maßnahmen zwingend erforderlich. Betrieb einstellen bis Lösung.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detaillierte Risikobewertung -->
+                    <div class="detailed-risk-assessment">
+                        <h4>Quantitative Risikobewertung nach TRBS 1111</h4>
+                        
+                        <div class="risk-calculation-form">
+                            <div class="calculation-section">
+                                <h5>1. Schadensausmaß (S) - Schwere der möglichen Verletzung</h5>
+                                <div class="assessment-grid">
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskSeverity" value="1" id="severity-1">
+                                        <div class="option-content">
+                                            <span class="option-value">S1</span>
+                                            <span class="option-text">Leichte Verletzung</span>
+                                            <span class="option-desc">Erste Hilfe, kein Arbeitsausfall</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskSeverity" value="2" id="severity-2">
+                                        <div class="option-content">
+                                            <span class="option-value">S2</span>
+                                            <span class="option-text">Mittlere Verletzung</span>
+                                            <span class="option-desc">Arztbehandlung, kurzer Arbeitsausfall</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskSeverity" value="3" id="severity-3">
+                                        <div class="option-content">
+                                            <span class="option-value">S3</span>
+                                            <span class="option-text">Schwere Verletzung</span>
+                                            <span class="option-desc">Krankenhaus, langer Arbeitsausfall</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskSeverity" value="4" id="severity-4">
+                                        <div class="option-content">
+                                            <span class="option-value">S4</span>
+                                            <span class="option-text">Tödliche Verletzung</span>
+                                            <span class="option-desc">Tod oder bleibende Schäden</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-section">
+                                <h5>2. Auftretenswahrscheinlichkeit (W) - Häufigkeit der Exposition</h5>
+                                <div class="assessment-grid">
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskProbability" value="1" id="probability-1">
+                                        <div class="option-content">
+                                            <span class="option-value">W1</span>
+                                            <span class="option-text">Sehr unwahrscheinlich</span>
+                                            <span class="option-desc">< 1x pro Jahr, theoretisch möglich</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskProbability" value="2" id="probability-2">
+                                        <div class="option-content">
+                                            <span class="option-value">W2</span>
+                                            <span class="option-text">Unwahrscheinlich</span>
+                                            <span class="option-desc">1x pro Jahr bis 1x pro Monat</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskProbability" value="3" id="probability-3">
+                                        <div class="option-content">
+                                            <span class="option-value">W3</span>
+                                            <span class="option-text">Möglich</span>
+                                            <span class="option-desc">1x pro Monat bis 1x pro Woche</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskProbability" value="4" id="probability-4">
+                                        <div class="option-content">
+                                            <span class="option-value">W4</span>
+                                            <span class="option-text">Wahrscheinlich</span>
+                                            <span class="option-desc">> 1x pro Woche, täglich möglich</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-section">
+                                <h5>3. Vermeidbarkeit (V) - Möglichkeit der Gefährdungsvermeidung</h5>
+                                <div class="assessment-grid">
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskAvoidability" value="1" id="avoidability-1">
+                                        <div class="option-content">
+                                            <span class="option-value">V1</span>
+                                            <span class="option-text">Sehr gut vermeidbar</span>
+                                            <span class="option-desc">Situation ist vorhersehbar und vermeidbar</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskAvoidability" value="2" id="avoidability-2">
+                                        <div class="option-content">
+                                            <span class="option-value">V2</span>
+                                            <span class="option-text">Gut vermeidbar</span>
+                                            <span class="option-desc">Situation ist meist vorhersehbar</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskAvoidability" value="3" id="avoidability-3">
+                                        <div class="option-content">
+                                            <span class="option-value">V3</span>
+                                            <span class="option-text">Bedingt vermeidbar</span>
+                                            <span class="option-desc">Situation nur teilweise vorhersehbar</span>
+                                        </div>
+                                    </label>
+                                    <label class="assessment-option">
+                                        <input type="radio" name="riskAvoidability" value="4" id="avoidability-4">
+                                        <div class="option-content">
+                                            <span class="option-value">V4</span>
+                                            <span class="option-text">Nicht vermeidbar</span>
+                                            <span class="option-desc">Situation ist kaum vorhersehbar</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Automatische Berechnung -->
+                            <div class="risk-calculation-result">
+                                <h5>Risikobewertung nach Nohl-Methode</h5>
+                                <div class="calculation-formula">
+                                    <p><strong>Formel:</strong> R = S × W × V</p>
+                                    <div class="formula-calculation">
+                                        <span id="selectedSeverity">-</span> × 
+                                        <span id="selectedProbability">-</span> × 
+                                        <span id="selectedAvoidability">-</span> = 
+                                        <span id="calculatedRisk" class="risk-result">-</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="risk-level-display">
+                                    <div class="risk-level-indicator">
+                                        <span class="risk-level-label">Risikostufe:</span>
+                                        <span id="riskLevel" class="risk-badge">Nicht bewertet</span>
+                                    </div>
+                                    <div class="risk-action-required">
+                                        <span class="action-label">Erforderliche Maßnahmen:</span>
+                                        <span id="requiredActions">Bitte Bewertung durchführen</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Rechtliche Dokumentationspflicht -->
+                                <div class="legal-documentation">
+                                    <h6><i class="fas fa-gavel"></i> Rechtliche Dokumentationspflicht</h6>
+                                    <div class="legal-requirements">
+                                        <div class="requirement-item">
+                                            <input type="checkbox" id="legalDoc1" required>
+                                            <label for="legalDoc1">Gefährdungsbeurteilung gem. § 5 ArbSchG durchgeführt</label>
+                                        </div>
+                                        <div class="requirement-item">
+                                            <input type="checkbox" id="legalDoc2" required>
+                                            <label for="legalDoc2">Bewertung nach anerkannten Verfahren (TRBS 1111)</label>
+                                        </div>
+                                        <div class="requirement-item">
+                                            <input type="checkbox" id="legalDoc3" required>
+                                            <label for="legalDoc3">Dokumentation ist nachvollziehbar und aktuell</label>
+                                        </div>
+                                        <div class="requirement-item">
+                                            <input type="checkbox" id="legalDoc4" required>
+                                            <label for="legalDoc4">Mitarbeiterinformation erfolgt (§ 12 ArbSchG)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="riskAssessmentContainer">
+                        <div class="no-hazards-selected">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Wählen Sie zunächst Gefährdungen im Tab "Gefährdungsanalyse" aus, um diese bewerten zu können.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Schutzmaßnahmen -->
+                <div id="tab-schutzmassnahmen" class="tab-content">
+                    <h3>Schutzmaßnahmen nach TOP-Prinzip (DIN EN ISO 12100)</h3>
+                    
+                    <!-- TOP-Prinzip Erklärung -->
+                    <div class="top-principle-explanation">
+                        <div class="principle-intro">
+                            <p><strong>Das TOP-Prinzip ist zwingend einzuhalten:</strong> Maßnahmen sind in dieser Reihenfolge zu priorisieren:</p>
+                        </div>
+                        <div class="principle-hierarchy">
+                            <div class="principle-level">
+                                <div class="level-number">1</div>
+                                <div class="level-content">
+                                    <h4><i class="fas fa-cogs"></i> Technische Maßnahmen</h4>
+                                    <p>Inhärent sichere Konstruktion, Schutzeinrichtungen, Sicherheitstechnik</p>
+                                </div>
+                            </div>
+                            <div class="principle-arrow">→</div>
+                            <div class="principle-level">
+                                <div class="level-number">2</div>
+                                <div class="level-content">
+                                    <h4><i class="fas fa-clipboard-list"></i> Organisatorische Maßnahmen</h4>
+                                    <p>Verfahrensanweisungen, Schulungen, Wartungspläne, Zugangsbeschränkungen</p>
+                                </div>
+                            </div>
+                            <div class="principle-arrow">→</div>
+                            <div class="principle-level">
+                                <div class="level-number">3</div>
+                                <div class="level-content">
+                                    <h4><i class="fas fa-user-shield"></i> Persönliche Schutzausrüstung</h4>
+                                    <p>PSA nur als letztes Mittel, wenn technische und organisatorische Maßnahmen nicht ausreichen</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Maßnahmen-Vorlagen -->
+                    <div class="measures-templates">
+                        <h4><i class="fas fa-file-copy"></i> Maßnahmen-Vorlagen nach Branchen</h4>
+                        <div class="template-grid">
+                            <button class="template-btn" onclick="loadMeasureTemplate('maschinenbau')">
+                                <i class="fas fa-industry"></i> Maschinenbau
+                            </button>
+                            <button class="template-btn" onclick="loadMeasureTemplate('schweissen')">
+                                <i class="fas fa-fire"></i> Schweißarbeiten
+                            </button>
+                            <button class="template-btn" onclick="loadMeasureTemplate('chemikalien')">
+                                <i class="fas fa-flask"></i> Chemikalien
+                            </button>
+                            <button class="template-btn" onclick="loadMeasureTemplate('hoehe')">
+                                <i class="fas fa-mountain"></i> Arbeiten in der Höhe
+                            </button>
+                            <button class="template-btn" onclick="loadMeasureTemplate('buero')">
+                                <i class="fas fa-desktop"></i> Büroarbeitsplatz
+                            </button>
+                            <button class="template-btn" onclick="loadMeasureTemplate('lager')">
+                                <i class="fas fa-warehouse"></i> Lager/Transport
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="measures-container">
+                        <!-- 1. Technische Maßnahmen -->
+                        <div class="measure-category technical">
+                            <div class="category-header">
+                                <h4><i class="fas fa-cogs"></i> 1. Technische Maßnahmen (Priorität: Höchste)</h4>
+                                <span class="priority-badge priority-high">Priorität 1</span>
+                            </div>
+                            
+                            <div class="measure-subcategories">
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-shield-alt"></i> Inhärent sichere Konstruktion</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Sichere Materialien</span>
+                                        <span class="example-tag">Ergonomische Gestaltung</span>
+                                        <span class="example-tag">Energiearme Verfahren</span>
+                                    </div>
+                                    <div id="inherentSafetyMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('inherent')">
+                                            <i class="fas fa-plus"></i> Konstruktive Sicherheit hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-lock"></i> Schutzeinrichtungen</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Trennende Schutzeinrichtungen</span>
+                                        <span class="example-tag">Verriegelungseinrichtungen</span>
+                                        <span class="example-tag">Lichtschranken</span>
+                                    </div>
+                                    <div id="guardingMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('guarding')">
+                                            <i class="fas fa-plus"></i> Schutzeinrichtung hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-microchip"></i> Sicherheitstechnik</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Not-Aus-Systeme</span>
+                                        <span class="example-tag">Sicherheitssteuerungen</span>
+                                        <span class="example-tag">Überwachungseinrichtungen</span>
+                                    </div>
+                                    <div id="safetyTechMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('safety-tech')">
+                                            <i class="fas fa-plus"></i> Sicherheitstechnik hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 2. Organisatorische Maßnahmen -->
+                        <div class="measure-category organizational">
+                            <div class="category-header">
+                                <h4><i class="fas fa-clipboard-list"></i> 2. Organisatorische Maßnahmen (Priorität: Mittel)</h4>
+                                <span class="priority-badge priority-medium">Priorität 2</span>
+                            </div>
+                            
+                            <div class="measure-subcategories">
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-graduation-cap"></i> Qualifikation und Unterweisung</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Erstunterweisung</span>
+                                        <span class="example-tag">Regelmäßige Schulungen</span>
+                                        <span class="example-tag">Qualifikationsnachweis</span>
+                                    </div>
+                                    <div id="trainingMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('training')">
+                                            <i class="fas fa-plus"></i> Qualifikationsmaßnahme hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-file-alt"></i> Arbeitsanweisungen und Verfahren</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Betriebsanweisungen</span>
+                                        <span class="example-tag">Arbeitsverfahren</span>
+                                        <span class="example-tag">Notfallpläne</span>
+                                    </div>
+                                    <div id="procedureMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('procedures')">
+                                            <i class="fas fa-plus"></i> Verfahrensanweisung hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-tools"></i> Wartung und Instandhaltung</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Wartungspläne</span>
+                                        <span class="example-tag">Prüffristen</span>
+                                        <span class="example-tag">Dokumentation</span>
+                                    </div>
+                                    <div id="maintenanceMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('maintenance')">
+                                            <i class="fas fa-plus"></i> Wartungsmaßnahme hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-user-lock"></i> Zugangs- und Arbeitsorganisation</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Zugangsbeschränkung</span>
+                                        <span class="example-tag">Arbeitszeit-/Pausenregelung</span>
+                                        <span class="example-tag">Alleinarbeitsverbot</span>
+                                    </div>
+                                    <div id="accessMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('access')">
+                                            <i class="fas fa-plus"></i> Organisationsmaßnahme hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 3. Persönliche Schutzausrüstung -->
+                        <div class="measure-category personal">
+                            <div class="category-header">
+                                <h4><i class="fas fa-user-shield"></i> 3. Persönliche Schutzausrüstung (PSA) (Priorität: Niedrigste)</h4>
+                                <span class="priority-badge priority-low">Priorität 3</span>
+                            </div>
+                            
+                            <div class="psa-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p><strong>Wichtiger Hinweis:</strong> PSA ist nur als letztes Mittel einzusetzen, wenn technische und organisatorische Maßnahmen nicht ausreichen oder während deren Umsetzung als Überbrückung.</p>
+                            </div>
+                            
+                            <div class="measure-subcategories">
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-hard-hat"></i> Kopf- und Gesichtsschutz</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Schutzhelm</span>
+                                        <span class="example-tag">Schutzbrille</span>
+                                        <span class="example-tag">Gesichtsschutz</span>
+                                    </div>
+                                    <div id="headProtectionMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('head-protection')">
+                                            <i class="fas fa-plus"></i> Kopf-/Gesichtsschutz hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-lungs"></i> Atemschutz</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Filtermasken</span>
+                                        <span class="example-tag">Umluftunabhängige Geräte</span>
+                                        <span class="example-tag">Vollmasken</span>
+                                    </div>
+                                    <div id="respiratoryProtectionMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('respiratory')">
+                                            <i class="fas fa-plus"></i> Atemschutz hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-hand-paper"></i> Hand- und Hautschutz</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Schutzhandschuhe</span>
+                                        <span class="example-tag">Hautschutzmittel</span>
+                                        <span class="example-tag">Schutzkleidung</span>
+                                    </div>
+                                    <div id="handProtectionMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('hand-protection')">
+                                            <i class="fas fa-plus"></i> Hand-/Hautschutz hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-shoe-prints"></i> Fuß- und Beinschutz</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Sicherheitsschuhe</span>
+                                        <span class="example-tag">Schutzstiefel</span>
+                                        <span class="example-tag">Knieschutz</span>
+                                    </div>
+                                    <div id="footProtectionMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('foot-protection')">
+                                            <i class="fas fa-plus"></i> Fuß-/Beinschutz hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="subcategory">
+                                    <h5><i class="fas fa-link"></i> Absturzsicherung</h5>
+                                    <div class="subcategory-examples">
+                                        <span class="example-tag">Auffanggurt</span>
+                                        <span class="example-tag">Sicherungsseil</span>
+                                        <span class="example-tag">Höhensicherungsgeräte</span>
+                                    </div>
+                                    <div id="fallProtectionMeasures" class="measures-list">
+                                        <button class="add-measure-btn" onclick="addSpecificMeasure('fall-protection')">
+                                            <i class="fas fa-plus"></i> Absturzsicherung hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Maßnahmen-Bewertung und -Verfolgung -->
+                        <div class="measures-evaluation">
+                            <h4><i class="fas fa-chart-line"></i> Maßnahmen-Bewertung und Wirksamkeitskontrolle</h4>
+                            <div class="evaluation-grid">
+                                <div class="evaluation-item">
+                                    <label for="massnahmen_umsetzungsgrad">Umsetzungsgrad</label>
+                                    <select id="massnahmen_umsetzungsgrad">
+                                        <option value="">Bitte bewerten...</option>
+                                        <option value="geplant">Geplant</option>
+                                        <option value="teilweise">Teilweise umgesetzt</option>
+                                        <option value="vollstaendig">Vollständig umgesetzt</option>
+                                        <option value="unwirksam">Unwirksam</option>
+                                    </select>
+                                </div>
+                                <div class="evaluation-item">
+                                    <label for="massnahmen_wirksamkeit">Wirksamkeitsbewertung</label>
+                                    <select id="massnahmen_wirksamkeit">
+                                        <option value="">Bitte bewerten...</option>
+                                        <option value="sehr_wirksam">Sehr wirksam</option>
+                                        <option value="wirksam">Wirksam</option>
+                                        <option value="teilweise_wirksam">Teilweise wirksam</option>
+                                        <option value="unwirksam">Unwirksam</option>
+                                    </select>
+                                </div>
+                                <div class="evaluation-item">
+                                    <label for="massnahmen_kosten">Kosten-Nutzen-Bewertung</label>
+                                    <select id="massnahmen_kosten">
+                                        <option value="">Bitte bewerten...</option>
+                                        <option value="sehr_gut">Sehr gut</option>
+                                        <option value="gut">Gut</option>
+                                        <option value="angemessen">Angemessen</option>
+                                        <option value="hoch">Zu hoch</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Überwachung -->
+                <div id="tab-ueberwachung" class="tab-content">
+                    <h3>Wirksamkeitsüberwachung und Kontrolle</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ueberwachungsintervall">Überwachungsintervall *</label>
+                            <select id="ueberwachungsintervall" required>
+                                <option value="">Bitte wählen...</option>
+                                <option value="woechentlich">Wöchentlich</option>
+                                <option value="monatlich">Monatlich</option>
+                                <option value="quartalsweise">Quartalsweise</option>
+                                <option value="halbjaehrlich">Halbjährlich</option>
+                                <option value="jaehrlich">Jährlich</option>
+                                <option value="bei_bedarf">Bei Bedarf</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ueberwachungsverantwortlicher">Überwachungsverantwortlicher *</label>
+                            <select id="ueberwachungsverantwortlicher" required>
+                                <option value="">Bitte wählen...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="naechsteUeberpruefung">Nächste Überprüfung</label>
+                            <input type="date" id="naechsteUeberpruefung">
+                        </div>
+                        <div class="form-group">
+                            <label for="messverfahren">Messverfahren</label>
+                            <input type="text" id="messverfahren" placeholder="z.B. Lärmmessung, Staubmessung">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="ueberwachungsmethoden">Überwachungsmethoden</label>
+                        <textarea id="ueberwachungsmethoden" rows="3" placeholder="Beschreibung der Überwachungsmethoden und -kriterien..."></textarea>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="unfallstatistik">Unfallstatistik/Auswertungen</label>
+                        <textarea id="unfallstatistik" rows="3" placeholder="Auswertung von Unfällen und Beinahe-Unfällen..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Dokumentation -->
+                <div id="tab-dokumentation" class="tab-content">
+                    <h3>Dokumentation und Nachweise</h3>
+                    <div class="form-group full-width">
+                        <label for="quellenangaben">Verwendete Quellen und Regelwerke</label>
+                        <textarea id="quellenangaben" rows="4" placeholder="z.B. DIN-Normen, TRGS, BGI, Herstellerangaben..."></textarea>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="externe_beratung">Externe Beratung/Fachkraft für Arbeitssicherheit</label>
+                        <textarea id="externe_beratung" rows="3" placeholder="Beratung durch externe Experten, Fachkraft für Arbeitssicherheit..."></textarea>
+                    </div>
+                    
+                    <div class="documentation-actions">
+                        <h4>Export-Optionen</h4>
+                        <div class="export-buttons">
+                            <button class="btn-secondary" onclick="generateGBUPDF()">
+                                <i class="fas fa-file-pdf"></i> PDF erstellen
+                            </button>
+                            <button class="btn-secondary" onclick="generateGBUExcel()">
+                                <i class="fas fa-file-excel"></i> Excel Export
+                            </button>
+                            <button class="btn-secondary" onclick="generateGBUWord()">
+                                <i class="fas fa-file-word"></i> Word Dokument
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Freigabe -->
+                <div id="tab-freigabe" class="tab-content">
+                    <h3>TÜV-konforme Freigabe und Qualifikationsnachweis</h3>
+                    
+                    <!-- Qualifikationsnachweise -->
+                    <div class="qualification-section">
+                        <h4><i class="fas fa-graduation-cap"></i> Qualifikationsnachweise der beteiligten Personen</h4>
+                        
+                        <div class="qualification-roles">
+                            <div class="qualification-role">
+                                <h5>Ersteller der Gefährdungsbeurteilung</h5>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="ersteller_name">Name/Funktion *</label>
+                                        <input type="text" id="ersteller_name" required placeholder="z.B. Max Mustermann, Fachkraft für Arbeitssicherheit">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ersteller_qualifikation">Qualifikation *</label>
+                                        <select id="ersteller_qualifikation" required>
+                                            <option value="">Bitte wählen...</option>
+                                            <option value="fasi">Fachkraft für Arbeitssicherheit (§ 6 ASiG)</option>
+                                            <option value="sifa">Sicherheitsingenieur</option>
+                                            <option value="arbeitsmediziner">Arbeitsmediziner/Betriebsarzt</option>
+                                            <option value="sachkundiger">Sachkundige Person (TRBS 1203)</option>
+                                            <option value="befaehigte_person">Befähigte Person (TRBS 1203)</option>
+                                            <option value="meister">Meister mit Zusatzqualifikation</option>
+                                            <option value="ingenieur">Ingenieur mit Fachkunde</option>
+                                            <option value="extern">Externe Beratung/Prüforganisation</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ersteller_zertifikat">Zertifikat/Nachweis</label>
+                                        <input type="text" id="ersteller_zertifikat" placeholder="z.B. Zertifikatsnummer, Ausstellungsdatum">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ersteller_datum">Erstellungsdatum *</label>
+                                        <input type="date" id="ersteller_datum" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="digital-signature">
+                                    <h6>Digitale Unterschrift</h6>
+                                    <div class="signature-area">
+                                        <input type="text" id="ersteller_unterschrift" placeholder="Digitale Signatur oder 'Hiermit bestätige ich...'">
+                                        <button class="btn-secondary" onclick="addDigitalSignature('ersteller')">
+                                            <i class="fas fa-signature"></i> Unterschrift hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="qualification-role">
+                                <h5>Prüfer/Reviewer</h5>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="pruefer_name">Name/Funktion</label>
+                                        <input type="text" id="pruefer_name" placeholder="z.B. Dr. Schmidt, Arbeitsmediziner">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pruefer_qualifikation">Qualifikation</label>
+                                        <select id="pruefer_qualifikation">
+                                            <option value="">Bitte wählen...</option>
+                                            <option value="geschaeftsfuehrung">Geschäftsführung</option>
+                                            <option value="betriebsleitung">Betriebsleitung</option>
+                                            <option value="abteilungsleitung">Abteilungsleitung</option>
+                                            <option value="fasi">Fachkraft für Arbeitssicherheit</option>
+                                            <option value="arbeitsmediziner">Arbeitsmediziner</option>
+                                            <option value="qhse_manager">QHSE-Manager</option>
+                                            <option value="externe_beratung">Externe Beratung</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pruefer_datum">Prüfdatum</label>
+                                        <input type="date" id="pruefer_datum">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pruef_ergebnis">Prüfergebnis</label>
+                                        <select id="pruef_ergebnis">
+                                            <option value="">Bitte bewerten...</option>
+                                            <option value="freigegeben">Freigegeben ohne Änderungen</option>
+                                            <option value="freigegeben_hinweise">Freigegeben mit Hinweisen</option>
+                                            <option value="ueberarbeitung">Überarbeitung erforderlich</option>
+                                            <option value="abgelehnt">Abgelehnt</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group full-width">
+                                    <label for="pruefer_kommentar">Prüfkommentar/Anmerkungen</label>
+                                    <textarea id="pruefer_kommentar" rows="3" placeholder="Kommentare, Verbesserungsvorschläge, Auflagen..."></textarea>
+                                </div>
+                                
+                                <div class="digital-signature">
+                                    <h6>Digitale Unterschrift Prüfer</h6>
+                                    <div class="signature-area">
+                                        <input type="text" id="pruefer_unterschrift" placeholder="Digitale Signatur oder 'Hiermit bestätige ich die Prüfung...'">
+                                        <button class="btn-secondary" onclick="addDigitalSignature('pruefer')">
+                                            <i class="fas fa-signature"></i> Unterschrift hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="qualification-role">
+                                <h5>Verantwortlicher/Freigeber</h5>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="freigeber_name">Name/Funktion *</label>
+                                        <input type="text" id="freigeber_name" required placeholder="z.B. Herr Müller, Geschäftsführer">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="freigeber_befugnis">Befugnis zur Freigabe *</label>
+                                        <select id="freigeber_befugnis" required>
+                                            <option value="">Bitte wählen...</option>
+                                            <option value="geschaeftsfuehrung">Geschäftsführung</option>
+                                            <option value="betriebsleitung">Betriebsleitung (bevollmächtigt)</option>
+                                            <option value="beauftragte_fuehrungskraft">Beauftragte Führungskraft</option>
+                                            <option value="arbeitgeber">Arbeitgeber</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="freigabe_datum">Freigabedatum</label>
+                                        <input type="date" id="freigabe_datum">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="gueltigkeitsdauer">Gültigkeitsdauer *</label>
+                                        <select id="gueltigkeitsdauer" required>
+                                            <option value="">Bitte wählen...</option>
+                                            <option value="1_jahr">1 Jahr (Standard)</option>
+                                            <option value="2_jahre">2 Jahre (bei gleichbleibenden Bedingungen)</option>
+                                            <option value="3_jahre">3 Jahre (bei geringen Gefährdungen)</option>
+                                            <option value="5_jahre">5 Jahre (bei Büroarbeitsplätzen)</option>
+                                            <option value="bei_aenderung">Bei wesentlichen Änderungen</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="digital-signature">
+                                    <h6>Rechtsgültige Freigabe-Unterschrift</h6>
+                                    <div class="signature-area">
+                                        <input type="text" id="freigeber_unterschrift" placeholder="Digitale Signatur oder 'Hiermit gebe ich die GBU frei...'">
+                                        <button class="btn-success" onclick="addDigitalSignature('freigeber')">
+                                            <i class="fas fa-signature"></i> Freigabe unterschreiben
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Compliance und Dokumentationspflichten -->
+                    <div class="compliance-section">
+                        <h4><i class="fas fa-gavel"></i> Compliance und Dokumentationspflichten</h4>
+                        
+                        <div class="compliance-checklist">
+                            <h5>Rechtliche Anforderungen erfüllt</h5>
+                            <div class="checklist-grid">
+                                <label><input type="checkbox" id="compliance_arbschg5" required> § 5 ArbSchG - Gefährdungsbeurteilung durchgeführt</label>
+                                <label><input type="checkbox" id="compliance_trbs1111" required> TRBS 1111 - Systematische Vorgehensweise eingehalten</label>
+                                <label><input type="checkbox" id="compliance_dokumentation" required> Vollständige Dokumentation erstellt</label>
+                                <label><input type="checkbox" id="compliance_qualifikation" required> Qualifikation der Ersteller nachgewiesen</label>
+                                <label><input type="checkbox" id="compliance_aktualisierung" required> Aktualisierungsintervalle festgelegt</label>
+                                <label><input type="checkbox" id="compliance_massnahmen" required> Schutzmaßnahmen definiert und priorisiert</label>
+                                <label><input type="checkbox" id="compliance_ueberwachung" required> Überwachung der Wirksamkeit geplant</label>
+                                <label><input type="checkbox" id="compliance_schulung" required> Mitarbeiterunterweisung berücksichtigt</label>
+                            </div>
+                        </div>
+                        
+                        <div class="audit-readiness">
+                            <h5>TÜV/Audit-Bereitschaft</h5>
+                            <div class="readiness-items">
+                                <div class="readiness-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Vollständige Nachweisführung</span>
+                                </div>
+                                <div class="readiness-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Qualifikationsnachweise verfügbar</span>
+                                </div>
+                                <div class="readiness-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Systematische Risikobewertung</span>
+                                </div>
+                                <div class="readiness-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>TOP-Prinzip eingehalten</span>
+                                </div>
+                                <div class="readiness-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Überwachungsplan definiert</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Freigabe-Workflow -->
+                    <div class="approval-workflow">
+                        <h4><i class="fas fa-route"></i> Freigabe-Workflow</h4>
+                        
+                        <div class="workflow-steps">
+                            <div class="workflow-step completed">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h6>Erstellung</h6>
+                                    <p>Gefährdungsbeurteilung erstellt</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step" id="step-review">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h6>Prüfung</h6>
+                                    <p>Fachliche Prüfung durchgeführt</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step" id="step-approval">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h6>Freigabe</h6>
+                                    <p>Formale Freigabe erteilt</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step" id="step-implementation">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h6>Umsetzung</h6>
+                                    <p>Maßnahmen umgesetzt</p>
+                                </div>
+                            </div>
+                            <div class="workflow-step" id="step-monitoring">
+                                <div class="step-number">5</div>
+                                <div class="step-content">
+                                    <h6>Überwachung</h6>
+                                    <p>Wirksamkeit überwacht</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="current-status">
+                            <h5>Aktueller Status</h5>
+                            <div class="status-display">
+                                <span id="currentApprovalStatus" class="status-badge status-entwurf">Entwurf</span>
+                                <span class="status-date" id="statusDate">Erstellt am: <span id="creationDate"></span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="approval-actions">
+                            <h5>Freigabe-Aktionen</h5>
+                            <div class="action-buttons">
+                                <button class="btn-info" onclick="validateGBUCompleteness()">
+                                    <i class="fas fa-clipboard-check"></i> Vollständigkeit prüfen
+                                </button>
+                                <button class="btn-warning" onclick="requestGBUReview()">
+                                    <i class="fas fa-search"></i> Zur Prüfung freigeben
+                                </button>
+                                <button class="btn-success" onclick="approveGBU()" disabled id="approveBtn">
+                                    <i class="fas fa-check"></i> Endgültig freigeben
+                                </button>
+                                <button class="btn-danger" onclick="rejectGBU()">
+                                    <i class="fas fa-times"></i> Ablehnen
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="final-export">
+                            <h5>Export für TÜV/Audit</h5>
+                            <div class="export-buttons">
+                                <button class="btn-primary" onclick="generateCompleteGBUReport()">
+                                    <i class="fas fa-file-pdf"></i> Vollständiger GBU-Bericht (PDF)
+                                </button>
+                                <button class="btn-secondary" onclick="generateComplianceReport()">
+                                    <i class="fas fa-clipboard-list"></i> Compliance-Nachweis
+                                </button>
+                                <button class="btn-secondary" onclick="generateQualificationReport()">
+                                    <i class="fas fa-certificate"></i> Qualifikationsnachweise
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab Content: Verlauf -->
+                <div id="tab-verlauf" class="tab-content">
+                    <h3>Änderungsverlauf und Versionshistorie</h3>
+                    <div id="gbuHistoryContainer">
+                        <div class="history-item">
+                            <div class="history-date">Heute</div>
+                            <div class="history-user">Aktueller Benutzer</div>
+                            <div class="history-action">Gefährdungsbeurteilung erstellt</div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="saveRiskAssessmentBtn" class="btn-primary">
+                    <i class="fas fa-save"></i> Speichern
+                </button>
+                <button id="saveAndCloseRiskAssessmentBtn" class="btn-success">
+                    <i class="fas fa-save"></i> Speichern & Schließen
+                </button>
+                <button id="cancelRiskAssessmentBtn" class="btn-secondary">
+                    Abbrechen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialize the QHSE Dashboard when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            window.qhseDashboard = new QHSEDashboard();
+        });
+    </script>
 </body>
 </html>
