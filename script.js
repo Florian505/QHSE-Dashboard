@@ -6295,7 +6295,9 @@ PLZ Ort">${user.address || ''}</textarea>
 
     openTrainingModal() {
         console.log('🎓 DEBUGGING: Opening training creation modal...');
-        this.openNewTrainingModal();
+        const modal = this.createNewTrainingModal();
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
     }
 
     openTrainingReports() {
@@ -6962,6 +6964,578 @@ PLZ Ort">${user.address || ''}</textarea>
         alert('Schulungsdaten wurden erfolgreich exportiert!');
     }
 
+    // Enhanced Training Export Functions
+    exportTrainingReportAsCSV(reportData, reportType) {
+        console.log('📊 Exporting training report as CSV...');
+        
+        let csvContent = '';
+        let headers = [];
+        let rows = [];
+        
+        switch (reportType) {
+            case 'overview':
+                headers = [
+                    'Schulungsname',
+                    'Kategorie', 
+                    'Typ',
+                    'Dauer (Min)',
+                    'Gültigkeitsdauer (Monate)',
+                    'Zielgruppen',
+                    'Zugewiesene Personen',
+                    'Abgeschlossen',
+                    'Offene Zuweisungen',
+                    'Abschlussrate (%)',
+                    'Status'
+                ];
+                
+                reportData.trainings.forEach(training => {
+                    const assignments = this.trainingAssignments.filter(a => a.trainingId === training.id);
+                    const completed = assignments.filter(a => a.status === 'completed').length;
+                    const total = assignments.length;
+                    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    
+                    rows.push([
+                        training.title,
+                        this.getTrainingCategoryText(training.category),
+                        training.type === 'mandatory' ? 'Pflichtschulung' : 'Freiwillig',
+                        training.duration || 0,
+                        training.validityPeriod || 12,
+                        training.targetRoles.join('; '),
+                        total,
+                        completed,
+                        total - completed,
+                        completionRate,
+                        training.isActive ? 'Aktiv' : 'Inaktiv'
+                    ]);
+                });
+                break;
+                
+            case 'completion':
+                headers = [
+                    'Kategorie',
+                    'Gesamte Schulungen',
+                    'Abgeschlossene Zuweisungen',
+                    'Offene Zuweisungen',
+                    'Überfällige Zuweisungen',
+                    'Abschlussrate (%)',
+                    'Compliance-Status'
+                ];
+                
+                reportData.categories.forEach(cat => {
+                    rows.push([
+                        cat.name,
+                        cat.totalTrainings,
+                        cat.completed,
+                        cat.pending,
+                        cat.overdue,
+                        cat.completionRate,
+                        cat.completionRate >= 90 ? 'Konform' : cat.completionRate >= 75 ? 'Akzeptabel' : 'Kritisch'
+                    ]);
+                });
+                break;
+                
+            case 'compliance':
+                headers = [
+                    'Mitarbeiter',
+                    'Abteilung',
+                    'Rolle',
+                    'Pflichtschulungen Gesamt',
+                    'Abgeschlossen',
+                    'Überfällig',
+                    'Compliance-Rate (%)',
+                    'Status',
+                    'Nächste Fälligkeit'
+                ];
+                
+                reportData.users.forEach(user => {
+                    const nextDue = user.upcomingDeadlines.length > 0 ? 
+                        new Date(Math.min(...user.upcomingDeadlines.map(d => new Date(d)))).toLocaleDateString('de-DE') : 
+                        'Keine';
+                    
+                    rows.push([
+                        user.name,
+                        user.department || 'Nicht zugewiesen',
+                        user.role,
+                        user.mandatoryTotal,
+                        user.mandatoryCompleted,
+                        user.overdue,
+                        user.complianceRate,
+                        user.complianceRate >= 90 ? 'Konform' : user.complianceRate >= 75 ? 'Warnung' : 'Kritisch',
+                        nextDue
+                    ]);
+                });
+                break;
+                
+            case 'individual':
+                if (reportData.user) {
+                    headers = [
+                        'Schulungsname',
+                        'Kategorie',
+                        'Typ',
+                        'Status',
+                        'Zugewiesen am',
+                        'Abgeschlossen am',
+                        'Fällig am',
+                        'Bewertung',
+                        'Zertifikat'
+                    ];
+                    
+                    reportData.assignments.forEach(assignment => {
+                        const training = this.trainings.find(t => t.id === assignment.trainingId);
+                        const certificate = this.certificates.find(c => 
+                            c.userId === assignment.userId && c.trainingId === assignment.trainingId
+                        );
+                        
+                        rows.push([
+                            training ? training.title : 'Unbekannt',
+                            training ? this.getTrainingCategoryText(training.category) : '-',
+                            training ? (training.type === 'mandatory' ? 'Pflichtschulung' : 'Freiwillig') : '-',
+                            this.getAssignmentStatusText(assignment.status),
+                            assignment.assignedAt ? new Date(assignment.assignedAt).toLocaleDateString('de-DE') : '-',
+                            assignment.completedAt ? new Date(assignment.completedAt).toLocaleDateString('de-DE') : '-',
+                            assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('de-DE') : '-',
+                            assignment.score ? `${assignment.score}%` : '-',
+                            certificate ? 'Vorhanden' : 'Nicht vorhanden'
+                        ]);
+                    });
+                }
+                break;
+        }
+        
+        // Build CSV content
+        csvContent = headers.join(',') + '\n';
+        rows.forEach(row => {
+            const csvRow = row.map(cell => {
+                // Escape quotes and wrap in quotes if contains comma, quote, or newline
+                const cellStr = String(cell || '');
+                if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                    return '"' + cellStr.replace(/"/g, '""') + '"';
+                }
+                return cellStr;
+            });
+            csvContent += csvRow.join(',') + '\n';
+        });
+        
+        // Add BOM for proper Excel UTF-8 handling
+        const bom = '\uFEFF';
+        const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `schulungen-bericht-${reportType}-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert(`CSV-Export erfolgreich: schulungen-bericht-${reportType}-${new Date().toISOString().split('T')[0]}.csv`);
+    }
+
+    exportTrainingReportAsExcel(reportData, reportType) {
+        console.log('📈 Exporting training report as Excel...');
+        this.exportTrainingReportAsCSV(reportData, reportType);
+        alert('Excel-Export wird als CSV-Datei bereitgestellt, die in Excel geöffnet werden kann.');
+    }
+
+    exportTrainingReportAsPDF(reportData, reportType) {
+        console.log('📄 Generating training report PDF...');
+        
+        // Import jsPDF library dynamically if not available
+        if (typeof window.jsPDF === 'undefined') {
+            this.loadJsPDFLibrary(() => this.exportTrainingReportAsPDF(reportData, reportType));
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        // PDF Configuration
+        const margin = 20;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const contentWidth = pageWidth - (margin * 2);
+        let yPosition = margin;
+        
+        // Company Header
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SCHULUNGSBERICHT', margin, yPosition);
+        yPosition += 10;
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${document.getElementById('companyName')?.textContent || 'Hoffmann & Voss'}`, margin, yPosition);
+        yPosition += 15;
+        
+        // Report Header
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${this.getTrainingReportTitle(reportType)}`, margin, yPosition);
+        yPosition += 8;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Generiert am: ${new Date().toLocaleString('de-DE')}`, margin, yPosition);
+        yPosition += 8;
+        doc.text(`Erstellt von: ${this.getCurrentUser().name}`, margin, yPosition);
+        yPosition += 15;
+        
+        switch (reportType) {
+            case 'overview':
+                this.addOverviewReportToPDF(doc, reportData, yPosition, margin, contentWidth);
+                break;
+            case 'completion':
+                this.addCompletionReportToPDF(doc, reportData, yPosition, margin, contentWidth);
+                break;
+            case 'compliance':
+                this.addComplianceReportToPDF(doc, reportData, yPosition, margin, contentWidth);
+                break;
+            case 'individual':
+                this.addIndividualReportToPDF(doc, reportData, yPosition, margin, contentWidth);
+                break;
+        }
+        
+        // Save PDF
+        const fileName = `schulungen-bericht-${reportType}-${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        alert(`PDF-Export erfolgreich: ${fileName}`);
+    }
+
+    getTrainingReportTitle(reportType) {
+        const titles = {
+            'overview': 'SCHULUNGSÜBERSICHT',
+            'completion': 'ABSCHLUSSRATEN NACH KATEGORIEN',
+            'compliance': 'COMPLIANCE-BERICHT PFLICHTSCHULUNGEN',
+            'individual': 'INDIVIDUELLER SCHULUNGSBERICHT'
+        };
+        return titles[reportType] || 'SCHULUNGSBERICHT';
+    }
+
+    getTrainingCategoryText(category) {
+        const categories = {
+            'safety': 'Arbeitssicherheit',
+            'quality': 'Qualität',
+            'environment': 'Umweltschutz',
+            'health': 'Gesundheit',
+            'compliance': 'Compliance',
+            'technical': 'Technisch',
+            'soft-skills': 'Soft Skills',
+            'management': 'Führung'
+        };
+        return categories[category] || category;
+    }
+
+    getAssignmentStatusText(status) {
+        const statusTexts = {
+            'pending': 'Ausstehend',
+            'in_progress': 'In Bearbeitung',
+            'completed': 'Abgeschlossen',
+            'overdue': 'Überfällig'
+        };
+        return statusTexts[status] || status;
+    }
+
+    prepareTrainingReportData(reportType, filters = {}) {
+        console.log(`📊 Preparing training report data for type: ${reportType}`);
+        
+        switch (reportType) {
+            case 'overview':
+                return {
+                    trainings: this.trainings.filter(t => 
+                        !filters.department || t.targetDepartments.includes(filters.department)
+                    ),
+                    totalTrainings: this.trainings.length,
+                    activeTrainings: this.trainings.filter(t => t.isActive).length,
+                    totalAssignments: this.trainingAssignments.length,
+                    completedAssignments: this.trainingAssignments.filter(a => a.status === 'completed').length
+                };
+                
+            case 'completion':
+                return this.calculateCompletionRatesByCategory(filters);
+                
+            case 'compliance':
+                return this.calculateComplianceByUser(filters);
+                
+            case 'individual':
+                return this.prepareIndividualReport(filters.userId);
+                
+            default:
+                return {};
+        }
+    }
+
+    // PDF Helper Functions for Training Reports
+    addOverviewReportToPDF(doc, reportData, startY, margin, contentWidth) {
+        let yPosition = startY;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('SCHULUNGSSTATISTIKEN', margin, yPosition);
+        yPosition += 10;
+        
+        // Summary statistics
+        const stats = [
+            [`Gesamte Schulungen:`, reportData.totalTrainings || this.trainings.length],
+            [`Aktive Schulungen:`, reportData.activeTrainings || this.trainings.filter(t => t.isActive).length],
+            [`Gesamte Zuweisungen:`, reportData.totalAssignments || this.trainingAssignments.length],
+            [`Abgeschlossene Zuweisungen:`, reportData.completedAssignments || this.trainingAssignments.filter(a => a.status === 'completed').length]
+        ];
+        
+        stats.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'normal');
+            doc.text(`${label} ${value}`, margin, yPosition);
+            yPosition += 7;
+        });
+        
+        yPosition += 10;
+        
+        // Training details
+        doc.setFont('helvetica', 'bold');
+        doc.text('SCHULUNGSDETAILS', margin, yPosition);
+        yPosition += 10;
+        
+        reportData.trainings.forEach(training => {
+            if (this.checkPageSpace(doc, yPosition, 25)) {
+                doc.addPage();
+                yPosition = margin;
+            }
+            
+            const assignments = this.trainingAssignments.filter(a => a.trainingId === training.id);
+            const completed = assignments.filter(a => a.status === 'completed').length;
+            const total = assignments.length;
+            const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text(training.title, margin, yPosition);
+            yPosition += 7;
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Kategorie: ${this.getTrainingCategoryText(training.category)}`, margin + 5, yPosition);
+            yPosition += 5;
+            doc.text(`Typ: ${training.type === 'mandatory' ? 'Pflichtschulung' : 'Freiwillig'}`, margin + 5, yPosition);
+            yPosition += 5;
+            doc.text(`Zuweisungen: ${total} | Abgeschlossen: ${completed} | Rate: ${completionRate}%`, margin + 5, yPosition);
+            yPosition += 10;
+        });
+    }
+
+    addCompletionReportToPDF(doc, reportData, startY, margin, contentWidth) {
+        let yPosition = startY;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('ABSCHLUSSRATEN NACH KATEGORIEN', margin, yPosition);
+        yPosition += 15;
+        
+        reportData.categories.forEach(category => {
+            if (this.checkPageSpace(doc, yPosition, 20)) {
+                doc.addPage();
+                yPosition = margin;
+            }
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text(category.name, margin, yPosition);
+            yPosition += 8;
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Schulungen: ${category.totalTrainings}`, margin + 5, yPosition);
+            yPosition += 5;
+            doc.text(`Abgeschlossen: ${category.completed} | Offen: ${category.pending} | Überfällig: ${category.overdue}`, margin + 5, yPosition);
+            yPosition += 5;
+            
+            // Color-coded completion rate
+            const rate = category.completionRate;
+            doc.text(`Abschlussrate: ${rate}%`, margin + 5, yPosition);
+            yPosition += 5;
+            
+            let status = 'Kritisch';
+            if (rate >= 90) status = 'Konform';
+            else if (rate >= 75) status = 'Akzeptabel';
+            
+            doc.text(`Status: ${status}`, margin + 5, yPosition);
+            yPosition += 10;
+        });
+    }
+
+    addComplianceReportToPDF(doc, reportData, startY, margin, contentWidth) {
+        let yPosition = startY;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('COMPLIANCE-BERICHT PFLICHTSCHULUNGEN', margin, yPosition);
+        yPosition += 15;
+        
+        reportData.users.forEach(user => {
+            if (this.checkPageSpace(doc, yPosition, 25)) {
+                doc.addPage();
+                yPosition = margin;
+            }
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${user.name} (${user.role})`, margin, yPosition);
+            yPosition += 8;
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Abteilung: ${user.department || 'Nicht zugewiesen'}`, margin + 5, yPosition);
+            yPosition += 5;
+            doc.text(`Pflichtschulungen: ${user.mandatoryCompleted}/${user.mandatoryTotal}`, margin + 5, yPosition);
+            yPosition += 5;
+            doc.text(`Compliance-Rate: ${user.complianceRate}%`, margin + 5, yPosition);
+            yPosition += 5;
+            
+            if (user.overdue > 0) {
+                doc.text(`⚠️ Überfällige Schulungen: ${user.overdue}`, margin + 5, yPosition);
+                yPosition += 5;
+            }
+            
+            yPosition += 8;
+        });
+    }
+
+    addIndividualReportToPDF(doc, reportData, startY, margin, contentWidth) {
+        let yPosition = startY;
+        
+        if (reportData.user) {
+            doc.setFont('helvetica', 'bold');
+            doc.text(`INDIVIDUELLER BERICHT FÜR: ${reportData.user.name}`, margin, yPosition);
+            yPosition += 8;
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Abteilung: ${reportData.user.department || 'Nicht zugewiesen'}`, margin, yPosition);
+            yPosition += 5;
+            doc.text(`Rolle: ${reportData.user.role}`, margin, yPosition);
+            yPosition += 15;
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('SCHULUNGSZUWEISUNGEN', margin, yPosition);
+            yPosition += 10;
+            
+            reportData.assignments.forEach(assignment => {
+                if (this.checkPageSpace(doc, yPosition, 20)) {
+                    doc.addPage();
+                    yPosition = margin;
+                }
+                
+                const training = this.trainings.find(t => t.id === assignment.trainingId);
+                
+                doc.setFont('helvetica', 'bold');
+                doc.text(training ? training.title : 'Unbekannte Schulung', margin, yPosition);
+                yPosition += 7;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Status: ${this.getAssignmentStatusText(assignment.status)}`, margin + 5, yPosition);
+                yPosition += 5;
+                
+                if (assignment.completedAt) {
+                    doc.text(`Abgeschlossen: ${new Date(assignment.completedAt).toLocaleDateString('de-DE')}`, margin + 5, yPosition);
+                    yPosition += 5;
+                }
+                
+                if (assignment.score) {
+                    doc.text(`Bewertung: ${assignment.score}%`, margin + 5, yPosition);
+                    yPosition += 5;
+                }
+                
+                yPosition += 8;
+            });
+        }
+    }
+
+    calculateCompletionRatesByCategory(filters = {}) {
+        const categories = ['safety', 'quality', 'environment', 'health', 'compliance', 'technical'];
+        
+        return {
+            categories: categories.map(category => {
+                const categoryTrainings = this.trainings.filter(t => t.category === category);
+                const categoryAssignments = this.trainingAssignments.filter(a => 
+                    categoryTrainings.some(t => t.id === a.trainingId)
+                );
+                
+                const completed = categoryAssignments.filter(a => a.status === 'completed').length;
+                const pending = categoryAssignments.filter(a => a.status === 'pending' || a.status === 'in_progress').length;
+                const overdue = categoryAssignments.filter(a => a.status === 'overdue').length;
+                const total = categoryAssignments.length;
+                
+                return {
+                    name: this.getTrainingCategoryText(category),
+                    totalTrainings: categoryTrainings.length,
+                    completed,
+                    pending,
+                    overdue,
+                    completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
+                };
+            }).filter(cat => cat.totalTrainings > 0)
+        };
+    }
+
+    calculateComplianceByUser(filters = {}) {
+        const users = this.users.filter(u => 
+            !filters.department || u.department === filters.department
+        );
+        
+        return {
+            users: users.map(user => {
+                const userAssignments = this.trainingAssignments.filter(a => a.userId === user.id);
+                const mandatoryAssignments = userAssignments.filter(a => {
+                    const training = this.trainings.find(t => t.id === a.trainingId);
+                    return training && training.type === 'mandatory';
+                });
+                
+                const mandatoryCompleted = mandatoryAssignments.filter(a => a.status === 'completed').length;
+                const overdue = mandatoryAssignments.filter(a => a.status === 'overdue').length;
+                const mandatoryTotal = mandatoryAssignments.length;
+                
+                return {
+                    name: user.name,
+                    department: user.department,
+                    role: user.role,
+                    mandatoryTotal,
+                    mandatoryCompleted,
+                    overdue,
+                    complianceRate: mandatoryTotal > 0 ? Math.round((mandatoryCompleted / mandatoryTotal) * 100) : 100,
+                    upcomingDeadlines: userAssignments
+                        .filter(a => a.dueDate && new Date(a.dueDate) > new Date())
+                        .map(a => a.dueDate)
+                        .sort()
+                };
+            })
+        };
+    }
+
+    prepareIndividualReport(userId) {
+        const user = this.users.find(u => u.id === userId);
+        const assignments = this.trainingAssignments.filter(a => a.userId === userId);
+        
+        return {
+            user,
+            assignments: assignments.sort((a, b) => new Date(b.assignedAt) - new Date(a.assignedAt))
+        };
+    }
+
+    // Helper Functions for PDF Generation
+    checkPageSpace(doc, currentY, neededSpace) {
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        return currentY + neededSpace > pageHeight - margin;
+    }
+
+    loadJsPDFLibrary(callback) {
+        if (typeof window.jspdf !== 'undefined') {
+            callback();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => {
+            console.log('✅ jsPDF library loaded successfully');
+            callback();
+        };
+        script.onerror = () => {
+            console.error('❌ Failed to load jsPDF library');
+            alert('PDF-Export nicht verfügbar. jsPDF-Bibliothek konnte nicht geladen werden.');
+        };
+        document.head.appendChild(script);
+    }
+
     openAssignmentModal() {
         // This opens the general assignment modal without a specific training
         const modal = this.createGeneralAssignmentModal();
@@ -7411,11 +7985,6 @@ PLZ Ort">${user.address || ''}</textarea>
     // TRAINING CREATION FUNCTIONS
     // ========================================
 
-    openNewTrainingModal() {
-        const modal = this.createNewTrainingModal();
-        document.body.appendChild(modal);
-        modal.style.display = 'block';
-    }
 
     createNewTrainingModal() {
         const modal = document.createElement('div');
@@ -7428,102 +7997,653 @@ PLZ Ort">${user.address || ''}</textarea>
                 </div>
                 <div class="modal-body">
                     <form class="training-form" id="newTrainingForm">
+                        <!-- Tab Navigation -->
+                        <div class="form-tabs">
+                            <button type="button" class="tab-btn active" data-tab="basic">Grunddaten</button>
+                            <button type="button" class="tab-btn" data-tab="content">Inhalte</button>
+                            <button type="button" class="tab-btn" data-tab="targets">Zielgruppe</button>
+                            <button type="button" class="tab-btn" data-tab="requirements">Prüfung</button>
+                            <button type="button" class="tab-btn" data-tab="questions">Fragen</button>
+                            <button type="button" class="tab-btn" data-tab="media">Multimedia</button>
+                            <button type="button" class="tab-btn" data-tab="certification">Zertifizierung</button>
+                            <button type="button" class="tab-btn" data-tab="quality">Qualität</button>
+                            <button type="button" class="tab-btn" data-tab="advanced">Erweitert</button>
+                        </div>
+
                         <div class="form-sections">
-                            <div class="form-section">
-                                <h3>Grundinformationen</h3>
+                            <!-- Tab 1: Grunddaten -->
+                            <div class="form-section tab-content active" data-tab="basic">
+                                <h3><i class="fas fa-info-circle"></i> Grundinformationen</h3>
                                 <div class="form-grid">
                                     <div class="form-group full-width">
-                                        <label for="trainingTitle">Titel *</label>
-                                        <input type="text" id="trainingTitle" required placeholder="z.B. Arbeitssicherheit Grundlagen">
+                                        <label for="trainingTitle">Schulungstitel * <span class="help-text">(TÜV-konforme Bezeichnung)</span></label>
+                                        <input type="text" id="trainingTitle" name="trainingTitle" required placeholder="z.B. Arbeitssicherheit nach DGUV Vorschrift 1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingCode">Schulungs-ID/Code *</label>
+                                        <input type="text" id="trainingCode" name="trainingCode" required placeholder="z.B. AS-001-2024" pattern="[A-Z]{2}-[0-9]{3}-[0-9]{4}">
+                                        <small>Format: XX-000-YYYY (z.B. AS-001-2024)</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingVersion">Version *</label>
+                                        <input type="text" id="trainingVersion" name="trainingVersion" required value="1.0" placeholder="1.0">
                                     </div>
                                     <div class="form-group full-width">
-                                        <label for="trainingDescription">Beschreibung *</label>
-                                        <textarea id="trainingDescription" required placeholder="Detaillierte Beschreibung der Schulung..."></textarea>
+                                        <label for="trainingDescription">Detaillierte Beschreibung *</label>
+                                        <textarea id="trainingDescription" name="trainingDescription" required placeholder="Umfassende Beschreibung der Schulungsinhalte, Lernziele und Methoden..." rows="4"></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label for="trainingCategory">Kategorie *</label>
-                                        <select id="trainingCategory" required>
+                                        <select id="trainingCategory" name="trainingCategory" required>
                                             <option value="">Bitte wählen...</option>
+                                            <option value="safety">Arbeitssicherheit (DGUV)</option>
+                                            <option value="health">Gesundheitsschutz (ArbSchG)</option>
+                                            <option value="environment">Umweltschutz (ISO 14001)</option>
+                                            <option value="quality">Qualitätsmanagement (ISO 9001)</option>
+                                            <option value="data-protection">Datenschutz (DSGVO)</option>
+                                            <option value="compliance">Compliance & Recht</option>
+                                            <option value="technical">Technische Qualifikation</option>
+                                            <option value="fire-safety">Brandschutz</option>
+                                            <option value="first-aid">Erste Hilfe</option>
+                                            <option value="crane-operator">Kranführer</option>
+                                            <option value="forklift">Staplerfahrer</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingType">Schulungstyp *</label>
+                                        <select id="trainingType" name="trainingType" required>
+                                            <option value="mandatory">Pflichtschulung (gesetzlich)</option>
+                                            <option value="regulatory">Vorschriftenschulung (behördlich)</option>
+                                            <option value="certification">Zertifizierungsschulung</option>
+                                            <option value="qualification">Qualifizierungsschulung</option>
+                                            <option value="refresher">Auffrischungsschulung</option>
+                                            <option value="optional">Freiwillige Weiterbildung</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingDuration">Schulungsdauer (Minuten) *</label>
+                                        <input type="number" id="trainingDuration" name="trainingDuration" required min="15" max="960" placeholder="60">
+                                        <small>Inkl. Pausen (15 min - 16 Std)</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingValidity">Gültigkeitsdauer (Monate) *</label>
+                                        <select id="trainingValidity" name="trainingValidity" required>
+                                            <option value="6">6 Monate</option>
+                                            <option value="12" selected>12 Monate (Standard)</option>
+                                            <option value="24">24 Monate</option>
+                                            <option value="36">36 Monate</option>
+                                            <option value="60">5 Jahre</option>
+                                            <option value="unbegrenzt">Unbegrenzt</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="trainingLanguage">Sprache *</label>
+                                        <select id="trainingLanguage" name="trainingLanguage" required>
+                                            <option value="de" selected>Deutsch</option>
+                                            <option value="en">Englisch</option>
+                                            <option value="fr">Französisch</option>
+                                            <option value="es">Spanisch</option>
+                                            <option value="multi">Mehrsprachig</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group checkbox-group">
+                                    <label><input type="checkbox" id="trainingRecurring" name="trainingRecurring"> Wiederkehrende Schulung (automatische Neuzuweisung)</label>
+                                    <label><input type="checkbox" id="trainingMandatory" name="trainingMandatory"> Gesetzliche Pflichtschulung</label>
+                                    <label><input type="checkbox" id="trainingCertified" name="trainingCertified"> TÜV/externe Zertifizierung erforderlich</label>
+                                </div>
+                            </div>
+
+                            <!-- Tab 2: Inhalte -->
+                            <div class="form-section tab-content" data-tab="content">
+                                <h3><i class="fas fa-book"></i> Schulungsinhalte & Materialien</h3>
+                                
+                                <div class="form-group">
+                                    <label for="learningObjectives">Lernziele * <span class="help-text">(messbare Kompetenzen)</span></label>
+                                    <textarea id="learningObjectives" name="learningObjectives" required placeholder="1. Teilnehmer können...&#10;2. Teilnehmer sind in der Lage...&#10;3. Teilnehmer verstehen..." rows="4"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="trainingContent">Detaillierte Inhalte *</label>
+                                    <textarea id="trainingContent" name="trainingContent" required placeholder="Gliederung der Schulungsinhalte:&#10;1. Einführung&#10;2. Theoretische Grundlagen&#10;3. Praktische Übungen&#10;4. Prüfung" rows="6"></textarea>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="trainingMethod">Schulungsmethode *</label>
+                                        <select id="trainingMethod" name="trainingMethod" required>
+                                            <option value="">Bitte wählen...</option>
+                                            <option value="classroom">Präsenzschulung</option>
+                                            <option value="online">Online-Schulung</option>
+                                            <option value="blended">Blended Learning</option>
+                                            <option value="practical">Praktische Unterweisung</option>
+                                            <option value="workshop">Workshop</option>
+                                            <option value="elearning">E-Learning Modul</option>
+                                            <option value="simulation">Simulation/VR</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="maxParticipants">Max. Teilnehmerzahl</label>
+                                        <input type="number" id="maxParticipants" name="maxParticipants" min="1" max="50" placeholder="12">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Schulungsunterlagen</label>
+                                    <div class="file-upload-area" id="trainingMaterials">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Materialien hochladen (PDF, DOC, PPT)</p>
+                                        <input type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.mp3">
+                                    </div>
+                                    <div id="uploadedMaterials" class="uploaded-files"></div>
+                                </div>
+                            </div>
+                            <!-- Tab 3: Zielgruppe -->
+                            <div class="form-section tab-content" data-tab="targets">
+                                <h3><i class="fas fa-users"></i> Zielgruppe & Teilnahmevoraussetzungen</h3>
+                                
+                                <div class="form-group">
+                                    <label>Zielrollen: *</label>
+                                    <div class="checkbox-grid">
+                                        ${Object.entries(this.roleDefinitions).map(([key, role]) => `
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="targetRoles" value="${key}">
+                                                ${role.name}
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Abteilungen (optional):</label>
+                                    <div class="checkbox-grid">
+                                        ${this.departments.map(dept => `
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="targetDepartments" value="${dept.id}">
+                                                ${dept.name}
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="minExperience">Mindesterfahrung (Jahre)</label>
+                                        <input type="number" id="minExperience" name="minExperience" min="0" max="10" placeholder="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="requiredEducation">Erforderliche Ausbildung</label>
+                                        <select id="requiredEducation" name="requiredEducation">
+                                            <option value="">Keine spezielle Ausbildung</option>
+                                            <option value="apprentice">Abgeschlossene Ausbildung</option>
+                                            <option value="bachelor">Bachelor/FH</option>
+                                            <option value="master">Master/Diplom</option>
+                                            <option value="certification">Fachzertifikat</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="prerequisites">Teilnahmevoraussetzungen</label>
+                                    <textarea id="prerequisites" name="prerequisites" placeholder="z.B. Grundkenntnisse in..., Abgeschlossene Schulung XY, Mindestqualifikation..." rows="3"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Tab 4: Anforderungen -->
+                            <div class="form-section tab-content" data-tab="requirements">
+                                <h3><i class="fas fa-clipboard-check"></i> Prüfungs- & Abschlusskriterien</h3>
+                                
+                                <div class="form-group">
+                                    <label>Prüfungsform *</label>
+                                    <div class="radio-group">
+                                        <label><input type="radio" name="assessmentType" value="none"> Keine Prüfung</label>
+                                        <label><input type="radio" name="assessmentType" value="quiz" checked> Online-Test/Quiz</label>
+                                        <label><input type="radio" name="assessmentType" value="practical"> Praktische Prüfung</label>
+                                        <label><input type="radio" name="assessmentType" value="written"> Schriftliche Prüfung</label>
+                                        <label><input type="radio" name="assessmentType" value="oral"> Mündliche Prüfung</label>
+                                        <label><input type="radio" name="assessmentType" value="combined"> Kombiniert (Theorie + Praxis)</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="passingScore">Mindestpunktzahl (%) *</label>
+                                        <input type="number" id="passingScore" name="passingScore" min="50" max="100" value="80" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="maxAttempts">Max. Prüfungsversuche</label>
+                                        <input type="number" id="maxAttempts" name="maxAttempts" min="1" max="5" value="3">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="examDuration">Prüfungszeit (Minuten)</label>
+                                        <input type="number" id="examDuration" name="examDuration" min="5" max="240" placeholder="30">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="questionCount">Anzahl Fragen</label>
+                                        <input type="number" id="questionCount" name="questionCount" min="1" max="100" placeholder="20">
+                                    </div>
+                                </div>
+
+                                <div class="form-group checkbox-group">
+                                    <label><input type="checkbox" id="requiresSignature" name="requiresSignature" checked> Digitale Unterschrift erforderlich</label>
+                                    <label><input type="checkbox" id="requiresPresence" name="requiresPresence"> Anwesenheitspflicht (Präsenzschulung)</label>
+                                    <label><input type="checkbox" id="requiresHomework" name="requiresHomework"> Hausaufgaben/Nachbereitung</label>
+                                    <label><input type="checkbox" id="allowRetake" name="allowRetake"> Wiederholung bei Nichtbestehen möglich</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="failureConsequences">Konsequenzen bei Nichtbestehen</label>
+                                    <textarea id="failureConsequences" name="failureConsequences" placeholder="z.B. Wiederholung nach 30 Tagen, Zusätzliche Unterweisung erforderlich..." rows="2"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Tab 5: Zertifizierung -->
+                            <div class="form-section tab-content" data-tab="certification">
+                                <h3><i class="fas fa-certificate"></i> Zertifikate & Nachweise</h3>
+                                
+                                <div class="form-group checkbox-group">
+                                    <label><input type="checkbox" id="generatesCertificate" name="generatesCertificate" checked> Automatische Zertifikatserstellung</label>
+                                    <label><input type="checkbox" id="tuevCertified" name="tuevCertified"> TÜV-zertifizierte Schulung</label>
+                                    <label><input type="checkbox" id="isoCompliant" name="isoCompliant"> ISO-konform</label>
+                                    <label><input type="checkbox" id="dguvrCompliant" name="dguvrCompliant"> DGUV-konform</label>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="certificateTemplate">Zertifikat-Vorlage</label>
+                                        <select id="certificateTemplate" name="certificateTemplate">
+                                            <option value="standard">Standard-Zertifikat</option>
                                             <option value="safety">Arbeitssicherheit</option>
                                             <option value="quality">Qualitätsmanagement</option>
-                                            <option value="environment">Umweltschutz</option>
-                                            <option value="health">Gesundheitsschutz</option>
-                                            <option value="data-protection">Datenschutz</option>
-                                            <option value="compliance">Compliance</option>
-                                            <option value="technical">Technische Schulung</option>
+                                            <option value="tuev">TÜV-Zertifikat</option>
+                                            <option value="dguv">DGUV-Nachweis</option>
+                                            <option value="custom">Benutzerdefiniert</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="trainingType">Typ *</label>
-                                        <select id="trainingType" required>
-                                            <option value="mandatory">Pflichtschulung</option>
-                                            <option value="optional">Optionale Schulung</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="trainingDuration">Dauer (Minuten) *</label>
-                                        <input type="number" id="trainingDuration" required min="15" placeholder="60">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="trainingValidity">Gültigkeit (Monate)</label>
-                                        <input type="number" id="trainingValidity" min="1" max="36" placeholder="12">
+                                        <label for="certificationBody">Zertifizierungsstelle</label>
+                                        <input type="text" id="certificationBody" name="certificationBody" placeholder="z.B. TÜV NORD, DEKRA, BG BAU">
                                     </div>
                                 </div>
+
                                 <div class="form-group">
-                                    <label>
-                                        <input type="checkbox" id="trainingRecurring">
-                                        Wiederkehrende Schulung
-                                    </label>
+                                    <label for="certificationNumber">Zertifikatsnummer/Akkreditierung</label>
+                                    <input type="text" id="certificationNumber" name="certificationNumber" placeholder="z.B. TÜV-12345-2024">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="legalBasis">Rechtliche Grundlage</label>
+                                    <textarea id="legalBasis" name="legalBasis" placeholder="z.B. §4 ArbSchG, DGUV Vorschrift 1, ISO 9001:2015..." rows="3"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="auditRequirements">Audit-Anforderungen</label>
+                                    <textarea id="auditRequirements" name="auditRequirements" placeholder="Besondere Anforderungen für interne/externe Audits..." rows="2"></textarea>
                                 </div>
                             </div>
-                            
-                            <div class="form-section">
-                                <h3>Zielgruppe</h3>
-                                <div class="target-selection">
+
+                            <!-- Tab 6: Qualitätssicherung -->
+                            <div class="form-section tab-content" data-tab="quality">
+                                <h3><i class="fas fa-star"></i> Qualitätssicherung & Dokumentation</h3>
+                                
+                                <div class="form-grid">
                                     <div class="form-group">
-                                        <label>Zielrollen:</label>
-                                        <div class="checkbox-grid">
-                                            ${Object.entries(this.roleDefinitions).map(([key, role]) => `
-                                                <label class="checkbox-item">
-                                                    <input type="checkbox" name="targetRoles" value="${key}">
-                                                    ${role.name}
-                                                </label>
+                                        <label for="trainer">Trainer/Dozent *</label>
+                                        <select id="trainer" name="trainer" required>
+                                            <option value="">Bitte auswählen...</option>
+                                            ${this.users.filter(u => u.role === 'qhse' || u.role === 'admin' || u.role === 'root-admin').map(user => `
+                                                <option value="${user.id}">${user.name}</option>
                                             `).join('')}
-                                        </div>
+                                            <option value="external">Externer Trainer</option>
+                                        </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>Abteilungen (optional):</label>
-                                        <div class="checkbox-grid">
-                                            ${this.departments.map(dept => `
-                                                <label class="checkbox-item">
-                                                    <input type="checkbox" name="targetDepartments" value="${dept.id}">
-                                                    ${dept.name}
-                                                </label>
-                                            `).join('')}
+                                        <label for="trainerQualification">Trainer-Qualifikation</label>
+                                        <input type="text" id="trainerQualification" name="trainerQualification" placeholder="z.B. Sifa, Ingenieur, TÜV-zertifiziert">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="reviewCycle">Überprüfungszyklus (Monate)</label>
+                                    <select id="reviewCycle" name="reviewCycle">
+                                        <option value="6">6 Monate</option>
+                                        <option value="12" selected>12 Monate</option>
+                                        <option value="24">24 Monate</option>
+                                        <option value="36">36 Monate</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Feedback-Verfahren</label>
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" id="feedbackAuto" name="feedbackAuto" checked> Automatische Bewertungsabfrage</label>
+                                        <label><input type="checkbox" id="feedbackTrainer" name="feedbackTrainer"> Trainer-Bewertung</label>
+                                        <label><input type="checkbox" id="feedbackContent" name="feedbackContent"> Inhalts-Bewertung</label>
+                                        <label><input type="checkbox" id="feedbackSuggestions" name="feedbackSuggestions"> Verbesserungsvorschläge</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="recordKeeping">Aufbewahrung Schulungsnachweis</label>
+                                    <select id="recordKeeping" name="recordKeeping">
+                                        <option value="3">3 Jahre</option>
+                                        <option value="5">5 Jahre</option>
+                                        <option value="10" selected>10 Jahre</option>
+                                        <option value="30">30 Jahre</option>
+                                        <option value="permanent">Dauerhaft</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="approvalProcess">Freigabeprozess</label>
+                                    <div class="radio-group">
+                                        <label><input type="radio" name="approval" value="automatic" checked> Automatische Freigabe</label>
+                                        <label><input type="radio" name="approval" value="supervisor"> Vorgesetzten-Freigabe</label>
+                                        <label><input type="radio" name="approval" value="qhse"> QHSE-Manager Freigabe</label>
+                                        <label><input type="radio" name="approval" value="external"> Externe Zertifizierung</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="qualityNotes">Qualitätshinweise</label>
+                                    <textarea id="qualityNotes" name="qualityNotes" placeholder="Besondere Qualitätsanforderungen, Standards, Hinweise für Auditoren..." rows="3"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Tab 5: Fragenerstellung -->
+                            <div class="form-section tab-content" data-tab="questions">
+                                <h3><i class="fas fa-question-circle"></i> Prüfungsfragen & Tests</h3>
+                                
+                                <div class="form-group">
+                                    <label>Fragentypen</label>
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" name="questionTypes" value="multiple-choice" checked> Multiple Choice</label>
+                                        <label><input type="checkbox" name="questionTypes" value="true-false"> Richtig/Falsch</label>
+                                        <label><input type="checkbox" name="questionTypes" value="fill-blank"> Lückentext</label>
+                                        <label><input type="checkbox" name="questionTypes" value="short-answer"> Kurzantwort</label>
+                                        <label><input type="checkbox" name="questionTypes" value="essay"> Freitext/Essay</label>
+                                        <label><input type="checkbox" name="questionTypes" value="practical"> Praktische Aufgabe</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="questionPool">Fragenpools verwenden</label>
+                                        <select id="questionPool" name="questionPool">
+                                            <option value="">Keine Pools</option>
+                                            <option value="safety-basic">Arbeitssicherheit Grundlagen</option>
+                                            <option value="safety-advanced">Arbeitssicherheit Fortgeschritten</option>
+                                            <option value="quality-iso9001">ISO 9001 Fragen</option>
+                                            <option value="environment-iso14001">ISO 14001 Fragen</option>
+                                            <option value="dguv-general">DGUV Allgemein</option>
+                                            <option value="fire-safety">Brandschutz</option>
+                                            <option value="first-aid">Erste Hilfe</option>
+                                            <option value="custom">Benutzerdefiniert</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="randomizeQuestions">Fragen randomisieren</label>
+                                        <select id="randomizeQuestions" name="randomizeQuestions">
+                                            <option value="none">Keine Randomisierung</option>
+                                            <option value="partial">Teilweise (50%)</option>
+                                            <option value="full" selected>Vollständig</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Schwierigkeitsgrad-Verteilung</label>
+                                    <div class="difficulty-slider-group">
+                                        <div class="difficulty-item">
+                                            <label for="easyQuestions">Leicht (%):</label>
+                                            <input type="range" id="easyQuestions" name="easyQuestions" min="0" max="100" value="30">
+                                            <span class="difficulty-value">30%</span>
+                                        </div>
+                                        <div class="difficulty-item">
+                                            <label for="mediumQuestions">Mittel (%):</label>
+                                            <input type="range" id="mediumQuestions" name="mediumQuestions" min="0" max="100" value="50">
+                                            <span class="difficulty-value">50%</span>
+                                        </div>
+                                        <div class="difficulty-item">
+                                            <label for="hardQuestions">Schwer (%):</label>
+                                            <input type="range" id="hardQuestions" name="hardQuestions" min="0" max="100" value="20">
+                                            <span class="difficulty-value">20%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="questionEditor">Fragen direkt erstellen</label>
+                                    <div class="question-builder">
+                                        <div class="question-creator">
+                                            <button type="button" class="btn-secondary" onclick="addNewQuestion('multiple-choice')">
+                                                <i class="fas fa-plus"></i> Multiple Choice
+                                            </button>
+                                            <button type="button" class="btn-secondary" onclick="addNewQuestion('true-false')">
+                                                <i class="fas fa-plus"></i> Richtig/Falsch
+                                            </button>
+                                            <button type="button" class="btn-secondary" onclick="addNewQuestion('practical')">
+                                                <i class="fas fa-plus"></i> Praktische Aufgabe
+                                            </button>
+                                        </div>
+                                        <div id="questionsList" class="questions-container">
+                                            <!-- Dynamisch erstellte Fragen -->
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="form-section">
-                                <h3>Abschlusskriterien</h3>
-                                <div class="completion-criteria">
+
+                            <!-- Tab 6: Multimedia & Interaktivität -->
+                            <div class="form-section tab-content" data-tab="media">
+                                <h3><i class="fas fa-video"></i> Multimedia & Interaktive Elemente</h3>
+                                
+                                <div class="form-group">
+                                    <label>Medientypen</label>
+                                    <div class="media-types-grid">
+                                        <div class="media-type-card">
+                                            <i class="fas fa-video"></i>
+                                            <h4>Videos</h4>
+                                            <label><input type="checkbox" name="mediaTypes" value="video"> Aktivieren</label>
+                                            <input type="file" accept="video/*" multiple class="media-upload" data-type="video">
+                                        </div>
+                                        <div class="media-type-card">
+                                            <i class="fas fa-volume-up"></i>
+                                            <h4>Audio</h4>
+                                            <label><input type="checkbox" name="mediaTypes" value="audio"> Aktivieren</label>
+                                            <input type="file" accept="audio/*" multiple class="media-upload" data-type="audio">
+                                        </div>
+                                        <div class="media-type-card">
+                                            <i class="fas fa-images"></i>
+                                            <h4>Bilder/Grafiken</h4>
+                                            <label><input type="checkbox" name="mediaTypes" value="images"> Aktivieren</label>
+                                            <input type="file" accept="image/*" multiple class="media-upload" data-type="images">
+                                        </div>
+                                        <div class="media-type-card">
+                                            <i class="fas fa-file-pdf"></i>
+                                            <h4>Dokumente</h4>
+                                            <label><input type="checkbox" name="mediaTypes" value="documents"> Aktivieren</label>
+                                            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" multiple class="media-upload" data-type="documents">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Interaktive Elemente</label>
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" name="interactiveElements" value="simulations"> 3D-Simulationen</label>
+                                        <label><input type="checkbox" name="interactiveElements" value="virtual-reality"> Virtual Reality (VR)</label>
+                                        <label><input type="checkbox" name="interactiveElements" value="augmented-reality"> Augmented Reality (AR)</label>
+                                        <label><input type="checkbox" name="interactiveElements" value="gamification"> Gamification</label>
+                                        <label><input type="checkbox" name="interactiveElements" value="interactive-videos"> Interaktive Videos</label>
+                                        <label><input type="checkbox" name="interactiveElements" value="case-studies"> Fallstudien</label>
+                                        <label><input type="checkbox" name="interactiveElements" value="role-playing"> Rollenspiele</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
                                     <div class="form-group">
-                                        <label>
-                                            <input type="checkbox" id="requiresTest">
-                                            Test erforderlich
-                                        </label>
+                                        <label for="vrEquipment">VR-Equipment erforderlich</label>
+                                        <select id="vrEquipment" name="vrEquipment">
+                                            <option value="">Kein VR</option>
+                                            <option value="oculus">Oculus/Meta Quest</option>
+                                            <option value="vive">HTC Vive</option>
+                                            <option value="pico">Pico VR</option>
+                                            <option value="mobile">Smartphone VR</option>
+                                            <option value="any">Beliebiges VR-Gerät</option>
+                                        </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="passingScore">Mindestpunktzahl (%):</label>
-                                        <input type="number" id="passingScore" min="0" max="100" value="80">
+                                        <label for="simulationSoftware">Simulations-Software</label>
+                                        <input type="text" id="simulationSoftware" name="simulationSoftware" placeholder="z.B. Unity, Unreal Engine, WebGL">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="progressTracking">Fortschritts-Tracking</label>
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" name="progressTracking" value="time-spent" checked> Lernzeit erfassen</label>
+                                        <label><input type="checkbox" name="progressTracking" value="interaction-rate" checked> Interaktionsrate messen</label>
+                                        <label><input type="checkbox" name="progressTracking" value="completion-rate"> Abschlussraten verfolgen</label>
+                                        <label><input type="checkbox" name="progressTracking" value="attention-analytics"> Aufmerksamkeits-Analytics</label>
+                                        <label><input type="checkbox" name="progressTracking" value="learning-path"> Lernpfad-Optimierung</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab 9: Erweiterte Konfiguration -->
+                            <div class="form-section tab-content" data-tab="advanced">
+                                <h3><i class="fas fa-cogs"></i> Erweiterte Konfiguration & KI-Integration</h3>
+                                
+                                <div class="form-group">
+                                    <label>KI-gestützte Funktionen</label>
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" id="aiAdaptiveLearning" name="aiAdaptiveLearning"> Adaptive Lernpfade (KI-optimiert)</label>
+                                        <label><input type="checkbox" id="aiContentGeneration" name="aiContentGeneration"> Automatische Fragengenerierung</label>
+                                        <label><input type="checkbox" id="aiPersonalization" name="aiPersonalization"> Personalisierte Lernempfehlungen</label>
+                                        <label><input type="checkbox" id="aiAnalytics" name="aiAnalytics"> KI-basierte Lernanalyse</label>
+                                        <label><input type="checkbox" id="aiChatbot" name="aiChatbot"> Intelligenter Lern-Assistent</label>
+                                        <label><input type="checkbox" id="aiPredictive" name="aiPredictive"> Vorhersage von Lernerfolg</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Experimentelle Technologien</label>
+                                    <div class="experimental-features">
+                                        <div class="experimental-card">
+                                            <h4><i class="fas fa-microphone"></i> Sprachsteuerung</h4>
+                                            <label><input type="checkbox" id="voiceCommands" name="voiceCommands"> Voice Commands aktivieren</label>
+                                            <label><input type="checkbox" id="speechRecognition" name="speechRecognition"> Spracherkennung für Antworten</label>
+                                        </div>
+                                        <div class="experimental-card">
+                                            <h4><i class="fas fa-fingerprint"></i> Biometrie</h4>
+                                            <label><input type="checkbox" id="biometricAuth" name="biometricAuth"> Biometrische Authentifizierung</label>
+                                            <label><input type="checkbox" id="attentionTracking" name="attentionTracking"> Aufmerksamkeitsmessung</label>
+                                        </div>
+                                        <div class="experimental-card">
+                                            <h4><i class="fas fa-brain"></i> Neurofeedback</h4>
+                                            <label><input type="checkbox" id="brainwaveTracking" name="brainwaveTracking"> EEG-Integration (experimentell)</label>
+                                            <label><input type="checkbox" id="stressMonitoring" name="stressMonitoring"> Stress-Level Überwachung</label>
+                                        </div>
+                                        <div class="experimental-card">
+                                            <h4><i class="fas fa-robot"></i> Automation</h4>
+                                            <label><input type="checkbox" id="autoScheduling" name="autoScheduling"> Intelligente Terminplanung</label>
+                                            <label><input type="checkbox" id="autoReminders" name="autoReminders"> Adaptive Erinnerungen</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="aiModelProvider">KI-Anbieter</label>
+                                        <select id="aiModelProvider" name="aiModelProvider">
+                                            <option value="">Keine KI-Integration</option>
+                                            <option value="openai">OpenAI GPT</option>
+                                            <option value="claude">Anthropic Claude</option>
+                                            <option value="gemini">Google Gemini</option>
+                                            <option value="azure">Azure OpenAI</option>
+                                            <option value="local">Lokales KI-Modell</option>
+                                            <option value="custom">Benutzerdefiniert</option>
+                                        </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>
-                                            <input type="checkbox" id="requiresSignature" checked>
-                                            Unterschrift erforderlich
-                                        </label>
+                                        <label for="adaptivityLevel">Adaptivitätslevel</label>
+                                        <select id="adaptivityLevel" name="adaptivityLevel">
+                                            <option value="none">Standard (keine Anpassung)</option>
+                                            <option value="basic">Grundlegend</option>
+                                            <option value="intermediate" selected>Fortgeschritten</option>
+                                            <option value="advanced">Expertenebene</option>
+                                            <option value="ai-driven">KI-gesteuert</option>
+                                        </select>
                                     </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="learningPathEngine">Lernpfad-Engine</label>
+                                    <div class="radio-group">
+                                        <label><input type="radio" name="learningPathEngine" value="traditional" checked> Traditionell (vordefiniert)</label>
+                                        <label><input type="radio" name="learningPathEngine" value="adaptive"> Adaptiv (nutzerbasiert)</label>
+                                        <label><input type="radio" name="learningPathEngine" value="ai-optimized"> KI-optimiert</label>
+                                        <label><input type="radio" name="learningPathEngine" value="predictive"> Prädiktiv</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dataCollection">Datensammlung & Privacy</label>
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" id="anonymousAnalytics" name="anonymousAnalytics" checked> Anonyme Nutzungsstatistiken</label>
+                                        <label><input type="checkbox" id="detailedTracking" name="detailedTracking"> Detailliertes Lernverhalten</label>
+                                        <label><input type="checkbox" id="performanceData" name="performanceData"> Leistungsdaten erfassen</label>
+                                        <label><input type="checkbox" id="gdprCompliant" name="gdprCompliant" checked> DSGVO-konform</label>
+                                        <label><input type="checkbox" id="dataRetention" name="dataRetention"> Erweiterte Datenspeicherung</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Integration & API</label>
+                                    <div class="api-integrations">
+                                        <div class="integration-item">
+                                            <label><input type="checkbox" id="lmsIntegration" name="lmsIntegration"> LMS-Integration (Moodle, Canvas)</label>
+                                        </div>
+                                        <div class="integration-item">
+                                            <label><input type="checkbox" id="hrSystemIntegration" name="hrSystemIntegration"> HR-System Verbindung</label>
+                                        </div>
+                                        <div class="integration-item">
+                                            <label><input type="checkbox" id="calendarIntegration" name="calendarIntegration"> Kalender-Synchronisation</label>
+                                        </div>
+                                        <div class="integration-item">
+                                            <label><input type="checkbox" id="notificationIntegration" name="notificationIntegration"> Push-Notifications</label>
+                                        </div>
+                                        <div class="integration-item">
+                                            <label><input type="checkbox" id="webhooksEnabled" name="webhooksEnabled"> Webhooks aktivieren</label>
+                                        </div>
+                                        <div class="integration-item">
+                                            <label><input type="checkbox" id="apiAccess" name="apiAccess"> REST API Zugang</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="customConfiguration">Benutzerdefinierte Konfiguration (JSON)</label>
+                                    <textarea id="customConfiguration" name="customConfiguration" placeholder="{&#10;  &quot;advanced_features&quot;: {},&#10;  &quot;ai_settings&quot;: {},&#10;  &quot;experimental&quot;: {}&#10;}" rows="6" style="font-family: monospace; font-size: 0.875rem;"></textarea>
+                                    <small>Erweiterte Konfiguration für Entwickler und Power-User</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Debugging & Entwicklung</label>
+                                    <div class="checkbox-group">
+                                        <label><input type="checkbox" id="debugMode" name="debugMode"> Debug-Modus aktivieren</label>
+                                        <label><input type="checkbox" id="verboseLogging" name="verboseLogging"> Erweiterte Protokollierung</label>
+                                        <label><input type="checkbox" id="betaFeatures" name="betaFeatures"> Beta-Features aktivieren</label>
+                                        <label><input type="checkbox" id="experimentalApi" name="experimentalApi"> Experimentelle APIs</label>
+                                    </div>
+                                </div>
+
+                                <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                                    <h4 style="color: #92400e; margin-top: 0;"><i class="fas fa-exclamation-triangle"></i> Hinweis zu experimentellen Features</h4>
+                                    <p style="color: #92400e; font-size: 0.875rem; margin-bottom: 0;">
+                                        Die hier aktivierten experimentellen Funktionen befinden sich noch in der Entwicklung und sollten nur in Testumgebungen verwendet werden. 
+                                        Für produktive TÜV-Audits empfehlen wir die Verwendung bewährter Standards.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -7548,76 +8668,1012 @@ PLZ Ort">${user.address || ''}</textarea>
             btn.addEventListener('click', () => modal.remove());
         });
 
+        // Tab navigation
+        modal.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                this.switchTrainingFormTab(modal, targetTab);
+            });
+        });
+
+        // Auto-generate training code
+        const titleInput = modal.querySelector('#trainingTitle');
+        const codeInput = modal.querySelector('#trainingCode');
+        if (titleInput && codeInput) {
+            titleInput.addEventListener('input', () => {
+                if (!codeInput.value) {
+                    const title = titleInput.value.toUpperCase();
+                    const year = new Date().getFullYear();
+                    const category = title.substring(0, 2) || 'SC';
+                    const number = String(this.trainings.length + 1).padStart(3, '0');
+                    codeInput.value = category + '-' + number + '-' + year;
+                }
+            });
+        }
+
+        // File upload handling
+        const fileInput = modal.querySelector('#trainingMaterials input[type="file"]');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                this.handleTrainingMaterialsUpload(e, modal);
+            });
+        }
+
+        // Form submission
         const form = modal.querySelector('#newTrainingForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             this.createNewTraining(modal);
         });
 
+        // Form validation on tab switch
+        modal.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
+            field.addEventListener('blur', () => this.validateTrainingField(field));
+        });
+
+        // Enhanced Interactive Features
+        this.setupAdvancedTrainingFeatures(modal);
+
         return modal;
     }
 
     createNewTraining(modal) {
-        const formData = new FormData(modal.querySelector('#newTrainingForm'));
         const currentUser = this.getCurrentUser();
         
-        // Get form values
-        const title = modal.querySelector('#trainingTitle').value;
-        const description = modal.querySelector('#trainingDescription').value;
-        const category = modal.querySelector('#trainingCategory').value;
-        const type = modal.querySelector('#trainingType').value;
-        const duration = parseInt(modal.querySelector('#trainingDuration').value);
-        const validity = parseInt(modal.querySelector('#trainingValidity').value) || 12;
-        const isRecurring = modal.querySelector('#trainingRecurring').checked;
-        const requiresTest = modal.querySelector('#requiresTest').checked;
-        const passingScore = parseInt(modal.querySelector('#passingScore').value) || 80;
-        const requiresSignature = modal.querySelector('#requiresSignature').checked;
+        // Get all form values - comprehensive TÜV-compliant data collection
+        const trainingData = {
+            // Basic Information
+            title: modal.querySelector('#trainingTitle').value,
+            code: modal.querySelector('#trainingCode').value,
+            version: modal.querySelector('#trainingVersion').value,
+            description: modal.querySelector('#trainingDescription').value,
+            category: modal.querySelector('#trainingCategory').value,
+            type: modal.querySelector('#trainingType').value,
+            duration: parseInt(modal.querySelector('#trainingDuration').value),
+            validity: modal.querySelector('#trainingValidity').value,
+            language: modal.querySelector('#trainingLanguage').value,
+            isRecurring: modal.querySelector('#trainingRecurring').checked,
+            isMandatory: modal.querySelector('#trainingMandatory').checked,
+            isCertified: modal.querySelector('#trainingCertified').checked,
+
+            // Content & Materials
+            learningObjectives: modal.querySelector('#learningObjectives').value,
+            content: modal.querySelector('#trainingContent').value,
+            method: modal.querySelector('#trainingMethod').value,
+            maxParticipants: parseInt(modal.querySelector('#maxParticipants').value) || null,
+
+            // Target Group & Prerequisites
+            targetRoles: Array.from(modal.querySelectorAll('input[name="targetRoles"]:checked')).map(cb => cb.value),
+            targetDepartments: Array.from(modal.querySelectorAll('input[name="targetDepartments"]:checked')).map(cb => cb.value),
+            minExperience: parseInt(modal.querySelector('#minExperience').value) || 0,
+            requiredEducation: modal.querySelector('#requiredEducation').value,
+            prerequisites: modal.querySelector('#prerequisites').value,
+
+            // Assessment & Requirements
+            assessmentType: modal.querySelector('input[name="assessmentType"]:checked')?.value || 'none',
+            passingScore: parseInt(modal.querySelector('#passingScore').value) || 80,
+            maxAttempts: parseInt(modal.querySelector('#maxAttempts').value) || 3,
+            examDuration: parseInt(modal.querySelector('#examDuration').value) || null,
+            questionCount: parseInt(modal.querySelector('#questionCount').value) || null,
+            requiresSignature: modal.querySelector('#requiresSignature').checked,
+            requiresPresence: modal.querySelector('#requiresPresence').checked,
+            requiresHomework: modal.querySelector('#requiresHomework').checked,
+            allowRetake: modal.querySelector('#allowRetake').checked,
+            failureConsequences: modal.querySelector('#failureConsequences').value,
+
+            // Certification
+            generatesCertificate: modal.querySelector('#generatesCertificate').checked,
+            tuevCertified: modal.querySelector('#tuevCertified').checked,
+            isoCompliant: modal.querySelector('#isoCompliant').checked,
+            dguvrCompliant: modal.querySelector('#dguvrCompliant').checked,
+            certificateTemplate: modal.querySelector('#certificateTemplate').value,
+            certificationBody: modal.querySelector('#certificationBody').value,
+            certificationNumber: modal.querySelector('#certificationNumber').value,
+            legalBasis: modal.querySelector('#legalBasis').value,
+            auditRequirements: modal.querySelector('#auditRequirements').value,
+
+            // Quality Assurance
+            trainer: modal.querySelector('#trainer').value,
+            trainerQualification: modal.querySelector('#trainerQualification').value,
+            reviewCycle: parseInt(modal.querySelector('#reviewCycle').value) || 12,
+            recordKeeping: modal.querySelector('#recordKeeping').value,
+            approvalProcess: modal.querySelector('input[name="approval"]:checked')?.value || 'automatic',
+            qualityNotes: modal.querySelector('#qualityNotes').value,
+
+            // Questions & Testing (Tab 5)
+            questionTypes: Array.from(modal.querySelectorAll('input[name="questionTypes"]:checked')).map(cb => cb.value),
+            questionPool: modal.querySelector('#questionPool')?.value || '',
+            randomizeQuestions: modal.querySelector('#randomizeQuestions')?.value || 'none',
+            easyQuestions: parseInt(modal.querySelector('#easyQuestions')?.value) || 30,
+            mediumQuestions: parseInt(modal.querySelector('#mediumQuestions')?.value) || 50,
+            hardQuestions: parseInt(modal.querySelector('#hardQuestions')?.value) || 20,
+
+            // Multimedia & Interactive Elements (Tab 6)
+            mediaTypes: Array.from(modal.querySelectorAll('input[name="mediaTypes"]:checked')).map(cb => cb.value),
+            interactiveElements: Array.from(modal.querySelectorAll('input[name="interactiveElements"]:checked')).map(cb => cb.value),
+            vrEquipment: modal.querySelector('#vrEquipment')?.value || '',
+            simulationSoftware: modal.querySelector('#simulationSoftware')?.value || '',
+            progressTracking: Array.from(modal.querySelectorAll('input[name="progressTracking"]:checked')).map(cb => cb.value),
+
+            // Advanced Configuration (Tab 9)
+            aiAdaptiveLearning: modal.querySelector('#aiAdaptiveLearning')?.checked || false,
+            aiContentGeneration: modal.querySelector('#aiContentGeneration')?.checked || false,
+            aiPersonalization: modal.querySelector('#aiPersonalization')?.checked || false,
+            aiAnalytics: modal.querySelector('#aiAnalytics')?.checked || false,
+            aiChatbot: modal.querySelector('#aiChatbot')?.checked || false,
+            aiPredictive: modal.querySelector('#aiPredictive')?.checked || false,
+
+            // Experimental Technologies
+            voiceCommands: modal.querySelector('#voiceCommands')?.checked || false,
+            speechRecognition: modal.querySelector('#speechRecognition')?.checked || false,
+            biometricAuth: modal.querySelector('#biometricAuth')?.checked || false,
+            attentionTracking: modal.querySelector('#attentionTracking')?.checked || false,
+            brainwaveTracking: modal.querySelector('#brainwaveTracking')?.checked || false,
+            stressMonitoring: modal.querySelector('#stressMonitoring')?.checked || false,
+            autoScheduling: modal.querySelector('#autoScheduling')?.checked || false,
+            autoReminders: modal.querySelector('#autoReminders')?.checked || false,
+
+            // AI Configuration
+            aiModelProvider: modal.querySelector('#aiModelProvider')?.value || '',
+            adaptivityLevel: modal.querySelector('#adaptivityLevel')?.value || 'none',
+            learningPathEngine: modal.querySelector('input[name="learningPathEngine"]:checked')?.value || 'traditional',
+
+            // Data Collection & Privacy
+            anonymousAnalytics: modal.querySelector('#anonymousAnalytics')?.checked || false,
+            detailedTracking: modal.querySelector('#detailedTracking')?.checked || false,
+            performanceData: modal.querySelector('#performanceData')?.checked || false,
+            gdprCompliant: modal.querySelector('#gdprCompliant')?.checked || true,
+            dataRetention: modal.querySelector('#dataRetention')?.checked || false,
+
+            // Integration & API
+            lmsIntegration: modal.querySelector('#lmsIntegration')?.checked || false,
+            hrSystemIntegration: modal.querySelector('#hrSystemIntegration')?.checked || false,
+            calendarIntegration: modal.querySelector('#calendarIntegration')?.checked || false,
+            notificationIntegration: modal.querySelector('#notificationIntegration')?.checked || false,
+            webhooksEnabled: modal.querySelector('#webhooksEnabled')?.checked || false,
+            apiAccess: modal.querySelector('#apiAccess')?.checked || false,
+
+            // Custom Configuration
+            customConfiguration: modal.querySelector('#customConfiguration')?.value || '',
+
+            // Debugging & Development
+            debugMode: modal.querySelector('#debugMode')?.checked || false,
+            verboseLogging: modal.querySelector('#verboseLogging')?.checked || false,
+            betaFeatures: modal.querySelector('#betaFeatures')?.checked || false,
+            experimentalApi: modal.querySelector('#experimentalApi')?.checked || false
+        };
         
-        // Get selected roles and departments
-        const targetRoles = Array.from(modal.querySelectorAll('input[name="targetRoles"]:checked')).map(cb => cb.value);
-        const targetDepartments = Array.from(modal.querySelectorAll('input[name="targetDepartments"]:checked')).map(cb => cb.value);
-        
-        // Validation
-        if (!title || !description || !category || !type || !duration || targetRoles.length === 0) {
-            alert('Bitte füllen Sie alle Pflichtfelder aus und wählen Sie mindestens eine Zielrolle.');
+        // Enhanced validation for TÜV compliance
+        const validationErrors = this.validateTrainingData(trainingData);
+        if (validationErrors.length > 0) {
+            alert('Validierungsfehler:\n\n' + validationErrors.join('\n'));
             return;
         }
         
-        // Create new training
+        // Generate compliance report and audit checklist
+        const complianceReport = this.generateComplianceReport(trainingData);
+        const auditChecklist = this.createAuditChecklist(trainingData);
+        const auditScore = this.calculateAuditScore(auditChecklist);
+        
+        // Create comprehensive training object
         const newTraining = {
             id: `training-${Date.now()}`,
-            title: title,
-            description: description,
-            category: category,
-            type: type,
-            duration: duration,
-            validityPeriod: validity,
-            isRecurring: isRecurring,
-            content: {
-                materials: [],
-                videos: [],
-                documents: [],
-                testQuestions: []
-            },
-            targetRoles: targetRoles,
-            targetDepartments: targetDepartments,
+            ...trainingData,
+            
+            // System fields
             createdAt: new Date().toISOString(),
             createdBy: currentUser.id,
+            lastModified: new Date().toISOString(),
+            modifiedBy: currentUser.id,
             isActive: true,
-            completionCriteria: {
-                requiresTest: requiresTest,
-                passingScore: passingScore,
-                requiresSignature: requiresSignature
+            status: auditScore >= 80 ? 'ready' : 'draft',
+            
+            // Materials (uploaded files)
+            materials: [], // Will be populated from file uploads
+            
+            // Enhanced compliance tracking
+            compliance: {
+                level: complianceReport.complianceLevel,
+                certifications: complianceReport.certifications,
+                auditScore: auditScore,
+                auditReadiness: complianceReport.auditReadiness,
+                tuevApproved: false,
+                lastAudit: null,
+                nextReview: new Date(Date.now() + trainingData.reviewCycle * 30 * 24 * 60 * 60 * 1000).toISOString(),
+                complianceNotes: [],
+                requirements: complianceReport.requirements,
+                recommendations: complianceReport.recommendations,
+                auditChecklist: auditChecklist
+            },
+            
+            // Statistics
+            stats: {
+                totalAssignments: 0,
+                completedAssignments: 0,
+                averageScore: 0,
+                passRate: 0
             }
         };
         
+        // Save to trainings array
         this.trainings.push(newTraining);
         this.saveTrainingsToStorage();
-        this.updateTrainingStatistics();
-        this.renderTrainingOverview();
         
-        alert('Neue Schulung wurde erfolgreich erstellt!');
+        // Show enhanced success message with compliance details
         modal.remove();
+        
+        const complianceDetails = `
+🎓 SCHULUNG ERFOLGREICH ERSTELLT
+
+📋 Grunddaten:
+• Titel: ${newTraining.title}
+• Code: ${newTraining.code}
+• Status: ${newTraining.status}
+
+🏆 Compliance-Level: ${newTraining.compliance.level}
+📊 Audit-Score: ${newTraining.compliance.auditScore}%
+🎯 Audit-Bereitschaft: ${newTraining.compliance.auditReadiness}%
+
+${newTraining.compliance.certifications.length > 0 ? 
+`🛡️ Zertifizierungen: ${newTraining.compliance.certifications.join(', ')}` : 
+'📝 Standard-Compliance'}
+
+${newTraining.compliance.recommendations.length > 0 ? 
+`\n💡 Empfehlungen:\n• ${newTraining.compliance.recommendations.join('\n• ')}` : 
+'\n✅ Keine weiteren Empfehlungen'}
+
+${newTraining.aiAdaptiveLearning || newTraining.experimentalFeatures ? 
+'\n🚀 Erweiterte Features aktiviert' : ''}
+        `;
+        
+        alert(complianceDetails);
+        
+        // Refresh the training list
+        this.renderTrainingsList();
+        
+        // Console output with detailed information
+        console.log('🎓 New training created with enhanced compliance:', {
+            ...newTraining,
+            complianceReport: complianceReport,
+            auditScore: auditScore
+        });
+    }
+
+    // Helper functions for enhanced training management
+    switchTrainingFormTab(modal, targetTab) {
+        // Remove active class from all tabs and content
+        modal.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        modal.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Add active class to target tab and content
+        modal.querySelector(`[data-tab="${targetTab}"]`).classList.add('active');
+        modal.querySelector(`.tab-content[data-tab="${targetTab}"]`).classList.add('active');
+    }
+
+    validateTrainingData(data) {
+        const errors = [];
+        
+        // Basic validation
+        if (!data.title?.trim()) errors.push('• Schulungstitel ist erforderlich');
+        if (!data.code?.trim()) errors.push('• Schulungs-Code ist erforderlich');
+        if (!data.version?.trim()) errors.push('• Version ist erforderlich');
+        if (!data.description?.trim()) errors.push('• Beschreibung ist erforderlich');
+        if (!data.category) errors.push('• Kategorie ist erforderlich');
+        if (!data.type) errors.push('• Schulungstyp ist erforderlich');
+        if (!data.duration || data.duration < 15) errors.push('• Mindestdauer: 15 Minuten');
+        if (!data.language) errors.push('• Sprache ist erforderlich');
+        
+        // Content validation
+        if (!data.learningObjectives?.trim()) errors.push('• Lernziele sind erforderlich');
+        if (!data.content?.trim()) errors.push('• Schulungsinhalte sind erforderlich');
+        if (!data.method) errors.push('• Schulungsmethode ist erforderlich');
+        
+        // Target group validation
+        if (!data.targetRoles || data.targetRoles.length === 0) {
+            errors.push('• Mindestens eine Zielrolle muss ausgewählt werden');
+        }
+        
+        // Assessment validation
+        if (data.assessmentType !== 'none') {
+            if (!data.passingScore || data.passingScore < 50 || data.passingScore > 100) {
+                errors.push('• Mindestpunktzahl muss zwischen 50% und 100% liegen');
+            }
+        }
+        
+        // TÜV-specific validation - Enhanced
+        if (data.tuevCertified) {
+            if (!data.certificationBody?.trim()) errors.push('• TÜV-Zertifizierung erfordert Zertifizierungsstelle');
+            if (!data.legalBasis?.trim()) errors.push('• TÜV-Zertifizierung erfordert rechtliche Grundlage');
+            if (!data.trainer) errors.push('• TÜV-Zertifizierung erfordert qualifizierten Trainer');
+            if (!data.certificationNumber?.trim()) errors.push('• TÜV-Zertifikation benötigt Zertifikatsnummer');
+            if (!data.auditRequirements?.trim()) errors.push('• TÜV-Zertifizierung erfordert Audit-Anforderungen');
+            
+            // Advanced TÜV checks
+            if (data.assessmentType === 'none') errors.push('• TÜV-zertifizierte Schulungen müssen eine Prüfung enthalten');
+            if (!data.recordKeeping || data.recordKeeping < 5) errors.push('• TÜV-Zertifikate müssen mindestens 5 Jahre aufbewahrt werden');
+        }
+        
+        // ISO Compliance checks
+        if (data.isoCompliant) {
+            if (!data.learningObjectives?.trim()) errors.push('• ISO-konforme Schulungen erfordern messbare Lernziele');
+            if (!data.reviewCycle || data.reviewCycle > 36) errors.push('• ISO-Standards erfordern Überprüfung spätestens alle 36 Monate');
+            if (data.approvalProcess === 'automatic') errors.push('• ISO-konforme Schulungen benötigen formellen Freigabeprozess');
+        }
+        
+        // DGUV Compliance checks  
+        if (data.dguvrCompliant) {
+            if (!data.prerequisites?.trim() && data.category === 'safety') errors.push('• DGUV-Sicherheitsschulungen erfordern Teilnahmevoraussetzungen');
+            if (!data.requiresPresence && data.category === 'safety') errors.push('• DGUV-Sicherheitsschulungen erfordern meist Anwesenheitspflicht');
+            if (data.validity === 'unbegrenzt') errors.push('• DGUV-Schulungen haben begrenzte Gültigkeitsdauer');
+        }
+        
+        // Enhanced compliance matrix check
+        const complianceMatrix = this.checkComplianceMatrix(data);
+        if (complianceMatrix.length > 0) {
+            errors.push(...complianceMatrix.map(issue => `• Compliance-Matrix: ${issue}`));
+        }
+        
+        // Mandatory training validation
+        if (data.isMandatory) {
+            if (!data.legalBasis?.trim()) errors.push('• Pflichtschulungen erfordern rechtliche Grundlage');
+            if (data.assessmentType === 'none') errors.push('• Pflichtschulungen erfordern eine Prüfung');
+        }
+        
+        // Code format validation
+        const codePattern = /^[A-Z]{2}-[0-9]{3}-[0-9]{4}$/;
+        if (!codePattern.test(data.code)) {
+            errors.push('• Schulungs-Code muss Format XX-000-YYYY haben (z.B. AS-001-2024)');
+        }
+        
+        return errors;
+    }
+
+    validateTrainingField(field) {
+        const value = field.value?.trim();
+        const isRequired = field.hasAttribute('required');
+        
+        // Remove existing validation styling
+        field.classList.remove('validation-error', 'validation-success');
+        
+        if (isRequired && !value) {
+            field.classList.add('validation-error');
+            return false;
+        } else if (value) {
+            field.classList.add('validation-success');
+        }
+        
+        return true;
+    }
+
+    handleTrainingMaterialsUpload(event, modal) {
+        const files = Array.from(event.target.files);
+        const uploadedContainer = modal.querySelector('#uploadedMaterials');
+        
+        files.forEach(file => {
+            // Create file preview
+            const fileItem = document.createElement('div');
+            fileItem.className = 'uploaded-file-item';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <i class="fas fa-file-${this.getFileIcon(file.type)}"></i>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">(${this.formatFileSize(file.size)})</span>
+                </div>
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            uploadedContainer.appendChild(fileItem);
+        });
+        
+        // Reset file input
+        event.target.value = '';
+    }
+
+    getFileIcon(mimeType) {
+        if (mimeType.includes('pdf')) return 'pdf';
+        if (mimeType.includes('word') || mimeType.includes('document')) return 'word';
+        if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'powerpoint';
+        if (mimeType.includes('video')) return 'video';
+        if (mimeType.includes('audio')) return 'audio';
+        if (mimeType.includes('image')) return 'image';
+        return 'alt';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // ========================================
+    // ADVANCED TRAINING FEATURES
+    // ========================================
+
+    setupAdvancedTrainingFeatures(modal) {
+        // Difficulty Sliders with Live Update
+        this.setupDifficultySliders(modal);
+        
+        // Question Builder
+        this.setupQuestionBuilder(modal);
+        
+        // Media Type Cards Interactive
+        this.setupMediaTypeCards(modal);
+        
+        // Experimental Features Toggle
+        this.setupExperimentalFeatures(modal);
+        
+        // TÜV Compliance Checker
+        this.setupTuevComplianceChecker(modal);
+        
+        // AI Features Configuration
+        this.setupAiFeatures(modal);
+        
+        // Integration Setup
+        this.setupIntegrationFeatures(modal);
+    }
+
+    setupDifficultySliders(modal) {
+        const easySlider = modal.querySelector('#easyQuestions');
+        const mediumSlider = modal.querySelector('#mediumQuestions');
+        const hardSlider = modal.querySelector('#hardQuestions');
+        
+        if (easySlider && mediumSlider && hardSlider) {
+            const updateValues = () => {
+                const easyValue = parseInt(easySlider.value);
+                const mediumValue = parseInt(mediumSlider.value);
+                const hardValue = parseInt(hardSlider.value);
+                
+                // Auto-balance to 100%
+                const total = easyValue + mediumValue + hardValue;
+                if (total !== 100) {
+                    const diff = 100 - total;
+                    if (Math.abs(diff) <= 10) {
+                        // Auto-adjust medium if difference is small
+                        mediumSlider.value = Math.max(0, Math.min(100, mediumValue + diff));
+                    }
+                }
+                
+                // Update display values with improved selector
+                const difficultyValues = modal.querySelectorAll('.difficulty-value');
+                if (difficultyValues.length >= 3) {
+                    difficultyValues[0].textContent = easySlider.value + '%';
+                    difficultyValues[1].textContent = mediumSlider.value + '%';
+                    difficultyValues[2].textContent = hardSlider.value + '%';
+                }
+                
+                // Visual feedback for balance
+                const newTotal = parseInt(easySlider.value) + parseInt(mediumSlider.value) + parseInt(hardSlider.value);
+                const balanceIndicator = modal.querySelector('.difficulty-balance') || this.createBalanceIndicator(modal);
+                balanceIndicator.textContent = `Gesamt: ${newTotal}%`;
+                balanceIndicator.className = `difficulty-balance ${newTotal === 100 ? 'balanced' : 'unbalanced'}`;
+            };
+            
+            [easySlider, mediumSlider, hardSlider].forEach(slider => {
+                slider.addEventListener('input', updateValues);
+            });
+            
+            // Initial update
+            updateValues();
+        }
+    }
+
+    createBalanceIndicator(modal) {
+        const indicator = document.createElement('div');
+        indicator.className = 'difficulty-balance';
+        const sliderGroup = modal.querySelector('.difficulty-slider-group');
+        if (sliderGroup) {
+            sliderGroup.appendChild(indicator);
+        }
+        return indicator;
+    }
+
+    setupQuestionBuilder(modal) {
+        const questionsList = modal.querySelector('#questionsList');
+        let questionCounter = 1;
+        
+        // Global functions for question management
+        window.addNewQuestion = (type) => {
+            const questionHtml = this.createQuestionHtml(type, questionCounter++);
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-item';
+            questionDiv.innerHTML = questionHtml;
+            questionsList.appendChild(questionDiv);
+            
+            // Add remove functionality
+            questionDiv.querySelector('.remove-question').addEventListener('click', () => {
+                questionDiv.remove();
+            });
+        };
+        
+        window.removeQuestion = (button) => {
+            button.closest('.question-item').remove();
+        };
+    }
+
+    createQuestionHtml(type, counter) {
+        const baseHtml = `
+            <div class="question-header">
+                <span class="question-number">Frage ${counter}</span>
+                <select class="question-type">
+                    <option value="multiple-choice" ${type === 'multiple-choice' ? 'selected' : ''}>Multiple Choice</option>
+                    <option value="true-false" ${type === 'true-false' ? 'selected' : ''}>Richtig/Falsch</option>
+                    <option value="practical" ${type === 'practical' ? 'selected' : ''}>Praktische Aufgabe</option>
+                </select>
+                <button type="button" class="remove-question btn-danger">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="question-content">
+                <label>Fragestellung:</label>
+                <textarea placeholder="Geben Sie hier Ihre Frage ein..." rows="2"></textarea>
+        `;
+        
+        switch(type) {
+            case 'multiple-choice':
+                return baseHtml + `
+                    <label>Antwortmöglichkeiten:</label>
+                    <div class="answer-options">
+                        <div class="answer-option">
+                            <input type="radio" name="correct_${counter}" value="1">
+                            <input type="text" placeholder="Antwort 1">
+                        </div>
+                        <div class="answer-option">
+                            <input type="radio" name="correct_${counter}" value="2">
+                            <input type="text" placeholder="Antwort 2">
+                        </div>
+                        <div class="answer-option">
+                            <input type="radio" name="correct_${counter}" value="3">
+                            <input type="text" placeholder="Antwort 3">
+                        </div>
+                        <div class="answer-option">
+                            <input type="radio" name="correct_${counter}" value="4">
+                            <input type="text" placeholder="Antwort 4">
+                        </div>
+                    </div>
+                </div>`;
+                
+            case 'true-false':
+                return baseHtml + `
+                    <label>Richtige Antwort:</label>
+                    <div class="true-false-options">
+                        <label><input type="radio" name="correct_${counter}" value="true"> Richtig</label>
+                        <label><input type="radio" name="correct_${counter}" value="false"> Falsch</label>
+                    </div>
+                </div>`;
+                
+            case 'practical':
+                return baseHtml + `
+                    <label>Praktische Aufgabe:</label>
+                    <textarea placeholder="Beschreiben Sie die praktische Aufgabe..." rows="3"></textarea>
+                    <label>Bewertungskriterien:</label>
+                    <textarea placeholder="Bewertungskriterien für die praktische Aufgabe..." rows="2"></textarea>
+                </div>`;
+                
+            default:
+                return baseHtml + '</div>';
+        }
+    }
+
+    setupMediaTypeCards(modal) {
+        const mediaCards = modal.querySelectorAll('.media-type-card');
+        
+        mediaCards.forEach(card => {
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            const fileInput = card.querySelector('input[type="file"]');
+            
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    card.classList.add('active');
+                    if (fileInput) fileInput.style.display = 'block';
+                } else {
+                    card.classList.remove('active');
+                    if (fileInput) fileInput.style.display = 'none';
+                }
+            });
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    const files = Array.from(e.target.files);
+                    this.handleMediaUpload(files, card);
+                });
+            }
+        });
+    }
+
+    handleMediaUpload(files, card) {
+        const mediaType = card.querySelector('input[type="file"]').dataset.type;
+        console.log(`📁 ${files.length} ${mediaType} Dateien hochgeladen:`, files.map(f => f.name));
+        
+        // Create preview area if doesn't exist
+        let previewArea = card.querySelector('.media-preview');
+        if (!previewArea) {
+            previewArea = document.createElement('div');
+            previewArea.className = 'media-preview';
+            card.appendChild(previewArea);
+        }
+        
+        files.forEach(file => {
+            const preview = document.createElement('div');
+            preview.className = 'media-preview-item';
+            preview.innerHTML = `
+                <i class="fas fa-${this.getMediaIcon(file.type)}"></i>
+                <span>${file.name}</span>
+                <button type="button" onclick="this.parentElement.remove()">×</button>
+            `;
+            previewArea.appendChild(preview);
+        });
+    }
+
+    getMediaIcon(mimeType) {
+        if (mimeType.startsWith('video/')) return 'video';
+        if (mimeType.startsWith('audio/')) return 'volume-up';
+        if (mimeType.startsWith('image/')) return 'image';
+        if (mimeType.includes('pdf')) return 'file-pdf';
+        return 'file';
+    }
+
+    setupExperimentalFeatures(modal) {
+        const experimentalCards = modal.querySelectorAll('.experimental-card');
+        
+        experimentalCards.forEach(card => {
+            const checkboxes = card.querySelectorAll('input[type="checkbox"]');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const activeCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                    
+                    if (activeCount > 0) {
+                        card.classList.add('experimental-active');
+                        this.showExperimentalWarning(checkbox.id);
+                    } else {
+                        card.classList.remove('experimental-active');
+                    }
+                });
+            });
+        });
+    }
+
+    showExperimentalWarning(featureName) {
+        const warnings = {
+            'brainwaveTracking': '⚠️ EEG-Integration erfordert spezielle Hardware und ist noch experimentell.',
+            'biometricAuth': '🔒 Biometrische Authentifizierung benötigt entsprechende Geräte.',
+            'voiceCommands': '🎤 Sprachsteuerung funktioniert nur mit Mikrofon-Berechtigung.',
+            'stressMonitoring': '💓 Stress-Monitoring erfordert Wearable-Geräte oder Sensoren.'
+        };
+        
+        if (warnings[featureName]) {
+            console.log('🚨', warnings[featureName]);
+        }
+    }
+
+    setupTuevComplianceChecker(modal) {
+        // Real-time TÜV compliance checking
+        const tuevFields = ['#tuevCertified', '#isoCompliant', '#dguvrCompliant'];
+        
+        tuevFields.forEach(selector => {
+            const field = modal.querySelector(selector);
+            if (field) {
+                field.addEventListener('change', () => {
+                    this.checkTuevCompliance(modal);
+                });
+            }
+        });
+        
+        // Initial check
+        this.checkTuevCompliance(modal);
+    }
+
+    checkTuevCompliance(modal) {
+        const isTuevCertified = modal.querySelector('#tuevCertified')?.checked;
+        const isIsoCompliant = modal.querySelector('#isoCompliant')?.checked;
+        const isDguvrCompliant = modal.querySelector('#dguvrCompliant')?.checked;
+        
+        let complianceLevel = 'Standard';
+        let complianceColor = '#6b7280';
+        
+        if (isTuevCertified && isIsoCompliant && isDguvrCompliant) {
+            complianceLevel = 'Premium TÜV + ISO + DGUV';
+            complianceColor = '#10b981';
+        } else if (isTuevCertified && isIsoCompliant) {
+            complianceLevel = 'TÜV + ISO konform';
+            complianceColor = '#3b82f6';
+        } else if (isTuevCertified) {
+            complianceLevel = 'TÜV-zertifiziert';
+            complianceColor = '#f59e0b';
+        }
+        
+        // Update compliance indicator
+        this.updateComplianceIndicator(modal, complianceLevel, complianceColor);
+    }
+
+    updateComplianceIndicator(modal, level, color) {
+        let indicator = modal.querySelector('.compliance-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.className = 'compliance-indicator';
+            const certificationSection = modal.querySelector('[data-tab="certification"]');
+            if (certificationSection) {
+                certificationSection.insertBefore(indicator, certificationSection.firstChild);
+            }
+        }
+        
+        indicator.innerHTML = `
+            <div style="background: ${color}; color: white; padding: 0.75rem; border-radius: 0.5rem; text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-certificate"></i> <strong>Compliance-Level: ${level}</strong>
+            </div>
+        `;
+    }
+
+    setupAiFeatures(modal) {
+        const aiProvider = modal.querySelector('#aiModelProvider');
+        const adaptivityLevel = modal.querySelector('#adaptivityLevel');
+        
+        if (aiProvider) {
+            aiProvider.addEventListener('change', () => {
+                const selectedProvider = aiProvider.value;
+                this.configureAiProvider(modal, selectedProvider);
+            });
+        }
+        
+        if (adaptivityLevel) {
+            adaptivityLevel.addEventListener('change', () => {
+                const level = adaptivityLevel.value;
+                this.updateAdaptivityFeatures(modal, level);
+            });
+        }
+    }
+
+    configureAiProvider(modal, provider) {
+        const aiFeatures = modal.querySelectorAll('[id^="ai"]');
+        
+        if (provider && provider !== '') {
+            aiFeatures.forEach(feature => {
+                feature.disabled = false;
+                feature.closest('label').style.opacity = '1';
+            });
+            console.log(`🤖 KI-Anbieter konfiguriert: ${provider}`);
+        } else {
+            aiFeatures.forEach(feature => {
+                feature.disabled = true;
+                feature.checked = false;
+                feature.closest('label').style.opacity = '0.5';
+            });
+            console.log('❌ KI-Features deaktiviert');
+        }
+    }
+
+    updateAdaptivityFeatures(modal, level) {
+        const adaptiveFeatures = {
+            'none': 'Keine adaptiven Features',
+            'basic': 'Grundlegende Anpassung',
+            'intermediate': 'Fortgeschrittene Personalisierung',
+            'advanced': 'Expertenebene mit Predictive Analytics',
+            'ai-driven': 'Vollständig KI-gesteuerte Optimierung'
+        };
+        
+        console.log(`🎯 Adaptivität eingestellt: ${adaptiveFeatures[level]}`);
+    }
+
+    setupIntegrationFeatures(modal) {
+        const integrationCheckboxes = modal.querySelectorAll('[id$="Integration"]');
+        
+        integrationCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    this.enableIntegration(checkbox.id);
+                } else {
+                    this.disableIntegration(checkbox.id);
+                }
+            });
+        });
+    }
+
+    enableIntegration(integrationId) {
+        const integrationMessages = {
+            'lmsIntegration': '🎓 LMS-Integration wird vorbereitet...',
+            'hrSystemIntegration': '👥 HR-System Verbindung wird hergestellt...',
+            'calendarIntegration': '📅 Kalender-Synchronisation aktiviert',
+            'notificationIntegration': '🔔 Push-Notifications konfiguriert'
+        };
+        
+        if (integrationMessages[integrationId]) {
+            console.log(integrationMessages[integrationId]);
+        }
+    }
+
+    disableIntegration(integrationId) {
+        console.log(`❌ ${integrationId} deaktiviert`);
+    }
+
+    // ========================================
+    // TÜV COMPLIANCE & AUDIT FUNCTIONS
+    // ========================================
+
+    checkComplianceMatrix(data) {
+        const issues = [];
+        
+        // Category-based compliance requirements
+        const categoryRequirements = {
+            'safety': {
+                minDuration: 60,
+                requiredAssessment: true,
+                maxValidity: 12,
+                requiredCertification: true
+            },
+            'quality': {
+                minDuration: 45,
+                requiredAssessment: true,
+                maxValidity: 24,
+                requiredDocumentation: true
+            },
+            'environment': {
+                minDuration: 30,
+                requiredAssessment: false,
+                maxValidity: 36,
+                requiredReview: true
+            }
+        };
+        
+        const requirements = categoryRequirements[data.category];
+        if (requirements) {
+            // Duration check
+            if (data.duration < requirements.minDuration) {
+                issues.push(`Mindestdauer für ${data.category}: ${requirements.minDuration} Minuten`);
+            }
+            
+            // Assessment requirement
+            if (requirements.requiredAssessment && data.assessmentType === 'none') {
+                issues.push(`Kategorie ${data.category} erfordert Bewertung/Prüfung`);
+            }
+            
+            // Validity check
+            if (data.validity > requirements.maxValidity) {
+                issues.push(`Max. Gültigkeitsdauer für ${data.category}: ${requirements.maxValidity} Monate`);
+            }
+        }
+        
+        // Multi-standard compliance conflicts
+        if (data.tuevCertified && data.isoCompliant && data.dguvrCompliant) {
+            // Check for conflicting requirements
+            if (data.approvalProcess === 'automatic') {
+                issues.push('Multi-Standard Compliance erfordert manuelle Freigabe');
+            }
+            if (data.recordKeeping < 10) {
+                issues.push('Multi-Standard Compliance: min. 10 Jahre Aufbewahrung');
+            }
+        }
+        
+        // Advanced feature compliance
+        if (data.tuevCertified && (data.aiAdaptiveLearning || data.aiContentGeneration)) {
+            issues.push('TÜV-Zertifizierung und KI-Features können Validierung erfordern');
+        }
+        
+        if (data.experimentalFeatures && (data.tuevCertified || data.isoCompliant)) {
+            issues.push('Experimentelle Features sind nicht für zertifizierte Schulungen geeignet');
+        }
+        
+        return issues;
+    }
+
+    generateComplianceReport(trainingData) {
+        const report = {
+            complianceLevel: 'Standard',
+            certifications: [],
+            requirements: [],
+            recommendations: [],
+            auditReadiness: 0
+        };
+        
+        // Determine compliance level
+        if (trainingData.tuevCertified) report.certifications.push('TÜV');
+        if (trainingData.isoCompliant) report.certifications.push('ISO');
+        if (trainingData.dguvrCompliant) report.certifications.push('DGUV');
+        
+        if (report.certifications.length === 3) {
+            report.complianceLevel = 'Premium Multi-Standard';
+            report.auditReadiness = 95;
+        } else if (report.certifications.length === 2) {
+            report.complianceLevel = 'Professional Dual-Standard';
+            report.auditReadiness = 85;
+        } else if (report.certifications.length === 1) {
+            report.complianceLevel = 'Single Standard Certified';
+            report.auditReadiness = 75;
+        } else {
+            report.auditReadiness = 60;
+        }
+        
+        // Generate requirements
+        if (trainingData.tuevCertified) {
+            report.requirements.push('Zertifizierte Trainer erforderlich');
+            report.requirements.push('Dokumentierte Qualitätssicherung');
+            report.requirements.push('Regelmäßige Audits');
+        }
+        
+        if (trainingData.isoCompliant) {
+            report.requirements.push('Prozessdokumentation nach ISO');
+            report.requirements.push('Kontinuierliche Verbesserung');
+            report.requirements.push('Management Review');
+        }
+        
+        if (trainingData.dguvrCompliant) {
+            report.requirements.push('Arbeitsschutz-konforme Inhalte');
+            report.requirements.push('Gefährdungsbeurteilung');
+            report.requirements.push('Dokumentation nach DGUV');
+        }
+        
+        // Generate recommendations
+        if (report.auditReadiness < 90) {
+            report.recommendations.push('Implementierung zusätzlicher Qualitätsmaßnahmen');
+            report.recommendations.push('Erweiterung der Dokumentation');
+        }
+        
+        if (!trainingData.gdprCompliant) {
+            report.recommendations.push('DSGVO-Compliance sicherstellen');
+        }
+        
+        if (trainingData.experimentalFeatures) {
+            report.recommendations.push('Experimentelle Features für Produktiveinsatz validieren');
+        }
+        
+        return report;
+    }
+
+    createAuditChecklist(trainingData) {
+        const checklist = {
+            'Grundlagen': [
+                { item: 'Schulungstitel eindeutig und beschreibend', status: !!trainingData.title },
+                { item: 'Schulungs-Code nach Standard-Format', status: /^[A-Z]{2}-[0-9]{3}-[0-9]{4}$/.test(trainingData.code) },
+                { item: 'Versionierung implementiert', status: !!trainingData.version },
+                { item: 'Detaillierte Beschreibung vorhanden', status: !!trainingData.description }
+            ],
+            'Inhalte': [
+                { item: 'Messbare Lernziele definiert', status: !!trainingData.learningObjectives },
+                { item: 'Strukturierte Inhalte vorhanden', status: !!trainingData.content },
+                { item: 'Schulungsmethode festgelegt', status: !!trainingData.method },
+                { item: 'Materialien bereitgestellt', status: trainingData.materials?.length > 0 }
+            ],
+            'Bewertung': [
+                { item: 'Bewertungsverfahren definiert', status: trainingData.assessmentType !== 'none' },
+                { item: 'Bestehensgrenze festgelegt', status: trainingData.passingScore >= 50 },
+                { item: 'Wiederholungsversuche geregelt', status: trainingData.maxAttempts > 0 },
+                { item: 'Prüfungszeit angemessen', status: trainingData.examDuration > 0 }
+            ],
+            'Compliance': [
+                { item: 'Rechtliche Grundlage dokumentiert', status: !!trainingData.legalBasis },
+                { item: 'Trainer qualifiziert', status: !!trainingData.trainer },
+                { item: 'Aufbewahrungsfristen definiert', status: !!trainingData.recordKeeping },
+                { item: 'Freigabeprozess etabliert', status: trainingData.approvalProcess !== 'automatic' }
+            ]
+        };
+        
+        if (trainingData.tuevCertified) {
+            checklist['TÜV-Spezifisch'] = [
+                { item: 'Zertifizierungsstelle benannt', status: !!trainingData.certificationBody },
+                { item: 'Zertifikatsnummer vergeben', status: !!trainingData.certificationNumber },
+                { item: 'Audit-Anforderungen dokumentiert', status: !!trainingData.auditRequirements },
+                { item: 'Qualitätssicherung implementiert', status: !!trainingData.qualityNotes }
+            ];
+        }
+        
+        return checklist;
+    }
+
+    calculateAuditScore(checklist) {
+        let totalItems = 0;
+        let passedItems = 0;
+        
+        Object.values(checklist).forEach(category => {
+            category.forEach(item => {
+                totalItems++;
+                if (item.status) passedItems++;
+            });
+        });
+        
+        return Math.round((passedItems / totalItems) * 100);
     }
 
     // ========================================
@@ -7649,15 +9705,71 @@ PLZ Ort">${user.address || ''}</textarea>
                         </div>
                         <div class="report-content">
                             <div id="report-overview" class="report-panel active">
+                                <div class="report-header">
+                                    <h3>Schulungsübersicht</h3>
+                                    <div class="export-buttons">
+                                        <button class="btn-export btn-csv" onclick="exportTrainingOverview('csv')">
+                                            <i class="fas fa-file-csv"></i> CSV
+                                        </button>
+                                        <button class="btn-export btn-excel" onclick="exportTrainingOverview('excel')">
+                                            <i class="fas fa-file-excel"></i> Excel
+                                        </button>
+                                        <button class="btn-export btn-pdf" onclick="exportTrainingOverview('pdf')">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </button>
+                                    </div>
+                                </div>
                                 ${this.generateOverviewReport()}
                             </div>
                             <div id="report-completion" class="report-panel">
+                                <div class="report-header">
+                                    <h3>Abschlussraten nach Kategorien</h3>
+                                    <div class="export-buttons">
+                                        <button class="btn-export btn-csv" onclick="exportTrainingCompletion('csv')">
+                                            <i class="fas fa-file-csv"></i> CSV
+                                        </button>
+                                        <button class="btn-export btn-excel" onclick="exportTrainingCompletion('excel')">
+                                            <i class="fas fa-file-excel"></i> Excel
+                                        </button>
+                                        <button class="btn-export btn-pdf" onclick="exportTrainingCompletion('pdf')">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </button>
+                                    </div>
+                                </div>
                                 ${this.generateCompletionReport()}
                             </div>
                             <div id="report-compliance" class="report-panel">
+                                <div class="report-header">
+                                    <h3>Compliance-Bericht Pflichtschulungen</h3>
+                                    <div class="export-buttons">
+                                        <button class="btn-export btn-csv" onclick="exportTrainingCompliance('csv')">
+                                            <i class="fas fa-file-csv"></i> CSV
+                                        </button>
+                                        <button class="btn-export btn-excel" onclick="exportTrainingCompliance('excel')">
+                                            <i class="fas fa-file-excel"></i> Excel
+                                        </button>
+                                        <button class="btn-export btn-pdf" onclick="exportTrainingCompliance('pdf')">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </button>
+                                    </div>
+                                </div>
                                 ${this.generateComplianceReport()}
                             </div>
                             <div id="report-individual" class="report-panel">
+                                <div class="report-header">
+                                    <h3>Individuelle Schulungsberichte</h3>
+                                    <div class="export-buttons">
+                                        <button class="btn-export btn-csv" onclick="exportTrainingIndividual('csv')">
+                                            <i class="fas fa-file-csv"></i> CSV
+                                        </button>
+                                        <button class="btn-export btn-excel" onclick="exportTrainingIndividual('excel')">
+                                            <i class="fas fa-file-excel"></i> Excel
+                                        </button>
+                                        <button class="btn-export btn-pdf" onclick="exportTrainingIndividual('pdf')">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </button>
+                                    </div>
+                                </div>
                                 ${this.generateIndividualReport()}
                             </div>
                         </div>
@@ -11690,171 +13802,1470 @@ PLZ Ort">${user.address || ''}</textarea>
     }
 
     showAddMachineModal() {
-        console.log('showAddMachineModal() aufgerufen');
+        console.log('🏭 Professional Machine Management Modal wird erstellt...');
         
-        // Ensure departments are loaded
-        if (!this.departments || this.departments.length === 0) {
-            console.log('Keine Abteilungen gefunden - initialisiere Standardabteilungen');
-            this.initializeDefaultDepartments();
+        try {
+            // Ensure departments are loaded
+            if (!this.departments || this.departments.length === 0) {
+                console.log('Keine Abteilungen gefunden - initialisiere Standardabteilungen');
+                this.initializeDefaultDepartments();
+            }
+            
+            // Remove existing modals to prevent duplicate IDs
+            const existingModal = document.getElementById('addMachineModal');
+            if (existingModal) {
+                console.log('Entferne vorhandenes Modal');
+                existingModal.remove();
+            }
+            
+            console.log('Erstelle Professional Machine Modal mit', this.departments.length, 'Abteilungen');
+            
+            // Create working machine modal (simplified version)
+            const modal = this.createWorkingMachineModal();
+            if (!modal) {
+                throw new Error('Modal konnte nicht erstellt werden');
+            }
+            
+            document.body.appendChild(modal);
+            modal.style.display = 'block';
+            
+            console.log('🚀 Professional Machine Modal erstellt und angezeigt');
+            
+            // Focus first field for better UX  
+            setTimeout(() => {
+                const firstField = modal.querySelector('#machineName');
+                if (firstField) {
+                    firstField.focus();
+                    console.log('✅ Focus auf erstes Feld gesetzt');
+                } else {
+                    console.warn('⚠️ Erstes Feld nicht gefunden');
+                }
+            }, 100);
+            
+        } catch (error) {
+            console.error('❌ Fehler beim Erstellen des Machine Modals:', error);
+            alert('Fehler beim Öffnen des Maschinenformulars: ' + error.message);
         }
+    }
+
+    createAdvancedMachineModal() {
+        console.log('🏗️ Erstelle erweiterte Maschinen-Modal mit 9 Tabs...');
         
-        // Remove existing modals to prevent duplicate IDs
-        const existingModal = document.getElementById('addMachineModal');
-        if (existingModal) existingModal.remove();
-        
-        console.log('Erstelle Modal mit', this.departments.length, 'Abteilungen');
-        
-        const modalHtml = `
-            <div id="addMachineModal" class="modal active">
+        try {
+            const modal = document.createElement('div');
+            modal.id = 'addMachineModal';
+            modal.className = 'modal new-machine-modal';
+            
+            console.log('✅ Modal Element erstellt');
+            
+            // Teste erst ein einfaches Modal
+            modal.innerHTML = `
                 <div class="modal-content large-modal">
                     <div class="modal-header">
-                        <h2>Neue Maschine hinzufügen</h2>
-                        <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                        <h2><i class="fas fa-plus"></i> Neue Maschine anlegen - Professional</h2>
+                        <span class="close new-machine-close">&times;</span>
                     </div>
                     <div class="modal-body">
-                        <form id="addMachineForm">
-                            <div class="form-grid">
-                                <div class="form-column">
-                                    <h3>Grunddaten</h3>
+                        <p>Modal wird geladen...</p>
+                        <button onclick="this.closest('.modal').remove()">Schließen</button>
+                    </div>
+                </div>
+            `;
+            
+            console.log('✅ Basis-HTML gesetzt');
+            
+            // Setup close button
+            const closeBtn = modal.querySelector('.new-machine-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => modal.remove());
+                console.log('✅ Close-Button eingerichtet');
+            }
+            
+            console.log('✅ Modal erfolgreich erstellt');
+            return modal;
+            
+        } catch (error) {
+            console.error('❌ Fehler beim Modal-Aufbau:', error);
+            throw error;
+        }
+    }
+
+    // TÜV-konformes Professional Machine Management System
+    createWorkingMachineModal() {
+        console.log('🏗️ Erstelle TÜV-konformes Professional Machine Management System...');
+        
+        const modal = document.createElement('div');
+        modal.id = 'addMachineModal';
+        modal.className = 'modal professional-machine-modal';
+        modal.style.display = 'block';
+        
+        modal.innerHTML = `
+            <div class="modal-content professional-modal" style="max-width: 1400px; margin: 1% auto; max-height: 95vh; overflow-y: auto;">
+                <div class="modal-header">
+                    <div class="header-content">
+                        <h2><i class="fas fa-industry"></i> Neue Maschine anlegen - TÜV Professional</h2>
+                        <div class="compliance-indicators">
+                            <span class="badge tuev-badge"><i class="fas fa-certificate"></i> TÜV-konform</span>
+                            <span class="badge iso-badge"><i class="fas fa-award"></i> ISO 9001:2015</span>
+                            <span class="badge ce-badge"><i class="fas fa-shield-check"></i> CE-Richtlinie</span>
+                        </div>
+                    </div>
+                    <span class="close" id="closeMachineModal">&times;</span>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Progress Indicator -->
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 11%"></div>
+                        </div>
+                        <div class="progress-text">Schritt 1 von 9 - Grunddaten</div>
+                    </div>
+                    
+                    <!-- Tab Navigation -->
+                    <div class="professional-tabs">
+                        <button type="button" class="form-tab active" data-tab="grunddaten">
+                            <i class="fas fa-info-circle"></i> Grunddaten
+                        </button>
+                        <button type="button" class="form-tab" data-tab="technisch">
+                            <i class="fas fa-cogs"></i> Technische Daten
+                        </button>
+                        <button type="button" class="form-tab" data-tab="compliance">
+                            <i class="fas fa-certificate"></i> Compliance
+                        </button>
+                        <button type="button" class="form-tab" data-tab="sicherheit">
+                            <i class="fas fa-shield-alt"></i> Sicherheitstechnik
+                        </button>
+                        <button type="button" class="form-tab" data-tab="wartung">
+                            <i class="fas fa-tools"></i> Wartung
+                        </button>
+                        <button type="button" class="form-tab" data-tab="risiko">
+                            <i class="fas fa-exclamation-triangle"></i> Risikobewertung
+                        </button>
+                        <button type="button" class="form-tab" data-tab="dokumentation">
+                            <i class="fas fa-file-alt"></i> Dokumentation
+                        </button>
+                        <button type="button" class="form-tab" data-tab="industrie40">
+                            <i class="fas fa-wifi"></i> Industrie 4.0
+                        </button>
+                        <button type="button" class="form-tab" data-tab="wirtschaft">
+                            <i class="fas fa-chart-line"></i> Betriebswirtschaft
+                        </button>
+                    </div>
+                    
+                    <form id="newMachineForm" class="professional-form">
+                        <!-- Tab 1: Erweiterte Grunddaten -->
+                        <div class="tab-content active" id="grunddatenContent">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-info-circle"></i> Erweiterte Grunddaten & Identifikation</h3>
+                                <p class="tab-description">Vollständige Erfassung aller maschinenspezifischen Grunddaten nach TÜV-Standards</p>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>Maschinenidentifikation</h4>
+                                <div class="form-grid professional-grid">
                                     <div class="form-group">
-                                        <label for="machineName">Maschinenname: *</label>
-                                        <input type="text" id="machineName" required placeholder="z.B. Spritzgussmaschine A1">
+                                        <label for="machineName">Maschinenbezeichnung *</label>
+                                        <input type="text" id="machineName" name="machineName" required 
+                                               placeholder="z.B. Spritzgussmaschine SGM-001">
+                                        <small>Eindeutige Bezeichnung nach Betriebsanweisung</small>
                                     </div>
                                     <div class="form-group">
-                                        <label for="machineType">Maschinentyp: *</label>
-                                        <select id="machineType" required>
-                                            <option value="">Typ auswählen</option>
-                                            <option value="Spritzgussmaschine">Spritzgussmaschine</option>
-                                            <option value="Extruder">Extruder</option>
-                                            <option value="Blasformmaschine">Blasformmaschine</option>
-                                            <option value="Thermoformmaschine">Thermoformmaschine</option>
-                                            <option value="Mischanlage">Mischanlage</option>
-                                            <option value="Schredder">Schredder</option>
-                                            <option value="Granulator">Granulator</option>
-                                            <option value="Kompressor">Kompressor</option>
-                                            <option value="Kühlanlage">Kühlanlage</option>
-                                            <option value="Andere">Andere</option>
-                                        </select>
+                                        <label for="machineId">Maschinen-ID / Inventarnummer *</label>
+                                        <input type="text" id="machineId" name="machineId" required
+                                               placeholder="wird automatisch generiert" pattern="[A-Z]{3}-[0-9]{3}-[0-9]{4}">
+                                        <small>Format: ABC-123-2024 (automatisch)</small>
                                     </div>
                                     <div class="form-group">
-                                        <label for="machineManufacturer">Hersteller:</label>
-                                        <input type="text" id="machineManufacturer" placeholder="z.B. Arburg, Engel, Battenfeld">
+                                        <label for="manufacturer">Hersteller *</label>
+                                        <input type="text" id="manufacturer" name="manufacturer" required 
+                                               placeholder="z.B. Arburg GmbH + Co KG">
                                     </div>
                                     <div class="form-group">
-                                        <label for="machineModel">Modell:</label>
-                                        <input type="text" id="machineModel" placeholder="Modellbezeichnung">
+                                        <label for="machineModel">Maschinentyp / Modell *</label>
+                                        <input type="text" id="machineModel" name="machineModel" required 
+                                               placeholder="z.B. Allrounder 520 C">
                                     </div>
                                     <div class="form-group">
-                                        <label for="machineSerialNumber">Seriennummer:</label>
-                                        <input type="text" id="machineSerialNumber" placeholder="Seriennummer">
+                                        <label for="serialNumber">Seriennummer *</label>
+                                        <input type="text" id="serialNumber" name="serialNumber" required 
+                                               placeholder="Herstellerseriennummer">
                                     </div>
                                     <div class="form-group">
-                                        <label for="machineYearBuilt">Baujahr:</label>
-                                        <input type="number" id="machineYearBuilt" min="1990" max="${new Date().getFullYear()}" placeholder="z.B. 2020">
-                                    </div>
-                                </div>
-                                
-                                <div class="form-column">
-                                    <h3>Standort & Organisation</h3>
-                                    <div class="form-group">
-                                        <label for="machineDepartment">Abteilung: *</label>
-                                        <select id="machineDepartment" required>
-                                            <option value="">Abteilung auswählen</option>
-                                            ${this.departments && this.departments.length > 0 ? 
-                                                this.departments.map(dept => `<option value="${dept.id}">${dept.name} (${dept.code || dept.id})</option>`).join('') : 
-                                                `<option value="produktion">Produktion (PROD)</option>
-                                                 <option value="instandhaltung">Instandhaltung (IH)</option>
-                                                 <option value="qhse">QHSE Management (QHSE)</option>`
-                                            }
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="machineLocation">Standort: *</label>
-                                        <input type="text" id="machineLocation" required placeholder="z.B. Halle 1, Bereich A">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="machineResponsible">Verantwortlicher:</label>
-                                        <input type="text" id="machineResponsible" placeholder="Name des Verantwortlichen">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="machineStatus">Aktueller Status: *</label>
-                                        <select id="machineStatus" required>
-                                            <option value="running">In Betrieb</option>
-                                            <option value="maintenance">Wartung</option>
-                                            <option value="issue">Störung</option>
-                                            <option value="offline">Außer Betrieb</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <h3>Technische Daten</h3>
-                                    <div class="form-group">
-                                        <label for="machinePower">Leistung (kW):</label>
-                                        <input type="number" id="machinePower" step="0.1" placeholder="z.B. 15.5">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="machineWeight">Gewicht (kg):</label>
-                                        <input type="number" id="machineWeight" placeholder="z.B. 2500">
+                                        <label for="yearBuilt">Baujahr *</label>
+                                        <input type="number" id="yearBuilt" name="yearBuilt" required 
+                                               min="1950" max="2030" placeholder="2024">
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="form-full-width">
-                                <h3>Wartung & Service</h3>
-                                <div class="form-row">
+                            <div class="form-section">
+                                <h4>Klassifikation & Kategorisierung</h4>
+                                <div class="form-grid">
                                     <div class="form-group">
-                                        <label for="machineLastMaintenance">Letzte Wartung:</label>
-                                        <input type="date" id="machineLastMaintenance">
+                                        <label for="machineType">Hauptkategorie *</label>
+                                        <select id="machineType" name="machineType" required>
+                                            <option value="">Kategorie wählen...</option>
+                                            <option value="injection-molding">Spritzgussmaschine</option>
+                                            <option value="extrusion">Extrusionsanlage</option>
+                                            <option value="blow-molding">Blasformmaschine</option>
+                                            <option value="thermoforming">Thermoformmaschine</option>
+                                            <option value="cnc-milling">CNC-Fräsmaschine</option>
+                                            <option value="cnc-turning">CNC-Drehmaschine</option>
+                                            <option value="cnc-multi">CNC-Bearbeitungszentrum</option>
+                                            <option value="press-hydraulic">Hydraulikpresse</option>
+                                            <option value="press-pneumatic">Pneumatikpresse</option>
+                                            <option value="robot-articulated">Gelenkarmroboter</option>
+                                            <option value="robot-scara">SCARA-Roboter</option>
+                                            <option value="robot-linear">Linearroboter</option>
+                                            <option value="conveyor">Förderanlage</option>
+                                            <option value="packaging">Verpackungsmaschine</option>
+                                            <option value="assembly">Montageautomat</option>
+                                            <option value="testing">Prüfautomat</option>
+                                            <option value="other">Sonstige Maschine</option>
+                                        </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="machineNextMaintenance">Nächste Wartung:</label>
-                                        <input type="date" id="machineNextMaintenance">
+                                        <label for="applicationArea">Anwendungsbereich</label>
+                                        <select id="applicationArea" name="applicationArea">
+                                            <option value="">Bereich wählen...</option>
+                                            <option value="automotive">Automotive</option>
+                                            <option value="medical">Medizintechnik</option>
+                                            <option value="packaging">Verpackung</option>
+                                            <option value="electronics">Elektronik</option>
+                                            <option value="construction">Bauwesen</option>
+                                            <option value="aerospace">Luft- und Raumfahrt</option>
+                                            <option value="consumer">Konsumgüter</option>
+                                            <option value="industrial">Industriegüter</option>
+                                        </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="machineMaintenanceInterval">Wartungsintervall (Tage):</label>
-                                        <input type="number" id="machineMaintenanceInterval" placeholder="z.B. 90" value="90">
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="machineNotes">Bemerkungen:</label>
-                                    <textarea id="machineNotes" rows="3" placeholder="Zusätzliche Informationen zur Maschine..."></textarea>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="machineDocuments">Dokumente (optional):</label>
-                                    <div class="file-upload-area">
-                                        <input type="file" id="machineDocuments" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" style="display: none;">
-                                        <div class="upload-zone" onclick="document.getElementById('machineDocuments').click()" style="border: 2px dashed #d1d5db; padding: 20px; text-align: center; cursor: pointer; border-radius: 6px; margin-top: 8px;">
-                                            <i class="fas fa-cloud-upload-alt" style="font-size: 24px; color: #9ca3af; margin-bottom: 8px;"></i>
-                                            <p style="margin: 0; color: #6b7280;">Dokumente hier ablegen oder klicken zum Auswählen</p>
-                                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af;">PDF, DOC, JPG, PNG, XLS erlaubt</p>
-                                        </div>
-                                        <div id="selectedFiles" style="margin-top: 8px;"></div>
+                                        <label for="criticality">Kritikalitätsstufe *</label>
+                                        <select id="criticality" name="criticality" required>
+                                            <option value="">Stufe wählen...</option>
+                                            <option value="critical">Kritisch (Produktionsstopp bei Ausfall)</option>
+                                            <option value="important">Wichtig (Teilstörung möglich)</option>
+                                            <option value="standard">Standard (Ersetzbar)</option>
+                                            <option value="backup">Reserve (Backup-System)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                            
+                            <div class="form-section">
+                                <h4>Standort & Organisation</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="facility">Werk / Standort *</label>
+                                        <input type="text" id="facility" name="facility" required 
+                                               placeholder="z.B. Werk Hamburg">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="building">Gebäude / Halle *</label>
+                                        <input type="text" id="building" name="building" required 
+                                               placeholder="z.B. Halle 1, Gebäude A">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="floor">Etage / Ebene</label>
+                                        <input type="text" id="floor" name="floor" 
+                                               placeholder="z.B. Erdgeschoss, Ebene 2">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="area">Bereich / Linie *</label>
+                                        <input type="text" id="area" name="area" required 
+                                               placeholder="z.B. Linie A, Montage 3">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="coordinates">GPS-Koordinaten</label>
+                                        <input type="text" id="coordinates" name="coordinates" 
+                                               placeholder="z.B. 53.5511, 9.9937">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="machineDepartment">Zuständige Abteilung *</label>
+                                        <select id="machineDepartment" name="machineDepartment" required>
+                                            <option value="">Abteilung wählen...</option>
+                                            <option value="produktion">Produktion</option>
+                                            <option value="instandhaltung">Instandhaltung</option>
+                                            <option value="entwicklung">Entwicklung</option>
+                                            <option value="qualitaet">Qualitätssicherung</option>
+                                            <option value="qhse">QHSE Management</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab 2: Technische Daten -->
+                        <div class="tab-content" id="technischContent">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-cogs"></i> Detaillierte Technische Spezifikationen</h3>
+                                <p class="tab-description">Vollständige technische Daten nach Maschinenrichtlinie 2006/42/EG</p>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>Leistungsdaten & Energieversorgung</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="nominalPower">Nennleistung (kW) *</label>
+                                        <input type="number" id="nominalPower" step="0.1" required 
+                                               placeholder="z.B. 15.5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="maxPower">Maximale Leistung (kW)</label>
+                                        <input type="number" id="maxPower" step="0.1" 
+                                               placeholder="z.B. 18.0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="voltage">Spannung (V) *</label>
+                                        <select id="voltage" required>
+                                            <option value="">Spannung wählen...</option>
+                                            <option value="230">230V (1-phasig)</option>
+                                            <option value="400">400V (3-phasig)</option>
+                                            <option value="690">690V (3-phasig)</option>
+                                            <option value="other">Sonstige</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="frequency">Frequenz (Hz)</label>
+                                        <select id="frequency">
+                                            <option value="50">50 Hz (Europa)</option>
+                                            <option value="60">60 Hz (USA)</option>
+                                            <option value="variable">Variable</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="current">Stromaufnahme (A)</label>
+                                        <input type="number" id="current" step="0.1" 
+                                               placeholder="z.B. 32.5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="protectionClass">Schutzart (IP-Code) *</label>
+                                        <select id="protectionClass" required>
+                                            <option value="">IP-Code wählen...</option>
+                                            <option value="IP20">IP20 (Standardumgebung)</option>
+                                            <option value="IP54">IP54 (Staub- und Spritzwasserschutz)</option>
+                                            <option value="IP65">IP65 (Vollständiger Schutz)</option>
+                                            <option value="IP67">IP67 (Wasserdicht)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>Abmessungen & Gewicht</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="length">Länge (mm) *</label>
+                                        <input type="number" id="length" required placeholder="z.B. 5000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="width">Breite (mm) *</label>
+                                        <input type="number" id="width" required placeholder="z.B. 2000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="height">Höhe (mm) *</label>
+                                        <input type="number" id="height" required placeholder="z.B. 2500">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="weight">Gewicht (kg) *</label>
+                                        <input type="number" id="weight" required placeholder="z.B. 3500">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="footprint">Grundfläche (m²)</label>
+                                        <input type="number" id="footprint" step="0.1" 
+                                               placeholder="wird automatisch berechnet" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="clearanceHeight">Freihöhe erforderlich (mm)</label>
+                                        <input type="number" id="clearanceHeight" 
+                                               placeholder="z.B. 3000">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>Betriebsmedien & Versorgung</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="compressedAir">Druckluft erforderlich</label>
+                                        <div class="checkbox-group">
+                                            <label><input type="checkbox" id="compressedAir"> Druckluftversorgung</label>
+                                        </div>
+                                        <input type="number" id="airPressure" step="0.1" 
+                                               placeholder="Druck in bar (z.B. 6.0)">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cooling">Kühlsystem</label>
+                                        <select id="cooling">
+                                            <option value="none">Keine Kühlung</option>
+                                            <option value="air">Luftkühlung</option>
+                                            <option value="water">Wasserkühlung</option>
+                                            <option value="oil">Ölkühlung</option>
+                                            <option value="closed-loop">Geschlossener Kreislauf</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="hydraulics">Hydrauliksystem</label>
+                                        <div class="checkbox-group">
+                                            <label><input type="checkbox" id="hydraulics"> Hydraulikversorgung</label>
+                                        </div>
+                                        <input type="number" id="hydraulicPressure" step="1" 
+                                               placeholder="Druck in bar (z.B. 200)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab 3: Compliance & Zertifizierungen -->
+                        <div class="tab-content" id="complianceContent">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-certificate"></i> Compliance & Zertifizierungen</h3>
+                                <p class="tab-description">Vollständige Erfassung aller Normen, Richtlinien und Zertifizierungen</p>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>CE-Kennzeichnung & EU-Richtlinien</h4>
+                                <div class="compliance-grid">
+                                    <div class="form-group">
+                                        <label for="ceMarking">CE-Kennzeichnung *</label>
+                                        <div class="radio-group">
+                                            <label><input type="radio" name="ceMarking" value="yes" required> Vorhanden</label>
+                                            <label><input type="radio" name="ceMarking" value="no" required> Nicht vorhanden</label>
+                                            <label><input type="radio" name="ceMarking" value="pending" required> In Bearbeitung</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ceNumber">CE-Kennzeichnungsnummer</label>
+                                        <input type="text" id="ceNumber" placeholder="z.B. CE-2024-001">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="notifiedBody">Benannte Stelle</label>
+                                        <input type="text" id="notifiedBody" 
+                                               placeholder="z.B. TÜV SÜD (0123)">
+                                    </div>
+                                </div>
+                                
+                                <h5>Anwendbare EU-Richtlinien</h5>
+                                <div class="checkbox-grid">
+                                    <label><input type="checkbox" name="euDirectives" value="machinery"> Maschinenrichtlinie 2006/42/EG</label>
+                                    <label><input type="checkbox" name="euDirectives" value="emc"> EMV-Richtlinie 2014/30/EU</label>
+                                    <label><input type="checkbox" name="euDirectives" value="lvd"> Niederspannungsrichtlinie 2014/35/EU</label>
+                                    <label><input type="checkbox" name="euDirectives" value="atex"> ATEX-Richtlinie 2014/34/EU</label>
+                                    <label><input type="checkbox" name="euDirectives" value="pressure"> Druckgeräterichtlinie 2014/68/EU</label>
+                                    <label><input type="checkbox" name="euDirectives" value="radio"> Funkanlagenrichtlinie 2014/53/EU</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>Harmonisierte Normen & Standards</h4>
+                                <div class="standards-section">
+                                    <h5>Sicherheitsnormen</h5>
+                                    <div class="checkbox-grid">
+                                        <label><input type="checkbox" name="safetyStandards" value="en-iso-12100"> EN ISO 12100 (Grundlegende Sicherheitsnormen)</label>
+                                        <label><input type="checkbox" name="safetyStandards" value="en-iso-13849"> EN ISO 13849 (Sicherheitsbezogene Teile)</label>
+                                        <label><input type="checkbox" name="safetyStandards" value="en-62061"> EN 62061 (Funktionale Sicherheit)</label>
+                                        <label><input type="checkbox" name="safetyStandards" value="en-iso-14119"> EN ISO 14119 (Verriegelungseinrichtungen)</label>
+                                        <label><input type="checkbox" name="safetyStandards" value="en-iso-13857"> EN ISO 13857 (Sicherheitsabstände)</label>
+                                    </div>
+                                    
+                                    <h5>Qualitätsnormen</h5>
+                                    <div class="checkbox-grid">
+                                        <label><input type="checkbox" name="qualityStandards" value="iso-9001"> ISO 9001:2015 (Qualitätsmanagement)</label>
+                                        <label><input type="checkbox" name="qualityStandards" value="iso-14001"> ISO 14001:2015 (Umweltmanagement)</label>
+                                        <label><input type="checkbox" name="qualityStandards" value="iso-45001"> ISO 45001:2018 (Arbeitsschutzmanagement)</label>
+                                        <label><input type="checkbox" name="qualityStandards" value="iso-27001"> ISO 27001:2013 (Informationssicherheit)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>TÜV-Prüfungen & Zertifikate</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="tuevInspection">TÜV-Prüfung erforderlich *</label>
+                                        <select id="tuevInspection" required>
+                                            <option value="">Prüfung wählen...</option>
+                                            <option value="none">Keine TÜV-Prüfung erforderlich</option>
+                                            <option value="initial">Erstprüfung vor Inbetriebnahme</option>
+                                            <option value="periodic">Wiederkehrende Prüfung</option>
+                                            <option value="special">Sonderprüfung nach Änderung</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inspectionInterval">Prüfintervall</label>
+                                        <select id="inspectionInterval">
+                                            <option value="">Intervall wählen...</option>
+                                            <option value="6months">6 Monate</option>
+                                            <option value="12months">12 Monate</option>
+                                            <option value="24months">24 Monate</option>
+                                            <option value="60months">60 Monate</option>
+                                            <option value="individual">Individuell festgelegt</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lastInspection">Letzte Prüfung</label>
+                                        <input type="date" id="lastInspection">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nextInspection">Nächste Prüfung fällig</label>
+                                        <input type="date" id="nextInspection">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional tabs will be added via addRemainingMachineTabs() -->
+                        ${this.createRemainingMachineTabs()}
+                        
+                        <div class="modal-footer professional-footer">
+                            <button type="button" id="cancelMachineBtn" class="btn-secondary">
+                                <i class="fas fa-times"></i> Abbrechen
+                            </button>
+                            <button type="button" id="prevTabBtn" class="btn-outline" disabled>
+                                <i class="fas fa-chevron-left"></i> Zurück
+                            </button>
+                            <button type="button" id="nextTabBtn" class="btn-outline">
+                                Weiter <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i> Maschine erstellen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        // Setup event listeners
+        const closeBtn = modal.querySelector('#closeMachineModal');
+        const cancelBtn = modal.querySelector('#cancelMachineBtn');
+        
+        [closeBtn, cancelBtn].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', () => modal.remove());
+            }
+        });
+        
+        // Auto-generate machine ID
+        const nameInput = modal.querySelector('#machineName');
+        const idInput = modal.querySelector('#machineId');
+        
+        if (nameInput && idInput) {
+            nameInput.addEventListener('input', () => {
+                if (!idInput.value) {
+                    const name = nameInput.value.toUpperCase();
+                    const year = new Date().getFullYear();
+                    const prefix = name.substring(0, 3) || 'MAC';
+                    const number = String((this.machines?.length || 0) + 1).padStart(3, '0');
+                    idInput.value = `${prefix}-${number}-${year}`;
+                }
+            });
+        }
+        
+        // Form submission
+        const form = modal.querySelector('#newMachineForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveWorkingMachine(modal);
+            });
+        }
+        
+        // Setup tab navigation
+        this.setupProfessionalMachineTabNavigation(modal);
+        
+        // Setup advanced features
+        this.setupProfessionalMachineFeatures(modal);
+        
+        return modal;
+    }
+
+    createRemainingMachineTabs() {
+        return `
+            <!-- Tab 4: Sicherheitstechnik -->
+            <div class="tab-content" id="sicherheitContent">
+                <div class="tab-header">
+                    <h3><i class="fas fa-shield-alt"></i> Sicherheitstechnik & Schutzeinrichtungen</h3>
+                    <p class="tab-description">Vollständige Erfassung aller Sicherheitseinrichtungen nach EN ISO 12100</p>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Schutzeinrichtungen & Sicherheitssysteme</h4>
+                    <div class="safety-grid">
+                        <div class="safety-category">
+                            <h5>Mechanische Schutzeinrichtungen</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="mechanicalSafety" value="fixed-guards"> Fest angebrachte Schutzeinrichtungen</label>
+                                <label><input type="checkbox" name="mechanicalSafety" value="movable-guards"> Bewegliche Schutzeinrichtungen</label>
+                                <label><input type="checkbox" name="mechanicalSafety" value="adjustable-guards"> Verstellbare Schutzeinrichtungen</label>
+                                <label><input type="checkbox" name="mechanicalSafety" value="self-adjusting-guards"> Selbstanpassende Schutzeinrichtungen</label>
+                            </div>
+                        </div>
+                        
+                        <div class="safety-category">
+                            <h5>Verriegelungseinrichtungen</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="interlockSafety" value="mechanical-interlock"> Mechanische Verriegelung</label>
+                                <label><input type="checkbox" name="interlockSafety" value="electrical-interlock"> Elektrische Verriegelung</label>
+                                <label><input type="checkbox" name="interlockSafety" value="magnetic-interlock"> Magnetische Verriegelung</label>
+                                <label><input type="checkbox" name="interlockSafety" value="coded-interlock"> Codierte Verriegelung</label>
+                            </div>
+                        </div>
+                        
+                        <div class="safety-category">
+                            <h5>Schaltende Schutzeinrichtungen</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="switchingSafety" value="light-curtain"> Lichtvorhang</label>
+                                <label><input type="checkbox" name="switchingSafety" value="light-barrier"> Lichtschranke</label>
+                                <label><input type="checkbox" name="switchingSafety" value="laser-scanner"> Laserscanner</label>
+                                <label><input type="checkbox" name="switchingSafety" value="pressure-mat"> Schaltmatte</label>
+                                <label><input type="checkbox" name="switchingSafety" value="safety-edges"> Schaltleisten</label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button onclick="window.qhseDashboard.addMachine()" class="btn-primary">
-                            <i class="fas fa-save"></i> Maschine speichern
-                        </button>
-                        <button onclick="this.closest('.modal').remove()" class="btn-secondary">
-                            <i class="fas fa-times"></i> Abbrechen
-                        </button>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Not-Aus & Stillsetzeinrichtungen</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="emergencyStops">Anzahl Not-Aus-Schalter *</label>
+                            <input type="number" id="emergencyStops" min="1" required placeholder="z.B. 2">
+                        </div>
+                        <div class="form-group">
+                            <label for="emergencyStopType">Not-Aus-Typ</label>
+                            <select id="emergencyStopType">
+                                <option value="category-0">Kategorie 0 (Sofortiger Stopp)</option>
+                                <option value="category-1">Kategorie 1 (Kontrollierter Stopp)</option>
+                                <option value="category-2">Kategorie 2 (Kontrollierter Stopp mit Energieerhaltung)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="safetyCategory">Sicherheitskategorie (EN ISO 13849) *</label>
+                            <select id="safetyCategory" required>
+                                <option value="">Kategorie wählen...</option>
+                                <option value="B">Kategorie B (Grundsicherheit)</option>
+                                <option value="1">Kategorie 1 (Bewährte Komponenten)</option>
+                                <option value="2">Kategorie 2 (Testbare Sicherheit)</option>
+                                <option value="3">Kategorie 3 (Einzelfehlertoleranz)</option>
+                                <option value="4">Kategorie 4 (Einzelfehlertoleranz + Fehlererkennung)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="performanceLevel">Performance Level (PLr) *</label>
+                            <select id="performanceLevel" required>
+                                <option value="">PL wählen...</option>
+                                <option value="a">PLr a (Sehr geringes Risiko)</option>
+                                <option value="b">PLr b (Geringes Risiko)</option>
+                                <option value="c">PLr c (Mittleres Risiko)</option>
+                                <option value="d">PLr d (Hohes Risiko)</option>
+                                <option value="e">PLr e (Sehr hohes Risiko)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 5: Wartung & Instandhaltung -->
+            <div class="tab-content" id="wartungContent">
+                <div class="tab-header">
+                    <h3><i class="fas fa-tools"></i> Wartung & Instandhaltung</h3>
+                    <p class="tab-description">TÜV-konforme Wartungsplanung und Instandhaltungsstrategien nach DGUV</p>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Wartungsintervalle & Prüffristen</h4>
+                    <div class="maintenance-grid">
+                        <div class="maintenance-type">
+                            <h5>Wiederkehrende Prüfungen (TÜV)</h5>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="tuevInterval">TÜV-Prüfintervall *</label>
+                                    <select id="tuevInterval" required>
+                                        <option value="">Intervall wählen...</option>
+                                        <option value="6">6 Monate</option>
+                                        <option value="12">12 Monate</option>
+                                        <option value="24">24 Monate</option>
+                                        <option value="36">36 Monate</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nextTuevDate">Nächste TÜV-Prüfung</label>
+                                    <input type="date" id="nextTuevDate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tuevOrganization">Prüforganisation</label>
+                                    <select id="tuevOrganization">
+                                        <option value="tuev-sued">TÜV SÜD</option>
+                                        <option value="tuev-nord">TÜV NORD</option>
+                                        <option value="tuev-rheinland">TÜV Rheinland</option>
+                                        <option value="dekra">DEKRA</option>
+                                        <option value="other">Andere</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="maintenance-type">
+                            <h5>Vorbeugende Wartung</h5>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="preventiveInterval">Wartungsintervall (Stunden)</label>
+                                    <input type="number" id="preventiveInterval" placeholder="z.B. 500">
+                                </div>
+                                <div class="form-group">
+                                    <label for="maintenanceResponsible">Verantwortlicher</label>
+                                    <input type="text" id="maintenanceResponsible" placeholder="Name oder Abteilung">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastMaintenance">Letzte Wartung</label>
+                                    <input type="date" id="lastMaintenance">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="maintenanceTasks">Wartungsaufgaben</label>
+                                <textarea id="maintenanceTasks" rows="3" placeholder="Beschreibung der regelmäßigen Wartungsarbeiten..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Ersatzteile & Service</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="sparePartsAvailable">Ersatzteilversorgung gesichert</label>
+                            <select id="sparePartsAvailable">
+                                <option value="yes">Ja, vollständig</option>
+                                <option value="partial">Teilweise</option>
+                                <option value="critical">Kritische Teile verfügbar</option>
+                                <option value="no">Nicht gesichert</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="serviceContract">Servicevertrag vorhanden</label>
+                            <select id="serviceContract">
+                                <option value="yes">Ja</option>
+                                <option value="no">Nein</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="serviceProvider">Serviceanbieter</label>
+                            <input type="text" id="serviceProvider" placeholder="Name des Serviceanbieters">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 6: Risikobewertung -->
+            <div class="tab-content" id="risikoContent">
+                <div class="tab-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Risikobewertung & Gefährdungsbeurteilung</h3>
+                    <p class="tab-description">Systematische Gefährdungsbeurteilung nach EN ISO 12100 und DGUV Vorschrift 1</p>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Gefährdungsarten</h4>
+                    <div class="risk-categories">
+                        <div class="risk-category">
+                            <h5>Mechanische Gefährdungen</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="mechanicalRisks" value="crushing"> Quetschen</label>
+                                <label><input type="checkbox" name="mechanicalRisks" value="cutting"> Schneiden</label>
+                                <label><input type="checkbox" name="mechanicalRisks" value="stabbing"> Stechen</label>
+                                <label><input type="checkbox" name="mechanicalRisks" value="entanglement"> Erfassen/Einziehen</label>
+                                <label><input type="checkbox" name="mechanicalRisks" value="impact"> Stoßen</label>
+                                <label><input type="checkbox" name="mechanicalRisks" value="abrasion"> Reiben/Scheuern</label>
+                            </div>
+                        </div>
+                        
+                        <div class="risk-category">
+                            <h5>Elektrische Gefährdungen</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="electricalRisks" value="shock"> Elektrischer Schlag</label>
+                                <label><input type="checkbox" name="electricalRisks" value="burn"> Verbrennungen</label>
+                                <label><input type="checkbox" name="electricalRisks" value="arc"> Lichtbogen</label>
+                                <label><input type="checkbox" name="electricalRisks" value="static"> Elektrostatische Aufladung</label>
+                            </div>
+                        </div>
+                        
+                        <div class="risk-category">
+                            <h5>Thermische Gefährdungen</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="thermalRisks" value="heat"> Hitze/heiße Oberflächen</label>
+                                <label><input type="checkbox" name="thermalRisks" value="cold"> Kälte</label>
+                                <label><input type="checkbox" name="thermalRisks" value="fire"> Brandgefahr</label>
+                                <label><input type="checkbox" name="thermalRisks" value="explosion"> Explosionsgefahr</label>
+                            </div>
+                        </div>
+                        
+                        <div class="risk-category">
+                            <h5>Lärm & Vibration</h5>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="noiseRisks" value="hearing-damage"> Gehörschäden</label>
+                                <label><input type="checkbox" name="noiseRisks" value="hand-arm-vibration"> Hand-Arm-Vibration</label>
+                                <label><input type="checkbox" name="noiseRisks" value="whole-body-vibration"> Ganzkörper-Vibration</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Risikobewertung</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="riskAssessmentDate">Datum der Gefährdungsbeurteilung</label>
+                            <input type="date" id="riskAssessmentDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="riskAssessor">Durchgeführt von</label>
+                            <input type="text" id="riskAssessor" placeholder="Name des Verantwortlichen">
+                        </div>
+                        <div class="form-group">
+                            <label for="overallRiskLevel">Gesamtrisikobewertung</label>
+                            <select id="overallRiskLevel">
+                                <option value="low">Geringes Risiko</option>
+                                <option value="medium">Mittleres Risiko</option>
+                                <option value="high">Hohes Risiko</option>
+                                <option value="very-high">Sehr hohes Risiko</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="riskMitigationMeasures">Schutzmaßnahmen</label>
+                        <textarea id="riskMitigationMeasures" rows="4" placeholder="Beschreibung der implementierten Schutzmaßnahmen..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 7: Dokumentation -->
+            <div class="tab-content" id="dokumentationContent">
+                <div class="tab-header">
+                    <h3><i class="fas fa-file-alt"></i> Dokumentation & Nachweise</h3>
+                    <p class="tab-description">TÜV-Audit-ready Dokumentenverwaltung und Compliance-Nachweise</p>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Pflichtdokumente</h4>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="requiredDocs" value="ce-declaration"> EG-Konformitätserklärung</label>
+                        <label><input type="checkbox" name="requiredDocs" value="manual"> Betriebsanleitung (deutsch)</label>
+                        <label><input type="checkbox" name="requiredDocs" value="risk-assessment"> Gefährdungsbeurteilung</label>
+                        <label><input type="checkbox" name="requiredDocs" value="installation-cert"> Aufstellungsbescheinigung</label>
+                        <label><input type="checkbox" name="requiredDocs" value="acceptance-protocol"> Abnahmeprotokoll</label>
+                        <label><input type="checkbox" name="requiredDocs" value="inspection-records"> Prüfbücher/-protokolle</label>
+                        <label><input type="checkbox" name="requiredDocs" value="maintenance-log"> Wartungsnachweis</label>
+                        <label><input type="checkbox" name="requiredDocs" value="training-records"> Einweisungsnachweise</label>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Dokumentenverwaltung</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="documentationComplete">Dokumentation vollständig</label>
+                            <select id="documentationComplete">
+                                <option value="complete">Vollständig</option>
+                                <option value="mostly-complete">Größtenteils vollständig</option>
+                                <option value="incomplete">Unvollständig</option>
+                                <option value="missing">Fehlend</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="documentStorage">Dokumentenablage</label>
+                            <select id="documentStorage">
+                                <option value="digital">Digital</option>
+                                <option value="physical">Papierform</option>
+                                <option value="both">Digital + Papier</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="documentResponsible">Verantwortlich für Dokumentation</label>
+                            <input type="text" id="documentResponsible" placeholder="Name/Abteilung">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Dokumenten-Upload</h4>
+                    <div class="document-upload-area">
+                        <div class="upload-zone" id="documentUploadZone">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h5>Dokumente hochladen</h5>
+                                <p>PDF, Word, Excel, Bilder (max. 10MB pro Datei)</p>
+                                <button type="button" class="btn-upload" onclick="document.getElementById('documentFileInput').click()">
+                                    <i class="fas fa-plus"></i> Dateien auswählen
+                                </button>
+                                <input type="file" id="documentFileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif" style="display: none;">
+                            </div>
+                        </div>
+                        
+                        <div class="uploaded-documents" id="uploadedDocuments">
+                            <h5>Hochgeladene Dokumente</h5>
+                            <div class="document-list" id="documentList">
+                                <!-- Uploaded documents will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>TÜV-Export & Auswertungen</h4>
+                    <div class="export-actions">
+                        <div class="export-grid">
+                            <button type="button" class="btn-export" onclick="window.qhseDashboard.exportTuevCompleteReport()">
+                                <i class="fas fa-file-pdf"></i>
+                                <div>
+                                    <strong>TÜV-Komplettbericht</strong>
+                                    <small>Vollständiger Audit-Report als PDF</small>
+                                </div>
+                            </button>
+                            
+                            <button type="button" class="btn-export" onclick="window.qhseDashboard.exportComplianceChecklist()">
+                                <i class="fas fa-list-check"></i>
+                                <div>
+                                    <strong>Compliance-Checkliste</strong>
+                                    <small>Audit-Checkliste zum Abhaken</small>
+                                </div>
+                            </button>
+                            
+                            <button type="button" class="btn-export" onclick="window.qhseDashboard.exportDocumentIndex()">
+                                <i class="fas fa-folder-open"></i>
+                                <div>
+                                    <strong>Dokumentenverzeichnis</strong>
+                                    <small>Übersicht aller Dokumente</small>
+                                </div>
+                            </button>
+                            
+                            <button type="button" class="btn-export" onclick="window.qhseDashboard.exportMaintenanceSchedule()">
+                                <i class="fas fa-calendar-alt"></i>
+                                <div>
+                                    <strong>Wartungsplan</strong>
+                                    <small>TÜV-Prüfungen und Wartungen</small>
+                                </div>
+                            </button>
+                            
+                            <button type="button" class="btn-export" onclick="window.qhseDashboard.exportRiskAssessment()">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div>
+                                    <strong>Gefährdungsbeurteilung</strong>
+                                    <small>Risikobewertung und Schutzmaßnahmen</small>
+                                </div>
+                            </button>
+                            
+                            <button type="button" class="btn-export" onclick="window.qhseDashboard.exportTechnicalDataSheet()">
+                                <i class="fas fa-cog"></i>
+                                <div>
+                                    <strong>Technisches Datenblatt</strong>
+                                    <small>Alle technischen Spezifikationen</small>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Audit-Bereitschaft</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="auditReady">TÜV-Audit-bereit</label>
+                            <select id="auditReady">
+                                <option value="ready">Ja, vollständig</option>
+                                <option value="mostly-ready">Größtenteils</option>
+                                <option value="preparation-needed">Vorbereitung erforderlich</option>
+                                <option value="not-ready">Nicht bereit</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastAudit">Letztes Audit</label>
+                            <input type="date" id="lastAudit">
+                        </div>
+                        <div class="form-group">
+                            <label for="nextAudit">Nächstes geplantes Audit</label>
+                            <input type="date" id="nextAudit">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="auditNotes">Audit-Hinweise</label>
+                        <textarea id="auditNotes" rows="3" placeholder="Besonderheiten oder Hinweise für künftige Audits..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 8: Industrie 4.0 & IoT -->
+            <div class="tab-content" id="industrie40Content">
+                <div class="tab-header">
+                    <h3><i class="fas fa-wifi"></i> Industrie 4.0 & IoT Integration</h3>
+                    <p class="tab-description">Digitale Transformation und Internet of Things Anbindung</p>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Digitalisierungsgrad</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="digitalizationLevel">Digitalisierungsgrad</label>
+                            <select id="digitalizationLevel">
+                                <option value="none">Keine Digitalisierung</option>
+                                <option value="basic">Grundausstattung</option>
+                                <option value="advanced">Erweiterte Digitalisierung</option>
+                                <option value="smart">Smart Factory Ready</option>
+                                <option value="fully-connected">Vollvernetzt</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="iotEnabled">IoT-fähig</label>
+                            <select id="iotEnabled">
+                                <option value="yes">Ja</option>
+                                <option value="planned">Geplant</option>
+                                <option value="no">Nein</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="connectivity">Konnektivität</label>
+                            <select id="connectivity">
+                                <option value="ethernet">Ethernet</option>
+                                <option value="wifi">WLAN</option>
+                                <option value="cellular">Mobilfunk</option>
+                                <option value="multiple">Mehrere Optionen</option>
+                                <option value="none">Keine</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Sensoren & Monitoring</h4>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="sensors" value="temperature"> Temperatursensoren</label>
+                        <label><input type="checkbox" name="sensors" value="vibration"> Vibrationssensoren</label>
+                        <label><input type="checkbox" name="sensors" value="pressure"> Drucksensoren</label>
+                        <label><input type="checkbox" name="sensors" value="flow"> Durchflusssensoren</label>
+                        <label><input type="checkbox" name="sensors" value="position"> Positionssensoren</label>
+                        <label><input type="checkbox" name="sensors" value="energy"> Energiemonitoring</label>
+                        <label><input type="checkbox" name="sensors" value="quality"> Qualitätssensoren</label>
+                        <label><input type="checkbox" name="sensors" value="safety"> Sicherheitssensoren</label>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Digitaler Zwilling</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="digitalTwin">Digitaler Zwilling verfügbar</label>
+                            <select id="digitalTwin">
+                                <option value="yes">Ja, vollständig</option>
+                                <option value="partial">Teilweise</option>
+                                <option value="planned">In Planung</option>
+                                <option value="no">Nein</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="simulationSoftware">Simulationssoftware</label>
+                            <input type="text" id="simulationSoftware" placeholder="z.B. Siemens NX, ANSYS, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="dataAnalytics">Datenanalytik</label>
+                            <select id="dataAnalytics">
+                                <option value="advanced">Erweiterte Analytik</option>
+                                <option value="basic">Basis-Auswertung</option>
+                                <option value="planned">Geplant</option>
+                                <option value="none">Keine</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 9: Betriebswirtschaft -->
+            <div class="tab-content" id="wirtschaftContent">
+                <div class="tab-header">
+                    <h3><i class="fas fa-chart-line"></i> Betriebswirtschaft & Lifecycle Management</h3>
+                    <p class="tab-description">Wirtschaftliche Bewertung und Total Cost of Ownership (TCO)</p>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Anschaffung & Investition</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="acquisitionCost">Anschaffungskosten (€)</label>
+                            <input type="number" id="acquisitionCost" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="installationCost">Installationskosten (€)</label>
+                            <input type="number" id="installationCost" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="commissioningDate">Inbetriebnahmedatum</label>
+                            <input type="date" id="commissioningDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="depreciation">Abschreibungsdauer (Jahre)</label>
+                            <input type="number" id="depreciation" min="1" max="50" placeholder="z.B. 10">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Betriebskosten</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="energyCostYear">Energiekosten/Jahr (€)</label>
+                            <input type="number" id="energyCostYear" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="maintenanceCostYear">Wartungskosten/Jahr (€)</label>
+                            <input type="number" id="maintenanceCostYear" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="personalCostYear">Personalkosten/Jahr (€)</label>
+                            <input type="number" id="personalCostYear" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="consumablesCostYear">Verbrauchsmaterial/Jahr (€)</label>
+                            <input type="number" id="consumablesCostYear" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>Produktivität & Effizienz</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="capacityUtilization">Kapazitätsauslastung (%)</label>
+                            <input type="number" id="capacityUtilization" min="0" max="100" placeholder="z.B. 85">
+                        </div>
+                        <div class="form-group">
+                            <label for="oeeTarget">OEE-Zielwert (%)</label>
+                            <input type="number" id="oeeTarget" min="0" max="100" placeholder="z.B. 75">
+                        </div>
+                        <div class="form-group">
+                            <label for="plannedLifetime">Geplante Nutzungsdauer (Jahre)</label>
+                            <input type="number" id="plannedLifetime" min="1" max="50" placeholder="z.B. 15">
+                        </div>
+                        <div class="form-group">
+                            <label for="residualValue">Restwert (€)</label>
+                            <input type="number" id="residualValue" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h4>ROI & Wirtschaftlichkeit</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="paybackPeriod">Amortisationsdauer (Jahre)</label>
+                            <input type="number" id="paybackPeriod" step="0.1" placeholder="z.B. 3.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="roi">ROI (%)</label>
+                            <input type="number" id="roi" step="0.1" placeholder="z.B. 15.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="costPerUnit">Kosten pro Einheit (€)</label>
+                            <input type="number" id="costPerUnit" step="0.001" placeholder="0.000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="economicNotes">Wirtschaftliche Bewertung</label>
+                        <textarea id="economicNotes" rows="3" placeholder="Zusätzliche Hinweise zur wirtschaftlichen Bewertung..."></textarea>
                     </div>
                 </div>
             </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    setupProfessionalMachineTabNavigation(modal) {
+        console.log('🔄 Richte Professional Tab Navigation ein...');
         
-        console.log('Modal erstellt und angezeigt');
+        const tabs = modal.querySelectorAll('.form-tab');
+        const contents = modal.querySelectorAll('.tab-content');
+        const progressFill = modal.querySelector('.progress-fill');
+        const progressText = modal.querySelector('.progress-text');
         
-        // Focus first field for better UX  
+        const tabOrder = ['grunddaten', 'technisch', 'compliance', 'sicherheit', 'wartung', 'risiko', 'dokumentation', 'industrie40', 'wirtschaft'];
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                this.switchProfessionalMachineTab(modal, targetTab, tabOrder);
+            });
+        });
+        
+        // Setup next/prev buttons
+        const nextBtn = modal.querySelector('#nextTabBtn');
+        const prevBtn = modal.querySelector('#prevTabBtn');
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const currentTab = modal.querySelector('.form-tab.active').getAttribute('data-tab');
+                const currentIndex = tabOrder.indexOf(currentTab);
+                if (currentIndex < tabOrder.length - 1) {
+                    this.switchProfessionalMachineTab(modal, tabOrder[currentIndex + 1], tabOrder);
+                }
+            });
+        }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                const currentTab = modal.querySelector('.form-tab.active').getAttribute('data-tab');
+                const currentIndex = tabOrder.indexOf(currentTab);
+                if (currentIndex > 0) {
+                    this.switchProfessionalMachineTab(modal, tabOrder[currentIndex - 1], tabOrder);
+                }
+            });
+        }
+    }
+
+    switchProfessionalMachineTab(modal, targetTab, tabOrder) {
+        console.log(`🔄 Wechsle zu Professional Tab: ${targetTab}`);
+        
+        // Remove active class from all tabs and contents
+        modal.querySelectorAll('.form-tab').forEach(tab => tab.classList.remove('active'));
+        modal.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Activate target tab and content
+        const targetTabBtn = modal.querySelector(`[data-tab="${targetTab}"]`);
+        const targetContent = modal.querySelector(`#${targetTab}Content`);
+        
+        if (targetTabBtn && targetContent) {
+            targetTabBtn.classList.add('active');
+            targetContent.classList.add('active');
+            
+            // Update progress
+            const currentIndex = tabOrder.indexOf(targetTab);
+            const progress = ((currentIndex + 1) / tabOrder.length) * 100;
+            
+            const progressFill = modal.querySelector('.progress-fill');
+            const progressText = modal.querySelector('.progress-text');
+            
+            if (progressFill) progressFill.style.width = `${progress}%`;
+            if (progressText) progressText.textContent = `Schritt ${currentIndex + 1} von ${tabOrder.length} - ${this.getTabDisplayName(targetTab)}`;
+            
+            // Update navigation buttons
+            const prevBtn = modal.querySelector('#prevTabBtn');
+            const nextBtn = modal.querySelector('#nextTabBtn');
+            
+            if (prevBtn) prevBtn.disabled = currentIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentIndex === tabOrder.length - 1;
+            
+            console.log(`✅ Tab gewechselt zu: ${targetTab}`);
+        }
+    }
+
+    getTabDisplayName(tabName) {
+        const names = {
+            'grunddaten': 'Grunddaten',
+            'technisch': 'Technische Daten',
+            'compliance': 'Compliance',
+            'sicherheit': 'Sicherheitstechnik',
+            'wartung': 'Wartung',
+            'risiko': 'Risikobewertung',
+            'dokumentation': 'Dokumentation',
+            'industrie40': 'Industrie 4.0',
+            'wirtschaft': 'Betriebswirtschaft'
+        };
+        return names[tabName] || tabName;
+    }
+
+    setupProfessionalMachineFeatures(modal) {
+        console.log('🔧 Richte Professional Machine Features ein...');
+        
+        // Auto-generate machine ID
+        const nameInput = modal.querySelector('#machineName');
+        const idInput = modal.querySelector('#machineId');
+        
+        if (nameInput && idInput) {
+            nameInput.addEventListener('input', () => {
+                if (!idInput.value) {
+                    const name = nameInput.value.toUpperCase();
+                    const year = new Date().getFullYear();
+                    const prefix = name.substring(0, 3) || 'MAC';
+                    const number = String((this.machines?.length || 0) + 1).padStart(3, '0');
+                    idInput.value = `${prefix}-${number}-${year}`;
+                }
+            });
+        }
+        
+        // Auto-calculate footprint
+        const lengthInput = modal.querySelector('#length');
+        const widthInput = modal.querySelector('#width');
+        const footprintInput = modal.querySelector('#footprint');
+        
+        const calculateFootprint = () => {
+            if (lengthInput && widthInput && footprintInput) {
+                const length = parseFloat(lengthInput.value) || 0;
+                const width = parseFloat(widthInput.value) || 0;
+                const footprint = (length * width) / 1000000; // Convert mm² to m²
+                footprintInput.value = footprint.toFixed(2);
+            }
+        };
+        
+        if (lengthInput) lengthInput.addEventListener('input', calculateFootprint);
+        if (widthInput) widthInput.addEventListener('input', calculateFootprint);
+        
+        // Setup document upload functionality
         setTimeout(() => {
-            const firstField = document.getElementById('machineName');
-            if (firstField) firstField.focus();
+            this.setupDocumentUpload();
+            this.currentMachineDocuments = []; // Initialize document array for this machine
+            this.renderDocumentList();
         }, 100);
+        
+        console.log('✅ Professional Machine Features eingerichtet');
+    }
+
+    saveWorkingMachine(modal) {
+        console.log('💾 Speichere Professional Machine...');
+        
+        try {
+            // Get comprehensive form data from all tabs
+            const machineData = this.collectMachineFormData(modal);
+            
+            if (!machineData) {
+                alert('Fehler beim Sammeln der Maschinendaten.');
+                return;
+            }
+            
+            // Get grunddaten specifically for validation
+            const grunddaten = machineData.grunddaten || {};
+            
+            // Validate required fields from grunddaten tab
+            if (!grunddaten.name || !grunddaten.type || !grunddaten.department) {
+                alert('Bitte füllen Sie alle Pflichtfelder in den Grunddaten aus: Name, Typ und Abteilung sind erforderlich.');
+                return;
+            }
+            
+            // Create comprehensive machine object with all professional data
+            const machine = {
+                id: grunddaten.id || `MACH-${Date.now()}`,
+                name: grunddaten.name,
+                type: grunddaten.type,
+                location: machineData.standort?.location || grunddaten.location || '',
+                department: grunddaten.department,
+                status: grunddaten.status || 'In Betrieb',
+                notes: grunddaten.notes || '',
+                
+                // Professional data from all tabs
+                grunddaten: machineData.grunddaten,
+                technischeDaten: machineData.technischeDaten,
+                standort: machineData.standort,
+                wartung: machineData.wartung,
+                sicherheit: machineData.sicherheit,
+                monitoring: machineData.monitoring,
+                dokumentation: machineData.dokumentation,
+                betriebswirtschaft: machineData.betriebswirtschaft,
+                erweitert: machineData.erweitert,
+                
+                // Metadata
+                createdAt: new Date().toISOString(),
+                createdBy: this.getCurrentUser()?.id || 'unknown',
+                updatedAt: new Date().toISOString(),
+                updatedBy: this.getCurrentUser()?.id || 'unknown',
+                
+                // Professional flags
+                isProfessional: true,
+                tuevCompliant: true,
+                version: '2.0'
+            };
+            
+            // Initialize machines array if needed
+            if (!Array.isArray(this.machines)) {
+                this.machines = [];
+            }
+            
+            // Add machine
+            this.machines.push(machine);
+            this.saveMachinesToStorage();
+            
+            // Update UI
+            this.renderMachinesList();
+            this.updateMachineStats();
+            
+            // Close modal
+            modal.remove();
+            
+            // Success message
+            alert(`✅ TÜV-konforme Maschine "${machine.name}" erfolgreich erstellt!`);
+            
+            console.log('✅ Professional Machine gespeichert:', machine);
+            
+        } catch (error) {
+            console.error('❌ Fehler beim Speichern:', error);
+            alert('Fehler beim Speichern der Maschine: ' + error.message);
+        }
+    }
+
+    // Temporärer Fix: Verwende die funktionierende Modal-Version
+    showAddMachineModalFixed() {
+        console.log('🔧 Verwende reparierte Modal-Version...');
+        
+        try {
+            // Remove existing modal
+            const existing = document.getElementById('addMachineModal');
+            if (existing) existing.remove();
+            
+            // Create working modal
+            const modal = this.createWorkingMachineModal();
+            document.body.appendChild(modal);
+            
+            // Focus first field
+            setTimeout(() => {
+                const firstField = modal.querySelector('#machineName');
+                if (firstField) firstField.focus();
+            }, 100);
+            
+            console.log('✅ Reparierte Modal erfolgreich angezeigt');
+            
+        } catch (error) {
+            console.error('❌ Fehler bei reparierter Modal:', error);
+            alert('Fehler: ' + error.message);
+        }
+
+        // Add event listeners
+        const closeBtn = modal.querySelector('.new-machine-close');
+        const cancelBtn = modal.querySelector('#cancelNewMachine');
+        [closeBtn, cancelBtn].forEach(btn => {
+            btn.addEventListener('click', () => modal.remove());
+        });
+
+        // Tab navigation
+        modal.querySelectorAll('.form-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                this.switchMachineFormTab(modal, targetTab);
+            });
+        });
+
+        // Auto-generate machine ID
+        const titleInput = modal.querySelector('#machineName');
+        const idInput = modal.querySelector('#machineID');
+        if (titleInput && idInput) {
+            titleInput.addEventListener('input', () => {
+                if (!idInput.value) {
+                    const name = titleInput.value.toUpperCase();
+                    const year = new Date().getFullYear();
+                    const prefix = name.substring(0, 3) || 'MAC';
+                    const number = String(this.machines.length + 1).padStart(3, '0');
+                    idInput.value = prefix + '-' + number + '-' + year;
+                }
+            });
+        }
+
+        // Form submission
+        const form = modal.querySelector('#newMachineForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.createAdvancedMachine(modal);
+        });
+
+        // Enhanced Interactive Features
+        this.setupAdvancedMachineFeatures(modal);
+
+        return modal;
     }
 
     addMachine() {
@@ -11998,6 +15409,512 @@ PLZ Ort">${user.address || ''}</textarea>
         }
         
         alert('Maschine erfolgreich hinzugefügt!');
+    }
+
+    // ===== ERWEITERTE MASCHINENMANAGEMENT FUNKTIONEN =====
+
+    switchMachineFormTab(modal, targetTab) {
+        console.log(`🔄 Wechsle zu Machine Tab: ${targetTab}`);
+        
+        if (!modal) {
+            console.error('❌ Modal nicht gefunden für Tab-Wechsel');
+            return;
+        }
+
+        // Remove active class from all tabs and content
+        const allTabs = modal.querySelectorAll('.form-tab');
+        const allContent = modal.querySelectorAll('.tab-content');
+        
+        allTabs.forEach(tab => tab.classList.remove('active'));
+        allContent.forEach(content => content.classList.remove('active'));
+
+        // Activate target tab and content
+        const targetTabElement = modal.querySelector(`[data-tab="${targetTab}"]`);
+        const targetContentElement = modal.querySelector(`#${targetTab}Content`);
+        
+        if (targetTabElement && targetContentElement) {
+            targetTabElement.classList.add('active');
+            targetContentElement.classList.add('active');
+            
+            // Update progress indicator
+            this.updateMachineFormProgress(modal, targetTab);
+            
+            // Auto-focus first input in new tab
+            const firstInput = targetContentElement.querySelector('input, select, textarea');
+            if (firstInput && !firstInput.disabled) {
+                setTimeout(() => firstInput.focus(), 100);
+            }
+            
+            console.log(`✅ Tab gewechselt zu: ${targetTab}`);
+        } else {
+            console.error(`❌ Tab oder Content nicht gefunden: ${targetTab}`);
+        }
+    }
+
+    updateMachineFormProgress(modal, currentTab) {
+        const tabOrder = ['grunddaten', 'technisch', 'standort', 'wartung', 'sicherheit', 'monitoring', 'dokumentation', 'wirtschaft', 'erweitert'];
+        const currentIndex = tabOrder.indexOf(currentTab);
+        const progress = ((currentIndex + 1) / tabOrder.length) * 100;
+        
+        const progressBar = modal.querySelector('.progress-fill');
+        const progressText = modal.querySelector('.progress-text');
+        
+        if (progressBar) {
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        if (progressText) {
+            progressText.textContent = `Schritt ${currentIndex + 1} von ${tabOrder.length}`;
+        }
+    }
+
+    setupAdvancedMachineFeatures(modal) {
+        console.log('🔧 Richte erweiterte Maschinenfeatures ein...');
+        
+        if (!modal) {
+            console.error('❌ Modal nicht verfunden für Feature-Setup');
+            return;
+        }
+
+        // Setup file upload areas
+        this.setupMachineFileUploads(modal);
+        
+        // Setup interactive sliders and ranges
+        this.setupMachineInteractiveElements(modal);
+        
+        // Setup dynamic dependencies
+        this.setupMachineDependencies(modal);
+        
+        // Setup validation
+        this.setupMachineValidation(modal);
+        
+        // Setup auto-calculations
+        this.setupMachineCalculations(modal);
+        
+        console.log('✅ Erweiterte Maschinenfeatures eingerichtet');
+    }
+
+    setupMachineFileUploads(modal) {
+        const uploadAreas = modal.querySelectorAll('.file-upload-area');
+        
+        uploadAreas.forEach(area => {
+            const input = area.querySelector('input[type="file"]');
+            const preview = area.querySelector('.file-preview');
+            
+            if (input) {
+                // Drag and drop
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.classList.add('drag-over');
+                });
+                
+                area.addEventListener('dragleave', () => {
+                    area.classList.remove('drag-over');
+                });
+                
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.classList.remove('drag-over');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        input.files = files;
+                        this.handleMachineFilePreview(files[0], preview);
+                    }
+                });
+                
+                // Click to upload
+                area.addEventListener('click', () => input.click());
+                
+                // File selection
+                input.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleMachineFilePreview(e.target.files[0], preview);
+                    }
+                });
+            }
+        });
+    }
+
+    handleMachineFilePreview(file, previewContainer) {
+        if (!previewContainer) return;
+        
+        const isImage = file.type.startsWith('image/');
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            previewContainer.innerHTML = isImage 
+                ? `<img src="${e.target.result}" style="max-width: 100%; max-height: 150px; border-radius: 4px;">
+                   <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #6b7280;">${file.name}</p>`
+                : `<div style="padding: 1rem; background: #f3f4f6; border-radius: 4px; text-align: center;">
+                     <i class="fas fa-file" style="font-size: 2rem; color: #6b7280; margin-bottom: 0.5rem;"></i>
+                     <p style="margin: 0; font-size: 0.875rem; color: #374151;">${file.name}</p>
+                     <p style="margin: 0; font-size: 0.75rem; color: #6b7280;">${(file.size / 1024).toFixed(1)} KB</p>
+                   </div>`;
+        };
+        
+        reader.readAsDataURL(file);
+    }
+
+    setupMachineInteractiveElements(modal) {
+        // Setup automation level slider
+        const automationSlider = modal.querySelector('#automationLevel');
+        const automationValue = modal.querySelector('#automationValue');
+        
+        if (automationSlider && automationValue) {
+            automationSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                const levels = ['Manuell', 'Teilautomatisiert', 'Vollautomatisiert', 'Autonom', 'KI-gesteuert'];
+                automationValue.textContent = `Level ${value}: ${levels[value] || 'Unbekannt'}`;
+            });
+        }
+        
+        // Setup efficiency sliders
+        const efficiencySliders = modal.querySelectorAll('.efficiency-slider');
+        efficiencySliders.forEach(slider => {
+            const valueDisplay = modal.querySelector(`#${slider.id}Value`);
+            if (valueDisplay) {
+                slider.addEventListener('input', (e) => {
+                    valueDisplay.textContent = `${e.target.value}%`;
+                });
+            }
+        });
+        
+        // Setup cost calculators
+        this.setupCostCalculators(modal);
+    }
+
+    setupCostCalculators(modal) {
+        const purchasePrice = modal.querySelector('#purchasePrice');
+        const installationCost = modal.querySelector('#installationCost');
+        const totalCostDisplay = modal.querySelector('#totalCostDisplay');
+        
+        const updateTotalCost = () => {
+            if (purchasePrice && installationCost && totalCostDisplay) {
+                const purchase = parseFloat(purchasePrice.value) || 0;
+                const installation = parseFloat(installationCost.value) || 0;
+                const total = purchase + installation;
+                totalCostDisplay.textContent = `Gesamtkosten: ${total.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}`;
+            }
+        };
+        
+        if (purchasePrice) purchasePrice.addEventListener('input', updateTotalCost);
+        if (installationCost) installationCost.addEventListener('input', updateTotalCost);
+    }
+
+    setupMachineDependencies(modal) {
+        // Machine type dependencies
+        const machineType = modal.querySelector('#machineType');
+        const specificFields = modal.querySelector('#typeSpecificFields');
+        
+        if (machineType) {
+            machineType.addEventListener('change', (e) => {
+                this.updateMachineTypeFields(modal, e.target.value);
+            });
+        }
+        
+        // Monitoring dependencies
+        const hasIoT = modal.querySelector('#hasIoT');
+        const iotConfig = modal.querySelector('#iotConfiguration');
+        
+        if (hasIoT && iotConfig) {
+            hasIoT.addEventListener('change', (e) => {
+                iotConfig.style.display = e.target.checked ? 'block' : 'none';
+            });
+        }
+    }
+
+    updateMachineTypeFields(modal, machineType) {
+        const specificFields = modal.querySelector('#typeSpecificFields');
+        if (!specificFields) return;
+        
+        const typeConfigs = {
+            'cnc': {
+                label: 'CNC-spezifische Einstellungen',
+                fields: ['Spindelleistung (kW)', 'Verfahrwege X/Y/Z (mm)', 'Werkzeugwechsler', 'Steuerung']
+            },
+            'press': {
+                label: 'Pressen-spezifische Einstellungen', 
+                fields: ['Presskraft (kN)', 'Hubbewegung (mm)', 'Sicherheitskategorie', 'Hydraulikdruck (bar)']
+            },
+            'robot': {
+                label: 'Roboter-spezifische Einstellungen',
+                fields: ['Traglast (kg)', 'Reichweite (mm)', 'Achsenanzahl', 'Wiederholgenauigkeit (mm)']
+            }
+        };
+        
+        const config = typeConfigs[machineType];
+        if (config) {
+            specificFields.innerHTML = `
+                <h4>${config.label}</h4>
+                ${config.fields.map(field => `
+                    <div class="input-group">
+                        <label>${field}:</label>
+                        <input type="text" name="${field.toLowerCase().replace(/[^a-z0-9]/g, '')}" placeholder="${field}">
+                    </div>
+                `).join('')}
+            `;
+            specificFields.style.display = 'block';
+        } else {
+            specificFields.style.display = 'none';
+        }
+    }
+
+    setupMachineValidation(modal) {
+        const requiredFields = modal.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            field.addEventListener('blur', () => {
+                this.validateMachineField(field);
+            });
+            
+            field.addEventListener('input', () => {
+                // Clear error state on input
+                field.classList.remove('error');
+                const errorMsg = field.parentNode.querySelector('.error-message');
+                if (errorMsg) errorMsg.remove();
+            });
+        });
+    }
+
+    validateMachineField(field) {
+        const value = field.value.trim();
+        const isValid = value.length > 0;
+        
+        field.classList.toggle('error', !isValid);
+        
+        // Remove existing error message
+        const existingError = field.parentNode.querySelector('.error-message');
+        if (existingError) existingError.remove();
+        
+        if (!isValid) {
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'error-message';
+            errorMsg.textContent = 'Dieses Feld ist erforderlich';
+            errorMsg.style.color = '#ef4444';
+            errorMsg.style.fontSize = '0.875rem';
+            errorMsg.style.marginTop = '0.25rem';
+            field.parentNode.appendChild(errorMsg);
+        }
+        
+        return isValid;
+    }
+
+    createAdvancedMachine(modal) {
+        console.log('🏭 Erstelle erweiterte Maschine...');
+        
+        if (!modal) {
+            console.error('❌ Modal nicht gefunden für Maschinenerstellung');
+            return;
+        }
+
+        // Validate all required fields
+        const requiredFields = modal.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!this.validateMachineField(field)) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            alert('Bitte füllen Sie alle Pflichtfelder aus.');
+            return;
+        }
+
+        // Collect data from all tabs
+        const machineData = this.collectMachineFormData(modal);
+        
+        if (!machineData) {
+            alert('Fehler beim Sammeln der Maschinendaten.');
+            return;
+        }
+
+        // Generate unique machine ID
+        const machineId = this.generateMachineId();
+        
+        // Create comprehensive machine object
+        const machine = {
+            id: machineId,
+            ...machineData,
+            createdAt: new Date().toISOString(),
+            createdBy: this.getCurrentUser().id,
+            updatedAt: new Date().toISOString(),
+            updatedBy: this.getCurrentUser().id,
+            version: '1.0'
+        };
+
+        // Initialize machines array if needed
+        if (!Array.isArray(this.machines)) {
+            this.machines = [];
+        }
+
+        // Add machine to storage
+        this.machines.push(machine);
+        this.saveMachinesToStorage();
+        
+        // Update UI
+        this.renderMachinesList();
+        this.updateMachineStats();
+        
+        // Close modal
+        modal.remove();
+        
+        // Success notification
+        alert(`✅ Maschine "${machine.grunddaten.name}" erfolgreich erstellt!\nMaschinen-ID: ${machineId}`);
+        
+        console.log('✅ Erweiterte Maschine erstellt:', machine);
+    }
+
+    collectMachineFormData(modal) {
+        console.log('📊 Sammle Daten aus allen Machine-Tabs...');
+        
+        try {
+            const data = {
+                // Tab 1: Grunddaten
+                grunddaten: {
+                    name: modal.querySelector('#machineName')?.value?.trim(),
+                    machineId: modal.querySelector('#machineId')?.value?.trim(),
+                    type: modal.querySelector('#machineType')?.value,
+                    category: modal.querySelector('#machineCategory')?.value,
+                    manufacturer: modal.querySelector('#manufacturer')?.value?.trim(),
+                    model: modal.querySelector('#machineModel')?.value?.trim(),
+                    serialNumber: modal.querySelector('#serialNumber')?.value?.trim(),
+                    yearBuilt: modal.querySelector('#yearBuilt')?.value,
+                    description: modal.querySelector('#machineDescription')?.value?.trim()
+                },
+                
+                // Tab 2: Technische Daten
+                technisch: {
+                    power: modal.querySelector('#machinePower')?.value,
+                    voltage: modal.querySelector('#machineVoltage')?.value,
+                    weight: modal.querySelector('#machineWeight')?.value,
+                    dimensions: {
+                        length: modal.querySelector('#machineLength')?.value,
+                        width: modal.querySelector('#machineWidth')?.value,
+                        height: modal.querySelector('#machineHeight')?.value
+                    },
+                    capacity: modal.querySelector('#machineCapacity')?.value,
+                    automationLevel: modal.querySelector('#automationLevel')?.value,
+                    specifications: modal.querySelector('#technicalSpecs')?.value?.trim()
+                },
+                
+                // Tab 3: Standort & Organisation
+                standort: {
+                    department: modal.querySelector('#machineDepartment')?.value,
+                    location: modal.querySelector('#machineLocation')?.value?.trim(),
+                    building: modal.querySelector('#machineBuilding')?.value?.trim(),
+                    floor: modal.querySelector('#machineFloor')?.value?.trim(),
+                    room: modal.querySelector('#machineRoom')?.value?.trim(),
+                    responsiblePerson: modal.querySelector('#responsiblePerson')?.value,
+                    backup: modal.querySelector('#backupPerson')?.value
+                },
+                
+                // Tab 4: Wartung & Service
+                wartung: {
+                    maintenanceInterval: modal.querySelector('#maintenanceInterval')?.value,
+                    lastMaintenance: modal.querySelector('#lastMaintenance')?.value,
+                    nextMaintenance: modal.querySelector('#nextMaintenance')?.value,
+                    serviceContract: modal.querySelector('#serviceContract')?.checked,
+                    serviceProvider: modal.querySelector('#serviceProvider')?.value?.trim(),
+                    warrantyEnd: modal.querySelector('#warrantyEnd')?.value,
+                    spareParts: modal.querySelector('#spareParts')?.value?.trim()
+                },
+                
+                // Tab 5: Sicherheit & Compliance
+                sicherheit: {
+                    status: modal.querySelector('#machineStatus')?.value,
+                    ceMarking: modal.querySelector('#ceMarking')?.checked,
+                    riskAssessment: modal.querySelector('#riskAssessment')?.checked,
+                    safetyInstructions: modal.querySelector('#safetyInstructions')?.checked,
+                    emergencyStop: modal.querySelector('#emergencyStop')?.checked,
+                    lockout: modal.querySelector('#lockout')?.checked,
+                    complianceNotes: modal.querySelector('#complianceNotes')?.value?.trim()
+                },
+                
+                // Tab 6: Monitoring & IoT
+                monitoring: {
+                    hasIoT: modal.querySelector('#hasIoT')?.checked,
+                    sensorTypes: this.getSelectedSensorTypes(modal),
+                    dataInterval: modal.querySelector('#dataInterval')?.value,
+                    alertThresholds: modal.querySelector('#alertThresholds')?.value?.trim(),
+                    digitalTwin: modal.querySelector('#digitalTwin')?.checked,
+                    predictiveMaintenance: modal.querySelector('#predictiveMaintenance')?.checked
+                },
+                
+                // Tab 7: Dokumentation
+                dokumentation: {
+                    manualAvailable: modal.querySelector('#manualAvailable')?.checked,
+                    drawingsAvailable: modal.querySelector('#drawingsAvailable')?.checked,
+                    certificatesAvailable: modal.querySelector('#certificatesAvailable')?.checked,
+                    trainingRequired: modal.querySelector('#trainingRequired')?.checked,
+                    documentNotes: modal.querySelector('#documentNotes')?.value?.trim()
+                },
+                
+                // Tab 8: Betriebswirtschaft
+                wirtschaft: {
+                    purchasePrice: modal.querySelector('#purchasePrice')?.value,
+                    installationCost: modal.querySelector('#installationCost')?.value,
+                    annualOperatingCost: modal.querySelector('#annualOperatingCost')?.value,
+                    depreciation: modal.querySelector('#depreciation')?.value,
+                    utilizationRate: modal.querySelector('#utilizationRate')?.value,
+                    efficiency: modal.querySelector('#efficiency')?.value
+                },
+                
+                // Tab 9: Erweiterte Features
+                erweitert: {
+                    industry40: modal.querySelector('#industry40')?.checked,
+                    ai: modal.querySelector('#ai')?.checked,
+                    cloudConnection: modal.querySelector('#cloudConnection')?.checked,
+                    remoteAccess: modal.querySelector('#remoteAccess')?.checked,
+                    energyMonitoring: modal.querySelector('#energyMonitoring')?.checked,
+                    qualityControl: modal.querySelector('#qualityControl')?.checked,
+                    notes: modal.querySelector('#advancedNotes')?.value?.trim()
+                }
+            };
+            
+            console.log('✅ Maschinendaten gesammelt:', data);
+            return data;
+            
+        } catch (error) {
+            console.error('❌ Fehler beim Sammeln der Maschinendaten:', error);
+            return null;
+        }
+    }
+
+    getSelectedSensorTypes(modal) {
+        const checkboxes = modal.querySelectorAll('input[name="sensorTypes"]:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    generateMachineId() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const time = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+        
+        return `MACH-${year}${month}${day}-${time}`;
+    }
+
+    // Debug-Funktion für direkten Test
+    testMachineModal() {
+        console.log('🧪 Teste Machine Modal direkt...');
+        
+        try {
+            if (!window.qhseDashboard) {
+                console.error('❌ QHSE Dashboard nicht gefunden');
+                return;
+            }
+            
+            console.log('✅ Dashboard gefunden, rufe showAddMachineModal auf...');
+            this.showAddMachineModal();
+            
+        } catch (error) {
+            console.error('❌ Test-Fehler:', error);
+            alert('Test-Fehler: ' + error.message);
+        }
     }
 
     renderMachinesList() {
@@ -12239,21 +16156,1481 @@ PLZ Ort">${user.address || ''}</textarea>
         document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
+    // ===== MISSING CRITICAL FUNCTIONS =====
+
+    editMachine(machineId) {
+        console.log('✏️ Bearbeite Maschine:', machineId);
+        
+        const machine = this.machines.find(m => m.id === machineId);
+        if (!machine) {
+            alert('Maschine nicht gefunden!');
+            return;
+        }
+
+        // Remove any existing edit modals
+        const existingModal = document.getElementById('editMachineModal');
+        if (existingModal) existingModal.remove();
+
+        // Create edit modal based on machine type
+        let modal;
+        if (machine.isProfessional) {
+            modal = this.createEditProfessionalMachineModal(machine);
+        } else {
+            modal = this.createEditBasicMachineModal(machine);
+        }
+
+        document.body.appendChild(modal);
+        
+        // Focus first field
+        setTimeout(() => {
+            const firstField = modal.querySelector('input[type="text"]');
+            if (firstField) firstField.focus();
+        }, 100);
+    }
+
+    createEditBasicMachineModal(machine) {
+        const modal = document.createElement('div');
+        modal.id = 'editMachineModal';
+        modal.className = 'modal';
+        
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-edit"></i> Maschine bearbeiten</h2>
+                    <button class="close-modal" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editMachineForm">
+                        <div class="form-group">
+                            <label for="editMachineName">Maschinenbezeichnung *</label>
+                            <input type="text" id="editMachineName" value="${machine.name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editMachineType">Maschinentyp *</label>
+                            <input type="text" id="editMachineType" value="${machine.type}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editMachineLocation">Standort</label>
+                            <input type="text" id="editMachineLocation" value="${machine.location || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="editMachineDepartment">Abteilung *</label>
+                            <select id="editMachineDepartment" required>
+                                ${this.departments.map(dept => 
+                                    `<option value="${dept.id}" ${dept.id === machine.department ? 'selected' : ''}>${dept.name}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editMachineStatus">Status</label>
+                            <select id="editMachineStatus">
+                                <option value="In Betrieb" ${machine.status === 'In Betrieb' ? 'selected' : ''}>In Betrieb</option>
+                                <option value="Wartung" ${machine.status === 'Wartung' ? 'selected' : ''}>Wartung</option>
+                                <option value="Störung" ${machine.status === 'Störung' ? 'selected' : ''}>Störung</option>
+                                <option value="Außer Betrieb" ${machine.status === 'Außer Betrieb' ? 'selected' : ''}>Außer Betrieb</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editMachineNotes">Bemerkungen</label>
+                            <textarea id="editMachineNotes" rows="3">${machine.notes || ''}</textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="this.closest('.modal').remove()" class="btn-secondary">
+                        <i class="fas fa-times"></i> Abbrechen
+                    </button>
+                    <button onclick="window.qhseDashboard.saveEditedMachine('${machine.id}')" class="btn-primary">
+                        <i class="fas fa-save"></i> Speichern
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return modal;
+    }
+
+    createEditProfessionalMachineModal(machine) {
+        // Create professional edit modal similar to create modal but pre-filled
+        const modal = this.createWorkingMachineModal();
+        modal.id = 'editMachineModal';
+        
+        // Update modal title
+        const title = modal.querySelector('h2');
+        if (title) {
+            title.innerHTML = '<i class="fas fa-edit"></i> TÜV-konforme Maschine bearbeiten';
+        }
+        
+        // Pre-fill all form fields
+        setTimeout(() => {
+            this.populateEditFormFields(modal, machine);
+        }, 100);
+        
+        // Update save button
+        const saveButton = modal.querySelector('.btn-primary');
+        if (saveButton) {
+            saveButton.onclick = () => this.saveEditedProfessionalMachine(machine.id, modal);
+        }
+        
+        return modal;
+    }
+
+    populateEditFormFields(modal, machine) {
+        // Basic fields
+        const fields = {
+            'machineName': machine.name,
+            'machineType': machine.type,
+            'machineId': machine.id,
+            'department': machine.department,
+            'status': machine.status,
+            'notes': machine.notes
+        };
+        
+        // Populate basic fields
+        Object.entries(fields).forEach(([fieldId, value]) => {
+            const field = modal.querySelector(`#${fieldId}`);
+            if (field && value) {
+                field.value = value;
+            }
+        });
+        
+        // Populate professional data if available
+        if (machine.isProfessional && machine.grunddaten) {
+            this.populateProfessionalEditFields(modal, machine);
+        }
+    }
+
+    populateProfessionalEditFields(modal, machine) {
+        // Populate all professional tabs with existing data
+        const tabs = ['grunddaten', 'technischeDaten', 'standort', 'wartung', 'sicherheit', 'monitoring', 'dokumentation', 'betriebswirtschaft', 'erweitert'];
+        
+        tabs.forEach(tabName => {
+            if (machine[tabName]) {
+                this.populateTabFields(modal, tabName, machine[tabName]);
+            }
+        });
+    }
+
+    populateTabFields(modal, tabName, data) {
+        Object.entries(data).forEach(([fieldName, value]) => {
+            const field = modal.querySelector(`[name="${fieldName}"]`) || modal.querySelector(`#${fieldName}`);
+            if (field && value) {
+                if (field.type === 'checkbox') {
+                    field.checked = value === true || value === 'true';
+                } else if (field.type === 'radio') {
+                    if (field.value === value) {
+                        field.checked = true;
+                    }
+                } else {
+                    field.value = value;
+                }
+            }
+        });
+    }
+
+    saveEditedMachine(machineId) {
+        console.log('💾 Speichere bearbeitete Maschine:', machineId);
+        
+        try {
+            const modal = document.getElementById('editMachineModal');
+            if (!modal) return;
+            
+            const form = modal.querySelector('#editMachineForm');
+            if (!form) return;
+            
+            // Get form data
+            const formData = new FormData(form);
+            const name = modal.querySelector('#editMachineName').value;
+            const type = modal.querySelector('#editMachineType').value;
+            const location = modal.querySelector('#editMachineLocation').value;
+            const department = modal.querySelector('#editMachineDepartment').value;
+            const status = modal.querySelector('#editMachineStatus').value;
+            const notes = modal.querySelector('#editMachineNotes').value;
+            
+            // Validate required fields
+            if (!name || !type || !department) {
+                alert('Bitte füllen Sie alle Pflichtfelder (*) aus.');
+                return;
+            }
+            
+            // Find and update machine
+            const machineIndex = this.machines.findIndex(m => m.id === machineId);
+            if (machineIndex === -1) {
+                alert('Maschine nicht gefunden!');
+                return;
+            }
+            
+            // Update machine data
+            this.machines[machineIndex] = {
+                ...this.machines[machineIndex],
+                name: name,
+                type: type,
+                location: location,
+                department: department,
+                status: status,
+                notes: notes,
+                updatedAt: new Date().toISOString(),
+                updatedBy: this.getCurrentUser()?.id || 'unknown'
+            };
+            
+            // Save to storage
+            this.saveMachinesToStorage();
+            
+            // Update UI
+            this.renderMachinesList();
+            this.updateMachineStats();
+            
+            // Close modal
+            modal.remove();
+            
+            alert(`Maschine "${name}" wurde erfolgreich aktualisiert.`);
+            
+        } catch (error) {
+            console.error('❌ Fehler beim Speichern:', error);
+            alert('Fehler beim Speichern der Änderungen: ' + error.message);
+        }
+    }
+
+    saveEditedProfessionalMachine(machineId, modal) {
+        console.log('💾 Speichere bearbeitete Professional Machine:', machineId);
+        
+        try {
+            // Get comprehensive form data
+            const machineData = this.collectMachineFormData(modal);
+            
+            if (!machineData || !machineData.grunddaten) {
+                alert('Fehler beim Sammeln der Maschinendaten.');
+                return;
+            }
+            
+            // Validate required fields
+            const grunddaten = machineData.grunddaten;
+            if (!grunddaten.name || !grunddaten.type || !grunddaten.department) {
+                alert('Bitte füllen Sie alle Pflichtfelder aus: Name, Typ und Abteilung sind erforderlich.');
+                return;
+            }
+            
+            // Find and update machine
+            const machineIndex = this.machines.findIndex(m => m.id === machineId);
+            if (machineIndex === -1) {
+                alert('Maschine nicht gefunden!');
+                return;
+            }
+            
+            // Update machine with all professional data
+            this.machines[machineIndex] = {
+                ...this.machines[machineIndex],
+                name: grunddaten.name,
+                type: grunddaten.type,
+                location: machineData.standort?.location || grunddaten.location || '',
+                department: grunddaten.department,
+                status: grunddaten.status || 'In Betrieb',
+                notes: grunddaten.notes || '',
+                
+                // Update all professional tabs
+                grunddaten: machineData.grunddaten,
+                technischeDaten: machineData.technischeDaten,
+                standort: machineData.standort,
+                wartung: machineData.wartung,
+                sicherheit: machineData.sicherheit,
+                monitoring: machineData.monitoring,
+                dokumentation: machineData.dokumentation,
+                betriebswirtschaft: machineData.betriebswirtschaft,
+                erweitert: machineData.erweitert,
+                
+                // Update metadata
+                updatedAt: new Date().toISOString(),
+                updatedBy: this.getCurrentUser()?.id || 'unknown'
+            };
+            
+            // Save to storage
+            this.saveMachinesToStorage();
+            
+            // Update UI
+            this.renderMachinesList();
+            this.updateMachineStats();
+            
+            // Close modal
+            modal.remove();
+            
+            alert(`TÜV-konforme Maschine "${grunddaten.name}" wurde erfolgreich aktualisiert.`);
+            
+        } catch (error) {
+            console.error('❌ Fehler beim Speichern:', error);
+            alert('Fehler beim Speichern der Änderungen: ' + error.message);
+        }
+    }
+
+    changeMachineStatus(machineId, newStatus) {
+        console.log('🔄 Ändere Maschinenstatus:', machineId, 'zu', newStatus);
+        
+        const machine = this.machines.find(m => m.id === machineId);
+        if (!machine) {
+            alert('Maschine nicht gefunden!');
+            return;
+        }
+        
+        const oldStatus = machine.status;
+        
+        // Confirm status change
+        if (!confirm(`Status von "${machine.name}" von "${oldStatus}" zu "${newStatus}" ändern?`)) {
+            return;
+        }
+        
+        // Update status
+        machine.status = newStatus;
+        machine.updatedAt = new Date().toISOString();
+        machine.updatedBy = this.getCurrentUser()?.id || 'unknown';
+        
+        // Add status change to history if professional machine
+        if (machine.isProfessional) {
+            if (!machine.statusHistory) {
+                machine.statusHistory = [];
+            }
+            machine.statusHistory.push({
+                from: oldStatus,
+                to: newStatus,
+                timestamp: new Date().toISOString(),
+                changedBy: this.getCurrentUser()?.id || 'unknown'
+            });
+        }
+        
+        // Save changes
+        this.saveMachinesToStorage();
+        
+        // Update UI
+        this.renderMachinesList();
+        this.updateMachineStats();
+        
+        alert(`Status von "${machine.name}" wurde erfolgreich geändert.`);
+    }
+
+    searchMachines(query) {
+        if (!query || query.trim() === '') {
+            this.renderMachinesList();
+            return;
+        }
+        
+        const searchTerm = query.toLowerCase().trim();
+        const filteredMachines = this.machines.filter(machine => {
+            return (
+                machine.name.toLowerCase().includes(searchTerm) ||
+                machine.type.toLowerCase().includes(searchTerm) ||
+                machine.location?.toLowerCase().includes(searchTerm) ||
+                machine.status.toLowerCase().includes(searchTerm) ||
+                machine.notes?.toLowerCase().includes(searchTerm) ||
+                machine.id.toLowerCase().includes(searchTerm)
+            );
+        });
+        
+        this.renderFilteredMachinesList(filteredMachines);
+    }
+
+    filterMachines(criteria) {
+        let filteredMachines = [...this.machines];
+        
+        // Filter by status
+        if (criteria.status && criteria.status !== 'all') {
+            filteredMachines = filteredMachines.filter(m => m.status === criteria.status);
+        }
+        
+        // Filter by department
+        if (criteria.department && criteria.department !== 'all') {
+            filteredMachines = filteredMachines.filter(m => m.department === criteria.department);
+        }
+        
+        // Filter by type
+        if (criteria.type && criteria.type !== 'all') {
+            filteredMachines = filteredMachines.filter(m => m.type === criteria.type);
+        }
+        
+        this.renderFilteredMachinesList(filteredMachines);
+    }
+
+    renderFilteredMachinesList(machines) {
+        const container = document.getElementById('machinesList');
+        if (!container) return;
+        
+        if (machines.length === 0) {
+            container.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <p>Keine Maschinen gefunden</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Use same rendering logic as renderMachinesList but with filtered data
+        const machinesHtml = machines.map(machine => {
+            const statusClass = this.getStatusClass(machine.status);
+            const statusIcon = this.getStatusIcon(machine.status);
+            
+            return `
+                <div class="machine-card ${statusClass}">
+                    <div class="machine-header">
+                        <h3>${machine.name}</h3>
+                        <div class="machine-status">
+                            <i class="${statusIcon}"></i>
+                            ${machine.status}
+                        </div>
+                    </div>
+                    <div class="machine-details">
+                        <div class="machine-info">
+                            <span><strong>Typ:</strong> ${machine.type}</span>
+                            <span><strong>Standort:</strong> ${machine.location || 'Nicht angegeben'}</span>
+                            <span><strong>Abteilung:</strong> ${this.getDepartmentName(machine.department)}</span>
+                            ${machine.isProfessional ? '<span class="professional-badge"><i class="fas fa-certificate"></i> TÜV-konform</span>' : ''}
+                        </div>
+                        
+                        ${machine.notes ? `
+                            <div class="machine-notes">
+                                <h5>Bemerkungen</h5>
+                                <p>${machine.notes}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="machine-actions">
+                        <button onclick="window.qhseDashboard.viewMachineDetails('${machine.id}')" class="btn-info">
+                            <i class="fas fa-eye"></i> Details
+                        </button>
+                        <button onclick="window.qhseDashboard.editMachine('${machine.id}')" class="btn-secondary">
+                            <i class="fas fa-edit"></i> Bearbeiten
+                        </button>
+                        <button onclick="window.qhseDashboard.deleteMachine('${machine.id}')" class="btn-danger">
+                            <i class="fas fa-trash"></i> Löschen
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = machinesHtml;
+    }
+
+    // ===== HELPER FUNCTIONS =====
+
+    getStatusClass(status) {
+        const statusMap = {
+            'In Betrieb': 'status-running',
+            'running': 'status-running',
+            'Wartung': 'status-maintenance', 
+            'maintenance': 'status-maintenance',
+            'Störung': 'status-issue',
+            'issue': 'status-issue',
+            'Außer Betrieb': 'status-stopped',
+            'stopped': 'status-stopped'
+        };
+        return statusMap[status] || 'status-unknown';
+    }
+
+    getStatusIcon(status) {
+        const iconMap = {
+            'In Betrieb': 'fas fa-play-circle',
+            'running': 'fas fa-play-circle',
+            'Wartung': 'fas fa-tools',
+            'maintenance': 'fas fa-tools', 
+            'Störung': 'fas fa-exclamation-triangle',
+            'issue': 'fas fa-exclamation-triangle',
+            'Außer Betrieb': 'fas fa-stop-circle',
+            'stopped': 'fas fa-stop-circle'
+        };
+        return iconMap[status] || 'fas fa-question-circle';
+    }
+
+    getDepartmentName(departmentId) {
+        const department = this.departments.find(d => d.id === departmentId);
+        return department ? department.name : 'Unbekannt';
+    }
+
     updateMachineStats() {
         const totalMachines = this.machines.length;
-        const runningMachines = this.machines.filter(m => m.status === 'running').length;
-        const maintenanceMachines = this.machines.filter(m => m.status === 'maintenance').length;
-        const issueMachines = this.machines.filter(m => m.status === 'issue').length;
+        const runningMachines = this.machines.filter(m => 
+            m.status === 'In Betrieb' || m.status === 'running'
+        ).length;
+        const maintenanceMachines = this.machines.filter(m => 
+            m.status === 'Wartung' || m.status === 'maintenance'
+        ).length;
+        const issueMachines = this.machines.filter(m => 
+            m.status === 'Störung' || m.status === 'issue'
+        ).length;
+        const stoppedMachines = this.machines.filter(m => 
+            m.status === 'Außer Betrieb' || m.status === 'stopped'
+        ).length;
 
+        // Update stats display
         const totalEl = document.getElementById('totalMachines');
         const runningEl = document.getElementById('runningMachines');
         const maintenanceEl = document.getElementById('maintenanceMachines');
         const issueEl = document.getElementById('issueMachines');
+        const stoppedEl = document.getElementById('stoppedMachines');
 
         if (totalEl) totalEl.textContent = totalMachines;
         if (runningEl) runningEl.textContent = runningMachines;
         if (maintenanceEl) maintenanceEl.textContent = maintenanceMachines;
         if (issueEl) issueEl.textContent = issueMachines;
+        if (stoppedEl) stoppedEl.textContent = stoppedMachines;
+
+        // Update any machine status overview charts
+        this.updateMachineStatusChart();
+    }
+
+    updateMachineStatusChart() {
+        // This function can be called to update visual charts/dashboards
+        // For now, just log the status distribution
+        console.log('📊 Machine Status Distribution:', {
+            total: this.machines.length,
+            running: this.machines.filter(m => m.status === 'In Betrieb' || m.status === 'running').length,
+            maintenance: this.machines.filter(m => m.status === 'Wartung' || m.status === 'maintenance').length,
+            issues: this.machines.filter(m => m.status === 'Störung' || m.status === 'issue').length,
+            stopped: this.machines.filter(m => m.status === 'Außer Betrieb' || m.status === 'stopped').length
+        });
+    }
+
+    // ===== ADVANCED MACHINE FEATURES =====
+
+    exportMachineData() {
+        console.log('📤 Exportiere Maschinendaten...');
+        
+        try {
+            const csvData = this.generateMachineCSV();
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Maschinen_Export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Maschinendaten erfolgreich exportiert!');
+            
+        } catch (error) {
+            console.error('❌ Export-Fehler:', error);
+            alert('Fehler beim Exportieren der Daten: ' + error.message);
+        }
+    }
+
+    generateMachineCSV() {
+        const headers = [
+            'ID', 'Name', 'Typ', 'Standort', 'Abteilung', 'Status', 
+            'Bemerkungen', 'TÜV-konform', 'Erstellt am', 'Geändert am'
+        ];
+        
+        const rows = this.machines.map(machine => [
+            machine.id,
+            machine.name,
+            machine.type,
+            machine.location || '',
+            this.getDepartmentName(machine.department),
+            machine.status,
+            machine.notes || '',
+            machine.isProfessional ? 'Ja' : 'Nein',
+            machine.createdAt ? new Date(machine.createdAt).toLocaleDateString('de-DE') : '',
+            machine.updatedAt ? new Date(machine.updatedAt).toLocaleDateString('de-DE') : ''
+        ]);
+        
+        const csvContent = [headers, ...rows]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
+            
+        return csvContent;
+    }
+
+    validateMachineData(machineData) {
+        const errors = [];
+        
+        // Required field validation
+        if (!machineData.name || machineData.name.trim() === '') {
+            errors.push('Maschinenbezeichnung ist erforderlich');
+        }
+        
+        if (!machineData.type || machineData.type.trim() === '') {
+            errors.push('Maschinentyp ist erforderlich');
+        }
+        
+        if (!machineData.department) {
+            errors.push('Abteilung ist erforderlich');
+        }
+        
+        // Check for duplicate machine names
+        const existingMachine = this.machines.find(m => 
+            m.name.toLowerCase() === machineData.name.toLowerCase() && 
+            m.id !== machineData.id
+        );
+        
+        if (existingMachine) {
+            errors.push('Eine Maschine mit diesem Namen existiert bereits');
+        }
+        
+        // Validate department exists
+        if (machineData.department) {
+            const departmentExists = this.departments.find(d => d.id === machineData.department);
+            if (!departmentExists) {
+                errors.push('Gewählte Abteilung existiert nicht');
+            }
+        }
+        
+        return {
+            isValid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    generateMachineReport() {
+        console.log('📊 Generiere Maschinenbericht...');
+        
+        const report = {
+            generatedAt: new Date().toISOString(),
+            totalMachines: this.machines.length,
+            statusDistribution: this.getStatusDistribution(),
+            departmentDistribution: this.getDepartmentDistribution(),
+            professionalMachines: this.machines.filter(m => m.isProfessional).length,
+            averageAge: this.calculateAverageMachineAge(),
+            summary: this.generateMachineSummary()
+        };
+        
+        this.displayMachineReport(report);
+        return report;
+    }
+
+    getStatusDistribution() {
+        const distribution = {};
+        this.machines.forEach(machine => {
+            const status = machine.status;
+            distribution[status] = (distribution[status] || 0) + 1;
+        });
+        return distribution;
+    }
+
+    getDepartmentDistribution() {
+        const distribution = {};
+        this.machines.forEach(machine => {
+            const deptName = this.getDepartmentName(machine.department);
+            distribution[deptName] = (distribution[deptName] || 0) + 1;
+        });
+        return distribution;
+    }
+
+    calculateAverageMachineAge() {
+        if (this.machines.length === 0) return 0;
+        
+        const now = new Date();
+        const totalAge = this.machines.reduce((sum, machine) => {
+            if (machine.createdAt) {
+                const createdDate = new Date(machine.createdAt);
+                const ageInDays = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
+                return sum + ageInDays;
+            }
+            return sum;
+        }, 0);
+        
+        return Math.floor(totalAge / this.machines.length);
+    }
+
+    generateMachineSummary() {
+        const total = this.machines.length;
+        const professional = this.machines.filter(m => m.isProfessional).length;
+        const running = this.machines.filter(m => m.status === 'In Betrieb' || m.status === 'running').length;
+        const issues = this.machines.filter(m => m.status === 'Störung' || m.status === 'issue').length;
+        
+        return {
+            total,
+            professional,
+            professionalPercentage: total > 0 ? Math.round((professional / total) * 100) : 0,
+            running,
+            runningPercentage: total > 0 ? Math.round((running / total) * 100) : 0,
+            issues,
+            issuePercentage: total > 0 ? Math.round((issues / total) * 100) : 0
+        };
+    }
+
+    displayMachineReport(report) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h2><i class="fas fa-chart-bar"></i> Maschinenbericht</h2>
+                    <button class="close-modal" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="report-section">
+                        <h3>Übersicht</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h4>${report.totalMachines}</h4>
+                                <p>Maschinen gesamt</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>${report.professionalMachines}</h4>
+                                <p>TÜV-konforme Maschinen</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>${report.averageAge}</h4>
+                                <p>Durchschn. Alter (Tage)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-section">
+                        <h3>Status-Verteilung</h3>
+                        <div class="distribution-list">
+                            ${Object.entries(report.statusDistribution)
+                                .map(([status, count]) => `
+                                    <div class="distribution-item">
+                                        <span>${status}</span>
+                                        <span>${count} Maschinen</span>
+                                    </div>
+                                `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="report-section">
+                        <h3>Abteilungs-Verteilung</h3>
+                        <div class="distribution-list">
+                            ${Object.entries(report.departmentDistribution)
+                                .map(([dept, count]) => `
+                                    <div class="distribution-item">
+                                        <span>${dept}</span>
+                                        <span>${count} Maschinen</span>
+                                    </div>
+                                `).join('')}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="window.qhseDashboard.exportMachineReport()" class="btn-secondary">
+                        <i class="fas fa-download"></i> Report exportieren
+                    </button>
+                    <button onclick="this.closest('.modal').remove()" class="btn-primary">
+                        <i class="fas fa-times"></i> Schließen
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+
+    exportMachineReport() {
+        console.log('📤 Exportiere Maschinenbericht...');
+        
+        try {
+            const report = {
+                generatedAt: new Date().toISOString(),
+                totalMachines: this.machines.length,
+                statusDistribution: this.getStatusDistribution(),
+                departmentDistribution: this.getDepartmentDistribution(),
+                professionalMachines: this.machines.filter(m => m.isProfessional).length,
+                averageAge: this.calculateAverageMachineAge(),
+                machines: this.machines
+            };
+            
+            const jsonData = JSON.stringify(report, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Maschinenbericht_${new Date().toISOString().split('T')[0]}.json`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Maschinenbericht erfolgreich exportiert!');
+            
+        } catch (error) {
+            console.error('❌ Export-Fehler:', error);
+            alert('Fehler beim Exportieren des Berichts: ' + error.message);
+        }
+    }
+
+    // ===== DOCUMENT MANAGEMENT & TÜV EXPORT FUNCTIONS =====
+
+    setupDocumentUpload() {
+        console.log('📁 Setup Document Upload System...');
+        
+        const fileInput = document.getElementById('documentFileInput');
+        const uploadZone = document.getElementById('documentUploadZone');
+        
+        if (!fileInput || !uploadZone) return;
+        
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            this.handleDocumentUpload(e.target.files);
+        });
+        
+        // Drag and drop functionality
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+        
+        uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+            this.handleDocumentUpload(e.dataTransfer.files);
+        });
+    }
+
+    handleDocumentUpload(files) {
+        console.log('📤 Upload Dokumente:', files.length);
+        
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        const allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif'
+        ];
+        
+        Array.from(files).forEach(file => {
+            // Validate file size
+            if (file.size > maxSize) {
+                alert(`Datei "${file.name}" ist zu groß. Maximum: 10MB`);
+                return;
+            }
+            
+            // Validate file type
+            if (!allowedTypes.includes(file.type)) {
+                alert(`Dateityp von "${file.name}" wird nicht unterstützt.`);
+                return;
+            }
+            
+            // Read file and store
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const document = {
+                    id: `DOC-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    content: e.target.result,
+                    uploadedAt: new Date().toISOString(),
+                    uploadedBy: this.getCurrentUser()?.id || 'unknown'
+                };
+                
+                this.addDocumentToMachine(document);
+            };
+            
+            reader.readAsDataURL(file);
+        });
+    }
+
+    addDocumentToMachine(document) {
+        // Initialize machine documents if not exist
+        if (!this.currentMachineDocuments) {
+            this.currentMachineDocuments = [];
+        }
+        
+        this.currentMachineDocuments.push(document);
+        this.renderDocumentList();
+        
+        console.log('✅ Dokument hinzugefügt:', document.name);
+    }
+
+    renderDocumentList() {
+        const documentList = document.getElementById('documentList');
+        if (!documentList || !this.currentMachineDocuments) return;
+        
+        if (this.currentMachineDocuments.length === 0) {
+            documentList.innerHTML = '<p class="no-documents">Noch keine Dokumente hochgeladen</p>';
+            return;
+        }
+        
+        const documentsHtml = this.currentMachineDocuments.map(doc => `
+            <div class="document-item" data-doc-id="${doc.id}">
+                <div class="document-info">
+                    <i class="fas ${this.getDocumentIcon(doc.type)}"></i>
+                    <div class="document-details">
+                        <h6>${doc.name}</h6>
+                        <small>${this.formatFileSize(doc.size)} • ${new Date(doc.uploadedAt).toLocaleDateString('de-DE')}</small>
+                    </div>
+                </div>
+                <div class="document-actions">
+                    <button type="button" class="btn-view" onclick="window.qhseDashboard.viewDocument('${doc.id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button type="button" class="btn-download" onclick="window.qhseDashboard.downloadDocument('${doc.id}')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button type="button" class="btn-delete" onclick="window.qhseDashboard.deleteDocument('${doc.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        documentList.innerHTML = documentsHtml;
+    }
+
+    getDocumentIcon(mimeType) {
+        const iconMap = {
+            'application/pdf': 'fa-file-pdf',
+            'application/msword': 'fa-file-word',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'fa-file-word',
+            'application/vnd.ms-excel': 'fa-file-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'fa-file-excel',
+            'image/jpeg': 'fa-file-image',
+            'image/jpg': 'fa-file-image',
+            'image/png': 'fa-file-image',
+            'image/gif': 'fa-file-image'
+        };
+        
+        return iconMap[mimeType] || 'fa-file';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    viewDocument(documentId) {
+        const document = this.currentMachineDocuments?.find(d => d.id === documentId);
+        if (!document) return;
+        
+        // Open document in new window/tab
+        const newWindow = window.open('', '_blank');
+        if (document.type.startsWith('image/')) {
+            newWindow.document.write(`
+                <html>
+                    <head><title>${document.name}</title></head>
+                    <body style="margin:0; display:flex; justify-content:center; align-items:center; min-height:100vh; background:#f0f0f0;">
+                        <img src="${document.content}" style="max-width:100%; max-height:100%;" alt="${document.name}">
+                    </body>
+                </html>
+            `);
+        } else {
+            newWindow.location.href = document.content;
+        }
+    }
+
+    downloadDocument(documentId) {
+        const document = this.currentMachineDocuments?.find(d => d.id === documentId);
+        if (!document) return;
+        
+        const link = document.createElement('a');
+        link.href = document.content;
+        link.download = document.name;
+        link.click();
+    }
+
+    deleteDocument(documentId) {
+        if (!confirm('Dokument wirklich löschen?')) return;
+        
+        this.currentMachineDocuments = this.currentMachineDocuments?.filter(d => d.id !== documentId) || [];
+        this.renderDocumentList();
+    }
+
+    // ===== TÜV EXPORT FUNCTIONS =====
+
+    exportTuevCompleteReport() {
+        console.log('📋 Exportiere TÜV-Komplettbericht...');
+        
+        const currentMachine = this.getCurrentEditingMachine();
+        if (!currentMachine) {
+            alert('Keine Maschine für Export ausgewählt');
+            return;
+        }
+        
+        const report = this.generateTuevCompleteReport(currentMachine);
+        this.downloadTextAsFile(report, `TUeV_Komplettbericht_${currentMachine.name}_${new Date().toISOString().split('T')[0]}.txt`);
+    }
+
+    generateTuevCompleteReport(machine) {
+        const currentDate = new Date().toLocaleDateString('de-DE');
+        
+        return `
+═══════════════════════════════════════════════════════════════
+                    TÜV-KONFORMER MASCHINENBERICHT
+═══════════════════════════════════════════════════════════════
+
+Erstellt am: ${currentDate}
+Erstellt von: ${this.getCurrentUser()?.name || 'Unbekannt'}
+System: QHSE Management System v2.0
+
+═══════════════════════════════════════════════════════════════
+                        GRUNDDATEN
+═══════════════════════════════════════════════════════════════
+
+Maschinenbezeichnung: ${machine.name || 'N/A'}
+Maschinentyp: ${machine.type || 'N/A'}
+Maschinen-ID: ${machine.id || 'N/A'}
+Hersteller: ${machine.grunddaten?.manufacturer || 'N/A'}
+Baujahr: ${machine.grunddaten?.yearBuilt || 'N/A'}
+CE-Kennzeichnung: ${machine.grunddaten?.ceMarking === 'yes' ? 'Ja ✓' : 'Nein ✗'}
+Seriennummer: ${machine.grunddaten?.serialNumber || 'N/A'}
+
+Standort: ${machine.location || 'N/A'}
+Abteilung: ${this.getDepartmentName(machine.department)}
+Status: ${machine.status || 'N/A'}
+
+═══════════════════════════════════════════════════════════════
+                    TECHNISCHE SPEZIFIKATIONEN
+═══════════════════════════════════════════════════════════════
+
+Leistung: ${machine.technischeDaten?.power || 'N/A'} kW
+Spannung: ${machine.technischeDaten?.voltage || 'N/A'} V
+Frequenz: ${machine.technischeDaten?.frequency || 'N/A'} Hz
+Schutzart: ${machine.technischeDaten?.protectionClass || 'N/A'}
+
+Abmessungen:
+  Länge: ${machine.technischeDaten?.length || 'N/A'} mm
+  Breite: ${machine.technischeDaten?.width || 'N/A'} mm
+  Höhe: ${machine.technischeDaten?.height || 'N/A'} mm
+  Gewicht: ${machine.technischeDaten?.weight || 'N/A'} kg
+
+═══════════════════════════════════════════════════════════════
+                    SICHERHEITSTECHNIK
+═══════════════════════════════════════════════════════════════
+
+Not-Aus-Schalter: ${machine.sicherheit?.emergencyStops || 'N/A'}
+Sicherheitskategorie: ${machine.sicherheit?.safetyCategory || 'N/A'}
+Performance Level: ${machine.sicherheit?.performanceLevel || 'N/A'}
+
+Schutzeinrichtungen:
+${this.formatSafetyEquipment(machine.sicherheit)}
+
+═══════════════════════════════════════════════════════════════
+                    WARTUNG & INSTANDHALTUNG
+═══════════════════════════════════════════════════════════════
+
+TÜV-Prüfintervall: ${machine.wartung?.tuevInterval || 'N/A'} Monate
+Nächste TÜV-Prüfung: ${machine.wartung?.nextTuevDate || 'N/A'}
+Prüforganisation: ${machine.wartung?.tuevOrganization || 'N/A'}
+
+Wartungsintervall: ${machine.wartung?.preventiveInterval || 'N/A'} Stunden
+Letzte Wartung: ${machine.wartung?.lastMaintenance || 'N/A'}
+Verantwortlicher: ${machine.wartung?.maintenanceResponsible || 'N/A'}
+
+Servicevertrag: ${machine.wartung?.serviceContract === 'yes' ? 'Ja ✓' : 'Nein ✗'}
+Serviceanbieter: ${machine.wartung?.serviceProvider || 'N/A'}
+
+═══════════════════════════════════════════════════════════════
+                    RISIKOBEWERTUNG
+═══════════════════════════════════════════════════════════════
+
+Gefährdungsbeurteilung vom: ${machine.risiko?.riskAssessmentDate || 'N/A'}
+Durchgeführt von: ${machine.risiko?.riskAssessor || 'N/A'}
+Gesamtrisikobewertung: ${machine.risiko?.overallRiskLevel || 'N/A'}
+
+Identifizierte Gefährdungen:
+${this.formatRiskFactors(machine.risiko)}
+
+Schutzmaßnahmen:
+${machine.risiko?.riskMitigationMeasures || 'Nicht dokumentiert'}
+
+═══════════════════════════════════════════════════════════════
+                    DOKUMENTATION
+═══════════════════════════════════════════════════════════════
+
+Dokumentation vollständig: ${machine.dokumentation?.documentationComplete || 'N/A'}
+Dokumentenablage: ${machine.dokumentation?.documentStorage || 'N/A'}
+Verantwortlicher: ${machine.dokumentation?.documentResponsible || 'N/A'}
+
+TÜV-Audit-bereit: ${machine.dokumentation?.auditReady || 'N/A'}
+Letztes Audit: ${machine.dokumentation?.lastAudit || 'N/A'}
+Nächstes Audit: ${machine.dokumentation?.nextAudit || 'N/A'}
+
+Hochgeladene Dokumente: ${this.currentMachineDocuments?.length || 0}
+
+═══════════════════════════════════════════════════════════════
+                    COMPLIANCE-STATUS
+═══════════════════════════════════════════════════════════════
+
+✓ TÜV-konform: ${machine.isProfessional ? 'Ja' : 'Nein'}
+✓ Version: ${machine.version || '1.0'}
+✓ Erstellt: ${machine.createdAt ? new Date(machine.createdAt).toLocaleDateString('de-DE') : 'N/A'}
+✓ Letzte Änderung: ${machine.updatedAt ? new Date(machine.updatedAt).toLocaleDateString('de-DE') : 'N/A'}
+
+═══════════════════════════════════════════════════════════════
+
+Dieser Bericht wurde automatisch generiert durch das
+QHSE Management System für Hoffmann & Voss GmbH.
+
+Bericht-ID: ${Date.now()}
+═══════════════════════════════════════════════════════════════
+        `;
+    }
+
+    formatSafetyEquipment(sicherheit) {
+        if (!sicherheit) return '  Keine Daten verfügbar';
+        
+        let equipment = [];
+        if (sicherheit.mechanicalSafety) equipment.push('  • Mechanische Schutzeinrichtungen');
+        if (sicherheit.interlockSafety) equipment.push('  • Verriegelungseinrichtungen');
+        if (sicherheit.switchingSafety) equipment.push('  • Schaltende Schutzeinrichtungen');
+        
+        return equipment.length > 0 ? equipment.join('\n') : '  Keine Schutzeinrichtungen dokumentiert';
+    }
+
+    formatRiskFactors(risiko) {
+        if (!risiko) return '  Keine Risikobewertung verfügbar';
+        
+        let risks = [];
+        if (risiko.mechanicalRisks) risks.push('  • Mechanische Gefährdungen');
+        if (risiko.electricalRisks) risks.push('  • Elektrische Gefährdungen');
+        if (risiko.thermalRisks) risks.push('  • Thermische Gefährdungen');
+        if (risiko.noiseRisks) risks.push('  • Lärm & Vibration');
+        
+        return risks.length > 0 ? risks.join('\n') : '  Keine Gefährdungen identifiziert';
+    }
+
+    getCurrentEditingMachine() {
+        // Get machine data from currently open modal
+        const modal = document.getElementById('addMachineModal') || document.getElementById('editMachineModal');
+        if (!modal) return null;
+        
+        const machineData = this.collectMachineFormData(modal);
+        return machineData ? {
+            name: machineData.grunddaten?.name || 'Unbekannte Maschine',
+            type: machineData.grunddaten?.type || 'Unbekannter Typ',
+            id: machineData.grunddaten?.id || 'TEMP-ID',
+            ...machineData,
+            isProfessional: true,
+            version: '2.0'
+        } : null;
+    }
+
+    exportComplianceChecklist() {
+        console.log('📋 Exportiere Compliance-Checkliste...');
+        
+        const checklist = this.generateComplianceChecklist();
+        this.downloadTextAsFile(checklist, `Compliance_Checkliste_${new Date().toISOString().split('T')[0]}.txt`);
+    }
+
+    generateComplianceChecklist() {
+        return `
+TÜV-COMPLIANCE CHECKLISTE für Maschinenaudit
+═══════════════════════════════════════════════════════════════
+
+Datum: ${new Date().toLocaleDateString('de-DE')}
+Prüfer: ________________________
+Maschine: ______________________
+
+GRUNDANFORDERUNGEN:
+═══════════════════════════════════════════════════════════════
+☐ CE-Kennzeichnung vorhanden und lesbar
+☐ EG-Konformitätserklärung verfügbar
+☐ Betriebsanleitung in deutscher Sprache vorhanden
+☐ Typenschild mit allen erforderlichen Angaben
+☐ Seriennummer eindeutig und dauerhaft angebracht
+
+DOKUMENTATION:
+═══════════════════════════════════════════════════════════════
+☐ Gefährdungsbeurteilung durchgeführt und dokumentiert
+☐ Aufstellungsbescheinigung vorhanden
+☐ Abnahmeprotokoll verfügbar
+☐ Prüfbücher/Prüfprotokolle vollständig
+☐ Wartungsnachweis geführt
+☐ Einweisungsnachweise für Bedienpersonal
+
+SICHERHEITSTECHNIK:
+═══════════════════════════════════════════════════════════════
+☐ Not-Aus-Einrichtungen funktionsfähig und erreichbar
+☐ Schutzeinrichtungen vollständig und wirksam
+☐ Verriegelungseinrichtungen funktionsfähig
+☐ Sicherheitskategorie entspricht Risikobewertung
+☐ Performance Level erreicht erforderlichen PLr-Wert
+☐ Schaltende Schutzeinrichtungen (Lichtvorhang, etc.) funktionstüchtig
+
+ELEKTRISCHE SICHERHEIT:
+═══════════════════════════════════════════════════════════════
+☐ Elektrische Ausrüstung entspricht VDE-Bestimmungen
+☐ Schutzleiter ordnungsgemäß angeschlossen
+☐ FI/RCD-Schutz vorhanden und funktionsfähig
+☐ Isolationswiderstand ausreichend
+☐ Schutzart IP-Rating entspricht Umgebungsbedingungen
+
+WARTUNG & PRÜFUNGEN:
+═══════════════════════════════════════════════════════════════
+☐ Wiederkehrende Prüfungen termingerecht durchgeführt
+☐ Prüffristen eingehalten
+☐ Mängel umgehend behoben
+☐ Wartungsintervalle eingehalten
+☐ Ersatzteilversorgung gesichert
+
+BETRIEB:
+═══════════════════════════════════════════════════════════════
+☐ Bestimmungsgemäße Verwendung sichergestellt
+☐ Qualifiziertes Personal eingesetzt
+☐ Arbeitsplatzgrenzwerte eingehalten
+☐ Persönliche Schutzausrüstung verfügbar
+☐ Betriebsanweisung am Arbeitsplatz verfügbar
+
+FESTGESTELLTE MÄNGEL:
+═══════════════════════════════════════════════════════════════
+
+_________________________________________________________________
+
+_________________________________________________________________
+
+_________________________________________________________________
+
+_________________________________________________________________
+
+GESAMTBEWERTUNG:
+═══════════════════════════════════════════════════════════════
+☐ Ohne Mängel
+☐ Geringfügige Mängel
+☐ Erhebliche Mängel
+☐ Gefährliche Mängel - Sofortmaßnahmen erforderlich
+
+Unterschrift Prüfer: _________________________ Datum: __________
+
+Unterschrift Betreiber: _______________________ Datum: __________
+        `;
+    }
+
+    exportDocumentIndex() {
+        console.log('📂 Exportiere Dokumentenverzeichnis...');
+        
+        const index = this.generateDocumentIndex();
+        this.downloadTextAsFile(index, `Dokumentenverzeichnis_${new Date().toISOString().split('T')[0]}.txt`);
+    }
+
+    generateDocumentIndex() {
+        const documents = this.currentMachineDocuments || [];
+        
+        let index = `
+DOKUMENTENVERZEICHNIS
+═══════════════════════════════════════════════════════════════
+
+Maschine: ${this.getCurrentEditingMachine()?.name || 'Unbekannt'}
+Erstellt: ${new Date().toLocaleDateString('de-DE')}
+Anzahl Dokumente: ${documents.length}
+
+ÜBERSICHT ALLER DOKUMENTE:
+═══════════════════════════════════════════════════════════════
+
+`;
+
+        if (documents.length === 0) {
+            index += "Keine Dokumente hochgeladen.\n";
+        } else {
+            documents.forEach((doc, index_num) => {
+                index += `${index_num + 1}. ${doc.name}
+   Typ: ${this.getFileTypeDescription(doc.type)}
+   Größe: ${this.formatFileSize(doc.size)}
+   Hochgeladen: ${new Date(doc.uploadedAt).toLocaleDateString('de-DE')}
+   Von: ${doc.uploadedBy}
+
+`;
+            });
+        }
+
+        index += `
+PFLICHTDOKUMENTE-STATUS:
+═══════════════════════════════════════════════════════════════
+
+☐ EG-Konformitätserklärung
+☐ Betriebsanleitung (deutsch)
+☐ Gefährdungsbeurteilung
+☐ Aufstellungsbescheinigung
+☐ Abnahmeprotokoll
+☐ Prüfbücher/-protokolle
+☐ Wartungsnachweis
+☐ Einweisungsnachweise
+
+Hinweis: Bitte markieren Sie vorhandene Dokumente mit ✓
+═══════════════════════════════════════════════════════════════
+        `;
+
+        return index;
+    }
+
+    getFileTypeDescription(mimeType) {
+        const typeMap = {
+            'application/pdf': 'PDF-Dokument',
+            'application/msword': 'Word-Dokument',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word-Dokument',
+            'application/vnd.ms-excel': 'Excel-Tabelle',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel-Tabelle',
+            'image/jpeg': 'JPEG-Bild',
+            'image/jpg': 'JPEG-Bild',
+            'image/png': 'PNG-Bild',
+            'image/gif': 'GIF-Bild'
+        };
+        
+        return typeMap[mimeType] || 'Unbekannter Dateityp';
+    }
+
+    exportMaintenanceSchedule() {
+        console.log('📅 Exportiere Wartungsplan...');
+        
+        const schedule = this.generateMaintenanceSchedule();
+        this.downloadTextAsFile(schedule, `Wartungsplan_${new Date().toISOString().split('T')[0]}.txt`);
+    }
+
+    generateMaintenanceSchedule() {
+        const machine = this.getCurrentEditingMachine();
+        const currentDate = new Date();
+        
+        return `
+WARTUNGSPLAN
+═══════════════════════════════════════════════════════════════
+
+Maschine: ${machine?.name || 'Unbekannt'}
+Erstellt: ${currentDate.toLocaleDateString('de-DE')}
+
+TÜV-PRÜFUNGEN:
+═══════════════════════════════════════════════════════════════
+Prüfintervall: ${machine?.wartung?.tuevInterval || 'N/A'} Monate
+Nächste Prüfung: ${machine?.wartung?.nextTuevDate || 'N/A'}
+Prüforganisation: ${machine?.wartung?.tuevOrganization || 'N/A'}
+
+VORBEUGENDE WARTUNG:
+═══════════════════════════════════════════════════════════════
+Wartungsintervall: ${machine?.wartung?.preventiveInterval || 'N/A'} Betriebsstunden
+Letzte Wartung: ${machine?.wartung?.lastMaintenance || 'N/A'}
+Verantwortlicher: ${machine?.wartung?.maintenanceResponsible || 'N/A'}
+
+WARTUNGSAUFGABEN:
+${machine?.wartung?.maintenanceTasks || 'Keine Aufgaben definiert'}
+
+SERVICE:
+═══════════════════════════════════════════════════════════════
+Servicevertrag: ${machine?.wartung?.serviceContract === 'yes' ? 'Ja' : 'Nein'}
+Serviceanbieter: ${machine?.wartung?.serviceProvider || 'N/A'}
+Ersatzteilversorgung: ${machine?.wartung?.sparePartsAvailable || 'N/A'}
+
+═══════════════════════════════════════════════════════════════
+        `;
+    }
+
+    exportRiskAssessment() {
+        console.log('⚠️ Exportiere Gefährdungsbeurteilung...');
+        
+        const assessment = this.generateRiskAssessment();
+        this.downloadTextAsFile(assessment, `Gefaehrdungsbeurteilung_${new Date().toISOString().split('T')[0]}.txt`);
+    }
+
+    generateRiskAssessment() {
+        const machine = this.getCurrentEditingMachine();
+        
+        return `
+GEFÄHRDUNGSBEURTEILUNG
+═══════════════════════════════════════════════════════════════
+
+Maschine: ${machine?.name || 'Unbekannt'}
+Datum: ${machine?.risiko?.riskAssessmentDate || new Date().toLocaleDateString('de-DE')}
+Durchgeführt von: ${machine?.risiko?.riskAssessor || 'N/A'}
+
+IDENTIFIZIERTE GEFÄHRDUNGEN:
+═══════════════════════════════════════════════════════════════
+
+${this.formatRiskFactors(machine?.risiko)}
+
+RISIKOBEWERTUNG:
+═══════════════════════════════════════════════════════════════
+Gesamtrisikobewertung: ${machine?.risiko?.overallRiskLevel || 'N/A'}
+
+SCHUTZMASSNAHMEN:
+═══════════════════════════════════════════════════════════════
+${machine?.risiko?.riskMitigationMeasures || 'Keine Schutzmaßnahmen dokumentiert'}
+
+TECHNISCHE SCHUTZMASSNAHMEN:
+═══════════════════════════════════════════════════════════════
+${this.formatSafetyEquipment(machine?.sicherheit)}
+
+Performance Level: ${machine?.sicherheit?.performanceLevel || 'N/A'}
+Sicherheitskategorie: ${machine?.sicherheit?.safetyCategory || 'N/A'}
+
+═══════════════════════════════════════════════════════════════
+        `;
+    }
+
+    exportTechnicalDataSheet() {
+        console.log('⚙️ Exportiere Technisches Datenblatt...');
+        
+        const dataSheet = this.generateTechnicalDataSheet();
+        this.downloadTextAsFile(dataSheet, `Technisches_Datenblatt_${new Date().toISOString().split('T')[0]}.txt`);
+    }
+
+    generateTechnicalDataSheet() {
+        const machine = this.getCurrentEditingMachine();
+        
+        return `
+TECHNISCHES DATENBLATT
+═══════════════════════════════════════════════════════════════
+
+Maschinenbezeichnung: ${machine?.name || 'N/A'}
+Maschinentyp: ${machine?.type || 'N/A'}
+Hersteller: ${machine?.grunddaten?.manufacturer || 'N/A'}
+Baujahr: ${machine?.grunddaten?.yearBuilt || 'N/A'}
+Seriennummer: ${machine?.grunddaten?.serialNumber || 'N/A'}
+
+ELEKTRISCHE DATEN:
+═══════════════════════════════════════════════════════════════
+Nennleistung: ${machine?.technischeDaten?.power || 'N/A'} kW
+Nennspannung: ${machine?.technischeDaten?.voltage || 'N/A'} V
+Frequenz: ${machine?.technischeDaten?.frequency || 'N/A'} Hz
+Nennstrom: ${machine?.technischeDaten?.current || 'N/A'} A
+Schutzart: ${machine?.technischeDaten?.protectionClass || 'N/A'}
+
+MECHANISCHE DATEN:
+═══════════════════════════════════════════════════════════════
+Länge: ${machine?.technischeDaten?.length || 'N/A'} mm
+Breite: ${machine?.technischeDaten?.width || 'N/A'} mm
+Höhe: ${machine?.technischeDaten?.height || 'N/A'} mm
+Gewicht: ${machine?.technischeDaten?.weight || 'N/A'} kg
+
+BETRIEBSDATEN:
+═══════════════════════════════════════════════════════════════
+Max. Arbeitstemperatur: ${machine?.technischeDaten?.maxTemp || 'N/A'} °C
+Min. Arbeitstemperatur: ${machine?.technischeDaten?.minTemp || 'N/A'} °C
+Betriebsdruck: ${machine?.technischeDaten?.operatingPressure || 'N/A'} bar
+Durchsatz: ${machine?.technischeDaten?.throughput || 'N/A'}
+
+NORMEN & STANDARDS:
+═══════════════════════════════════════════════════════════════
+CE-Kennzeichnung: ${machine?.grunddaten?.ceMarking === 'yes' ? 'Ja ✓' : 'Nein ✗'}
+Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
+
+═══════════════════════════════════════════════════════════════
+        `;
+    }
+
+    downloadTextAsFile(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        
+        alert(`${filename} wurde erfolgreich heruntergeladen!`);
     }
 
     setupMaintenancePlanning() {
@@ -15830,21 +21207,26 @@ PLZ Ort">${user.address || ''}</textarea>
     renderHazardSymbols(symbols) {
         if (!symbols || symbols.length === 0) return '-';
         
-        const symbolMap = {
-            'GHS01': '💥',
-            'GHS02': '🔥',
-            'GHS03': '⭕',
-            'GHS04': '⚗️',
-            'GHS05': '🧪',
-            'GHS06': '☠️',
-            'GHS07': '❗',
-            'GHS08': '⚕️',
-            'GHS09': '🌍'
+        const symbolInfo = {
+            'GHS01': { name: 'Explodierende Bombe', description: 'Explosive Stoffe' },
+            'GHS02': { name: 'Flamme', description: 'Entzündbare Stoffe' },
+            'GHS03': { name: 'Flamme über Kreis', description: 'Brandfördernde Stoffe' },
+            'GHS04': { name: 'Gasflasche', description: 'Gase unter Druck' },
+            'GHS05': { name: 'Ätzwirkung', description: 'Ätzende Stoffe' },
+            'GHS06': { name: 'Totenkopf', description: 'Akut toxische Stoffe' },
+            'GHS07': { name: 'Ausrufezeichen', description: 'Reizende/schädliche Stoffe' },
+            'GHS08': { name: 'Gesundheitsgefahr', description: 'Schwere Gesundheitsgefahr' },
+            'GHS09': { name: 'Umwelt', description: 'Umweltgefährliche Stoffe' }
         };
 
-        return symbols.map(symbol => 
-            `<span class="hazard-symbol" title="${symbol}">${symbolMap[symbol] || symbol}</span>`
-        ).join('');
+        return symbols.map(symbol => {
+            const info = symbolInfo[symbol];
+            if (!info) return `<span class="hazard-symbol" title="${symbol}">${symbol}</span>`;
+            
+            return `<span class="hazard-symbol ghs-pictogram ${symbol.toLowerCase()}" 
+                          title="${info.name}: ${info.description}" 
+                          data-symbol="${symbol}"></span>`;
+        }).join('');
     }
 
     getFilteredSubstances() {
@@ -25670,6 +31052,92 @@ function generateRiskAssessmentReport() {
 function exportRiskAssessments() {
     if (window.qhseDashboard) {
         alert('📤 Export wird vorbereitet... (Feature wird noch implementiert)');
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+// Global Training Export Functions
+function exportTrainingOverview(format) {
+    if (window.qhseDashboard) {
+        const reportData = window.qhseDashboard.prepareTrainingReportData('overview');
+        switch (format) {
+            case 'csv':
+                window.qhseDashboard.exportTrainingReportAsCSV(reportData, 'overview');
+                break;
+            case 'excel':
+                window.qhseDashboard.exportTrainingReportAsExcel(reportData, 'overview');
+                break;
+            case 'pdf':
+                window.qhseDashboard.exportTrainingReportAsPDF(reportData, 'overview');
+                break;
+        }
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function exportTrainingCompletion(format) {
+    if (window.qhseDashboard) {
+        const reportData = window.qhseDashboard.prepareTrainingReportData('completion');
+        switch (format) {
+            case 'csv':
+                window.qhseDashboard.exportTrainingReportAsCSV(reportData, 'completion');
+                break;
+            case 'excel':
+                window.qhseDashboard.exportTrainingReportAsExcel(reportData, 'completion');
+                break;
+            case 'pdf':
+                window.qhseDashboard.exportTrainingReportAsPDF(reportData, 'completion');
+                break;
+        }
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function exportTrainingCompliance(format) {
+    if (window.qhseDashboard) {
+        const reportData = window.qhseDashboard.prepareTrainingReportData('compliance');
+        switch (format) {
+            case 'csv':
+                window.qhseDashboard.exportTrainingReportAsCSV(reportData, 'compliance');
+                break;
+            case 'excel':
+                window.qhseDashboard.exportTrainingReportAsExcel(reportData, 'compliance');
+                break;
+            case 'pdf':
+                window.qhseDashboard.exportTrainingReportAsPDF(reportData, 'compliance');
+                break;
+        }
+    } else {
+        alert('System wird noch geladen...');
+    }
+}
+
+function exportTrainingIndividual(format) {
+    if (window.qhseDashboard) {
+        // Get selected user from the individual report form
+        const userSelect = document.querySelector('#individual-user-select');
+        const userId = userSelect ? userSelect.value : null;
+        
+        if (!userId) {
+            alert('Bitte wählen Sie zunächst einen Benutzer aus.');
+            return;
+        }
+        
+        const reportData = window.qhseDashboard.prepareTrainingReportData('individual', { userId });
+        switch (format) {
+            case 'csv':
+                window.qhseDashboard.exportTrainingReportAsCSV(reportData, 'individual');
+                break;
+            case 'excel':
+                window.qhseDashboard.exportTrainingReportAsExcel(reportData, 'individual');
+                break;
+            case 'pdf':
+                window.qhseDashboard.exportTrainingReportAsPDF(reportData, 'individual');
+                break;
+        }
     } else {
         alert('System wird noch geladen...');
     }
