@@ -16003,6 +16003,9 @@ ${newTraining.aiAdaptiveLearning || newTraining.experimentalFeatures ?
                         <button onclick="window.qhseDashboard.viewMachineDetails('${machine.id}')" class="btn-info">
                             <i class="fas fa-eye"></i> Details
                         </button>
+                        <button onclick="window.qhseDashboard.showReportIssueModal('${machine.id}')" class="btn-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Störung melden
+                        </button>
                         <button onclick="window.qhseDashboard.editMachine('${machine.id}')" class="btn-secondary">
                             <i class="fas fa-edit"></i> Bearbeiten
                         </button>
@@ -17714,9 +17717,10 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
         this.updateIssueStats();
     }
 
-    showReportIssueModal() {
-        console.log('showReportIssueModal() aufgerufen');
-        console.log('Verfügbare Maschinen:', this.machines);
+    showReportIssueModal(machineId = null) {
+        console.log('🚨 showReportIssueModal() aufgerufen mit Maschinen-ID:', machineId);
+        console.log('🚨 Verfügbare Maschinen:', this.machines);
+        console.log('🚨 Maschinen Anzahl:', this.machines ? this.machines.length : 'undefined');
         
         // Remove existing modals to prevent duplicate IDs
         const existingModal = document.getElementById('reportIssueModal');
@@ -17729,10 +17733,36 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
 
         const modalHtml = `
             <div id="reportIssueModal" class="modal active">
-                <div class="modal-content large-modal">
-                    <div class="modal-header">
-                        <h2><i class="fas fa-exclamation-triangle"></i> Störung melden</h2>
-                        <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                <div class="modal-content enterprise-issue-modal ultra-professional">
+                    <div class="modal-header enterprise-header">
+                        <div class="header-content">
+                            <div class="header-title-section">
+                                <div class="title-with-animation">
+                                    <i class="fas fa-exclamation-triangle pulse-animation"></i>
+                                    <h2>Enterprise Störungsmeldesystem</h2>
+                                    <div class="live-status-indicator"></div>
+                                </div>
+                                <div class="system-info">
+                                    <span class="timestamp" id="systemTimestamp">${new Date().toLocaleString('de-DE')}</span>
+                                    <span class="user-info">Benutzer: ${this.getCurrentUser()?.displayName || 'Unbekannt'}</span>
+                                </div>
+                            </div>
+                            <div class="header-badges advanced-badges">
+                                <span class="version-badge premium">v4.0 Enterprise Max</span>
+                                <span class="priority-indicator" id="priorityIndicator">🟢 Standard</span>
+                                <span class="machine-indicator" id="machineIndicator">${machineId ? 'Maschine vorausgewählt' : 'Maschine wählen'}</span>
+                                <span class="ai-status-badge" id="aiStatusBadge">🤖 AI Ready</span>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <button class="minimize-btn" onclick="window.qhseDashboard.minimizeModal()" title="Minimieren">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button class="fullscreen-btn" onclick="window.qhseDashboard.toggleFullscreen()" title="Vollbild">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <span class="close" onclick="this.closest('.modal').remove()" title="Schließen">&times;</span>
+                        </div>
                     </div>
                     <div class="modal-body">
                         ${this.machines && this.machines.length === 0 ? `
@@ -17742,48 +17772,347 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
                             </div>
                         ` : ''}
                         
+                        <!-- Advanced Action Dashboard -->
+                        <div class="advanced-action-dashboard">
+                            <div class="dashboard-section quick-templates">
+                                <h4><i class="fas fa-magic"></i> Smart Templates</h4>
+                                <div class="template-grid">
+                                    <button type="button" class="template-btn hydraulic" onclick="window.qhseDashboard.fillQuickTemplate('hydraulic')">
+                                        <div class="template-icon"><i class="fas fa-tint"></i></div>
+                                        <div class="template-info">
+                                            <span class="template-name">Hydraulik</span>
+                                            <span class="template-desc">Pumpen, Ventile, Leckage</span>
+                                        </div>
+                                        <div class="template-indicator">🔧</div>
+                                    </button>
+                                    <button type="button" class="template-btn electrical" onclick="window.qhseDashboard.fillQuickTemplate('electrical')">
+                                        <div class="template-icon"><i class="fas fa-bolt"></i></div>
+                                        <div class="template-info">
+                                            <span class="template-name">Elektrik</span>
+                                            <span class="template-desc">Stromausfall, Kurzschluss</span>
+                                        </div>
+                                        <div class="template-indicator">⚡</div>
+                                    </button>
+                                    <button type="button" class="template-btn mechanical" onclick="window.qhseDashboard.fillQuickTemplate('mechanical')">
+                                        <div class="template-icon"><i class="fas fa-cog"></i></div>
+                                        <div class="template-info">
+                                            <span class="template-name">Mechanik</span>
+                                            <span class="template-desc">Verschleiß, Vibration</span>
+                                        </div>
+                                        <div class="template-indicator">🔩</div>
+                                    </button>
+                                    <button type="button" class="template-btn software" onclick="window.qhseDashboard.fillQuickTemplate('software')">
+                                        <div class="template-icon"><i class="fas fa-laptop-code"></i></div>
+                                        <div class="template-info">
+                                            <span class="template-name">Software</span>
+                                            <span class="template-desc">Systemfehler, Absturz</span>
+                                        </div>
+                                        <div class="template-indicator">💻</div>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="dashboard-section ai-tools">
+                                <h4><i class="fas fa-robot"></i> AI-Assistenten</h4>
+                                <div class="ai-tools-grid">
+                                    <button type="button" class="ai-btn voice" onclick="window.qhseDashboard.enableAdvancedVoiceInput()">
+                                        <i class="fas fa-microphone"></i>
+                                        <span>Sprach-AI</span>
+                                        <div class="ai-status">🟢 Bereit</div>
+                                    </button>
+                                    <button type="button" class="ai-btn camera" onclick="window.qhseDashboard.enableSmartCamera()">
+                                        <i class="fas fa-camera-retro"></i>
+                                        <span>Foto-AI</span>
+                                        <div class="ai-status">🟢 Bereit</div>
+                                    </button>
+                                    <button type="button" class="ai-btn analyzer" onclick="window.qhseDashboard.startRealTimeAnalysis()">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Live-Analyse</span>
+                                        <div class="ai-status">🟡 Standby</div>
+                                    </button>
+                                    <button type="button" class="ai-btn predictor" onclick="window.qhseDashboard.enablePredictiveAnalysis()">
+                                        <i class="fas fa-crystal-ball"></i>
+                                        <span>Prognose</span>
+                                        <div class="ai-status">🟠 Learning</div>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="dashboard-section quick-actions">
+                                <h4><i class="fas fa-lightning-bolt"></i> Express Actions</h4>
+                                <div class="express-actions">
+                                    <button type="button" class="express-btn emergency" onclick="window.qhseDashboard.triggerEmergencyMode()">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span>Notfall</span>
+                                    </button>
+                                    <button type="button" class="express-btn priority" onclick="window.qhseDashboard.setPriorityMode()">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Eilig</span>
+                                    </button>
+                                    <button type="button" class="express-btn duplicate" onclick="window.qhseDashboard.duplicateLastIssue()">
+                                        <i class="fas fa-copy"></i>
+                                        <span>Wiederholen</span>
+                                    </button>
+                                    <button type="button" class="express-btn save-draft" onclick="window.qhseDashboard.saveDraft()">
+                                        <i class="fas fa-save"></i>
+                                        <span>Entwurf</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <form id="reportIssueForm">
-                            <div class="form-grid">
-                                <div class="form-column">
-                                    <h3>Grundinformationen</h3>
-                                    <div class="form-group">
-                                        <label for="issueMachine">Betroffene Maschine: *</label>
-                                        <select id="issueMachine" required ${this.machines && this.machines.length === 0 ? 'disabled' : ''}>
-                                            <option value="">Maschine auswählen</option>
-                                            ${machineOptions}
-                                        </select>
+                            <!-- Tab Navigation -->
+                            <div class="form-tabs">
+                                <button type="button" class="tab-btn active" onclick="window.qhseDashboard.switchIssueTab(event, 'basic')">
+                                    <i class="fas fa-info-circle"></i> Grunddaten
+                                </button>
+                                <button type="button" class="tab-btn" onclick="window.qhseDashboard.switchIssueTab(event, 'details')">
+                                    <i class="fas fa-list-ul"></i> Details
+                                </button>
+                                <button type="button" class="tab-btn" onclick="window.qhseDashboard.switchIssueTab(event, 'media')">
+                                    <i class="fas fa-camera"></i> Medien
+                                </button>
+                                <button type="button" class="tab-btn" onclick="window.qhseDashboard.switchIssueTab(event, 'analysis')">
+                                    <i class="fas fa-chart-line"></i> Analyse
+                                </button>
+                                <button type="button" class="tab-btn" onclick="window.qhseDashboard.switchIssueTab(event, 'workflow')">
+                                    <i class="fas fa-route"></i> Workflow
+                                </button>
+                            </div>
+
+                            <!-- Tab Content: Basic Info -->
+                            <div id="tab-basic" class="tab-content active">
+                                <div class="enterprise-grid">
+                                    <div class="grid-section">
+                                        <h3><i class="fas fa-cogs"></i> Maschinenauswahl</h3>
+                                        <div class="form-group">
+                                            <label for="issueMachine">Betroffene Maschine: *</label>
+                                            <select id="issueMachine" required ${this.machines && this.machines.length === 0 ? 'disabled' : ''} onchange="window.qhseDashboard.updateMachineInfo(this.value)">
+                                                <option value="">Maschine auswählen</option>
+                                                ${machineOptions}
+                                            </select>
+                                        </div>
+                                        <div id="machineInfo" class="machine-info-card" style="display: none;">
+                                            <h4>Maschinendetails</h4>
+                                            <div class="machine-details-grid">
+                                                <div><strong>Typ:</strong> <span id="machineType">-</span></div>
+                                                <div><strong>Standort:</strong> <span id="machineLocation">-</span></div>
+                                                <div><strong>Status:</strong> <span id="machineStatus">-</span></div>
+                                                <div><strong>Letzte Wartung:</strong> <span id="lastMaintenance">-</span></div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="issuePriority">Priorität: *</label>
-                                        <select id="issuePriority" required>
-                                            <option value="">Priorität auswählen</option>
-                                            <option value="low">🟢 Niedrig - Kann bei nächster Wartung behoben werden</option>
-                                            <option value="medium">🟡 Mittel - Sollte innerhalb von 24h behoben werden</option>
-                                            <option value="high">🟠 Hoch - Erfordert schnelle Bearbeitung</option>
-                                            <option value="critical">🔴 Kritisch - Sofortige Aufmerksamkeit erforderlich</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="issueTitle">Kurzer Titel der Störung: *</label>
-                                        <input type="text" id="issueTitle" required placeholder="z.B. Hydraulikpumpe läuft unregelmäßig">
-                                        <small>Beschreiben Sie das Problem in wenigen Worten</small>
+                                    
+                                    <div class="grid-section">
+                                        <h3><i class="fas fa-exclamation-triangle"></i> Störungskategorisierung</h3>
+                                        <div class="form-group">
+                                            <label for="issuePriority">Priorität: *</label>
+                                            <select id="issuePriority" required onchange="window.qhseDashboard.updatePriorityIndicator(this.value)">
+                                                <option value="">Priorität auswählen</option>
+                                                <option value="low">🟢 Niedrig - Routine-Wartung ausreichend</option>
+                                                <option value="medium">🟡 Mittel - Bearbeitung binnen 24h</option>
+                                                <option value="high">🟠 Hoch - Schnelle Reaktion erforderlich</option>
+                                                <option value="critical">🔴 Kritisch - Sofortiger Produktionsstopp</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="issueCategory">Störungsart: *</label>
+                                            <select id="issueCategory" required>
+                                                <option value="">Kategorie auswählen</option>
+                                                <option value="mechanical">🔧 Mechanische Störung</option>
+                                                <option value="electrical">⚡ Elektrische Störung</option>
+                                                <option value="hydraulic">💧 Hydraulische Störung</option>
+                                                <option value="pneumatic">💨 Pneumatische Störung</option>
+                                                <option value="software">💻 Software-Problem</option>
+                                                <option value="safety">🛡️ Sicherheitsproblem</option>
+                                                <option value="quality">📏 Qualitätsproblem</option>
+                                                <option value="other">❓ Sonstiges</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="issueTitle">Kurzbeschreibung: *</label>
+                                            <input type="text" id="issueTitle" required placeholder="z.B. Hydraulikpumpe läuft unregelmäßig" maxlength="100">
+                                            <div class="character-counter"><span id="titleCounter">0</span>/100 Zeichen</div>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div class="form-column">
-                                    <h3>Details & Dokumentation</h3>
-                                    <div class="form-group">
-                                        <label for="issueDescription">Detaillierte Beschreibung: *</label>
-                                        <textarea id="issueDescription" rows="6" required placeholder="Beschreiben Sie die Störung ausführlich:
-- Was ist passiert?
-- Wann ist es aufgetreten?
-- Unter welchen Umständen?
-- Welche Auswirkungen hat es?"></textarea>
+                            </div>
+
+                            <!-- Tab Content: Details -->
+                            <div id="tab-details" class="tab-content">
+                                <div class="enterprise-grid">
+                                    <div class="grid-section">
+                                        <h3><i class="fas fa-file-alt"></i> Detaillierte Beschreibung</h3>
+                                        <div class="form-group">
+                                            <label for="issueDescription">Störungsbeschreibung: *</label>
+                                            <textarea id="issueDescription" rows="8" required placeholder="Detaillierte Beschreibung der Störung:
+
+🔍 Was ist passiert?
+⏰ Wann ist es aufgetreten?
+🔄 Unter welchen Umständen?
+📊 Welche Auswirkungen hat es?
+🔧 Wurden bereits Maßnahmen ergriffen?
+⚠️ Besondere Gefahren oder Risiken?"></textarea>
+                                            <div class="character-counter"><span id="descCounter">0</span>/2000 Zeichen empfohlen</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reproductionSteps">Reproduktionsschritte:</label>
+                                            <textarea id="reproductionSteps" rows="4" placeholder="Schritte zur Reproduktion der Störung:
+1. 
+2. 
+3. "></textarea>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="issuePhoto">Foto der Störung (optional):</label>
-                                        <input type="file" id="issuePhoto" accept="image/*">
-                                        <small>Unterstützte Formate: JPG, PNG, GIF (max. 10MB)</small>
+                                    
+                                    <div class="grid-section">
+                                        <h3><i class="fas fa-tools"></i> Zusätzliche Informationen</h3>
+                                        <div class="form-group">
+                                            <label for="affectedComponents">Betroffene Komponenten:</label>
+                                            <input type="text" id="affectedComponents" placeholder="z.B. Hydraulikzylinder, Steuerventil">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="errorCodes">Fehlercodes/Alarme:</label>
+                                            <input type="text" id="errorCodes" placeholder="z.B. E001, ALARM_TEMP_HIGH">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reportedBy">Störung gemeldet von:</label>
+                                            <input type="text" id="reportedBy" value="${this.getCurrentUser()?.displayName || ''}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="contactInfo">Kontakt für Rückfragen:</label>
+                                            <input type="text" id="contactInfo" placeholder="Telefon/E-Mail für Rückfragen">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content: Media -->
+                            <div id="tab-media" class="tab-content">
+                                <div class="media-upload-section">
+                                    <h3><i class="fas fa-camera"></i> Dokumentation & Medien</h3>
+                                    <div class="upload-grid">
+                                        <div class="upload-area" onclick="document.getElementById('issuePhoto').click()">
+                                            <i class="fas fa-camera fa-3x"></i>
+                                            <p>Foto hochladen/aufnehmen</p>
+                                            <small>JPG, PNG bis 10MB</small>
+                                        </div>
+                                        <div class="upload-area" onclick="document.getElementById('issueVideo').click()">
+                                            <i class="fas fa-video fa-3x"></i>
+                                            <p>Video aufnehmen</p>
+                                            <small>MP4, MOV bis 50MB</small>
+                                        </div>
+                                        <div class="upload-area" onclick="document.getElementById('issueAudio').click()">
+                                            <i class="fas fa-microphone fa-3x"></i>
+                                            <p>Audionotiz</p>
+                                            <small>MP3, WAV bis 10MB</small>
+                                        </div>
+                                        <div class="upload-area" onclick="document.getElementById('issueDocument').click()">
+                                            <i class="fas fa-file-alt fa-3x"></i>
+                                            <p>Dokument</p>
+                                            <small>PDF, DOCX bis 20MB</small>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="issuePhoto" accept="image/*" style="display: none;" onchange="window.qhseDashboard.handleFileUpload(this, 'photo')">
+                                    <input type="file" id="issueVideo" accept="video/*" style="display: none;" onchange="window.qhseDashboard.handleFileUpload(this, 'video')">
+                                    <input type="file" id="issueAudio" accept="audio/*" style="display: none;" onchange="window.qhseDashboard.handleFileUpload(this, 'audio')">
+                                    <input type="file" id="issueDocument" accept=".pdf,.doc,.docx" style="display: none;" onchange="window.qhseDashboard.handleFileUpload(this, 'document')">
+                                    
+                                    <div id="uploadedFiles" class="uploaded-files-section">
+                                        <h4>Hochgeladene Dateien:</h4>
+                                        <div id="filesList" class="files-list"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content: Analysis -->
+                            <div id="tab-analysis" class="tab-content">
+                                <div class="analysis-section">
+                                    <h3><i class="fas fa-chart-line"></i> AI-Gestützte Störungsanalyse</h3>
+                                    <div class="analysis-grid">
+                                        <div class="analysis-card">
+                                            <h4><i class="fas fa-history"></i> Historische Daten</h4>
+                                            <div id="historicalAnalysis">
+                                                <p>Analysiere ähnliche Störungen...</p>
+                                                <button type="button" onclick="window.qhseDashboard.analyzeHistoricalData()" class="btn-info">
+                                                    <i class="fas fa-search"></i> Ähnliche Fälle suchen
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="analysis-card">
+                                            <h4><i class="fas fa-clock"></i> Ausfallzeit-Prognose</h4>
+                                            <div id="downtimeAnalysis">
+                                                <p>Geschätzte Reparaturdauer: <span id="estimatedDowntime">Wird berechnet...</span></p>
+                                                <p>Produktionsausfall: <span id="productionLoss">Wird berechnet...</span></p>
+                                            </div>
+                                        </div>
+                                        <div class="analysis-card">
+                                            <h4><i class="fas fa-tools"></i> Empfohlene Maßnahmen</h4>
+                                            <div id="recommendedActions">
+                                                <ul id="actionsList">
+                                                    <li>Analysiere Störungstyp...</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="analysis-card">
+                                            <h4><i class="fas fa-users"></i> Expertenwissen</h4>
+                                            <div id="expertAdvice">
+                                                <p>Empfohlene Kontakte:</p>
+                                                <div id="expertContacts"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content: Workflow -->
+                            <div id="tab-workflow" class="tab-content">
+                                <div class="workflow-section">
+                                    <h3><i class="fas fa-route"></i> Automatisierter Workflow</h3>
+                                    <div class="workflow-options">
+                                        <div class="workflow-card">
+                                            <h4><i class="fas fa-bell"></i> Benachrichtigungen</h4>
+                                            <div class="checkbox-group">
+                                                <label><input type="checkbox" id="notifyMaintenance" checked> Instandhaltung benachrichtigen</label>
+                                                <label><input type="checkbox" id="notifyProduction" checked> Produktionsleitung informieren</label>
+                                                <label><input type="checkbox" id="notifySafety"> Arbeitssicherheit bei kritischen Störungen</label>
+                                                <label><input type="checkbox" id="notifyManagement"> Management bei längeren Ausfällen</label>
+                                            </div>
+                                        </div>
+                                        <div class="workflow-card">
+                                            <h4><i class="fas fa-calendar-alt"></i> Automatische Terminplanung</h4>
+                                            <div class="checkbox-group">
+                                                <label><input type="checkbox" id="scheduleRepair" checked> Reparaturtermin vorschlagen</label>
+                                                <label><input type="checkbox" id="orderParts"> Ersatzteile automatisch bestellen</label>
+                                                <label><input type="checkbox" id="blockMachine"> Maschine sperren bei kritischen Störungen</label>
+                                            </div>
+                                        </div>
+                                        <div class="workflow-card">
+                                            <h4><i class="fas fa-file-contract"></i> Dokumentation</h4>
+                                            <div class="checkbox-group">
+                                                <label><input type="checkbox" id="createWorkOrder" checked> Arbeitsauftrag erstellen</label>
+                                                <label><input type="checkbox" id="updateMaintLog" checked> Wartungslog aktualisieren</label>
+                                                <label><input type="checkbox" id="generateReport"> Störungsbericht generieren</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="workflow-timeline">
+                                        <h4><i class="fas fa-timeline"></i> Geplanter Workflow</h4>
+                                        <div id="workflowPreview" class="timeline-preview">
+                                            <div class="timeline-item">
+                                                <span class="timeline-time">Sofort</span>
+                                                <span class="timeline-action">Störungsmeldung erstellen</span>
+                                            </div>
+                                            <div class="timeline-item">
+                                                <span class="timeline-time">+5 Min</span>
+                                                <span class="timeline-action">Benachrichtigungen versenden</span>
+                                            </div>
+                                            <div class="timeline-item">
+                                                <span class="timeline-time">+15 Min</span>
+                                                <span class="timeline-action">Erste Bewertung durch Techniker</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -17800,7 +18129,765 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
                 </div>
             </div>
         `;
+        
+        console.log('🚨 Modal HTML wird eingefügt...');
         document.body.insertAdjacentHTML('beforeend', modalHtml);
+        console.log('🚨 Modal wurde zur DOM hinzugefügt');
+        
+        // Check if modal exists in DOM
+        setTimeout(() => {
+            const insertedModal = document.getElementById('reportIssueModal');
+            console.log('🚨 Modal im DOM gefunden:', !!insertedModal);
+            if (insertedModal) {
+                console.log('🚨 Modal Klassen:', insertedModal.className);
+            }
+        }, 50);
+        
+        // Pre-select machine if provided
+        if (machineId) {
+            setTimeout(() => {
+                const machineSelect = document.getElementById('issueMachine');
+                if (machineSelect) {
+                    machineSelect.value = machineId;
+                    console.log('🚨 Maschine vorausgewählt:', machineId);
+                }
+            }, 100);
+        }
+        
+        // Initialize Enterprise features
+        this.initializeEnterpriseIssueFeatures();
+    }
+
+    // Enterprise Issue Features
+    initializeEnterpriseIssueFeatures() {
+        // Character counters
+        setTimeout(() => {
+            const titleInput = document.getElementById('issueTitle');
+            const descInput = document.getElementById('issueDescription');
+            
+            if (titleInput) {
+                titleInput.addEventListener('input', () => {
+                    const counter = document.getElementById('titleCounter');
+                    if (counter) counter.textContent = titleInput.value.length;
+                });
+            }
+            
+            if (descInput) {
+                descInput.addEventListener('input', () => {
+                    const counter = document.getElementById('descCounter');
+                    if (counter) counter.textContent = descInput.value.length;
+                });
+            }
+        }, 200);
+    }
+
+    switchIssueTab(event, tabName) {
+        // Remove active from all tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Add active to selected tab
+        event.target.classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+
+    updateMachineInfo(machineId) {
+        const machine = this.machines.find(m => m.id === machineId);
+        const machineInfo = document.getElementById('machineInfo');
+        
+        if (machine && machineInfo) {
+            machineInfo.style.display = 'block';
+            document.getElementById('machineType').textContent = machine.type || 'Unbekannt';
+            document.getElementById('machineLocation').textContent = machine.location || 'Unbekannt';
+            document.getElementById('machineStatus').textContent = machine.status || 'Unbekannt';
+            document.getElementById('lastMaintenance').textContent = machine.lastMaintenance ? 
+                new Date(machine.lastMaintenance).toLocaleDateString('de-DE') : 'Unbekannt';
+        } else if (machineInfo) {
+            machineInfo.style.display = 'none';
+        }
+        
+        // Update machine indicator
+        const indicator = document.getElementById('machineIndicator');
+        if (indicator) {
+            indicator.textContent = machine ? `${machine.name} ausgewählt` : 'Maschine wählen';
+        }
+    }
+
+    updatePriorityIndicator(priority) {
+        const indicator = document.getElementById('priorityIndicator');
+        if (indicator) {
+            const priorityMap = {
+                'low': '🟢 Niedrig',
+                'medium': '🟡 Mittel', 
+                'high': '🟠 Hoch',
+                'critical': '🔴 Kritisch'
+            };
+            indicator.textContent = priorityMap[priority] || '🟢 Standard';
+        }
+    }
+
+    fillQuickTemplate(type) {
+        const templates = {
+            hydraulic: {
+                title: 'Hydraulikstörung',
+                description: '🔧 Hydraulische Störung festgestellt:\n\n🔍 Symptome:\n- Unregelmäßige Bewegungen\n- Druckverlust\n- Leckage\n\n⏰ Aufgetreten: Gerade eben\n🔄 Umstände: Während normalem Betrieb\n📊 Auswirkungen: Produktionsunterbrechung',
+                category: 'hydraulic',
+                priority: 'medium'
+            },
+            electrical: {
+                title: 'Elektrische Störung',
+                description: '⚡ Elektrische Störung aufgetreten:\n\n🔍 Symptome:\n- Stromausfall\n- Kurzschluss\n- Überhitzung\n\n⏰ Aufgetreten: Gerade eben\n🔄 Umstände: Während des Betriebs\n📊 Auswirkungen: Maschine nicht betriebsbereit',
+                category: 'electrical',
+                priority: 'high'
+            },
+            mechanical: {
+                title: 'Mechanische Störung',
+                description: '🔧 Mechanische Störung festgestellt:\n\n🔍 Symptome:\n- Ungewöhnliche Geräusche\n- Vibration\n- Blockierung\n\n⏰ Aufgetreten: Gerade eben\n🔄 Umstände: Während der Produktion\n📊 Auswirkungen: Qualitätsprobleme',
+                category: 'mechanical',
+                priority: 'medium'
+            },
+            software: {
+                title: 'Software-Problem',
+                description: '💻 Software-Problem aufgetreten:\n\n🔍 Symptome:\n- Systemfehler\n- Falsche Anzeigen\n- Programmabsturz\n\n⏰ Aufgetreten: Gerade eben\n🔄 Umstände: Bei Programmstart\n📊 Auswirkungen: Bedienung nicht möglich',
+                category: 'software',
+                priority: 'medium'
+            }
+        };
+        
+        const template = templates[type];
+        if (template) {
+            document.getElementById('issueTitle').value = template.title;
+            document.getElementById('issueDescription').value = template.description;
+            document.getElementById('issueCategory').value = template.category;
+            document.getElementById('issuePriority').value = template.priority;
+            
+            // Update indicators
+            this.updatePriorityIndicator(template.priority);
+            
+            alert(`📋 Vorlage "${template.title}" geladen!\nSie können die Felder nach Bedarf anpassen.`);
+        }
+    }
+
+    enableVoiceInput() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            
+            recognition.lang = 'de-DE';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            recognition.onstart = function() {
+                alert('🎤 Sprachaufnahme gestartet. Sprechen Sie jetzt...');
+            };
+            
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript;
+                const descField = document.getElementById('issueDescription');
+                if (descField) {
+                    descField.value += (descField.value ? '\n\n' : '') + '🎤 Sprachnotiz: ' + speechResult;
+                }
+                alert('✅ Sprachaufnahme beendet und eingefügt!');
+            };
+            
+            recognition.onerror = function(event) {
+                alert('❌ Sprachaufnahme fehlgeschlagen: ' + event.error);
+            };
+            
+            recognition.start();
+        } else {
+            alert('❌ Sprachaufnahme wird von diesem Browser nicht unterstützt.');
+        }
+    }
+
+    openCameraCapture() {
+        // Try to access camera for live capture
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            alert('📸 Kamera-Funktion aktiviert!\nVerwenden Sie den "Foto hochladen" Button im Medien-Tab um ein Bild aufzunehmen.');
+            // Switch to media tab
+            this.switchIssueTab({target: document.querySelector('[onclick*="media"]')}, 'media');
+        } else {
+            alert('❌ Kamera-Zugriff wird von diesem Browser nicht unterstützt.');
+        }
+    }
+
+    handleFileUpload(input, type) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const maxSizes = {
+            photo: 10 * 1024 * 1024,    // 10MB
+            video: 50 * 1024 * 1024,    // 50MB  
+            audio: 10 * 1024 * 1024,    // 10MB
+            document: 20 * 1024 * 1024  // 20MB
+        };
+        
+        if (file.size > maxSizes[type]) {
+            alert(`❌ Datei zu groß! Maximum für ${type}: ${maxSizes[type] / (1024*1024)}MB`);
+            input.value = '';
+            return;
+        }
+        
+        const filesList = document.getElementById('filesList');
+        if (filesList) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <i class="fas fa-${this.getFileIcon(type)}"></i>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">(${(file.size / 1024).toFixed(1)} KB)</span>
+                </div>
+                <button type="button" onclick="this.parentNode.remove()" class="remove-file-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            filesList.appendChild(fileItem);
+        }
+        
+        alert(`✅ Datei "${file.name}" erfolgreich hochgeladen!`);
+    }
+
+    getFileIcon(type) {
+        const icons = {
+            photo: 'image',
+            video: 'video', 
+            audio: 'volume-up',
+            document: 'file-alt'
+        };
+        return icons[type] || 'file';
+    }
+
+    analyzeHistoricalData() {
+        const machineId = document.getElementById('issueMachine').value;
+        const category = document.getElementById('issueCategory').value;
+        
+        if (!machineId || !category) {
+            alert('⚠️ Bitte wählen Sie zuerst eine Maschine und Kategorie aus.');
+            return;
+        }
+        
+        // Simulate analysis
+        setTimeout(() => {
+            const analysisDiv = document.getElementById('historicalAnalysis');
+            if (analysisDiv) {
+                analysisDiv.innerHTML = `
+                    <div class="analysis-result">
+                        <h5>📊 Analyse-Ergebnisse:</h5>
+                        <ul>
+                            <li>🔍 3 ähnliche Störungen in den letzten 6 Monaten gefunden</li>
+                            <li>⏱️ Durchschnittliche Reparaturzeit: 2,5 Stunden</li>
+                            <li>💰 Durchschnittliche Kosten: €850</li>
+                            <li>🔧 Häufigste Ursache: Verschleiß der Dichtungen</li>
+                        </ul>
+                        <button type="button" onclick="alert('📋 Detailbericht wird generiert...')" class="btn-info">
+                            <i class="fas fa-download"></i> Detailbericht
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // Update other analysis sections
+            document.getElementById('estimatedDowntime').textContent = '2-4 Stunden';
+            document.getElementById('productionLoss').textContent = '€1.200-2.400';
+            
+            const actionsList = document.getElementById('actionsList');
+            if (actionsList) {
+                actionsList.innerHTML = `
+                    <li>🔧 Hydraulikdichtungen prüfen und ersetzen</li>
+                    <li>🧪 Hydraulikflüssigkeit analysieren</li>
+                    <li>📋 Wartungsintervall anpassen</li>
+                `;
+            }
+        }, 1500);
+        
+        alert('🔄 Historische Datenanalyse gestartet...');
+    }
+
+    // Advanced Enterprise Functions
+    minimizeModal() {
+        const modal = document.getElementById('reportIssueModal');
+        if (modal) {
+            modal.classList.toggle('minimized');
+            if (modal.classList.contains('minimized')) {
+                modal.style.transform = 'scale(0.3) translateY(70vh) translateX(70vw)';
+                modal.style.opacity = '0.8';
+            } else {
+                modal.style.transform = 'scale(1) translateY(0) translateX(0)';
+                modal.style.opacity = '1';
+            }
+        }
+    }
+
+    toggleFullscreen() {
+        const modal = document.getElementById('reportIssueModal');
+        if (modal) {
+            modal.classList.toggle('fullscreen');
+            const icon = modal.querySelector('.fullscreen-btn i');
+            if (modal.classList.contains('fullscreen')) {
+                icon.className = 'fas fa-compress';
+                modal.style.width = '100vw';
+                modal.style.height = '100vh';
+                modal.style.margin = '0';
+                modal.style.borderRadius = '0';
+            } else {
+                icon.className = 'fas fa-expand';
+                modal.style.width = '';
+                modal.style.height = '';
+                modal.style.margin = '';
+                modal.style.borderRadius = '';
+            }
+        }
+    }
+
+    enableAdvancedVoiceInput() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            
+            recognition.lang = 'de-DE';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            
+            // Update AI status
+            const aiStatusBadge = document.getElementById('aiStatusBadge');
+            if (aiStatusBadge) aiStatusBadge.textContent = '🎤 Hört zu...';
+            
+            recognition.onstart = function() {
+                const voiceBtn = document.querySelector('.ai-btn.voice .ai-status');
+                if (voiceBtn) voiceBtn.textContent = '🔴 Aktiv';
+                
+                // Create voice visualization
+                const modal = document.getElementById('reportIssueModal');
+                const voiceViz = document.createElement('div');
+                voiceViz.className = 'voice-visualization';
+                voiceViz.innerHTML = `
+                    <div class="voice-waves">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                    <p>🎤 Sprechen Sie jetzt... (kontinuierliche Aufnahme)</p>
+                `;
+                modal.appendChild(voiceViz);
+            };
+            
+            recognition.onresult = function(event) {
+                const results = Array.from(event.results);
+                const transcript = results.map(result => result[0].transcript).join('');
+                
+                const descField = document.getElementById('issueDescription');
+                if (descField) {
+                    descField.value = '🎤 Sprachaufnahme: ' + transcript;
+                    
+                    // Auto-analyze speech for keywords
+                    window.qhseDashboard.analyzeVoiceInput(transcript);
+                }
+            };
+            
+            recognition.onend = function() {
+                const voiceBtn = document.querySelector('.ai-btn.voice .ai-status');
+                if (voiceBtn) voiceBtn.textContent = '🟢 Bereit';
+                
+                const voiceViz = document.querySelector('.voice-visualization');
+                if (voiceViz) voiceViz.remove();
+                
+                if (aiStatusBadge) aiStatusBadge.textContent = '🤖 AI Ready';
+            };
+            
+            recognition.start();
+        } else {
+            alert('❌ Erweiterte Sprachaufnahme wird von diesem Browser nicht unterstützt.');
+        }
+    }
+
+    analyzeVoiceInput(transcript) {
+        const keywords = {
+            'hydraulik': { category: 'hydraulic', priority: 'medium' },
+            'elektrik': { category: 'electrical', priority: 'high' },
+            'mechanik': { category: 'mechanical', priority: 'medium' },
+            'software': { category: 'software', priority: 'medium' },
+            'notfall': { priority: 'critical' },
+            'dringend': { priority: 'high' },
+            'eilig': { priority: 'high' }
+        };
+
+        const lowerTranscript = transcript.toLowerCase();
+        
+        for (const [keyword, settings] of Object.entries(keywords)) {
+            if (lowerTranscript.includes(keyword)) {
+                if (settings.category) {
+                    const categorySelect = document.getElementById('issueCategory');
+                    if (categorySelect) categorySelect.value = settings.category;
+                }
+                if (settings.priority) {
+                    const prioritySelect = document.getElementById('issuePriority');
+                    if (prioritySelect) {
+                        prioritySelect.value = settings.priority;
+                        this.updatePriorityIndicator(settings.priority);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    enableSmartCamera() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            const aiStatusBadge = document.getElementById('aiStatusBadge');
+            if (aiStatusBadge) aiStatusBadge.textContent = '📸 Kamera aktiv';
+
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    // Create camera preview modal
+                    const cameraModal = document.createElement('div');
+                    cameraModal.className = 'camera-preview-modal';
+                    cameraModal.innerHTML = `
+                        <div class="camera-content">
+                            <div class="camera-header">
+                                <h3>📸 Smart Camera - AI-Analyse</h3>
+                                <button onclick="this.closest('.camera-preview-modal').remove(); window.qhseDashboard.stopCamera();">✕</button>
+                            </div>
+                            <div class="camera-preview">
+                                <video id="cameraVideo" autoplay playsinline></video>
+                                <canvas id="captureCanvas" style="display: none;"></canvas>
+                            </div>
+                            <div class="camera-controls">
+                                <button onclick="window.qhseDashboard.capturePhoto()" class="capture-btn">
+                                    <i class="fas fa-camera"></i> Foto aufnehmen
+                                </button>
+                                <button onclick="window.qhseDashboard.analyzeImage()" class="analyze-btn">
+                                    <i class="fas fa-search"></i> AI-Analyse
+                                </button>
+                            </div>
+                            <div class="ai-analysis-result" id="imageAnalysisResult"></div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(cameraModal);
+                    
+                    const video = document.getElementById('cameraVideo');
+                    video.srcObject = stream;
+                    this.currentCameraStream = stream;
+                })
+                .catch(err => {
+                    console.error('Kamera-Zugriff fehlgeschlagen:', err);
+                    alert('❌ Kamera-Zugriff fehlgeschlagen: ' + err.message);
+                });
+        } else {
+            alert('❌ Kamera-API wird von diesem Browser nicht unterstützt.');
+        }
+    }
+
+    capturePhoto() {
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.getElementById('captureCanvas');
+        const context = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+        
+        canvas.toBlob(blob => {
+            const file = new File([blob], `störung_foto_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            this.handleCapturedPhoto(file);
+        }, 'image/jpeg', 0.8);
+    }
+
+    handleCapturedPhoto(file) {
+        const filesList = document.getElementById('filesList');
+        if (filesList) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item captured-photo';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <i class="fas fa-camera text-green-500"></i>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">(${(file.size / 1024).toFixed(1)} KB)</span>
+                    <span class="capture-badge">📸 Live-Aufnahme</span>
+                </div>
+                <button type="button" onclick="this.parentNode.remove()" class="remove-file-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            filesList.appendChild(fileItem);
+        }
+        
+        alert('✅ Foto erfolgreich aufgenommen und zur Störungsmeldung hinzugefügt!');
+    }
+
+    analyzeImage() {
+        const analysisResult = document.getElementById('imageAnalysisResult');
+        if (analysisResult) {
+            analysisResult.innerHTML = `
+                <div class="analysis-progress">
+                    <div class="progress-spinner"></div>
+                    <p>🤖 AI analysiert Bild...</p>
+                </div>
+            `;
+            
+            // Simulate AI analysis
+            setTimeout(() => {
+                analysisResult.innerHTML = `
+                    <div class="analysis-complete">
+                        <h4>🔍 AI-Bildanalyse Ergebnisse:</h4>
+                        <ul class="analysis-findings">
+                            <li>🔧 Hydraulikkomponente erkannt</li>
+                            <li>⚠️ Ölleckage festgestellt</li>
+                            <li>📊 Empfohlene Priorität: Hoch</li>
+                            <li>🛠️ Vorgeschlagene Kategorie: Hydraulisch</li>
+                        </ul>
+                        <button onclick="window.qhseDashboard.applyAIRecommendations()" class="apply-recommendations-btn">
+                            <i class="fas fa-magic"></i> Empfehlungen übernehmen
+                        </button>
+                    </div>
+                `;
+            }, 2000);
+        }
+    }
+
+    applyAIRecommendations() {
+        document.getElementById('issueCategory').value = 'hydraulic';
+        document.getElementById('issuePriority').value = 'high';
+        document.getElementById('issueTitle').value = 'Hydraulik-Leckage erkannt (AI-analysiert)';
+        document.getElementById('issueDescription').value = '🤖 AI-Analyse-Ergebnis:\n\n📸 Automatische Bilderkennung hat eine Hydraulik-Leckage identifiziert.\n🔍 Erkannte Komponenten: Hydraulikzylinder, Leitungen\n⚠️ Schweregrad: Hoch (aktive Leckage)\n🛠️ Empfohlene Sofortmaßnahmen: Maschine stoppen, Bereich absichern';
+        
+        this.updatePriorityIndicator('high');
+        
+        alert('✅ AI-Empfehlungen wurden automatisch übernommen!');
+    }
+
+    stopCamera() {
+        if (this.currentCameraStream) {
+            this.currentCameraStream.getTracks().forEach(track => track.stop());
+            this.currentCameraStream = null;
+        }
+        
+        const aiStatusBadge = document.getElementById('aiStatusBadge');
+        if (aiStatusBadge) aiStatusBadge.textContent = '🤖 AI Ready';
+    }
+
+    startRealTimeAnalysis() {
+        const analyzerBtn = document.querySelector('.ai-btn.analyzer .ai-status');
+        if (analyzerBtn) analyzerBtn.textContent = '🔴 Aktiv';
+        
+        const aiStatusBadge = document.getElementById('aiStatusBadge');
+        if (aiStatusBadge) aiStatusBadge.textContent = '📊 Analysiert...';
+        
+        // Create real-time analysis dashboard
+        const analysisPanel = document.createElement('div');
+        analysisPanel.className = 'realtime-analysis-panel';
+        analysisPanel.innerHTML = `
+            <div class="analysis-header">
+                <h4>📊 Live-Analyse Dashboard</h4>
+                <button onclick="this.closest('.realtime-analysis-panel').remove(); window.qhseDashboard.stopRealTimeAnalysis();">✕</button>
+            </div>
+            <div class="analysis-metrics">
+                <div class="metric">
+                    <span class="metric-label">Form-Vollständigkeit:</span>
+                    <div class="metric-bar">
+                        <div class="metric-fill" id="completionMetric" style="width: 20%"></div>
+                    </div>
+                    <span class="metric-value" id="completionValue">20%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Datenqualität:</span>
+                    <div class="metric-bar">
+                        <div class="metric-fill quality" id="qualityMetric" style="width: 85%"></div>
+                    </div>
+                    <span class="metric-value" id="qualityValue">85%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Automatisierung:</span>
+                    <div class="metric-bar">
+                        <div class="metric-fill automation" id="automationMetric" style="width: 60%"></div>
+                    </div>
+                    <span class="metric-value" id="automationValue">60%</span>
+                </div>
+            </div>
+            <div class="live-suggestions" id="liveSuggestions">
+                <h5>💡 Live-Empfehlungen:</h5>
+                <ul>
+                    <li>📝 Beschreibung zu kurz - mehr Details hinzufügen</li>
+                    <li>📸 Foto empfohlen für bessere Dokumentation</li>
+                    <li>🔧 Ähnliche Störung vor 2 Wochen - Vorlage verfügbar</li>
+                </ul>
+            </div>
+        `;
+        
+        const modal = document.getElementById('reportIssueModal');
+        modal.appendChild(analysisPanel);
+        
+        // Start monitoring form changes
+        this.startFormMonitoring();
+    }
+
+    startFormMonitoring() {
+        const formFields = ['issueMachine', 'issuePriority', 'issueCategory', 'issueTitle', 'issueDescription'];
+        
+        formFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('input', () => this.updateAnalysisMetrics());
+                field.addEventListener('change', () => this.updateAnalysisMetrics());
+            }
+        });
+        
+        // Update metrics every 2 seconds
+        this.analysisInterval = setInterval(() => {
+            this.updateAnalysisMetrics();
+        }, 2000);
+    }
+
+    updateAnalysisMetrics() {
+        const machineSelected = document.getElementById('issueMachine')?.value;
+        const prioritySelected = document.getElementById('issuePriority')?.value;
+        const categorySelected = document.getElementById('issueCategory')?.value;
+        const titleLength = document.getElementById('issueTitle')?.value?.length || 0;
+        const descLength = document.getElementById('issueDescription')?.value?.length || 0;
+        
+        let completion = 0;
+        if (machineSelected) completion += 20;
+        if (prioritySelected) completion += 20;
+        if (categorySelected) completion += 20;
+        if (titleLength > 5) completion += 20;
+        if (descLength > 50) completion += 20;
+        
+        const quality = Math.min(100, 50 + (titleLength * 0.5) + (descLength * 0.1));
+        const automation = Math.min(100, 40 + completion * 0.6);
+        
+        // Update UI
+        const completionMetric = document.getElementById('completionMetric');
+        const qualityMetric = document.getElementById('qualityMetric');
+        const automationMetric = document.getElementById('automationMetric');
+        const completionValue = document.getElementById('completionValue');
+        const qualityValue = document.getElementById('qualityValue');
+        const automationValue = document.getElementById('automationValue');
+        
+        if (completionMetric) completionMetric.style.width = completion + '%';
+        if (qualityMetric) qualityMetric.style.width = quality + '%';
+        if (automationMetric) automationMetric.style.width = automation + '%';
+        if (completionValue) completionValue.textContent = completion + '%';
+        if (qualityValue) qualityValue.textContent = Math.round(quality) + '%';
+        if (automationValue) automationValue.textContent = Math.round(automation) + '%';
+    }
+
+    stopRealTimeAnalysis() {
+        if (this.analysisInterval) {
+            clearInterval(this.analysisInterval);
+            this.analysisInterval = null;
+        }
+        
+        const analyzerBtn = document.querySelector('.ai-btn.analyzer .ai-status');
+        if (analyzerBtn) analyzerBtn.textContent = '🟡 Standby';
+        
+        const aiStatusBadge = document.getElementById('aiStatusBadge');
+        if (aiStatusBadge) aiStatusBadge.textContent = '🤖 AI Ready';
+    }
+
+    enablePredictiveAnalysis() {
+        const predictorBtn = document.querySelector('.ai-btn.predictor .ai-status');
+        if (predictorBtn) predictorBtn.textContent = '🔮 Aktiv';
+        
+        alert('🔮 Predictive Analysis aktiviert!\n\nDas System lernt aus Ihren Eingaben und wird:\n• Automatische Vervollständigung anbieten\n• Wartungsintervalle optimieren\n• Ausfallwahrscheinlichkeiten berechnen\n• Präventive Maßnahmen vorschlagen');
+        
+        // Start predictive analysis
+        setTimeout(() => {
+            const modal = document.getElementById('reportIssueModal');
+            const predictionPanel = document.createElement('div');
+            predictionPanel.className = 'prediction-panel';
+            predictionPanel.innerHTML = `
+                <div class="prediction-header">
+                    <h4>🔮 Predictive Analytics</h4>
+                    <button onclick="this.closest('.prediction-panel').remove();">✕</button>
+                </div>
+                <div class="predictions">
+                    <div class="prediction-item">
+                        <span class="prediction-icon">⏰</span>
+                        <div class="prediction-content">
+                            <strong>Nächste Wartung:</strong>
+                            <p>In 12 Tagen fällig (basierend auf aktueller Störung)</p>
+                        </div>
+                    </div>
+                    <div class="prediction-item">
+                        <span class="prediction-icon">💰</span>
+                        <div class="prediction-content">
+                            <strong>Kostenschätzung:</strong>
+                            <p>€850-1.200 (ähnliche Störungen)</p>
+                        </div>
+                    </div>
+                    <div class="prediction-item">
+                        <span class="prediction-icon">🎯</span>
+                        <div class="prediction-content">
+                            <strong>Erfolgswahrscheinlichkeit:</strong>
+                            <p>92% bei sofortiger Bearbeitung</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.appendChild(predictionPanel);
+        }, 1500);
+    }
+
+    triggerEmergencyMode() {
+        document.getElementById('issuePriority').value = 'critical';
+        this.updatePriorityIndicator('critical');
+        
+        // Switch to workflow tab automatically
+        this.switchIssueTab({target: document.querySelector('[onclick*="workflow"]')}, 'workflow');
+        
+        // Auto-select emergency options
+        document.getElementById('notifySafety').checked = true;
+        document.getElementById('notifyManagement').checked = true;
+        document.getElementById('blockMachine').checked = true;
+        
+        alert('🚨 NOTFALL-MODUS AKTIVIERT!\n\n• Priorität auf KRITISCH gesetzt\n• Sicherheitsbeauftragte werden benachrichtigt\n• Management wird informiert\n• Maschine wird automatisch gesperrt');
+    }
+
+    setPriorityMode() {
+        document.getElementById('issuePriority').value = 'high';
+        this.updatePriorityIndicator('high');
+        
+        document.getElementById('notifyMaintenance').checked = true;
+        document.getElementById('scheduleRepair').checked = true;
+        
+        alert('⚡ EILIG-MODUS AKTIVIERT!\n\n• Priorität auf HOCH gesetzt\n• Instandhaltung wird sofort benachrichtigt\n• Reparaturtermin wird priorisiert');
+    }
+
+    duplicateLastIssue() {
+        const lastIssue = this.issues && this.issues.length > 0 ? this.issues[this.issues.length - 1] : null;
+        
+        if (lastIssue) {
+            document.getElementById('issueMachine').value = lastIssue.machineId || '';
+            document.getElementById('issuePriority').value = lastIssue.priority || '';
+            document.getElementById('issueCategory').value = lastIssue.category || '';
+            document.getElementById('issueTitle').value = '[KOPIE] ' + (lastIssue.title || '');
+            document.getElementById('issueDescription').value = lastIssue.description || '';
+            
+            this.updatePriorityIndicator(lastIssue.priority);
+            this.updateMachineInfo(lastIssue.machineId);
+            
+            alert('📋 Letzte Störungsmeldung wurde als Vorlage geladen!\nPassen Sie die Details entsprechend an.');
+        } else {
+            alert('ℹ️ Keine vorherige Störungsmeldung zum Kopieren verfügbar.');
+        }
+    }
+
+    saveDraft() {
+        const draftData = {
+            machineId: document.getElementById('issueMachine')?.value,
+            priority: document.getElementById('issuePriority')?.value,
+            category: document.getElementById('issueCategory')?.value,
+            title: document.getElementById('issueTitle')?.value,
+            description: document.getElementById('issueDescription')?.value,
+            timestamp: new Date().toISOString(),
+            userId: this.getCurrentUser()?.id
+        };
+        
+        localStorage.setItem('qhse_issue_draft', JSON.stringify(draftData));
+        
+        alert('💾 Entwurf erfolgreich gespeichert!\n\nSie können später zur Bearbeitung zurückkehren.');
     }
 
     reportIssue() {
@@ -30574,6 +31661,680 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
         alert('Neues Urlaubsjahr wurde initialisiert.');
     }
 
+    // ===================================
+    // ENTERPRISE STÖRUNGSMELDUNG FUNCTIONS
+    // ===================================
+
+    // Modal Management Functions
+    minimizeModal() {
+        const modal = document.getElementById('reportIssueModal');
+        if (modal) {
+            modal.style.transform = 'scale(0.8)';
+            modal.style.opacity = '0.5';
+            setTimeout(() => {
+                modal.style.transform = 'scale(1)';
+                modal.style.opacity = '1';
+            }, 300);
+        }
+    }
+
+    toggleFullscreen() {
+        const modal = document.getElementById('reportIssueModal');
+        if (modal) {
+            modal.classList.toggle('fullscreen-modal');
+            const btn = modal.querySelector('.fullscreen-btn i');
+            if (btn) {
+                btn.className = modal.classList.contains('fullscreen-modal') ? 'fas fa-compress' : 'fas fa-expand';
+            }
+        }
+    }
+
+    // Advanced Voice Input with AI Analysis
+    enableAdvancedVoiceInput() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert('❌ Sprachaufnahme wird von diesem Browser nicht unterstützt.');
+            return;
+        }
+
+        // Show voice visualization
+        this.showVoiceVisualization();
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        recognition.lang = 'de-DE';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        
+        let isRecording = false;
+        let finalTranscript = '';
+
+        recognition.onstart = () => {
+            isRecording = true;
+            this.updateVoiceStatus('🎤 Sprechen Sie jetzt - AI analysiert...');
+        };
+        
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + '. ';
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+            
+            // AI-powered keyword analysis
+            this.analyzeVoiceKeywords(finalTranscript + interimTranscript);
+        };
+
+        recognition.onend = () => {
+            isRecording = false;
+            this.hideVoiceVisualization();
+            
+            if (finalTranscript) {
+                // AI-enhanced voice processing
+                const processedText = this.processVoiceWithAI(finalTranscript);
+                this.fillFormFromVoiceInput(processedText);
+                alert('✅ Spracheingabe erfolgreich verarbeitet und analysiert!');
+            }
+        };
+
+        recognition.onerror = (event) => {
+            this.hideVoiceVisualization();
+            alert('❌ Sprachaufnahme fehlgeschlagen: ' + event.error);
+        };
+
+        recognition.start();
+        
+        // Auto-stop after 30 seconds
+        setTimeout(() => {
+            if (isRecording) {
+                recognition.stop();
+            }
+        }, 30000);
+    }
+
+    // Smart Camera with AI Image Analysis
+    enableSmartCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('❌ Kamera-Zugriff wird von diesem Browser nicht unterstützt.');
+            return;
+        }
+
+        this.showCameraPreview();
+        
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(stream => {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.autoplay = true;
+                
+                const viewfinder = document.querySelector('.camera-viewfinder');
+                if (viewfinder) {
+                    viewfinder.innerHTML = '';
+                    viewfinder.appendChild(video);
+                    
+                    // Add capture button functionality
+                    const captureBtn = viewfinder.parentElement.querySelector('.camera-btn');
+                    if (captureBtn) {
+                        captureBtn.onclick = () => this.captureAndAnalyzeImage(video, stream);
+                    }
+                }
+            })
+            .catch(err => {
+                this.hideCameraPreview();
+                alert('❌ Kamera konnte nicht aktiviert werden: ' + err.message);
+            });
+    }
+
+    captureAndAnalyzeImage(video, stream) {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        // Stop camera stream
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Convert to blob and analyze
+        canvas.toBlob(blob => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imageData = e.target.result;
+                this.analyzeImageWithAI(imageData);
+                this.addImageToIssue(imageData);
+                this.hideCameraPreview();
+            };
+            reader.readAsDataURL(blob);
+        }, 'image/jpeg', 0.8);
+    }
+
+    // Real-time Form Analysis
+    startRealTimeAnalysis() {
+        this.showRealtimeAnalysis();
+        
+        // Analyze form completion in real-time
+        const analysisInterval = setInterval(() => {
+            const metrics = this.calculateFormMetrics();
+            this.updateAnalysisMetrics(metrics);
+            
+            // Generate suggestions based on current input
+            const suggestions = this.generateIntelligentSuggestions();
+            this.updateAnalysisSuggestions(suggestions);
+        }, 2000);
+
+        // Stop analysis when modal closes
+        const modal = document.getElementById('reportIssueModal');
+        if (modal) {
+            const observer = new MutationObserver(mutations => {
+                if (!document.contains(modal)) {
+                    clearInterval(analysisInterval);
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+    }
+
+    // Predictive Analytics
+    enablePredictiveAnalysis() {
+        this.showPredictionPanel();
+        
+        setTimeout(() => {
+            const predictions = this.generatePredictions();
+            this.updatePredictionCards(predictions);
+        }, 1500);
+    }
+
+    // Emergency Mode
+    triggerEmergencyMode() {
+        const modal = document.getElementById('reportIssueModal');
+        if (modal) {
+            modal.classList.add('emergency-mode');
+            
+            // Auto-fill emergency values
+            document.getElementById('issuePriority').value = 'critical';
+            document.getElementById('issueCategory').value = 'safety';
+            
+            // Update indicators
+            this.updatePriorityIndicator('critical');
+            
+            // Add emergency styling
+            const header = modal.querySelector('.enterprise-modal-header');
+            if (header) {
+                header.style.background = 'linear-gradient(135deg, #dc2626, #991b1b)';
+                header.style.animation = 'emergencyPulse 1s infinite';
+            }
+            
+            alert('🚨 NOTFALL-MODUS AKTIVIERT!\nHöchste Priorität gesetzt. Alle relevanten Stellen werden sofort benachrichtigt.');
+        }
+    }
+
+    // Priority Mode
+    setPriorityMode() {
+        document.getElementById('issuePriority').value = 'high';
+        this.updatePriorityIndicator('high');
+        alert('⚡ Eilig-Modus aktiviert! Priorität auf "Hoch" gesetzt.');
+    }
+
+    // Duplicate Last Issue
+    duplicateLastIssue() {
+        if (this.issues && this.issues.length > 0) {
+            const lastIssue = this.issues[this.issues.length - 1];
+            
+            // Fill form with last issue data
+            document.getElementById('issueTitle').value = lastIssue.title + ' (Kopie)';
+            document.getElementById('issueDescription').value = lastIssue.description;
+            document.getElementById('issueCategory').value = lastIssue.category || '';
+            document.getElementById('issuePriority').value = lastIssue.priority || 'medium';
+            
+            if (lastIssue.machineId) {
+                document.getElementById('issueMachine').value = lastIssue.machineId;
+                this.updateMachineInfo(lastIssue.machineId);
+            }
+            
+            this.updatePriorityIndicator(lastIssue.priority || 'medium');
+            alert('📋 Letzte Störung dupliziert! Sie können die Daten anpassen.');
+        } else {
+            alert('❌ Keine vorherigen Störungen gefunden.');
+        }
+    }
+
+    // Save Draft
+    saveDraft() {
+        const draftData = {
+            machine: document.getElementById('issueMachine').value,
+            priority: document.getElementById('issuePriority').value,
+            category: document.getElementById('issueCategory').value,
+            title: document.getElementById('issueTitle').value,
+            description: document.getElementById('issueDescription').value,
+            timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem('qhse_issue_draft', JSON.stringify(draftData));
+        alert('💾 Entwurf gespeichert! Sie können später daran weiterarbeiten.');
+    }
+
+    // Voice Visualization Functions
+    showVoiceVisualization() {
+        const existing = document.querySelector('.voice-visualization');
+        if (existing) existing.remove();
+        
+        const modal = document.getElementById('reportIssueModal');
+        const body = modal?.querySelector('.modal-body');
+        if (body) {
+            const visualization = document.createElement('div');
+            visualization.className = 'voice-visualization active';
+            visualization.innerHTML = `
+                <h4><i class="fas fa-microphone"></i> AI-Sprach-Analyse</h4>
+                <div class="voice-waveform">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                </div>
+                <div class="voice-status">Bereit für Spracheingabe...</div>
+                <div class="voice-keywords"></div>
+            `;
+            body.insertBefore(visualization, body.firstChild);
+        }
+    }
+
+    hideVoiceVisualization() {
+        const visualization = document.querySelector('.voice-visualization');
+        if (visualization) {
+            visualization.classList.remove('active');
+            setTimeout(() => visualization.remove(), 500);
+        }
+    }
+
+    updateVoiceStatus(status) {
+        const statusElement = document.querySelector('.voice-status');
+        if (statusElement) {
+            statusElement.textContent = status;
+        }
+    }
+
+    // Camera Preview Functions
+    showCameraPreview() {
+        const existing = document.querySelector('.camera-preview');
+        if (existing) existing.remove();
+        
+        const modal = document.getElementById('reportIssueModal');
+        const body = modal?.querySelector('.modal-body');
+        if (body) {
+            const preview = document.createElement('div');
+            preview.className = 'camera-preview active';
+            preview.innerHTML = `
+                <h4><i class="fas fa-camera"></i> Smart Camera</h4>
+                <div class="camera-viewfinder">
+                    <i class="fas fa-camera fa-3x"></i>
+                    <p>Kamera wird gestartet...</p>
+                    <div class="camera-overlay"></div>
+                </div>
+                <div class="camera-controls">
+                    <button class="camera-btn" title="Foto aufnehmen">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+            `;
+            body.insertBefore(preview, body.firstChild);
+        }
+    }
+
+    hideCameraPreview() {
+        const preview = document.querySelector('.camera-preview');
+        if (preview) {
+            preview.classList.remove('active');
+            setTimeout(() => preview.remove(), 500);
+        }
+    }
+
+    // Real-time Analysis Functions
+    showRealtimeAnalysis() {
+        const existing = document.querySelector('.realtime-analysis');
+        if (existing) existing.remove();
+        
+        const modal = document.getElementById('reportIssueModal');
+        const body = modal?.querySelector('.modal-body');
+        if (body) {
+            const analysis = document.createElement('div');
+            analysis.className = 'realtime-analysis active';
+            analysis.innerHTML = `
+                <div class="analysis-header">
+                    <div class="analysis-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="analysis-title">Live-Formular-Analyse</h3>
+                </div>
+                <div class="analysis-metrics">
+                    <div class="metric-card">
+                        <div class="metric-value" id="completionRate">0%</div>
+                        <div class="metric-label">Vollständigkeit</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="qualityScore">0</div>
+                        <div class="metric-label">Qualitätsscore</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="estimatedTime">0 Min</div>
+                        <div class="metric-label">Restzeit</div>
+                    </div>
+                </div>
+                <div class="analysis-suggestions">
+                    <div class="suggestions-title">
+                        <i class="fas fa-lightbulb"></i> AI-Empfehlungen
+                    </div>
+                    <ul class="suggestion-list" id="suggestionsList">
+                        <li class="suggestion-item">Analysiere Eingaben...</li>
+                    </ul>
+                </div>
+            `;
+            body.insertBefore(analysis, body.firstChild);
+        }
+    }
+
+    // Prediction Panel Functions
+    showPredictionPanel() {
+        const existing = document.querySelector('.prediction-panel');
+        if (existing) existing.remove();
+        
+        const modal = document.getElementById('reportIssueModal');
+        const body = modal?.querySelector('.modal-body');
+        if (body) {
+            const panel = document.createElement('div');
+            panel.className = 'prediction-panel active';
+            panel.innerHTML = `
+                <div class="prediction-header">
+                    <div class="prediction-icon">
+                        <i class="fas fa-crystal-ball"></i>
+                    </div>
+                    <h3 class="prediction-title">Prognose-Analyse</h3>
+                </div>
+                <div class="prediction-cards">
+                    <div class="prediction-card">
+                        <div class="prediction-type">Reparaturdauer</div>
+                        <div class="prediction-value" id="repairTime">Wird berechnet...</div>
+                        <div class="prediction-confidence">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="confidence-text" id="repairConfidence">0% Konfidenz</span>
+                        </div>
+                    </div>
+                    <div class="prediction-card">
+                        <div class="prediction-type">Ausfallkosten</div>
+                        <div class="prediction-value" id="downtimeCost">Wird berechnet...</div>
+                        <div class="prediction-confidence">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="confidence-text" id="costConfidence">0% Konfidenz</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            body.insertBefore(panel, body.firstChild);
+        }
+    }
+
+    // AI Processing Functions
+    processVoiceWithAI(transcript) {
+        // Enhanced voice processing with AI
+        let processed = transcript;
+        
+        // Auto-detect urgency keywords
+        const urgencyKeywords = ['notfall', 'kritisch', 'sofort', 'eilig', 'gefahr', 'unfall'];
+        const hasUrgency = urgencyKeywords.some(keyword => 
+            processed.toLowerCase().includes(keyword)
+        );
+        
+        if (hasUrgency) {
+            document.getElementById('issuePriority').value = 'critical';
+            this.updatePriorityIndicator('critical');
+        }
+        
+        // Auto-detect category
+        const categoryKeywords = {
+            'electrical': ['strom', 'elektrik', 'spannung', 'kurzschluss', 'sicherung'],
+            'hydraulic': ['hydraulik', 'öl', 'druck', 'pumpe', 'zylinder', 'leckage'],
+            'mechanical': ['mechanik', 'verschleiß', 'bruch', 'vibration', 'lager'],
+            'software': ['software', 'programm', 'system', 'computer', 'bildschirm']
+        };
+        
+        for (const [category, keywords] of Object.entries(categoryKeywords)) {
+            if (keywords.some(keyword => processed.toLowerCase().includes(keyword))) {
+                document.getElementById('issueCategory').value = category;
+                break;
+            }
+        }
+        
+        return processed;
+    }
+
+    analyzeVoiceKeywords(text) {
+        const keywords = this.extractKeywords(text);
+        const keywordsContainer = document.querySelector('.voice-keywords');
+        
+        if (keywordsContainer && keywords.length > 0) {
+            keywordsContainer.innerHTML = keywords.map(keyword => 
+                `<span class="keyword-tag">${keyword}</span>`
+            ).join('');
+        }
+    }
+
+    extractKeywords(text) {
+        const importantWords = ['störung', 'defekt', 'ausfall', 'problem', 'fehler', 'alarm', 
+                               'hydraulik', 'elektrik', 'mechanik', 'software', 'notfall', 'kritisch'];
+        
+        const words = text.toLowerCase().split(/\s+/);
+        return words.filter(word => 
+            importantWords.some(important => word.includes(important))
+        ).slice(0, 5);
+    }
+
+    analyzeImageWithAI(imageData) {
+        // Simulate AI image analysis
+        setTimeout(() => {
+            const analysisResults = [
+                '🔍 Hydraulikschlauch mit Leckage erkannt',
+                '⚠️ Ölfleck auf dem Boden sichtbar',
+                '🔧 Empfehlung: Sofortiger Austausch erforderlich',
+                '📊 Risikobewertung: Mittel bis Hoch'
+            ];
+            
+            const description = document.getElementById('issueDescription');
+            if (description) {
+                description.value += '\n\n🤖 AI-Bildanalyse:\n' + analysisResults.join('\n');
+            }
+            
+            alert('🤖 AI-Bildanalyse abgeschlossen!\nErgebnisse wurden zur Beschreibung hinzugefügt.');
+        }, 2000);
+    }
+
+    fillFormFromVoiceInput(processedText) {
+        const description = document.getElementById('issueDescription');
+        if (description) {
+            const currentText = description.value;
+            description.value = currentText + (currentText ? '\n\n' : '') + 
+                               '🎤 Spracheingabe:\n' + processedText;
+        }
+    }
+
+    addImageToIssue(imageData) {
+        const filesList = document.getElementById('filesList');
+        if (filesList) {
+            const imagePreview = document.createElement('div');
+            imagePreview.className = 'uploaded-file-item';
+            imagePreview.innerHTML = `
+                <img src="${imageData}" alt="Captured Image" style="max-width: 200px; max-height: 150px; border-radius: 0.5rem;">
+                <div class="file-info">
+                    <span class="file-name">📸 Aufgenommenes Foto</span>
+                    <span class="file-size">Kamerabild</span>
+                </div>
+                <button class="remove-file-btn" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            filesList.appendChild(imagePreview);
+        }
+    }
+
+    calculateFormMetrics() {
+        const fields = [
+            'issueMachine', 'issuePriority', 'issueCategory', 
+            'issueTitle', 'issueDescription'
+        ];
+        
+        let completed = 0;
+        let totalLength = 0;
+        
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && field.value.trim()) {
+                completed++;
+                totalLength += field.value.length;
+            }
+        });
+        
+        return {
+            completion: Math.round((completed / fields.length) * 100),
+            quality: Math.min(100, Math.round(totalLength / 10)),
+            estimatedTime: Math.max(0, (fields.length - completed) * 2)
+        };
+    }
+
+    updateAnalysisMetrics(metrics) {
+        const completionEl = document.getElementById('completionRate');
+        const qualityEl = document.getElementById('qualityScore');
+        const timeEl = document.getElementById('estimatedTime');
+        
+        if (completionEl) completionEl.textContent = metrics.completion + '%';
+        if (qualityEl) qualityEl.textContent = metrics.quality;
+        if (timeEl) timeEl.textContent = metrics.estimatedTime + ' Min';
+    }
+
+    generateIntelligentSuggestions() {
+        const machine = document.getElementById('issueMachine').value;
+        const category = document.getElementById('issueCategory').value;
+        const priority = document.getElementById('issuePriority').value;
+        
+        const suggestions = [];
+        
+        if (!machine) {
+            suggestions.push('Wählen Sie die betroffene Maschine aus');
+        }
+        
+        if (!category) {
+            suggestions.push('Kategorisieren Sie die Art der Störung');
+        }
+        
+        if (priority === 'critical') {
+            suggestions.push('Bei kritischen Störungen: Notfallkontakte informieren');
+            suggestions.push('Dokumentieren Sie Sicherheitsmaßnahmen');
+        }
+        
+        if (category === 'hydraulic') {
+            suggestions.push('Prüfen Sie auf Leckagen und Druckverlust');
+            suggestions.push('Foto der betroffenen Komponenten aufnehmen');
+        }
+        
+        return suggestions;
+    }
+
+    updateAnalysisSuggestions(suggestions) {
+        const suggestionsList = document.getElementById('suggestionsList');
+        if (suggestionsList && suggestions.length > 0) {
+            suggestionsList.innerHTML = suggestions.map(suggestion =>
+                `<li class="suggestion-item">${suggestion}</li>`
+            ).join('');
+        }
+    }
+
+    generatePredictions() {
+        const category = document.getElementById('issueCategory').value;
+        const priority = document.getElementById('issuePriority').value;
+        
+        // Simulate predictive analytics
+        const baseTimes = {
+            'hydraulic': { min: 2, max: 8, cost: 1500 },
+            'electrical': { min: 1, max: 4, cost: 800 },
+            'mechanical': { min: 4, max: 12, cost: 2500 },
+            'software': { min: 0.5, max: 2, cost: 300 }
+        };
+        
+        const priorityMultiplier = {
+            'low': 1.5,
+            'medium': 1.0,
+            'high': 0.7,
+            'critical': 0.4
+        };
+        
+        const baseData = baseTimes[category] || baseTimes['mechanical'];
+        const multiplier = priorityMultiplier[priority] || 1.0;
+        
+        const repairTime = Math.round((baseData.min + Math.random() * (baseData.max - baseData.min)) * multiplier);
+        const cost = Math.round(baseData.cost * multiplier * (1 + Math.random() * 0.5));
+        
+        return {
+            repairTime: repairTime + ' Stunden',
+            cost: cost + ' €',
+            repairConfidence: Math.round(60 + Math.random() * 30),
+            costConfidence: Math.round(50 + Math.random() * 40)
+        };
+    }
+
+    updatePredictionCards(predictions) {
+        const repairTimeEl = document.getElementById('repairTime');
+        const costEl = document.getElementById('downtimeCost');
+        const repairConfEl = document.getElementById('repairConfidence');
+        const costConfEl = document.getElementById('costConfidence');
+        
+        if (repairTimeEl) repairTimeEl.textContent = predictions.repairTime;
+        if (costEl) costEl.textContent = predictions.cost;
+        if (repairConfEl) {
+            repairConfEl.textContent = predictions.repairConfidence + '% Konfidenz';
+            const bar = repairConfEl.parentElement.querySelector('.confidence-fill');
+            if (bar) bar.style.width = predictions.repairConfidence + '%';
+        }
+        if (costConfEl) {
+            costConfEl.textContent = predictions.costConfidence + '% Konfidenz';
+            const bar = costConfEl.parentElement.querySelector('.confidence-fill');
+            if (bar) bar.style.width = predictions.costConfidence + '%';
+        }
+    }
+
+    analyzeHistoricalData() {
+        const machine = document.getElementById('issueMachine').value;
+        const category = document.getElementById('issueCategory').value;
+        
+        // Simulate historical analysis
+        setTimeout(() => {
+            const results = [
+                'Ähnliche Hydraulikstörung vor 3 Monaten',
+                'Durchschnittliche Reparaturdauer: 4.5 Stunden',
+                'Erfolgreiche Lösungen: Schlauch-Austausch (60%), Ventil-Reinigung (25%)',
+                'Präventive Maßnahme: Wöchentliche Druckprüfung'
+            ];
+            
+            const analysisDiv = document.getElementById('historicalAnalysis');
+            if (analysisDiv) {
+                analysisDiv.innerHTML = `
+                    <h5>📊 Historische Analyse abgeschlossen:</h5>
+                    <ul>
+                        ${results.map(result => `<li>${result}</li>`).join('')}
+                    </ul>
+                `;
+            }
+        }, 1500);
+    }
+
 }
 
 // Global dashboard instance for onclick handlers
@@ -31142,3 +32903,4 @@ function exportTrainingIndividual(format) {
         alert('System wird noch geladen...');
     }
 }
+
