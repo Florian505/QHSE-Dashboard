@@ -29,9 +29,12 @@ class QHSEDashboard {
         this.supplierDocuments = this.loadSupplierDocumentsFromStorage();
         this.supplierAudits = this.loadSupplierAuditsFromStorage();
         this.riskAssessments = this.loadRiskAssessmentsFromStorage();
+        this.auditExchanges = this.loadAuditExchangesFromStorage();
+        this.exchangeRequests = this.loadExchangeRequestsFromStorage();
         this.initializeRootAdmin();
         this.initializeDefaultAreas();
         this.initializeDefaultDepartments();
+        this.initializeDefaultAuditExchanges();
         this.init();
     }
 
@@ -12190,6 +12193,53 @@ ${newTraining.aiAdaptiveLearning || newTraining.experimentalFeatures ?
             ];
             this.departments = defaultDepartments;
             this.saveDepartmentsToStorage();
+        }
+    }
+
+    initializeDefaultAuditExchanges() {
+        // Nur initialisieren wenn noch keine Audit-Exchanges existieren
+        if (this.auditExchanges.length === 0) {
+            const defaultExchanges = [
+                {
+                    id: 'sample-1',
+                    title: 'ISO 9001 Internes Audit - Qualitätsmanagement',
+                    standard: 'ISO 9001',
+                    type: 'Internes Audit',
+                    location: 'Hamburg',
+                    description: 'Erfahrenes Audit-Team bietet professionelle Durchführung von internen ISO 9001 Audits. Schwerpunkt auf Prozessoptimierung und Compliance-Prüfung.',
+                    offeredBy: 'qhse-1',
+                    offeredByName: 'Max Mustermann',
+                    createdAt: new Date('2024-01-15').toISOString(),
+                    status: 'available'
+                },
+                {
+                    id: 'sample-2',
+                    title: 'ISO 14001 Umweltmanagement Audit',
+                    standard: 'ISO 14001',
+                    type: 'Externes Audit',
+                    location: 'Berlin',
+                    description: 'Spezialisiert auf Umweltmanagementsysteme mit Fokus auf Nachhaltigkeitsbewertung und Umweltaspekte-Analyse.',
+                    offeredBy: 'admin-1',
+                    offeredByName: 'Sarah Schmidt',
+                    createdAt: new Date('2024-01-20').toISOString(),
+                    status: 'available'
+                },
+                {
+                    id: 'sample-3',
+                    title: 'ISO 45001 Arbeitsschutzmanagement',
+                    standard: 'ISO 45001',
+                    type: 'Zertifizierungsaudit',
+                    location: 'München',
+                    description: 'Comprehensive Arbeitsschutzaudit mit Expertise in Gefährdungsbeurteilung und Sicherheitskultur-Entwicklung.',
+                    offeredBy: 'qhse-2',
+                    offeredByName: 'Dr. Thomas Weber',
+                    createdAt: new Date('2024-01-25').toISOString(),
+                    status: 'available'
+                }
+            ];
+            
+            this.auditExchanges = defaultExchanges;
+            localStorage.setItem('qhse_audit_exchanges', JSON.stringify(this.auditExchanges));
         }
     }
 
@@ -24448,6 +24498,11 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
         return data ? JSON.parse(data) : [];
     }
 
+    loadAuditExchangesFromStorage() {
+        const data = localStorage.getItem('qhse_audit_exchanges');
+        return data ? JSON.parse(data) : [];
+    }
+
     setupRiskAssessment() {
         console.log('🔧 Setting up Risk Assessment module...');
         setTimeout(() => {
@@ -24476,7 +24531,131 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
                     this.submitAuditOffer();
                 });
             }
+
+            // Make updateScopeRequirements globally available
+            window.updateScopeRequirements = () => this.updateScopeRequirements();
         }, 100);
+    }
+
+    updateScopeRequirements() {
+        const standardSelect = document.getElementById('auditStandard');
+        const scopeRequirementsDiv = document.getElementById('scopeRequirements');
+        
+        if (!standardSelect || !scopeRequirementsDiv) return;
+        
+        const selectedStandard = standardSelect.value;
+        
+        const scopeRequirements = {
+            'ISO 9001': {
+                title: 'ISO 9001 - Qualitätsmanagement Scope-Anforderungen',
+                requirements: [
+                    '• Anwendungsbereich des QM-Systems klar definieren',
+                    '• Alle relevanten Prozesse und deren Wechselwirkungen identifizieren',
+                    '• Kundenanforderungen und zutreffende gesetzliche Anforderungen berücksichtigen',
+                    '• Ausschlüsse in Kapitel 7 begründen (falls zutreffend)',
+                    '• Organisationskontext und interessierte Parteien definieren'
+                ],
+                focusAreas: 'Führung, Planung, Unterstützung, Betrieb, Bewertung der Leistung, Verbesserung'
+            },
+            'ISO 14001': {
+                title: 'ISO 14001 - Umweltmanagement Scope-Anforderungen',
+                requirements: [
+                    '• Physische Grenzen und organisatorische Anwendbarkeit definieren',
+                    '• Umweltaspekte und -auswirkungen identifizieren und bewerten',
+                    '• Bindende Verpflichtungen (legal und andere) ermitteln',
+                    '• Tätigkeiten, Produkte und Dienstleistungen abgrenzen',
+                    '• Kontrolle und Einfluss der Organisation bestimmen'
+                ],
+                focusAreas: 'Kontext, Führung, Planung, Unterstützung, Betrieb, Leistungsbewertung, Verbesserung'
+            },
+            'ISO 45001': {
+                title: 'ISO 45001 - Arbeitsschutzmanagement Scope-Anforderungen',
+                requirements: [
+                    '• Physische und organisatorische Grenzen festlegen',
+                    '• Gefährdungen und Risiken für alle Arbeitsplätze identifizieren',
+                    '• Alle Tätigkeiten unter der Kontrolle der Organisation erfassen',
+                    '• Externe Anbieter und Besucher berücksichtigen',
+                    '• Rechtsvorschriften und andere Anforderungen ermitteln'
+                ],
+                focusAreas: 'Kontext, Führung, Planung, Unterstützung, Betrieb, Leistungsbewertung, Verbesserung'
+            },
+            'ISO 27001': {
+                title: 'ISO 27001 - Informationssicherheit Scope-Anforderungen',
+                requirements: [
+                    '• Informationen, Systeme und Prozesse klar abgrenzen',
+                    '• Interne und externe Schnittstellen definieren',
+                    '• Rechtliche, regulatorische und vertragliche Anforderungen berücksichtigen',
+                    '• Risikobewertung für alle Informationswerte durchführen',
+                    '• Geografische Standorte und organisatorische Einheiten festlegen'
+                ],
+                focusAreas: 'Kontext, Führung, Planung, Unterstützung, Betrieb, Leistungsbewertung, Verbesserung'
+            },
+            'IATF 16949': {
+                title: 'IATF 16949 - Automobilindustrie Scope-Anforderungen',
+                requirements: [
+                    '• Automotive-spezifische Prozesse und Anforderungen integrieren',
+                    '• Kundenspezifische Anforderungen (CSR) berücksichtigen',
+                    '• Produktrealisierung von der Entwicklung bis zur Produktion',
+                    '• Lieferantenbewertung und -entwicklung einbeziehen',
+                    '• Kontinuierliche Verbesserung und Problemlösung implementieren'
+                ],
+                focusAreas: 'ISO 9001 Basis + Automotive Core Tools, APQP, PPAP, SPC, MSA, FMEA'
+            },
+            'AS9100': {
+                title: 'AS9100 - Luft- und Raumfahrt Scope-Anforderungen',
+                requirements: [
+                    '• Luftfahrt-spezifische Prozesse und Anforderungen erfassen',
+                    '• Konfigurationsmanagement implementieren',
+                    '• Risikomanagement in der gesamten Produktlebensdauer',
+                    '• Kritische Artikel und Schlüsselmerkmale identifizieren',
+                    '• Lieferketten-Rückverfolgbarkeit sicherstellen'
+                ],
+                focusAreas: 'ISO 9001 Basis + Aerospace-spezifische Anforderungen, Risikomanagement, Konfiguration'
+            },
+            'ISO 13485': {
+                title: 'ISO 13485 - Medizinprodukte Scope-Anforderungen',
+                requirements: [
+                    '• Medizinprodukte-spezifische Prozesse definieren',
+                    '• Regulatorische Anforderungen (MDR, FDA) berücksichtigen',
+                    '• Risikomanagement nach ISO 14971 integrieren',
+                    '• Produktlebenszyklus-Prozesse erfassen',
+                    '• Post-Market Surveillance einbeziehen'
+                ],
+                focusAreas: 'Design Controls, Risikomanagement, Regulatory Affairs, Validierung, Vigilance'
+            },
+            'ISO 22000': {
+                title: 'ISO 22000 - Lebensmittelsicherheit Scope-Anforderungen',
+                requirements: [
+                    '• Gesamte Lebensmittelkette berücksichtigen',
+                    '• HACCP-Prinzipien vollständig integrieren',
+                    '• Präventivprogramme (PRPs) implementieren',
+                    '• Gefahrenanalyse für alle Produktgruppen',
+                    '• Rückverfolgbarkeit und Rückrufverfahren'
+                ],
+                focusAreas: 'HACCP, PRPs, Gefahrenanalyse, Monitoring, Verifizierung, Validierung'
+            }
+        };
+        
+        if (selectedStandard && scopeRequirements[selectedStandard]) {
+            const req = scopeRequirements[selectedStandard];
+            scopeRequirementsDiv.innerHTML = `
+                <div class="scope-requirements-content">
+                    <h5>${req.title}</h5>
+                    <div class="requirements-section">
+                        <h6>🎯 Wichtige Scope-Anforderungen:</h6>
+                        <ul class="requirements-list">
+                            ${req.requirements.map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="focus-areas-section">
+                        <h6>🔍 Audit-Schwerpunkte:</h6>
+                        <p class="focus-areas">${req.focusAreas}</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            scopeRequirementsDiv.innerHTML = '<p class="info-text">Wählen Sie einen Standard aus, um die spezifischen Scope-Anforderungen zu sehen.</p>';
+        }
     }
 
     switchExchangeTab(tabName) {
@@ -24512,60 +24691,149 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
         if (tabName === 'my-requests') {
             this.updateMyRequests();
         }
+        
+        // Update content when switching to auditor-search
+        if (tabName === 'auditor-search') {
+            console.log('🔄 Switching to auditor-search tab...');
+            this.initializeAuditorSearch();
+        }
     }
 
     submitAuditOffer() {
         const form = document.getElementById('offerForm');
         const formData = new FormData(form);
         const currentUser = this.getCurrentUser();
+        const editingOfferId = form.dataset.editingOfferId;
 
-        // Erstelle neues Audit-Angebot
-        const newOffer = {
-            id: Date.now().toString(),
+        // Helper function to collect checkbox values
+        const getCheckboxValues = (name) => {
+            const checkboxes = form.querySelectorAll(`input[name="${name}"]:checked`);
+            return Array.from(checkboxes).map(cb => cb.value);
+        };
+
+        // Collect all form data
+        const offerData = {
+            // Basic information
             title: formData.get('auditTitle'),
             standard: formData.get('auditStandard'),
             type: formData.get('auditType'),
             location: formData.get('location') || 'Nicht angegeben',
             description: formData.get('description') || '',
-            offeredBy: currentUser.id,
-            offeredByName: currentUser.displayName || currentUser.name,
-            createdAt: new Date().toISOString(),
-            status: 'available'
+            
+            // Scope information
+            auditScope: formData.get('auditScope') || '',
+            processAreas: getCheckboxValues('processAreas'),
+            
+            // Audit details
+            auditDuration: formData.get('auditDuration'),
+            teamSize: formData.get('teamSize'),
+            availableFrom: formData.get('availableFrom'),
+            availableUntil: formData.get('availableUntil'),
+            
+            // Auditor qualifications
+            leadAuditorCert: formData.get('leadAuditorCert'),
+            auditExperience: formData.get('auditExperience'),
+            industryExperience: getCheckboxValues('industryExperience'),
+            
+            // Additional audit details
+            auditStartDate: formData.get('auditStartDate'),
+            auditEndDate: formData.get('auditEndDate'),
+            auditPurpose: formData.get('auditPurpose'),
+            certificationBody: formData.get('certificationBody'),
+            
+            // Company information
+            companyName: formData.get('companyName'),
+            companySize: formData.get('companySize'),
+            companyIndustry: formData.get('companyIndustry'),
+            numberOfSites: formData.get('numberOfSites'),
+            companyDescription: formData.get('companyDescription') || '',
+            
+            // Specific audit requirements
+            currentCertStatus: formData.get('currentCertStatus'),
+            previousAudits: formData.get('previousAudits'),
+            lastAuditDate: formData.get('lastAuditDate'),
+            knownIssues: formData.get('knownIssues') || '',
+            specialRequirements: getCheckboxValues('specialRequirements'),
+            
+            // Additional information
+            deliverables: formData.get('deliverables') || ''
         };
 
-        // Initialisiere auditExchanges falls nicht vorhanden
-        if (!this.auditExchanges) {
-            this.auditExchanges = [];
+        // Prüfe ob wir ein existierendes Angebot bearbeiten oder ein neues erstellen
+        if (editingOfferId) {
+            // Bearbeite existierendes Angebot
+            const existingOffer = this.auditExchanges.find(o => o.id === editingOfferId);
+            
+            if (!existingOffer) {
+                alert('❌ Angebot nicht gefunden.');
+                return;
+            }
+
+            if (existingOffer.offeredBy !== currentUser.id) {
+                alert('❌ Sie können nur Ihre eigenen Angebote bearbeiten.');
+                return;
+            }
+
+            // Aktualisiere die Angebotsdaten
+            Object.assign(existingOffer, offerData);
+            existingOffer.updatedAt = new Date().toISOString();
+
+            // Speichere in localStorage
+            localStorage.setItem('qhse_audit_exchanges', JSON.stringify(this.auditExchanges));
+
+            // Reset form und wechsle zur Übersicht
+            form.reset();
+            delete form.dataset.editingOfferId;
+            
+            // Setze Submit-Button-Text zurück
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.textContent = 'Angebot erstellen';
+            }
+            
+            this.switchExchangeTab('overview');
+            
+            // Update Übersicht
+            this.updateOverview();
+            
+            // Erfolg-Nachricht
+            alert('✅ Audit-Angebot erfolgreich aktualisiert!');
+            
+            console.log('Audit offer updated:', existingOffer);
+        } else {
+            // Erstelle neues Audit-Angebot
+            const newOffer = {
+                id: Date.now().toString(),
+                ...offerData,
+                offeredBy: currentUser.id,
+                offeredByName: currentUser.displayName || currentUser.name,
+                createdAt: new Date().toISOString(),
+                status: 'available'
+            };
+
+            // Füge Angebot hinzu
+            this.auditExchanges.push(newOffer);
+            
+            // Speichere in localStorage
+            localStorage.setItem('qhse_audit_exchanges', JSON.stringify(this.auditExchanges));
+
+            // Reset form und wechsle zur Übersicht
+            form.reset();
+            this.switchExchangeTab('overview');
+            
+            // Update Übersicht
+            this.updateOverview();
+            
+            // Erfolg-Nachricht
+            alert('✅ Audit-Angebot erfolgreich erstellt!');
+            
+            console.log('New audit offer created:', newOffer);
         }
-
-        // Füge Angebot hinzu
-        this.auditExchanges.push(newOffer);
-        
-        // Speichere in localStorage
-        localStorage.setItem('qhse_audit_exchanges', JSON.stringify(this.auditExchanges));
-
-        // Reset form und wechsle zur Übersicht
-        form.reset();
-        this.switchExchangeTab('overview');
-        
-        // Update Übersicht
-        this.updateOverview();
-        
-        // Erfolg-Nachricht
-        alert('✅ Audit-Angebot erfolgreich erstellt!');
-        
-        console.log('New audit offer created:', newOffer);
     }
 
     updateOverview() {
         const currentUser = this.getCurrentUser();
         
-        // Lade auditExchanges falls nicht vorhanden
-        if (!this.auditExchanges) {
-            const saved = localStorage.getItem('qhse_audit_exchanges');
-            this.auditExchanges = saved ? JSON.parse(saved) : [];
-        }
-
         // Filtere meine Angebote
         const myOffers = this.auditExchanges.filter(offer => offer.offeredBy === currentUser.id);
         
@@ -24589,21 +24857,115 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
                 myOffersListElement.innerHTML = myOffers.map(offer => `
                     <div class="offer-card">
                         <h4>${offer.title}</h4>
-                        <div class="offer-details">
-                            <div class="offer-detail">
-                                <strong>Standard:</strong> <span>${offer.standard}</span>
-                            </div>
-                            <div class="offer-detail">
-                                <strong>Typ:</strong> <span>${offer.type}</span>
-                            </div>
-                            <div class="offer-detail">
-                                <strong>Standort:</strong> <span>${offer.location}</span>
-                            </div>
-                            <div class="offer-detail">
-                                <strong>Erstellt:</strong> <span>${new Date(offer.createdAt).toLocaleDateString('de-DE')}</span>
+                        
+                        <!-- Basic Information -->
+                        <div class="offer-section">
+                            <h5><i class="fas fa-info-circle"></i> Grundlegende Informationen</h5>
+                            <div class="offer-details">
+                                <div class="offer-detail">
+                                    <strong>Standard:</strong> <span>${offer.standard}</span>
+                                </div>
+                                <div class="offer-detail">
+                                    <strong>Typ:</strong> <span>${offer.type}</span>
+                                </div>
+                                <div class="offer-detail">
+                                    <strong>Standort:</strong> <span>${offer.location}</span>
+                                </div>
+                                <div class="offer-detail">
+                                    <strong>Erstellt:</strong> <span>${new Date(offer.createdAt).toLocaleDateString('de-DE')}</span>
+                                </div>
                             </div>
                         </div>
-                        ${offer.description ? `<p><strong>Beschreibung:</strong> ${offer.description}</p>` : ''}
+
+                        <!-- Scope Information -->
+                        ${offer.auditScope || offer.processAreas ? `
+                        <div class="offer-section">
+                            <h5><i class="fas fa-clipboard-list"></i> Audit-Scope</h5>
+                            ${offer.auditScope ? `<p class="scope-description">${offer.auditScope}</p>` : ''}
+                            ${offer.processAreas && offer.processAreas.length > 0 ? `
+                                <div class="process-areas">
+                                    <strong>Prozessbereiche:</strong> 
+                                    <span class="process-tags">
+                                        ${offer.processAreas.map(area => `<span class="process-tag">${area}</span>`).join('')}
+                                    </span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
+
+                        <!-- Audit Details -->
+                        ${offer.auditDuration || offer.teamSize || offer.availableFrom ? `
+                        <div class="offer-section">
+                            <h5><i class="fas fa-calendar-alt"></i> Audit-Details</h5>
+                            <div class="offer-details">
+                                ${offer.auditDuration ? `
+                                    <div class="offer-detail">
+                                        <strong>Dauer:</strong> <span>${offer.auditDuration} ${offer.auditDuration === '1' ? 'Tag' : 'Tage'}</span>
+                                    </div>
+                                ` : ''}
+                                ${offer.teamSize ? `
+                                    <div class="offer-detail">
+                                        <strong>Team-Größe:</strong> <span>${offer.teamSize}</span>
+                                    </div>
+                                ` : ''}
+                                ${offer.availableFrom ? `
+                                    <div class="offer-detail">
+                                        <strong>Verfügbar ab:</strong> <span>${new Date(offer.availableFrom).toLocaleDateString('de-DE')}</span>
+                                    </div>
+                                ` : ''}
+                                ${offer.availableUntil ? `
+                                    <div class="offer-detail">
+                                        <strong>Verfügbar bis:</strong> <span>${new Date(offer.availableUntil).toLocaleDateString('de-DE')}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- Qualifications -->
+                        ${offer.leadAuditorCert || offer.auditExperience || (offer.industryExperience && offer.industryExperience.length > 0) ? `
+                        <div class="offer-section">
+                            <h5><i class="fas fa-certificate"></i> Qualifikationen</h5>
+                            <div class="offer-details">
+                                ${offer.leadAuditorCert ? `
+                                    <div class="offer-detail">
+                                        <strong>Zertifizierung:</strong> <span>${offer.leadAuditorCert}</span>
+                                    </div>
+                                ` : ''}
+                                ${offer.auditExperience ? `
+                                    <div class="offer-detail">
+                                        <strong>Erfahrung:</strong> <span>${offer.auditExperience}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ${offer.industryExperience && offer.industryExperience.length > 0 ? `
+                                <div class="industry-experience">
+                                    <strong>Branchenerfahrung:</strong>
+                                    <span class="industry-tags">
+                                        ${offer.industryExperience.map(industry => `<span class="industry-tag">${industry}</span>`).join('')}
+                                    </span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
+
+                        <!-- Additional Information -->
+                        ${offer.description || offer.deliverables ? `
+                        <div class="offer-section">
+                            <h5><i class="fas fa-info"></i> Zusätzliche Informationen</h5>
+                            ${offer.description ? `<p><strong>Beschreibung:</strong> ${offer.description}</p>` : ''}
+                            ${offer.deliverables ? `<p><strong>Liefergegenstände:</strong> ${offer.deliverables}</p>` : ''}
+                        </div>
+                        ` : ''}
+
+                        <div class="offer-actions">
+                            <button onclick="qhseDashboard.editOffer('${offer.id}')" class="btn-secondary btn-sm">
+                                <i class="fas fa-edit"></i> Bearbeiten
+                            </button>
+                            <button onclick="qhseDashboard.deleteOffer('${offer.id}')" class="btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> Löschen
+                            </button>
+                        </div>
                     </div>
                 `).join('');
             }
@@ -24621,12 +24983,6 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
     applyFilters() {
         const currentUser = this.getCurrentUser();
         
-        // Lade auditExchanges falls nicht vorhanden
-        if (!this.auditExchanges) {
-            const saved = localStorage.getItem('qhse_audit_exchanges');
-            this.auditExchanges = saved ? JSON.parse(saved) : [];
-        }
-
         // Get filter values
         const filterStandard = document.getElementById('filterStandard').value;
         const filterType = document.getElementById('filterType').value;
@@ -24662,24 +25018,110 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
                     ${availableAudits.map(offer => `
                         <div class="offer-card">
                             <h4>${offer.title}</h4>
-                            <div class="offer-details">
-                                <div class="offer-detail">
-                                    <strong>Anbieter:</strong> <span>${offer.offeredByName}</span>
-                                </div>
-                                <div class="offer-detail">
-                                    <strong>Standard:</strong> <span>${offer.standard}</span>
-                                </div>
-                                <div class="offer-detail">
-                                    <strong>Typ:</strong> <span>${offer.type}</span>
-                                </div>
-                                <div class="offer-detail">
-                                    <strong>Standort:</strong> <span>${offer.location}</span>
-                                </div>
-                                <div class="offer-detail">
-                                    <strong>Erstellt:</strong> <span>${new Date(offer.createdAt).toLocaleDateString('de-DE')}</span>
+                            
+                            <!-- Basic Information -->
+                            <div class="offer-section">
+                                <h5><i class="fas fa-info-circle"></i> Grundlegende Informationen</h5>
+                                <div class="offer-details">
+                                    <div class="offer-detail">
+                                        <strong>Anbieter:</strong> <span>${offer.offeredByName}</span>
+                                    </div>
+                                    <div class="offer-detail">
+                                        <strong>Standard:</strong> <span>${offer.standard}</span>
+                                    </div>
+                                    <div class="offer-detail">
+                                        <strong>Typ:</strong> <span>${offer.type}</span>
+                                    </div>
+                                    <div class="offer-detail">
+                                        <strong>Standort:</strong> <span>${offer.location}</span>
+                                    </div>
+                                    <div class="offer-detail">
+                                        <strong>Erstellt:</strong> <span>${new Date(offer.createdAt).toLocaleDateString('de-DE')}</span>
+                                    </div>
                                 </div>
                             </div>
-                            ${offer.description ? `<p><strong>Beschreibung:</strong> ${offer.description}</p>` : ''}
+
+                            <!-- Scope Information -->
+                            ${offer.auditScope || offer.processAreas ? `
+                            <div class="offer-section">
+                                <h5><i class="fas fa-clipboard-list"></i> Audit-Scope</h5>
+                                ${offer.auditScope ? `<p class="scope-description">${offer.auditScope}</p>` : ''}
+                                ${offer.processAreas && offer.processAreas.length > 0 ? `
+                                    <div class="process-areas">
+                                        <strong>Prozessbereiche:</strong> 
+                                        <span class="process-tags">
+                                            ${offer.processAreas.map(area => `<span class="process-tag">${area}</span>`).join('')}
+                                        </span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ` : ''}
+
+                            <!-- Audit Details -->
+                            ${offer.auditDuration || offer.teamSize || offer.availableFrom ? `
+                            <div class="offer-section">
+                                <h5><i class="fas fa-calendar-alt"></i> Audit-Details</h5>
+                                <div class="offer-details">
+                                    ${offer.auditDuration ? `
+                                        <div class="offer-detail">
+                                            <strong>Dauer:</strong> <span>${offer.auditDuration} ${offer.auditDuration === '1' ? 'Tag' : 'Tage'}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${offer.teamSize ? `
+                                        <div class="offer-detail">
+                                            <strong>Team-Größe:</strong> <span>${offer.teamSize}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${offer.availableFrom ? `
+                                        <div class="offer-detail">
+                                            <strong>Verfügbar ab:</strong> <span>${new Date(offer.availableFrom).toLocaleDateString('de-DE')}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${offer.availableUntil ? `
+                                        <div class="offer-detail">
+                                            <strong>Verfügbar bis:</strong> <span>${new Date(offer.availableUntil).toLocaleDateString('de-DE')}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            <!-- Qualifications -->
+                            ${offer.leadAuditorCert || offer.auditExperience || (offer.industryExperience && offer.industryExperience.length > 0) ? `
+                            <div class="offer-section">
+                                <h5><i class="fas fa-certificate"></i> Qualifikationen</h5>
+                                <div class="offer-details">
+                                    ${offer.leadAuditorCert ? `
+                                        <div class="offer-detail">
+                                            <strong>Zertifizierung:</strong> <span>${offer.leadAuditorCert}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${offer.auditExperience ? `
+                                        <div class="offer-detail">
+                                            <strong>Erfahrung:</strong> <span>${offer.auditExperience}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                ${offer.industryExperience && offer.industryExperience.length > 0 ? `
+                                    <div class="industry-experience">
+                                        <strong>Branchenerfahrung:</strong>
+                                        <span class="industry-tags">
+                                            ${offer.industryExperience.map(industry => `<span class="industry-tag">${industry}</span>`).join('')}
+                                        </span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ` : ''}
+
+                            <!-- Additional Information -->
+                            ${offer.description || offer.deliverables ? `
+                            <div class="offer-section">
+                                <h5><i class="fas fa-info"></i> Zusätzliche Informationen</h5>
+                                ${offer.description ? `<p><strong>Beschreibung:</strong> ${offer.description}</p>` : ''}
+                                ${offer.deliverables ? `<p><strong>Liefergegenstände:</strong> ${offer.deliverables}</p>` : ''}
+                            </div>
+                            ` : ''}
+
                             <div class="form-actions">
                                 <button class="btn-primary" onclick="qhseDashboard.showInterest('${offer.id}')">
                                     <i class="fas fa-handshake"></i>
@@ -24702,6 +25144,328 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
         if (searchResultsElement) {
             searchResultsElement.innerHTML = '<p class="no-offers">Verwenden Sie die Filter oben, um nach Audits zu suchen</p>';
         }
+    }
+
+    searchAuditors() {
+        console.log('🔍 Searching for auditors...');
+        
+        // Get filter values with error handling
+        const standardFilter = document.getElementById('auditorStandardFilter')?.value || '';
+        const locationFilter = document.getElementById('auditorLocationFilter')?.value.toLowerCase() || '';
+        const certificationFilter = document.getElementById('auditorCertificationFilter')?.value || '';
+        const experienceFilter = document.getElementById('auditorExperienceFilter')?.value || '';
+        const industryFilter = document.getElementById('auditorIndustryFilter')?.value || '';
+        const availabilityFilter = document.getElementById('auditorAvailabilityFilter')?.value || '';
+        
+        // Check if we have any audit exchanges to search through
+        if (!this.auditExchanges || this.auditExchanges.length === 0) {
+            const resultsList = document.getElementById('auditorSearchResultsList');
+            if (resultsList) {
+                resultsList.innerHTML = '<p class="no-offers">Aktuell sind keine Auditoren verfügbar.</p>';
+            }
+            return;
+        }
+
+        // Filter available auditors based on their offers
+        let availableAuditors = this.auditExchanges.filter(offer => {
+            let matches = true;
+
+            // Filter by standard
+            if (standardFilter && offer.standard !== standardFilter) {
+                matches = false;
+            }
+
+            // Filter by location
+            if (locationFilter && !offer.location.toLowerCase().includes(locationFilter)) {
+                matches = false;
+            }
+
+            // Filter by auditor certification
+            if (certificationFilter && offer.leadAuditorCert !== certificationFilter) {
+                matches = false;
+            }
+
+            // Filter by experience
+            if (experienceFilter && offer.auditExperience !== experienceFilter) {
+                matches = false;
+            }
+
+            // Filter by industry experience
+            if (industryFilter && (!offer.industryExperience || !offer.industryExperience.includes(industryFilter))) {
+                matches = false;
+            }
+
+            // Filter by availability (based on availableFrom date)
+            if (availabilityFilter && offer.availableFrom) {
+                const availableDate = new Date(offer.availableFrom);
+                const today = new Date();
+                const timeDiff = availableDate.getTime() - today.getTime();
+                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                switch(availabilityFilter) {
+                    case 'sofort':
+                        if (daysDiff > 7) matches = false;
+                        break;
+                    case '1-4 wochen':
+                        if (daysDiff < 7 || daysDiff > 28) matches = false;
+                        break;
+                    case '1-3 monate':
+                        if (daysDiff < 30 || daysDiff > 90) matches = false;
+                        break;
+                    case 'langfristig':
+                        if (daysDiff < 90) matches = false;
+                        break;
+                }
+            }
+
+            return matches;
+        });
+
+        // Group by auditor (offeredBy) to avoid duplicates
+        const auditorMap = new Map();
+        availableAuditors.forEach(offer => {
+            if (!auditorMap.has(offer.offeredBy)) {
+                auditorMap.set(offer.offeredBy, {
+                    auditorId: offer.offeredBy,
+                    auditorName: offer.offeredByName,
+                    offers: []
+                });
+            }
+            auditorMap.get(offer.offeredBy).offers.push(offer);
+        });
+
+        const uniqueAuditors = Array.from(auditorMap.values());
+
+        // Display results
+        const resultsList = document.getElementById('auditorSearchResultsList');
+        if (resultsList) {
+            if (uniqueAuditors.length === 0) {
+                resultsList.innerHTML = '<p class="no-offers">Keine Auditoren entsprechen den gewählten Filtern.</p>';
+            } else {
+                resultsList.innerHTML = `
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        <i class="fas fa-info-circle"></i> ${uniqueAuditors.length} Auditor${uniqueAuditors.length !== 1 ? 'en' : ''} gefunden
+                    </p>
+                    ${uniqueAuditors.map(auditor => this.generateAuditorCard(auditor)).join('')}
+                `;
+            }
+        }
+    }
+
+    generateAuditorCard(auditor) {
+        const latestOffer = auditor.offers[0]; // Use the most recent offer for details
+        
+        return `
+            <div class="auditor-card">
+                <h4><i class="fas fa-user-tie"></i> ${auditor.auditorName}</h4>
+                
+                <!-- Auditor Overview -->
+                <div class="auditor-section">
+                    <h5><i class="fas fa-info-circle"></i> Auditor-Profil</h5>
+                    <div class="auditor-details">
+                        <div class="auditor-detail">
+                            <strong>Standards:</strong> 
+                            <span>${auditor.offers.map(o => o.standard).filter((v, i, a) => a.indexOf(v) === i).join(', ')}</span>
+                        </div>
+                        <div class="auditor-detail">
+                            <strong>Standort:</strong> <span>${latestOffer.location}</span>
+                        </div>
+                        <div class="auditor-detail">
+                            <strong>Anzahl Angebote:</strong> <span>${auditor.offers.length}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Qualifications -->
+                ${latestOffer.leadAuditorCert || latestOffer.auditExperience ? `
+                <div class="auditor-section">
+                    <h5><i class="fas fa-certificate"></i> Qualifikationen</h5>
+                    <div class="auditor-details">
+                        ${latestOffer.leadAuditorCert ? `
+                            <div class="auditor-detail">
+                                <strong>Zertifizierung:</strong> <span>${latestOffer.leadAuditorCert}</span>
+                            </div>
+                        ` : ''}
+                        ${latestOffer.auditExperience ? `
+                            <div class="auditor-detail">
+                                <strong>Erfahrung:</strong> <span>${latestOffer.auditExperience}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${latestOffer.industryExperience && latestOffer.industryExperience.length > 0 ? `
+                        <div class="industry-experience">
+                            <strong>Branchenerfahrung:</strong>
+                            <span class="industry-tags">
+                                ${latestOffer.industryExperience.map(industry => `<span class="industry-tag">${industry}</span>`).join('')}
+                            </span>
+                        </div>
+                    ` : ''}
+                </div>
+                ` : ''}
+
+                <!-- Available Services -->
+                <div class="auditor-section">
+                    <h5><i class="fas fa-list"></i> Verfügbare Services</h5>
+                    <div class="services-list">
+                        ${auditor.offers.slice(0, 3).map(offer => `
+                            <div class="service-item">
+                                <strong>${offer.type}</strong> - ${offer.standard}
+                                ${offer.availableFrom ? ` (ab ${new Date(offer.availableFrom).toLocaleDateString('de-DE')})` : ''}
+                            </div>
+                        `).join('')}
+                        ${auditor.offers.length > 3 ? `<p class="more-services">... und ${auditor.offers.length - 3} weitere</p>` : ''}
+                    </div>
+                </div>
+
+                <div class="auditor-actions">
+                    <button class="btn-primary" onclick="qhseDashboard.viewAuditorProfile('${auditor.auditorId}')">
+                        <i class="fas fa-eye"></i>
+                        Profil anzeigen
+                    </button>
+                    <button class="btn-secondary" onclick="qhseDashboard.contactAuditor('${auditor.auditorId}')">
+                        <i class="fas fa-envelope"></i>
+                        Kontaktieren
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    viewAuditorProfile(auditorId) {
+        // Switch to search tab and filter by this auditor's offers
+        this.switchExchangeTab('search');
+        
+        // Filter to show only this auditor's offers
+        const auditorOffers = this.auditExchanges.filter(offer => offer.offeredBy === auditorId);
+        
+        const searchResultsElement = document.getElementById('searchResultsList');
+        if (searchResultsElement && auditorOffers.length > 0) {
+            searchResultsElement.innerHTML = `
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    <i class="fas fa-user"></i> Alle Angebote von ${auditorOffers[0].offeredByName}
+                </p>
+                ${auditorOffers.map(offer => this.generateOfferCard(offer)).join('')}
+            `;
+        }
+        
+        alert(`📋 Profil von ${auditorOffers[0]?.offeredByName || 'Auditor'} wird angezeigt.\n\nSie wurden zur Audit-Suche weitergeleitet um alle Angebote zu sehen.`);
+    }
+
+    contactAuditor(auditorId) {
+        const auditorOffers = this.auditExchanges.filter(offer => offer.offeredBy === auditorId);
+        const auditorName = auditorOffers[0]?.offeredByName || 'Auditor';
+        
+        const message = prompt(`📧 Nachricht an ${auditorName}:\n\nBitte geben Sie Ihre Nachricht ein:`);
+        if (message) {
+            alert(`✅ Ihre Nachricht wurde an ${auditorName} gesendet!\n\n"${message}"\n\nDer Auditor wird sich mit Ihnen in Verbindung setzen.`);
+            console.log(`Message sent to ${auditorName}: ${message}`);
+        }
+    }
+
+    generateOfferCard(offer) {
+        // Verwende die bestehende Template-Logik für Konsistenz
+        return `
+            <div class="offer-card">
+                <h4>${offer.title}</h4>
+                
+                <!-- Basic Information -->
+                <div class="offer-section">
+                    <h5><i class="fas fa-info-circle"></i> Grundlegende Informationen</h5>
+                    <div class="offer-details">
+                        <div class="offer-detail">
+                            <strong>Anbieter:</strong> <span>${offer.offeredByName}</span>
+                        </div>
+                        <div class="offer-detail">
+                            <strong>Standard:</strong> <span>${offer.standard}</span>
+                        </div>
+                        <div class="offer-detail">
+                            <strong>Typ:</strong> <span>${offer.type}</span>
+                        </div>
+                        <div class="offer-detail">
+                            <strong>Standort:</strong> <span>${offer.location}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-primary" onclick="qhseDashboard.showInterest('${offer.id}')">
+                        <i class="fas fa-handshake"></i>
+                        Interesse bekunden
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    clearAuditorFilters() {
+        // Clear filter values with error handling
+        const filterElements = [
+            'auditorStandardFilter',
+            'auditorLocationFilter', 
+            'auditorCertificationFilter',
+            'auditorExperienceFilter',
+            'auditorIndustryFilter',
+            'auditorAvailabilityFilter'
+        ];
+        
+        filterElements.forEach(elementId => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.value = '';
+            }
+        });
+        
+        // Clear results
+        const resultsList = document.getElementById('auditorSearchResultsList');
+        if (resultsList) {
+            resultsList.innerHTML = '<p class="no-offers">Verwenden Sie die Filter oben, um nach Auditoren zu suchen</p>';
+        }
+    }
+
+    initializeAuditorSearch() {
+        console.log('🔍 Initializing auditor search tab...');
+        
+        // Check if we have any audit exchanges to search through
+        const totalAuditors = this.auditExchanges.length;
+        const resultsList = document.getElementById('auditorSearchResultsList');
+        
+        if (resultsList) {
+            if (totalAuditors === 0) {
+                resultsList.innerHTML = `
+                    <p class="no-offers">
+                        <i class="fas fa-info-circle"></i> 
+                        Aktuell sind keine Auditoren verfügbar. 
+                        Schauen Sie später wieder vorbei oder ermutigen Sie Kollegen, ihre Audit-Angebote zu veröffentlichen.
+                    </p>
+                `;
+            } else {
+                resultsList.innerHTML = `
+                    <p class="no-offers">
+                        <i class="fas fa-search"></i> 
+                        Verwenden Sie die Filter oben, um nach Auditoren zu suchen.
+                        <br><br>
+                        <strong>${totalAuditors}</strong> Audit-Angebot${totalAuditors !== 1 ? 'e' : ''} verfügbar zum Durchsuchen.
+                    </p>
+                `;
+            }
+        }
+        
+        // Ensure all filter elements are properly accessible
+        const filterElements = [
+            'auditorStandardFilter',
+            'auditorLocationFilter', 
+            'auditorCertificationFilter',
+            'auditorExperienceFilter',
+            'auditorIndustryFilter',
+            'auditorAvailabilityFilter'
+        ];
+        
+        filterElements.forEach(elementId => {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.warn(`⚠️ Missing auditor filter element: ${elementId}`);
+            }
+        });
     }
 
     showInterest(offerId) {
@@ -24748,6 +25512,208 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
         }
     }
 
+    deleteOffer(offerId) {
+        // Bestätigung vom Benutzer einholen
+        if (!confirm('Möchten Sie dieses Audit-Angebot wirklich löschen?')) {
+            return;
+        }
+
+        // Prüfe ob der Benutzer berechtigt ist (nur eigene Angebote löschen)
+        const currentUser = this.getCurrentUser();
+        const offer = this.auditExchanges.find(o => o.id === offerId);
+        
+        if (!offer) {
+            alert('❌ Angebot nicht gefunden.');
+            return;
+        }
+
+        if (offer.offeredBy !== currentUser.id) {
+            alert('❌ Sie können nur Ihre eigenen Angebote löschen.');
+            return;
+        }
+
+        // Prüfe ob es aktive Anfragen für dieses Angebot gibt
+        const activeRequests = this.exchangeRequests.filter(req => 
+            req.offerId === offerId && req.status === 'pending'
+        );
+
+        if (activeRequests.length > 0) {
+            if (!confirm(`⚠️ Es gibt ${activeRequests.length} aktive Anfrage(n) für dieses Angebot.\n\nWenn Sie das Angebot löschen, werden alle Anfragen automatisch abgelehnt.\n\nMöchten Sie fortfahren?`)) {
+                return;
+            }
+            
+            // Lehne alle aktiven Anfragen ab
+            activeRequests.forEach(request => {
+                request.status = 'declined';
+                request.declinedAt = new Date().toISOString();
+            });
+            
+            this.saveExchangeRequestsToStorage();
+        }
+
+        // Entferne das Angebot aus der Liste
+        this.auditExchanges = this.auditExchanges.filter(o => o.id !== offerId);
+        
+        // Speichere die aktualisierte Liste
+        localStorage.setItem('qhse_audit_exchanges', JSON.stringify(this.auditExchanges));
+        
+        // Aktualisiere die Übersicht
+        this.updateOverview();
+        
+        alert('✅ Angebot erfolgreich gelöscht!');
+        console.log('Offer deleted:', offerId);
+    }
+
+    editOffer(offerId) {
+        const currentUser = this.getCurrentUser();
+        const offer = this.auditExchanges.find(o => o.id === offerId);
+        
+        if (!offer) {
+            alert('❌ Angebot nicht gefunden.');
+            return;
+        }
+
+        if (offer.offeredBy !== currentUser.id) {
+            alert('❌ Sie können nur Ihre eigenen Angebote bearbeiten.');
+            return;
+        }
+
+        // Prüfe ob es aktive Anfragen für dieses Angebot gibt
+        const activeRequests = this.exchangeRequests.filter(req => 
+            req.offerId === offerId && req.status === 'pending'
+        );
+
+        if (activeRequests.length > 0) {
+            if (!confirm(`⚠️ Es gibt ${activeRequests.length} aktive Anfrage(n) für dieses Angebot.\n\nWenn Sie das Angebot bearbeiten, könnten sich die Bedingungen für die Interessenten ändern.\n\nMöchten Sie fortfahren?`)) {
+                return;
+            }
+        }
+
+        // Wechsle zum Angebot-Tab
+        this.switchExchangeTab('offer');
+        
+        // Helper function to set checkbox values
+        const setCheckboxValues = (name, values) => {
+            const checkboxes = document.querySelectorAll(`input[name="${name}"]`);
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = values && values.includes(checkbox.value);
+            });
+        };
+        
+        // Fülle das Formular mit den aktuellen Werten
+        // Basic information
+        document.getElementById('auditTitle').value = offer.title || '';
+        document.getElementById('auditStandard').value = offer.standard || '';
+        document.getElementById('auditType').value = offer.type || '';
+        document.getElementById('location').value = offer.location || '';
+        document.getElementById('description').value = offer.description || '';
+        
+        // Scope information
+        if (document.getElementById('auditScope')) {
+            document.getElementById('auditScope').value = offer.auditScope || '';
+        }
+        if (offer.processAreas) {
+            setCheckboxValues('processAreas', offer.processAreas);
+        }
+        
+        // Audit details
+        if (document.getElementById('auditDuration')) {
+            document.getElementById('auditDuration').value = offer.auditDuration || '';
+        }
+        if (document.getElementById('teamSize')) {
+            document.getElementById('teamSize').value = offer.teamSize || '';
+        }
+        if (document.getElementById('availableFrom')) {
+            document.getElementById('availableFrom').value = offer.availableFrom || '';
+        }
+        if (document.getElementById('availableUntil')) {
+            document.getElementById('availableUntil').value = offer.availableUntil || '';
+        }
+        
+        // Auditor qualifications
+        if (document.getElementById('leadAuditorCert')) {
+            document.getElementById('leadAuditorCert').value = offer.leadAuditorCert || '';
+        }
+        if (document.getElementById('auditExperience')) {
+            document.getElementById('auditExperience').value = offer.auditExperience || '';
+        }
+        if (offer.industryExperience) {
+            setCheckboxValues('industryExperience', offer.industryExperience);
+        }
+        
+        // Additional audit details
+        if (document.getElementById('auditStartDate')) {
+            document.getElementById('auditStartDate').value = offer.auditStartDate || '';
+        }
+        if (document.getElementById('auditEndDate')) {
+            document.getElementById('auditEndDate').value = offer.auditEndDate || '';
+        }
+        if (document.getElementById('auditPurpose')) {
+            document.getElementById('auditPurpose').value = offer.auditPurpose || '';
+        }
+        if (document.getElementById('certificationBody')) {
+            document.getElementById('certificationBody').value = offer.certificationBody || '';
+        }
+        
+        // Company information
+        if (document.getElementById('companyName')) {
+            document.getElementById('companyName').value = offer.companyName || '';
+        }
+        if (document.getElementById('companySize')) {
+            document.getElementById('companySize').value = offer.companySize || '';
+        }
+        if (document.getElementById('companyIndustry')) {
+            document.getElementById('companyIndustry').value = offer.companyIndustry || '';
+        }
+        if (document.getElementById('numberOfSites')) {
+            document.getElementById('numberOfSites').value = offer.numberOfSites || '';
+        }
+        if (document.getElementById('companyDescription')) {
+            document.getElementById('companyDescription').value = offer.companyDescription || '';
+        }
+        
+        // Specific audit requirements
+        if (document.getElementById('currentCertStatus')) {
+            document.getElementById('currentCertStatus').value = offer.currentCertStatus || '';
+        }
+        if (document.getElementById('previousAudits')) {
+            document.getElementById('previousAudits').value = offer.previousAudits || '';
+        }
+        if (document.getElementById('lastAuditDate')) {
+            document.getElementById('lastAuditDate').value = offer.lastAuditDate || '';
+        }
+        if (document.getElementById('knownIssues')) {
+            document.getElementById('knownIssues').value = offer.knownIssues || '';
+        }
+        if (offer.specialRequirements) {
+            setCheckboxValues('specialRequirements', offer.specialRequirements);
+        }
+        
+        // Additional information
+        if (document.getElementById('deliverables')) {
+            document.getElementById('deliverables').value = offer.deliverables || '';
+        }
+        
+        // Update scope requirements if standard is selected
+        if (offer.standard) {
+            this.updateScopeRequirements();
+        }
+        
+        // Speichere die ID des zu bearbeitenden Angebots
+        document.getElementById('offerForm').dataset.editingOfferId = offerId;
+        
+        // Ändere den Submit-Button-Text
+        const submitButton = document.querySelector('#offerForm button[type="submit"]');
+        if (submitButton) {
+            submitButton.textContent = 'Angebot aktualisieren';
+        }
+        
+        // Scroll zum Formular
+        document.getElementById('offerForm').scrollIntoView({ behavior: 'smooth' });
+        
+        console.log('Editing offer:', offerId);
+    }
+
     loadExchangeRequestsFromStorage() {
         const saved = localStorage.getItem('qhse_exchange_requests');
         return saved ? JSON.parse(saved) : [];
@@ -24764,11 +25730,6 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
         if (!this.exchangeRequests) {
             this.exchangeRequests = this.loadExchangeRequestsFromStorage();
         }
-        if (!this.auditExchanges) {
-            const saved = localStorage.getItem('qhse_audit_exchanges');
-            this.auditExchanges = saved ? JSON.parse(saved) : [];
-        }
-
         // Sent requests (my interest in others' offers)
         const sentRequests = this.exchangeRequests.filter(req => req.requestedBy === currentUser.id);
         
