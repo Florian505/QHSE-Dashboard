@@ -63,6 +63,7 @@ class QHSEDashboard {
         this.setupVacationManagement();
         this.setupUserProfiles();
         this.setupRiskAssessment();
+        this.setupAuditExchange();
         this.loadCustomLabels();
         
         // Apply saved color theme on load
@@ -2088,7 +2089,7 @@ PLZ Ort">${user.address || ''}</textarea>
         this.roleDefinitions = {
             'root-admin': {
                 name: 'Root Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'einstellungen', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'einstellungen', 'mein-profil', 'audit-tauschboerse'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2096,7 +2097,7 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             admin: {
                 name: 'Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2104,27 +2105,27 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             geschaeftsfuehrung: {
                 name: 'Geschäftsführung',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse'],
                 hierarchyLevel: 1,
                 canSupervise: ['betriebsleiter', 'qhse']
             },
             betriebsleiter: {
                 name: 'Betriebsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse'],
                 hierarchyLevel: 2,
                 canSupervise: ['abteilungsleiter'],
                 mustHaveSupervisor: ['geschaeftsfuehrung']
             },
             abteilungsleiter: {
                 name: 'Abteilungsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse'],
                 hierarchyLevel: 3,
                 canSupervise: ['mitarbeiter'],
                 mustHaveSupervisor: ['betriebsleiter']
             },
             qhse: {
                 name: 'QHSE-Mitarbeiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse'],
                 hierarchyLevel: 2,
                 isStaffPosition: true,
                 mustHaveSupervisor: ['geschaeftsfuehrung']
@@ -24453,6 +24454,451 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
             this.updateRiskAssessmentDashboard();
             this.setupRiskAssessmentEventListeners();
         }, 100);
+    }
+
+    setupAuditExchange() {
+        console.log('🔧 Setting up Audit Exchange module...');
+        setTimeout(() => {
+            // Setup tab navigation
+            const tabBtns = document.querySelectorAll('.exchange-tabs .tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.getAttribute('data-tab');
+                    this.switchExchangeTab(targetTab);
+                });
+            });
+
+            // Setup form submission
+            const offerForm = document.getElementById('offerForm');
+            if (offerForm) {
+                offerForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.submitAuditOffer();
+                });
+            }
+        }, 100);
+    }
+
+    switchExchangeTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.exchange-tabs .tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        const activeContent = document.getElementById(`${tabName}-tab`);
+        if (activeContent) {
+            activeContent.classList.add('active');
+        }
+
+        // Update content when switching to overview
+        if (tabName === 'overview') {
+            this.updateOverview();
+        }
+        
+        // Update content when switching to search
+        if (tabName === 'search') {
+            this.updateSearchResults();
+        }
+        
+        // Update content when switching to my-requests
+        if (tabName === 'my-requests') {
+            this.updateMyRequests();
+        }
+    }
+
+    submitAuditOffer() {
+        const form = document.getElementById('offerForm');
+        const formData = new FormData(form);
+        const currentUser = this.getCurrentUser();
+
+        // Erstelle neues Audit-Angebot
+        const newOffer = {
+            id: Date.now().toString(),
+            title: formData.get('auditTitle'),
+            standard: formData.get('auditStandard'),
+            type: formData.get('auditType'),
+            location: formData.get('location') || 'Nicht angegeben',
+            description: formData.get('description') || '',
+            offeredBy: currentUser.id,
+            offeredByName: currentUser.displayName || currentUser.name,
+            createdAt: new Date().toISOString(),
+            status: 'available'
+        };
+
+        // Initialisiere auditExchanges falls nicht vorhanden
+        if (!this.auditExchanges) {
+            this.auditExchanges = [];
+        }
+
+        // Füge Angebot hinzu
+        this.auditExchanges.push(newOffer);
+        
+        // Speichere in localStorage
+        localStorage.setItem('qhse_audit_exchanges', JSON.stringify(this.auditExchanges));
+
+        // Reset form und wechsle zur Übersicht
+        form.reset();
+        this.switchExchangeTab('overview');
+        
+        // Update Übersicht
+        this.updateOverview();
+        
+        // Erfolg-Nachricht
+        alert('✅ Audit-Angebot erfolgreich erstellt!');
+        
+        console.log('New audit offer created:', newOffer);
+    }
+
+    updateOverview() {
+        const currentUser = this.getCurrentUser();
+        
+        // Lade auditExchanges falls nicht vorhanden
+        if (!this.auditExchanges) {
+            const saved = localStorage.getItem('qhse_audit_exchanges');
+            this.auditExchanges = saved ? JSON.parse(saved) : [];
+        }
+
+        // Filtere meine Angebote
+        const myOffers = this.auditExchanges.filter(offer => offer.offeredBy === currentUser.id);
+        
+        // Update Statistiken
+        const totalOffersElement = document.getElementById('totalOffersCount');
+        const totalExchangesElement = document.getElementById('totalExchangesCount');
+        
+        if (totalOffersElement) {
+            totalOffersElement.textContent = myOffers.length;
+        }
+        if (totalExchangesElement) {
+            totalExchangesElement.textContent = this.auditExchanges.length;
+        }
+
+        // Update Angebotsliste
+        const myOffersListElement = document.getElementById('myOffersList');
+        if (myOffersListElement) {
+            if (myOffers.length === 0) {
+                myOffersListElement.innerHTML = '<p class="no-offers">Noch keine Angebote erstellt. <button onclick="qhseDashboard.switchExchangeTab(\'offer\')" class="btn-link">Erstes Angebot erstellen</button></p>';
+            } else {
+                myOffersListElement.innerHTML = myOffers.map(offer => `
+                    <div class="offer-card">
+                        <h4>${offer.title}</h4>
+                        <div class="offer-details">
+                            <div class="offer-detail">
+                                <strong>Standard:</strong> <span>${offer.standard}</span>
+                            </div>
+                            <div class="offer-detail">
+                                <strong>Typ:</strong> <span>${offer.type}</span>
+                            </div>
+                            <div class="offer-detail">
+                                <strong>Standort:</strong> <span>${offer.location}</span>
+                            </div>
+                            <div class="offer-detail">
+                                <strong>Erstellt:</strong> <span>${new Date(offer.createdAt).toLocaleDateString('de-DE')}</span>
+                            </div>
+                        </div>
+                        ${offer.description ? `<p><strong>Beschreibung:</strong> ${offer.description}</p>` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+    }
+
+    updateSearchResults() {
+        // Initial load - show message to use filters
+        const searchResultsElement = document.getElementById('searchResultsList');
+        if (searchResultsElement) {
+            searchResultsElement.innerHTML = '<p class="no-offers">Verwenden Sie die Filter oben, um nach Audits zu suchen</p>';
+        }
+    }
+
+    applyFilters() {
+        const currentUser = this.getCurrentUser();
+        
+        // Lade auditExchanges falls nicht vorhanden
+        if (!this.auditExchanges) {
+            const saved = localStorage.getItem('qhse_audit_exchanges');
+            this.auditExchanges = saved ? JSON.parse(saved) : [];
+        }
+
+        // Get filter values
+        const filterStandard = document.getElementById('filterStandard').value;
+        const filterType = document.getElementById('filterType').value;
+        const filterLocation = document.getElementById('filterLocation').value.toLowerCase();
+
+        // Filtere verfügbare Audits (nicht meine eigenen)
+        let availableAudits = this.auditExchanges.filter(offer => 
+            offer.offeredBy !== currentUser.id && offer.status === 'available'
+        );
+
+        // Apply filters
+        if (filterStandard) {
+            availableAudits = availableAudits.filter(offer => offer.standard === filterStandard);
+        }
+        if (filterType) {
+            availableAudits = availableAudits.filter(offer => offer.type === filterType);
+        }
+        if (filterLocation) {
+            availableAudits = availableAudits.filter(offer => 
+                offer.location.toLowerCase().includes(filterLocation)
+            );
+        }
+
+        const searchResultsElement = document.getElementById('searchResultsList');
+        if (searchResultsElement) {
+            if (availableAudits.length === 0) {
+                searchResultsElement.innerHTML = '<p class="no-offers">Keine Audit-Tauschbörsen entsprechen den gewählten Filtern.</p>';
+            } else {
+                searchResultsElement.innerHTML = `
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        <i class="fas fa-info-circle"></i> ${availableAudits.length} Ergebnis${availableAudits.length !== 1 ? 'se' : ''} gefunden
+                    </p>
+                    ${availableAudits.map(offer => `
+                        <div class="offer-card">
+                            <h4>${offer.title}</h4>
+                            <div class="offer-details">
+                                <div class="offer-detail">
+                                    <strong>Anbieter:</strong> <span>${offer.offeredByName}</span>
+                                </div>
+                                <div class="offer-detail">
+                                    <strong>Standard:</strong> <span>${offer.standard}</span>
+                                </div>
+                                <div class="offer-detail">
+                                    <strong>Typ:</strong> <span>${offer.type}</span>
+                                </div>
+                                <div class="offer-detail">
+                                    <strong>Standort:</strong> <span>${offer.location}</span>
+                                </div>
+                                <div class="offer-detail">
+                                    <strong>Erstellt:</strong> <span>${new Date(offer.createdAt).toLocaleDateString('de-DE')}</span>
+                                </div>
+                            </div>
+                            ${offer.description ? `<p><strong>Beschreibung:</strong> ${offer.description}</p>` : ''}
+                            <div class="form-actions">
+                                <button class="btn-primary" onclick="qhseDashboard.showInterest('${offer.id}')">
+                                    <i class="fas fa-handshake"></i>
+                                    Interesse bekunden
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+    }
+
+    clearFilters() {
+        document.getElementById('filterStandard').value = '';
+        document.getElementById('filterType').value = '';
+        document.getElementById('filterLocation').value = '';
+        
+        const searchResultsElement = document.getElementById('searchResultsList');
+        if (searchResultsElement) {
+            searchResultsElement.innerHTML = '<p class="no-offers">Verwenden Sie die Filter oben, um nach Audits zu suchen</p>';
+        }
+    }
+
+    showInterest(offerId) {
+        const offer = this.auditExchanges.find(o => o.id === offerId);
+        const currentUser = this.getCurrentUser();
+        
+        if (!offer) {
+            alert('Angebot nicht gefunden.');
+            return;
+        }
+
+        // Check if already requested
+        if (!this.exchangeRequests) {
+            this.exchangeRequests = this.loadExchangeRequestsFromStorage();
+        }
+        
+        const existingRequest = this.exchangeRequests.find(req => 
+            req.offerId === offerId && req.requestedBy === currentUser.id
+        );
+
+        if (existingRequest) {
+            alert('Sie haben bereits Interesse an diesem Audit bekundet.');
+            return;
+        }
+
+        const message = prompt(`Möchten Sie Interesse an "${offer.title}" bekunden?\n\nOptionale Nachricht an ${offer.offeredByName}:`);
+        if (message !== null) {
+            // Create new request
+            const newRequest = {
+                id: Date.now().toString(),
+                offerId: offerId,
+                requestedBy: currentUser.id,
+                requestedByName: currentUser.displayName || currentUser.name,
+                message: message || '',
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            this.exchangeRequests.push(newRequest);
+            this.saveExchangeRequestsToStorage();
+            
+            alert('✅ Interesse erfolgreich bekundet!\n\nDer Anbieter wird über Ihr Interesse informiert.');
+            console.log('Interest shown for offer:', offer.id, 'Message:', message);
+        }
+    }
+
+    loadExchangeRequestsFromStorage() {
+        const saved = localStorage.getItem('qhse_exchange_requests');
+        return saved ? JSON.parse(saved) : [];
+    }
+
+    saveExchangeRequestsToStorage() {
+        localStorage.setItem('qhse_exchange_requests', JSON.stringify(this.exchangeRequests));
+    }
+
+    updateMyRequests() {
+        const currentUser = this.getCurrentUser();
+        
+        // Load data if not available
+        if (!this.exchangeRequests) {
+            this.exchangeRequests = this.loadExchangeRequestsFromStorage();
+        }
+        if (!this.auditExchanges) {
+            const saved = localStorage.getItem('qhse_audit_exchanges');
+            this.auditExchanges = saved ? JSON.parse(saved) : [];
+        }
+
+        // Sent requests (my interest in others' offers)
+        const sentRequests = this.exchangeRequests.filter(req => req.requestedBy === currentUser.id);
+        
+        // Received requests (others' interest in my offers)
+        const myOffers = this.auditExchanges.filter(offer => offer.offeredBy === currentUser.id);
+        const receivedRequests = this.exchangeRequests.filter(req => 
+            myOffers.some(offer => offer.id === req.offerId)
+        );
+
+        // Update sent requests
+        const sentRequestsElement = document.getElementById('sentRequestsList');
+        if (sentRequestsElement) {
+            if (sentRequests.length === 0) {
+                sentRequestsElement.innerHTML = '<p class="no-offers">Keine gesendeten Anfragen vorhanden</p>';
+            } else {
+                sentRequestsElement.innerHTML = sentRequests.map(request => {
+                    const offer = this.auditExchanges.find(o => o.id === request.offerId);
+                    if (!offer) return '';
+                    
+                    return `
+                        <div class="request-card">
+                            <div class="request-header">
+                                <h4>${offer.title}</h4>
+                                <span class="status-badge ${request.status}">${this.getStatusText(request.status)}</span>
+                            </div>
+                            <div class="request-details">
+                                <div class="request-detail">
+                                    <strong>Anbieter:</strong> <span>${offer.offeredByName}</span>
+                                </div>
+                                <div class="request-detail">
+                                    <strong>Standard:</strong> <span>${offer.standard}</span>
+                                </div>
+                                <div class="request-detail">
+                                    <strong>Angefragt am:</strong> <span>${new Date(request.createdAt).toLocaleDateString('de-DE')}</span>
+                                </div>
+                            </div>
+                            ${request.message ? `<div class="request-message"><strong>Ihre Nachricht:</strong> "${request.message}"</div>` : ''}
+                            <div class="request-actions">
+                                <button class="btn-secondary" onclick="qhseDashboard.cancelRequest('${request.id}')">
+                                    <i class="fas fa-times"></i>
+                                    Anfrage zurückziehen
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Update received requests
+        const receivedRequestsElement = document.getElementById('receivedRequestsList');
+        if (receivedRequestsElement) {
+            if (receivedRequests.length === 0) {
+                receivedRequestsElement.innerHTML = '<p class="no-offers">Keine erhaltenen Anfragen vorhanden</p>';
+            } else {
+                receivedRequestsElement.innerHTML = receivedRequests.map(request => {
+                    const offer = this.auditExchanges.find(o => o.id === request.offerId);
+                    if (!offer) return '';
+                    
+                    return `
+                        <div class="request-card">
+                            <div class="request-header">
+                                <h4>${offer.title}</h4>
+                                <span class="status-badge ${request.status}">${this.getStatusText(request.status)}</span>
+                            </div>
+                            <div class="request-details">
+                                <div class="request-detail">
+                                    <strong>Interessent:</strong> <span>${request.requestedByName}</span>
+                                </div>
+                                <div class="request-detail">
+                                    <strong>Angefragt am:</strong> <span>${new Date(request.createdAt).toLocaleDateString('de-DE')}</span>
+                                </div>
+                            </div>
+                            ${request.message ? `<div class="request-message"><strong>Nachricht:</strong> "${request.message}"</div>` : ''}
+                            ${request.status === 'pending' ? `
+                                <div class="request-actions">
+                                    <button class="btn-primary" onclick="qhseDashboard.acceptRequest('${request.id}')">
+                                        <i class="fas fa-check"></i>
+                                        Akzeptieren
+                                    </button>
+                                    <button class="btn-secondary" onclick="qhseDashboard.declineRequest('${request.id}')">
+                                        <i class="fas fa-times"></i>
+                                        Ablehnen
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+    }
+
+    getStatusText(status) {
+        const statusMap = {
+            'pending': 'Ausstehend',
+            'accepted': 'Akzeptiert',
+            'declined': 'Abgelehnt',
+            'cancelled': 'Zurückgezogen'
+        };
+        return statusMap[status] || status;
+    }
+
+    cancelRequest(requestId) {
+        if (confirm('Möchten Sie diese Anfrage wirklich zurückziehen?')) {
+            this.exchangeRequests = this.exchangeRequests.filter(req => req.id !== requestId);
+            this.saveExchangeRequestsToStorage();
+            this.updateMyRequests();
+            alert('Anfrage erfolgreich zurückgezogen.');
+        }
+    }
+
+    acceptRequest(requestId) {
+        const request = this.exchangeRequests.find(req => req.id === requestId);
+        if (request) {
+            request.status = 'accepted';
+            this.saveExchangeRequestsToStorage();
+            this.updateMyRequests();
+            alert('✅ Anfrage akzeptiert! Sie können nun die Kontaktdaten austauschen.');
+        }
+    }
+
+    declineRequest(requestId) {
+        const request = this.exchangeRequests.find(req => req.id === requestId);
+        if (request) {
+            request.status = 'declined';
+            this.saveExchangeRequestsToStorage();
+            this.updateMyRequests();
+            alert('Anfrage abgelehnt.');
+        }
     }
 
     updateRiskAssessmentDashboard() {

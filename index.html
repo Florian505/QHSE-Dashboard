@@ -117,6 +117,10 @@
                         <i class="fas fa-chart-line"></i>
                         <span>Instandhaltungs-Auswertung</span>
                     </li>
+                    <li class="menu-item static-item" data-section="audit-tauschboerse" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,admin,root-admin">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Audit-Tauschbörse</span>
+                    </li>
                     <li class="menu-item static-item" data-section="gefahrstoffe" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,techniker,admin,root-admin">
                         <i class="fas fa-exclamation-circle"></i>
                         <span>Gefahrstoffe</span>
@@ -3291,6 +3295,195 @@
                                         <i class="fas fa-plus"></i> Erste Maschine hinzufügen
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Audit-Tauschbörse Section -->
+                <section id="audit-tauschboerse-section" class="content-section">
+                    <div class="content-header">
+                        <h1>
+                            <i class="fas fa-exchange-alt"></i>
+                            Audit-Tauschbörse
+                        </h1>
+                        <p class="section-description">
+                            Tauschen Sie Audits mit anderen Auditoren und erweitern Sie Ihr Netzwerk
+                        </p>
+                    </div>
+                    
+                    <div class="exchange-tabs">
+                        <button class="tab-btn active" data-tab="overview">
+                            <i class="fas fa-chart-bar"></i>
+                            Übersicht
+                        </button>
+                        <button class="tab-btn" data-tab="offer">
+                            <i class="fas fa-plus-circle"></i>
+                            Audit anbieten
+                        </button>
+                        <button class="tab-btn" data-tab="search">
+                            <i class="fas fa-search"></i>
+                            Suchen
+                        </button>
+                        <button class="tab-btn" data-tab="my-requests">
+                            <i class="fas fa-inbox"></i>
+                            Meine Anfragen
+                        </button>
+                    </div>
+
+                    <!-- Overview Tab -->
+                    <div id="overview-tab" class="tab-content active">
+                        <div class="info-box">
+                            <h3>📊 Statistiken</h3>
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <span class="stat-number" id="totalOffersCount">0</span>
+                                    <span class="stat-label">Meine Angebote</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number" id="totalExchangesCount">0</span>
+                                    <span class="stat-label">Gesamt verfügbar</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <h3>📋 Meine Angebote</h3>
+                            <div id="myOffersList">
+                                <p class="no-offers">Noch keine Angebote erstellt. <button onclick="qhseDashboard.switchExchangeTab('offer')" class="btn-link">Erstes Angebot erstellen</button></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Offer Tab -->
+                    <div id="offer-tab" class="tab-content">
+                        <div class="info-box">
+                            <h3>📤 Neues Audit-Angebot erstellen</h3>
+                            <form id="offerForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="auditTitle">Audit-Titel *</label>
+                                        <input type="text" id="auditTitle" name="auditTitle" required placeholder="z.B. ISO 9001 Zertifizierungsaudit">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="auditStandard">Standard/Norm *</label>
+                                        <select id="auditStandard" name="auditStandard" required>
+                                            <option value="">Bitte wählen</option>
+                                            <option value="ISO 9001">ISO 9001</option>
+                                            <option value="ISO 14001">ISO 14001</option>
+                                            <option value="ISO 45001">ISO 45001</option>
+                                            <option value="ISO 27001">ISO 27001</option>
+                                            <option value="IATF 16949">IATF 16949</option>
+                                            <option value="AS9100">AS9100</option>
+                                            <option value="Andere">Andere</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="auditType">Audit-Typ *</label>
+                                        <select id="auditType" name="auditType" required>
+                                            <option value="">Bitte wählen</option>
+                                            <option value="Internes Audit">Internes Audit</option>
+                                            <option value="Externes Audit">Externes Audit</option>
+                                            <option value="Zertifizierungsaudit">Zertifizierungsaudit</option>
+                                            <option value="Überwachungsaudit">Überwachungsaudit</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="location">Standort</label>
+                                        <input type="text" id="location" name="location" placeholder="Stadt, Region">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Beschreibung</label>
+                                    <textarea id="description" name="description" rows="4" placeholder="Beschreiben Sie das Audit und besondere Anforderungen..."></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Angebot erstellen
+                                    </button>
+                                    <button type="reset" class="btn-secondary">
+                                        <i class="fas fa-times"></i>
+                                        Zurücksetzen
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Search Tab -->
+                    <div id="search-tab" class="tab-content">
+                        <div class="info-box">
+                            <h3>🔍 Audit-Tauschbörsen suchen</h3>
+                            <div class="search-filters">
+                                <h4><i class="fas fa-filter"></i> Filter</h4>
+                                <div class="filter-row">
+                                    <div class="form-group">
+                                        <label for="filterStandard">Standard/Norm</label>
+                                        <select id="filterStandard" name="filterStandard">
+                                            <option value="">Alle Standards</option>
+                                            <option value="ISO 9001">ISO 9001</option>
+                                            <option value="ISO 14001">ISO 14001</option>
+                                            <option value="ISO 45001">ISO 45001</option>
+                                            <option value="ISO 27001">ISO 27001</option>
+                                            <option value="IATF 16949">IATF 16949</option>
+                                            <option value="AS9100">AS9100</option>
+                                            <option value="Andere">Andere</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="filterType">Audit-Typ</label>
+                                        <select id="filterType" name="filterType">
+                                            <option value="">Alle Typen</option>
+                                            <option value="Internes Audit">Internes Audit</option>
+                                            <option value="Externes Audit">Externes Audit</option>
+                                            <option value="Zertifizierungsaudit">Zertifizierungsaudit</option>
+                                            <option value="Überwachungsaudit">Überwachungsaudit</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="filterLocation">Standort</label>
+                                        <input type="text" id="filterLocation" name="filterLocation" placeholder="Stadt, Region eingeben...">
+                                    </div>
+                                </div>
+                                <div class="filter-actions">
+                                    <button type="button" class="btn-primary" onclick="qhseDashboard.applyFilters()">
+                                        <i class="fas fa-search"></i>
+                                        Filter anwenden
+                                    </button>
+                                    <button type="button" class="btn-secondary" onclick="qhseDashboard.clearFilters()">
+                                        <i class="fas fa-times"></i>
+                                        Filter zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <h3>📋 Suchergebnisse</h3>
+                            <div id="searchResultsList">
+                                <p class="no-offers">Verwenden Sie die Filter oben, um nach Audits zu suchen</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My Requests Tab -->
+                    <div id="my-requests-tab" class="tab-content">
+                        <div class="info-box">
+                            <h3>📤 Gesendete Anfragen</h3>
+                            <p>Ihre Interessensbekundungen an andere Auditoren</p>
+                            <div id="sentRequestsList">
+                                <p class="no-offers">Keine gesendeten Anfragen vorhanden</p>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <h3>📥 Erhaltene Anfragen</h3>
+                            <p>Interessensbekundungen für Ihre Audit-Angebote</p>
+                            <div id="receivedRequestsList">
+                                <p class="no-offers">Keine erhaltenen Anfragen vorhanden</p>
                             </div>
                         </div>
                     </div>

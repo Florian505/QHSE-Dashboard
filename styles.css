@@ -98,6 +98,415 @@
 }
 
 /* Orange Theme */
+
+/* Audit Exchange Specific Styles */
+.exchange-tabs {
+    display: flex;
+    background: var(--secondary-bg);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    margin: 2rem 0;
+    border: 2px solid var(--border-color);
+    overflow-x: auto;
+    gap: 0.25rem;
+}
+
+.exchange-tabs .tab-btn {
+    flex: 1;
+    min-width: 180px;
+    background: transparent;
+    border: none;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.exchange-tabs .tab-btn.active {
+    background: var(--card-bg);
+    color: var(--accent-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.exchange-tabs .tab-btn:hover {
+    background: var(--hover-bg);
+}
+
+.exchange-tab-content {
+    display: none;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 1rem;
+    border: 2px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+.exchange-tab-content.active {
+    display: block;
+}
+
+.exchange-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.exchange-stat-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.exchange-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.exchange-stat-card i {
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+}
+
+.exchange-stat-card h3 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.exchange-stat-card p {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.exchange-form {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.exchange-form h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.exchange-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.exchange-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.exchange-form-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.exchange-form-group input,
+.exchange-form-group select,
+.exchange-form-group textarea {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+}
+
+.exchange-form-group input:focus,
+.exchange-form-group select:focus,
+.exchange-form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.exchange-form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.exchange-search {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 1rem;
+}
+
+.exchange-search input,
+.exchange-search select {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.exchange-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.exchange-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.exchange-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.exchange-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.exchange-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.exchange-card-meta {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.exchange-card-description {
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.exchange-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.exchange-status {
+    padding: 0.5rem 1rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.exchange-status.verfuegbar {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.exchange-status.vergeben {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.exchange-status.pending {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.exchange-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.exchange-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.exchange-btn-primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+.exchange-btn-primary:hover {
+    background: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.exchange-btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.exchange-btn-secondary:hover {
+    background: var(--hover-bg);
+    border-color: var(--accent-color);
+}
+
+.exchange-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.exchange-modal-content {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.exchange-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.exchange-modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.exchange-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0.25rem;
+}
+
+.exchange-modal-close:hover {
+    color: var(--text-primary);
+}
+
+.exchange-type-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 1rem;
+}
+
+.exchange-type-badge.intern {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.exchange-type-badge.extern {
+    background: #f3e8ff;
+    color: #7c3aed;
+}
+
+.exchange-type-badge.zertifizierung {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.no-exchanges {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.no-exchanges i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .exchange-tabs {
+        flex-direction: column;
+    }
+    
+    .exchange-tabs .tab-btn {
+        min-width: unset;
+    }
+    
+    .exchange-form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .exchange-search {
+        flex-direction: column;
+    }
+    
+    .exchange-search input,
+    .exchange-search select {
+        min-width: unset;
+    }
+    
+    .exchange-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .exchange-card-footer {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .exchange-actions {
+        justify-content: center;
+    }
+}
 [data-theme="orange"] {
     --primary-bg: #9a3412;
     --primary-bg-gradient: linear-gradient(180deg, #9a3412 0%, #ea580c 100%);
@@ -19857,6 +20266,272 @@ input[type="file"]::file-selector-button:hover {
     font-size: 0.75rem;
     color: #92400e;
     font-weight: 500;
+}
+
+/* Audit Exchange Basic Styling */
+.info-box {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.info-box h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.info-box ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.info-box li {
+    margin: 0.5rem 0;
+    color: var(--text-primary);
+}
+
+/* Tab Navigation */
+.exchange-tabs {
+    display: flex;
+    background: var(--secondary-bg);
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+    border: 2px solid var(--border-color);
+    gap: 0.25rem;
+}
+
+.exchange-tabs .tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.exchange-tabs .tab-btn.active {
+    background: var(--accent-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.exchange-tabs .tab-btn:hover:not(.active) {
+    background: var(--hover-bg);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Form Styling */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-color);
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+}
+
+/* Statistics */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    margin: 1.5rem 0;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: inherit;
+}
+
+.btn-link:hover {
+    opacity: 0.8;
+}
+
+.no-offers {
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 2rem;
+}
+
+.offer-card {
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: var(--card-bg);
+}
+
+.offer-card h4 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.offer-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.offer-detail {
+    font-size: 0.9rem;
+}
+
+.offer-detail strong {
+    color: var(--text-primary);
+}
+
+.offer-detail span {
+    color: var(--text-secondary);
+}
+
+/* Search Filters */
+.search-filters {
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-filters h4 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 1rem;
 }
 
 /* Responsive Design for Enterprise Features */
