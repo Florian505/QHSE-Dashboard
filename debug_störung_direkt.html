@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Direkt-Test: Störungsmeldung</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background: #f3f4f6;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        .debug-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .debug-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .debug-header h1 {
+            color: #dc2626;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+        }
+        .debug-button {
+            background: #dc2626;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+        .debug-button:hover {
+            background: #b91c1c;
+        }
+        .debug-log {
+            background: #1f2937;
+            color: #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            min-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .step-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .step-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: #374151;
+        }
+        .step-info p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <div class="debug-header">
+            <h1>🚨 Direkt-Test: Störungsmeldung</h1>
+            <p>Schritt-für-Schritt Debug des Störungsmeldung-Systems</p>
+        </div>
+
+        <div class="step-info">
+            <h3>Test-Schritte:</h3>
+            <p>1. Dashboard laden<br>
+               2. Event-Listener prüfen<br>
+               3. Maschinen erstellen<br>
+               4. Modal öffnen<br>
+               5. Formular anzeigen</p>
+        </div>
+
+        <button class="debug-button" onclick="step1_checkDashboard()">
+            <i class="fas fa-search"></i>
+            Schritt 1: Dashboard prüfen
+        </button>
+
+        <button class="debug-button" onclick="step2_checkButton()">
+            <i class="fas fa-mouse-pointer"></i>
+            Schritt 2: Button & Event-Listener prüfen
+        </button>
+
+        <button class="debug-button" onclick="step3_checkMachines()">
+            <i class="fas fa-industry"></i>
+            Schritt 3: Maschinen prüfen/erstellen
+        </button>
+
+        <button class="debug-button" onclick="step4_openModal()">
+            <i class="fas fa-window-maximize"></i>
+            Schritt 4: Modal direkt öffnen
+        </button>
+
+        <button class="debug-button" onclick="step5_simulateClick()">
+            <i class="fas fa-exclamation-triangle"></i>
+            Schritt 5: Button-Klick simulieren
+        </button>
+
+        <div class="debug-log" id="debugLog">
+🚀 Störungsmeldung Debug-Konsole bereit
+Klicken Sie die Schritte nacheinander ab um das Problem zu identifizieren.
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="index.html" style="color: #3b82f6; text-decoration: none;">
+                ← Zurück zum Hauptsystem
+            </a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function log(message) {
+            const debugLog = document.getElementById('debugLog');
+            const time = new Date().toLocaleTimeString();
+            debugLog.textContent += `\n${time}: ${message}`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+
+        function step1_checkDashboard() {
+            log('🔍 SCHRITT 1: Dashboard prüfen...');
+            
+            if (window.qhseDashboard) {
+                log('✅ Dashboard gefunden: ' + typeof window.qhseDashboard);
+                log('Dashboard Funktionen:');
+                
+                const functions = ['showReportIssueModal', 'reportIssue', 'setupIssueReporting'];
+                functions.forEach(func => {
+                    if (typeof window.qhseDashboard[func] === 'function') {
+                        log(`  ✅ ${func} - verfügbar`);
+                    } else {
+                        log(`  ❌ ${func} - FEHLT`);
+                    }
+                });
+                
+                log(`Maschinen geladen: ${window.qhseDashboard.machines ? window.qhseDashboard.machines.length : 0}`);
+            } else {
+                log('❌ Dashboard NICHT gefunden - script.js nicht geladen oder Fehler');
+            }
+        }
+
+        function step2_checkButton() {
+            log('🔍 SCHRITT 2: Button & Event-Listener prüfen...');
+            
+            const btn = document.getElementById('reportIssueBtn');
+            if (btn) {
+                log('✅ Button im DOM gefunden');
+                log(`Button Text: "${btn.textContent.trim()}"`);
+                log(`Button disabled: ${btn.disabled}`);
+                log(`Button style.display: ${btn.style.display}`);
+                
+                // Check event listeners
+                const events = getEventListeners ? getEventListeners(btn) : 'getEventListeners nicht verfügbar';
+                log(`Event Listeners: ${JSON.stringify(events)}`);
+            } else {
+                log('❌ Button mit ID "reportIssueBtn" NICHT im DOM gefunden');
+                
+                // Suche nach ähnlichen Buttons
+                const buttons = document.querySelectorAll('button');
+                log(`Gefundene Buttons: ${buttons.length}`);
+                buttons.forEach((button, index) => {
+                    if (button.textContent.includes('Störung') || button.id.includes('Issue')) {
+                        log(`  Button ${index}: "${button.textContent.trim()}" (ID: ${button.id})`);
+                    }
+                });
+            }
+        }
+
+        function step3_checkMachines() {
+            log('🔍 SCHRITT 3: Maschinen prüfen/erstellen...');
+            
+            if (!window.qhseDashboard) {
+                log('❌ Dashboard nicht verfügbar');
+                return;
+            }
+            
+            log(`Aktuelle Maschinen: ${window.qhseDashboard.machines ? window.qhseDashboard.machines.length : 0}`);
+            
+            if (!window.qhseDashboard.machines || window.qhseDashboard.machines.length === 0) {
+                log('📝 Erstelle Test-Maschinen...');
+                
+                if (typeof window.qhseDashboard.createDefaultMachines === 'function') {
+                    window.qhseDashboard.createDefaultMachines();
+                    log(`✅ Test-Maschinen erstellt: ${window.qhseDashboard.machines.length}`);
+                } else {
+                    log('❌ createDefaultMachines Funktion nicht verfügbar');
+                    // Manual creation
+                    window.qhseDashboard.machines = [
+                        { id: 'test1', name: 'Test Maschine 1', type: 'Test' },
+                        { id: 'test2', name: 'Test Maschine 2', type: 'Test' }
+                    ];
+                    log('✅ Manuelle Test-Maschinen erstellt: 2');
+                }
+            } else {
+                window.qhseDashboard.machines.forEach((machine, index) => {
+                    log(`  Maschine ${index + 1}: ${machine.name} (${machine.type})`);
+                });
+            }
+        }
+
+        function step4_openModal() {
+            log('🔍 SCHRITT 4: Modal direkt öffnen...');
+            
+            if (!window.qhseDashboard) {
+                log('❌ Dashboard nicht verfügbar');
+                return;
+            }
+            
+            if (typeof window.qhseDashboard.showReportIssueModal !== 'function') {
+                log('❌ showReportIssueModal Funktion nicht verfügbar');
+                return;
+            }
+            
+            try {
+                log('🚀 Rufe showReportIssueModal() auf...');
+                window.qhseDashboard.showReportIssueModal();
+                
+                setTimeout(() => {
+                    const modal = document.getElementById('reportIssueModal');
+                    if (modal) {
+                        log('✅ Modal erfolgreich erstellt!');
+                        log(`Modal sichtbar: ${modal.style.display !== 'none'}`);
+                        log(`Modal Größe: ${modal.offsetWidth}x${modal.offsetHeight}`);
+                        
+                        const machineSelect = modal.querySelector('#issueMachine');
+                        if (machineSelect) {
+                            log(`✅ Maschinenauswahl gefunden mit ${machineSelect.options.length} Optionen`);
+                        } else {
+                            log('❌ Maschinenauswahl nicht gefunden');
+                        }
+                    } else {
+                        log('❌ Modal wurde NICHT erstellt');
+                    }
+                }, 50);
+                
+            } catch (error) {
+                log('💥 Fehler beim Öffnen des Modals: ' + error.message);
+                console.error('Modal Error:', error);
+            }
+        }
+
+        function step5_simulateClick() {
+            log('🔍 SCHRITT 5: Button-Klick simulieren...');
+            
+            const btn = document.getElementById('reportIssueBtn');
+            if (btn) {
+                log('🖱️ Simuliere Button-Klick...');
+                btn.click();
+                
+                setTimeout(() => {
+                    const modal = document.getElementById('reportIssueModal');
+                    if (modal) {
+                        log('✅ Modal durch simulierten Klick erfolgreich geöffnet!');
+                    } else {
+                        log('❌ Modal wurde durch simulierten Klick NICHT geöffnet');
+                    }
+                }, 50);
+            } else {
+                log('❌ Button für Simulation nicht gefunden');
+            }
+        }
+
+        // Auto-run first step on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                log('🎯 Auto-Start: Führe ersten Diagnose-Schritt aus...');
+                step1_checkDashboard();
+            }, 1000);
+        });
+
+        // Global error handler
+        window.addEventListener('error', (e) => {
+            log(`💥 JavaScript Fehler: ${e.message} (${e.filename}:${e.lineno})`);
+        });
+    </script>
+</body>
+</html>

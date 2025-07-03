@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimaler Störungsmeldung Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            padding: 2rem;
+            background: #f9fafb;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .test-btn {
+            background: #dc2626;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        .test-btn:hover {
+            background: #b91c1c;
+        }
+        #output {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            min-height: 100px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Minimal Störungsmeldung Test</h1>
+        <p>Dieser Test erstellt direkt ein funktionierendes Störungsmeldung-Modal</p>
+        
+        <button class="test-btn" onclick="createMinimalModal()">
+            <i class="fas fa-exclamation-triangle"></i>
+            STÖRUNGSMELDUNG ÖFFNEN
+        </button>
+        
+        <div id="output">Klicken Sie den Button um die Störungsmeldung zu öffnen...</div>
+        
+        <p><a href="index.html">← Zurück zum Hauptsystem</a></p>
+    </div>
+
+    <script>
+        function log(msg) {
+            document.getElementById('output').textContent += new Date().toLocaleTimeString() + ': ' + msg + '\n';
+        }
+
+        function createMinimalModal() {
+            log('Erstelle Störungsmeldung-Modal...');
+            
+            // Remove existing
+            const existing = document.getElementById('minimalIssueModal');
+            if (existing) existing.remove();
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.id = 'minimalIssueModal';
+            modal.innerHTML = `
+                <div class="modal active" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div class="modal-content" style="background: white; border-radius: 1rem; padding: 2rem; max-width: 600px; width: 90%; max-height: 90%; overflow-y: auto;">
+                        <div class="modal-header" style="border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; margin-bottom: 2rem;">
+                            <h2 style="margin: 0; color: #dc2626;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Störungsmeldung
+                            </h2>
+                            <button onclick="document.getElementById('minimalIssueModal').remove()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+                        </div>
+                        
+                        <form id="issueForm" style="display: grid; gap: 1rem;">
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Maschine/Anlage:</label>
+                                <select id="machineSelect" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem;">
+                                    <option value="">Maschine auswählen</option>
+                                    <option value="machine1">Produktionsmaschine Alpha</option>
+                                    <option value="machine2">Verpackungsmaschine Beta</option>
+                                    <option value="machine3">Qualitätsprüfung Gamma</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Priorität:</label>
+                                <select id="prioritySelect" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem;">
+                                    <option value="">Priorität wählen</option>
+                                    <option value="low">🟢 Niedrig</option>
+                                    <option value="medium">🟡 Mittel</option>
+                                    <option value="high">🟠 Hoch</option>
+                                    <option value="critical">🔴 Kritisch</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Titel der Störung:</label>
+                                <input type="text" id="issueTitle" required placeholder="z.B. Pumpe läuft unregelmäßig" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem;">
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Beschreibung:</label>
+                                <textarea id="issueDescription" required rows="4" placeholder="Beschreiben Sie die Störung detailliert..." style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; resize: vertical;"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Foto (optional):</label>
+                                <input type="file" id="issuePhoto" accept="image/*" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem;">
+                            </div>
+                            
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <button type="button" onclick="submitIssue()" style="flex: 1; background: #dc2626; color: white; padding: 0.75rem; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer;">
+                                    <i class="fas fa-paper-plane"></i> Störung melden
+                                </button>
+                                <button type="button" onclick="document.getElementById('minimalIssueModal').remove()" style="flex: 1; background: #6b7280; color: white; padding: 0.75rem; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer;">
+                                    <i class="fas fa-times"></i> Abbrechen
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            log('✅ Modal erstellt und geöffnet!');
+            
+            // Focus first field
+            setTimeout(() => {
+                document.getElementById('machineSelect').focus();
+            }, 100);
+        }
+        
+        function submitIssue() {
+            const machine = document.getElementById('machineSelect').value;
+            const priority = document.getElementById('prioritySelect').value;
+            const title = document.getElementById('issueTitle').value;
+            const description = document.getElementById('issueDescription').value;
+            
+            if (!machine || !priority || !title || !description) {
+                alert('Bitte füllen Sie alle Pflichtfelder aus!');
+                return;
+            }
+            
+            // Create issue object
+            const issue = {
+                id: 'issue_' + Date.now(),
+                machine: machine,
+                priority: priority,
+                title: title,
+                description: description,
+                createdAt: new Date().toISOString(),
+                status: 'open'
+            };
+            
+            // Save to localStorage (simplified)
+            let issues = JSON.parse(localStorage.getItem('qhse_issues') || '[]');
+            issues.push(issue);
+            localStorage.setItem('qhse_issues', JSON.stringify(issues));
+            
+            log('✅ Störung erfolgreich gemeldet!');
+            log('Daten: ' + JSON.stringify(issue, null, 2));
+            
+            alert('✅ Störung wurde erfolgreich gemeldet!\n\nTitel: ' + title + '\nPriorität: ' + priority);
+            
+            // Close modal
+            document.getElementById('minimalIssueModal').remove();
+        }
+        
+        log('Minimal-Test bereit. Klicken Sie den Button!');
+    </script>
+</body>
+</html>

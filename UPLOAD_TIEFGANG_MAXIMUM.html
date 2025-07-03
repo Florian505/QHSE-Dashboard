@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 QHSE Dokumenten-Management - Maximum Tiefgang</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+            border-radius: 1rem;
+            color: white;
+        }
+        .header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .main-tabs {
+            display: flex;
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #e2e8f0;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .tab-btn.active {
+            background: white;
+            color: #1e40af;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Upload Section */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .upload-panel {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+        .upload-zone {
+            border: 3px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .upload-zone.dragover {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            transform: scale(1.02);
+        }
+        
+        /* Form Styles */
+        .form-section {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .section-header h3 {
+            font-size: 1.3rem;
+            color: #1f2937;
+            margin: 0;
+        }
+        .section-header .badge {
+            background: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .form-grid.two-col {
+            grid-template-columns: 1fr 1fr;
+        }
+        .form-grid.three-col {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .required {
+            color: #ef4444;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.875rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        /* Priority & Classification */
+        .priority-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .priority-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+        .priority-btn:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .priority-btn.selected {
+            color: white;
+        }
+        .priority-btn.low.selected { background: #10b981; border-color: #10b981; }
+        .priority-btn.medium.selected { background: #f59e0b; border-color: #f59e0b; }
+        .priority-btn.high.selected { background: #ef4444; border-color: #ef4444; }
+        .priority-btn.critical.selected { background: #991b1b; border-color: #991b1b; }
+        
+        /* Tags System */
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.875rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            min-height: 3rem;
+            background: white;
+        }
+        .tag {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .tag .remove {
+            cursor: pointer;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .tag-input {
+            border: none;
+            outline: none;
+            background: transparent;
+            flex: 1;
+            min-width: 120px;
+            padding: 0.5rem;
+        }
+        
+        /* Advanced Features */
+        .compliance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .compliance-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .compliance-item:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .compliance-item.selected {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+        .compliance-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #6b7280;
+        }
+        .compliance-item.selected i {
+            color: #10b981;
+        }
+        
+        /* Risk Assessment */
+        .risk-matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .risk-cell {
+            aspect-ratio: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .risk-cell.low { background: #dcfce7; color: #166534; }
+        .risk-cell.medium { background: #fef3c7; color: #92400e; }
+        .risk-cell.high { background: #fee2e2; color: #991b1b; }
+        .risk-cell.selected { border-color: #1e40af; box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2); }
+        
+        /* Workflow System */
+        .workflow-steps {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .workflow-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .workflow-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #e2e8f0;
+            transform: translateY(-50%);
+        }
+        .workflow-step.active::after {
+            background: #3b82f6;
+        }
+        .workflow-step.completed::after {
+            background: #10b981;
+        }
+        .step-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .workflow-step.active .step-icon {
+            background: #3b82f6;
+            color: white;
+        }
+        .workflow-step.completed .step-icon {
+            background: #10b981;
+            color: white;
+        }
+        
+        /* Action Buttons */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .action-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .action-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        .action-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .action-btn.primary { background: #1e40af; }
+        .action-btn.success { background: #10b981; }
+        .action-btn.warning { background: #f59e0b; }
+        .action-btn.danger { background: #ef4444; }
+        
+        /* File Management */
+        .file-library {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .file-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        .file-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        .file-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .file-icon {
+            font-size: 2.5rem;
+            color: #3b82f6;
+        }
+        .file-info {
+            flex: 1;
+        }
+        .file-info h4 {
+            margin: 0 0 0.5rem 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+        .file-meta {
+            color: #6b7280;
+            font-size: 0.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .file-actions button {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        /* Statistics Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-grid.three-col {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .form-grid.two-col {
+                grid-template-columns: 1fr;
+            }
+            .priority-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .main-tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 QHSE Dokumenten-Management System</h1>
+            <p>Professionelles Dokumentenmanagement mit TÜV-konformer Compliance und maximaler Tiefgang</p>
+        </div>
+        
+        <!-- Main Navigation Tabs -->
+        <div class="main-tabs">
+            <button class="tab-btn active" onclick="switchTab('upload')">
+                <i class="fas fa-cloud-upload-alt"></i> Dokument hochladen
+            </button>
+            <button class="tab-btn" onclick="switchTab('library')">
+                <i class="fas fa-books"></i> Dokumentenbibliothek
+            </button>
+            <button class="tab-btn" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-line"></i> Analytics & Reports
+            </button>
+            <button class="tab-btn" onclick="switchTab('compliance')">
+                <i class="fas fa-shield-check"></i> Compliance Center
+            </button>
+            <button class="tab-btn" onclick="switchTab('workflow')">
+                <i class="fas fa-project-diagram"></i> Workflow Management
+            </button>
+        </div>
+
+        <!-- Upload Tab -->
+        <div id="upload-tab" class="tab-content active">
+            <!-- Workflow Progress -->
+            <div class="workflow-steps">
+                <div class="workflow-step active">
+                    <div class="step-icon"><i class="fas fa-file-upload"></i></div>
+                    <div>Datei auswählen</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon"><i class="fas fa-edit"></i></div>
+                    <div>Metadaten erfassen</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon"><i class="fas fa-shield-check"></i></div>
+                    <div>Compliance prüfen</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon"><i class="fas fa-users"></i></div>
+                    <div>Genehmigung</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon"><i class="fas fa-check-circle"></i></div>
+                    <div>Veröffentlichen</div>
+                </div>
+            </div>
+
+            <div class="upload-grid">
+                <div class="upload-panel">
+                    <!-- File Upload Zone -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>Datei-Upload</h3>
+                            <span class="badge">Schritt 1</span>
+                        </div>
+                        
+                        <div class="upload-zone" id="uploadZone">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 4rem; color: #6b7280; margin-bottom: 1rem;"></i>
+                            <p style="font-size: 1.2rem; color: #374151; margin-bottom: 1rem;">Dateien hier ablegen oder klicken</p>
+                            <small style="color: #6b7280;">Alle Dateitypen • Max 50MB pro Datei • Multi-Upload unterstützt</small>
+                            <input type="file" id="fileInput" multiple accept="*/*" style="display: none;">
+                        </div>
+                        
+                        <div id="selectedFiles" style="margin-top: 1rem;"></div>
+                    </div>
+
+                    <!-- Document Classification -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-sitemap"></i>
+                            <h3>Dokument-Klassifizierung</h3>
+                            <span class="badge">Pflicht</span>
+                        </div>
+                        
+                        <div class="form-grid two-col">
+                            <div class="form-group">
+                                <label><i class="fas fa-tag"></i> Kategorie <span class="required">*</span></label>
+                                <select id="docCategory" required>
+                                    <option value="">Kategorie wählen</option>
+                                    <option value="arbeitsschutz">🛡️ Arbeitsschutz</option>
+                                    <option value="qualitaet">⭐ Qualitätsmanagement</option>
+                                    <option value="umwelt">🌱 Umweltmanagement</option>
+                                    <option value="datenschutz">🔒 Datenschutz</option>
+                                    <option value="gesundheit">❤️ Gesundheitsschutz</option>
+                                    <option value="energie">⚡ Energiemanagement</option>
+                                    <option value="it-sicherheit">💻 IT-Sicherheit</option>
+                                    <option value="compliance">📋 Compliance</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-file-contract"></i> Dokumententyp <span class="required">*</span></label>
+                                <select id="docType" required>
+                                    <option value="">Typ wählen</option>
+                                    <option value="arbeitsanweisung">📋 Arbeitsanweisung</option>
+                                    <option value="verfahrensanweisung">🔄 Verfahrensanweisung</option>
+                                    <option value="betriebsanweisung">⚙️ Betriebsanweisung</option>
+                                    <option value="richtlinie">📜 Richtlinie/Policy</option>
+                                    <option value="handbuch">📖 Handbuch</option>
+                                    <option value="formular">📄 Formular</option>
+                                    <option value="checkliste">✅ Checkliste</option>
+                                    <option value="protokoll">📝 Protokoll</option>
+                                    <option value="zertifikat">🏆 Zertifikat</option>
+                                    <option value="schulung">🎓 Schulungsunterlage</option>
+                                    <option value="sdb">⚠️ Sicherheitsdatenblatt</option>
+                                    <option value="pruefreport">🔍 Prüfreport</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-exclamation-triangle"></i> Prioritätsstufe</label>
+                            <div class="priority-grid">
+                                <div class="priority-btn low" data-priority="low">
+                                    <i class="fas fa-circle" style="color: #10b981;"></i><br>Niedrig<br><small>Standard-Dokument</small>
+                                </div>
+                                <div class="priority-btn medium" data-priority="medium">
+                                    <i class="fas fa-circle" style="color: #f59e0b;"></i><br>Normal<br><small>Wichtiges Dokument</small>
+                                </div>
+                                <div class="priority-btn high" data-priority="high">
+                                    <i class="fas fa-circle" style="color: #ef4444;"></i><br>Hoch<br><small>Kritisches Dokument</small>
+                                </div>
+                                <div class="priority-btn critical" data-priority="critical">
+                                    <i class="fas fa-exclamation-triangle" style="color: #991b1b;"></i><br>Kritisch<br><small>Sicherheitskritisch</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>Grundinformationen</h3>
+                            <span class="badge">Basis</span>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label><i class="fas fa-heading"></i> Titel/Bezeichnung <span class="required">*</span></label>
+                                <input type="text" id="docTitle" placeholder="z.B. Betriebsanweisung Maschine XY-2000" required>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-code-branch"></i> Version</label>
+                                <input type="text" id="docVersion" placeholder="z.B. 1.0, 2.1, Rev-A">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-user-edit"></i> Autor/Ersteller</label>
+                                <input type="text" id="docAuthor" placeholder="Name des Dokument-Erstellers">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-building"></i> Abteilung/Bereich</label>
+                                <select id="docDepartment">
+                                    <option value="">Abteilung wählen</option>
+                                    <option value="produktion">🏭 Produktion</option>
+                                    <option value="qualitaet">⭐ Qualitätssicherung</option>
+                                    <option value="technik">⚙️ Technik/Engineering</option>
+                                    <option value="instandhaltung">🔧 Instandhaltung</option>
+                                    <option value="logistik">📦 Logistik</option>
+                                    <option value="einkauf">🛒 Einkauf</option>
+                                    <option value="vertrieb">📈 Vertrieb</option>
+                                    <option value="verwaltung">🏢 Verwaltung</option>
+                                    <option value="hr">👥 Personal/HR</option>
+                                    <option value="it">💻 IT</option>
+                                    <option value="geschaeftsfuehrung">👔 Geschäftsführung</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-align-left"></i> Beschreibung/Zweck</label>
+                            <textarea id="docDescription" placeholder="Detaillierte Beschreibung des Dokuments, Anwendungsbereich und Zweck..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-tags"></i> Tags/Schlagwörter</label>
+                            <div class="tags-input" id="tagsInput">
+                                <input type="text" class="tag-input" placeholder="Tag eingeben und Enter drücken..." id="tagInputField">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compliance & Standards -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-shield-check"></i>
+                            <h3>Compliance & Standards</h3>
+                            <span class="badge">TÜV</span>
+                        </div>
+                        
+                        <div class="form-grid three-col">
+                            <div class="form-group">
+                                <label><i class="fas fa-certificate"></i> Bezugsnorm/Standard</label>
+                                <select id="docStandard">
+                                    <option value="">Standard wählen</option>
+                                    <option value="iso-9001">ISO 9001:2015 (QM)</option>
+                                    <option value="iso-14001">ISO 14001:2015 (UM)</option>
+                                    <option value="iso-45001">ISO 45001:2018 (ASM)</option>
+                                    <option value="iso-50001">ISO 50001:2018 (EnM)</option>
+                                    <option value="iso-27001">ISO 27001:2022 (ISMS)</option>
+                                    <option value="dguv">DGUV Vorschriften</option>
+                                    <option value="maschinenrichtlinie">Maschinenrichtlinie 2006/42/EG</option>
+                                    <option value="presse">Betriebssicherheitsverordnung</option>
+                                    <option value="gefahrstoffv">Gefahrstoffverordnung</option>
+                                    <option value="dsgvo">DSGVO</option>
+                                    <option value="custom">Sonstiger Standard</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-gavel"></i> Rechtliche Grundlage</label>
+                                <input type="text" id="docLegalBasis" placeholder="z.B. §7 ArbSchG, Art. 32 DSGVO">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-balance-scale"></i> Compliance-Level</label>
+                                <select id="complianceLevel">
+                                    <option value="optional">Optional</option>
+                                    <option value="recommended">Empfohlen</option>
+                                    <option value="mandatory">Pflicht</option>
+                                    <option value="legal">Gesetzlich vorgeschrieben</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-clipboard-check"></i> Anwendbare Compliance-Standards</label>
+                            <div class="compliance-grid" id="complianceStandards">
+                                <div class="compliance-item" data-standard="tuv">
+                                    <i class="fas fa-shield-check"></i>
+                                    <div>TÜV SÜD</div>
+                                </div>
+                                <div class="compliance-item" data-standard="dekra">
+                                    <i class="fas fa-certificate"></i>
+                                    <div>DEKRA</div>
+                                </div>
+                                <div class="compliance-item" data-standard="bvqi">
+                                    <i class="fas fa-award"></i>
+                                    <div>BVQI</div>
+                                </div>
+                                <div class="compliance-item" data-standard="din">
+                                    <i class="fas fa-file-contract"></i>
+                                    <div>DIN CERTCO</div>
+                                </div>
+                                <div class="compliance-item" data-standard="emas">
+                                    <i class="fas fa-leaf"></i>
+                                    <div>EMAS</div>
+                                </div>
+                                <div class="compliance-item" data-standard="ohsas">
+                                    <i class="fas fa-hard-hat"></i>
+                                    <div>OHSAS</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Assessment -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Risikobewertung</h3>
+                            <span class="badge">Analyse</span>
+                        </div>
+                        
+                        <div class="form-grid two-col">
+                            <div class="form-group">
+                                <label><i class="fas fa-thermometer-half"></i> Eintrittswahrscheinlichkeit</label>
+                                <select id="riskProbability">
+                                    <option value="">Bewertung wählen</option>
+                                    <option value="1">1 - Sehr unwahrscheinlich</option>
+                                    <option value="2">2 - Unwahrscheinlich</option>
+                                    <option value="3">3 - Möglich</option>
+                                    <option value="4">4 - Wahrscheinlich</option>
+                                    <option value="5">5 - Sehr wahrscheinlich</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-skull-crossbones"></i> Schadensausmaß</label>
+                                <select id="riskImpact">
+                                    <option value="">Bewertung wählen</option>
+                                    <option value="1">1 - Vernachlässigbar</option>
+                                    <option value="2">2 - Gering</option>
+                                    <option value="3">3 - Mäßig</option>
+                                    <option value="4">4 - Hoch</option>
+                                    <option value="5">5 - Sehr hoch</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-chart-area"></i> Risiko-Matrix (Klicken Sie auf das entsprechende Feld)</label>
+                            <div class="risk-matrix" id="riskMatrix">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                            <div id="riskResult" style="margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; display: none;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-shield-alt"></i> Schutzmaßnahmen</label>
+                            <textarea id="protectiveMeasures" placeholder="Beschreibung der vorhandenen oder geplanten Schutzmaßnahmen..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Document Lifecycle -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-sync-alt"></i>
+                            <h3>Dokument-Lebenszyklus</h3>
+                            <span class="badge">Lifecycle</span>
+                        </div>
+                        
+                        <div class="form-grid three-col">
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-plus"></i> Gültig ab</label>
+                                <input type="date" id="docValidFrom">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-minus"></i> Gültig bis</label>
+                                <input type="date" id="docValidUntil">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-calendar-check"></i> Nächste Überprüfung</label>
+                                <input type="date" id="docReviewDate">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-redo"></i> Überprüfungsintervall</label>
+                                <select id="reviewInterval">
+                                    <option value="">Intervall wählen</option>
+                                    <option value="6">6 Monate</option>
+                                    <option value="12">12 Monate</option>
+                                    <option value="24">24 Monate</option>
+                                    <option value="36">36 Monate</option>
+                                    <option value="60">5 Jahre</option>
+                                    <option value="custom">Individuell</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-user-shield"></i> Verantwortlicher</label>
+                                <input type="text" id="docResponsible" placeholder="Name des Verantwortlichen">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-users-cog"></i> Genehmiger</label>
+                                <input type="text" id="docApprover" placeholder="Name des Genehmigers">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Access Control & Distribution -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-lock"></i>
+                            <h3>Zugriffskontrolle & Verteilung</h3>
+                            <span class="badge">Security</span>
+                        </div>
+                        
+                        <div class="form-grid two-col">
+                            <div class="form-group">
+                                <label><i class="fas fa-eye"></i> Sichtbarkeit</label>
+                                <select id="docVisibility">
+                                    <option value="public">🌍 Öffentlich (alle Mitarbeiter)</option>
+                                    <option value="department">🏢 Nur Abteilung</option>
+                                    <option value="team">👥 Nur Team</option>
+                                    <option value="management">👔 Nur Führungskräfte</option>
+                                    <option value="restricted">🔒 Eingeschränkt</option>
+                                    <option value="confidential">🔐 Vertraulich</option>
+                                    <option value="secret">🚫 Geheim</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-language"></i> Sprache</label>
+                                <select id="docLanguage">
+                                    <option value="de">🇩🇪 Deutsch</option>
+                                    <option value="en">🇺🇸 Englisch</option>
+                                    <option value="fr">🇫🇷 Französisch</option>
+                                    <option value="es">🇪🇸 Spanisch</option>
+                                    <option value="it">🇮🇹 Italienisch</option>
+                                    <option value="pl">🇵🇱 Polnisch</option>
+                                    <option value="tr">🇹🇷 Türkisch</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> Anwendungsbereich/Standorte</label>
+                            <textarea id="docScope" placeholder="Beschreibung der Anwendungsbereiche, Standorte, Maschinen, etc..."></textarea>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="docMandatory">
+                                    <i class="fas fa-exclamation-circle"></i> Pflichtdokument (Mitarbeiter müssen Kenntnisnahme bestätigen)
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="docTraining">
+                                    <i class="fas fa-graduation-cap"></i> Schulung erforderlich
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="docArchive">
+                                    <i class="fas fa-archive"></i> Langzeitarchivierung (>10 Jahre)
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="docPrint">
+                                    <i class="fas fa-print"></i> Druckversion vor Ort erforderlich
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="docEmergency">
+                                    <i class="fas fa-ambulance"></i> Notfalldokument (schneller Zugriff)
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="docAudit">
+                                    <i class="fas fa-search"></i> Audit-relevant
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Actions -->
+                    <div class="action-grid">
+                        <button class="action-btn" onclick="saveDraft()">
+                            <i class="fas fa-save"></i> Als Entwurf speichern
+                        </button>
+                        <button class="action-btn success" id="uploadBtn" onclick="uploadDocument()" disabled>
+                            <i class="fas fa-cloud-upload-alt"></i> Dokument hochladen
+                        </button>
+                        <button class="action-btn warning" onclick="validateCompliance()">
+                            <i class="fas fa-shield-check"></i> Compliance prüfen
+                        </button>
+                        <button class="action-btn danger" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Formular zurücksetzen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Side Panel -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Upload Statistics -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-chart-bar"></i>
+                            <h3>Upload-Statistiken</h3>
+                        </div>
+                        <div class="stats-grid" style="grid-template-columns: 1fr;">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <div class="stat-number" id="totalDocs">0</div>
+                                <div class="stat-label">Dokumente gesamt</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                                <div class="stat-number" id="todayUploads">0</div>
+                                <div class="stat-label">Uploads heute</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                <div class="stat-number" id="pendingApprovals">0</div>
+                                <div class="stat-label">Wartende Genehmigungen</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Documents -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-clock"></i>
+                            <h3>Kürzlich hochgeladen</h3>
+                        </div>
+                        <div id="recentDocs" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Recent documents will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-bolt"></i>
+                            <h3>Schnellaktionen</h3>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <button class="action-btn" onclick="createTemplate()">
+                                <i class="fas fa-file-plus"></i> Vorlage erstellen
+                            </button>
+                            <button class="action-btn" onclick="bulkUpload()">
+                                <i class="fas fa-layer-group"></i> Stapel-Upload
+                            </button>
+                            <button class="action-btn" onclick="importFromSystem()">
+                                <i class="fas fa-download"></i> Aus System importieren
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Library Tab -->
+        <div id="library-tab" class="tab-content">
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-books"></i>
+                    <h3>Dokumentenbibliothek</h3>
+                    <span class="badge">Übersicht</span>
+                </div>
+                
+                <div class="file-library" id="documentLibrary">
+                    <!-- Documents will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDocsAnalytics">0</div>
+                    <div class="stat-label">Gesamt Dokumente</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="complianceRate">100%</div>
+                    <div class="stat-label">Compliance Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgProcessingTime">2.5</div>
+                    <div class="stat-label">Ø Bearbeitungszeit (Tage)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingReviews">0</div>
+                    <div class="stat-label">Ausstehende Reviews</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Tab -->
+        <div id="compliance-tab" class="tab-content">
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-shield-check"></i>
+                    <h3>Compliance Center</h3>
+                    <span class="badge">TÜV Ready</span>
+                </div>
+                <p>Compliance-Management und Audit-Bereitschaft</p>
+            </div>
+        </div>
+
+        <!-- Workflow Tab -->
+        <div id="workflow-tab" class="tab-content">
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>Workflow Management</h3>
+                    <span class="badge">Process</span>
+                </div>
+                <p>Dokumenten-Workflows und Genehmigungsprozesse</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedFiles = [];
+        let selectedCategory = '';
+        let selectedPriority = '';
+        let selectedDocType = '';
+        let documentTags = [];
+        let complianceStandards = [];
+        let uploadedDocuments = [];
+        let currentWorkflowStep = 1;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUploadSystem();
+            loadExistingDocuments();
+            updateStatistics();
+            createRiskMatrix();
+            setupEventListeners();
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Initialize upload system
+        function initializeUploadSystem() {
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+            
+            // Click to upload
+            uploadZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // Drag and drop
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+            
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+            
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                handleFileSelection(e.dataTransfer.files);
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFileSelection(e.target.files);
+            });
+        }
+
+        // Handle file selection
+        function handleFileSelection(files) {
+            selectedFiles = Array.from(files);
+            displaySelectedFiles();
+            updateWorkflowStep(2);
+            updateUploadButton();
+        }
+
+        // Display selected files
+        function displaySelectedFiles() {
+            const container = document.getElementById('selectedFiles');
+            if (selectedFiles.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div style="background: white; border: 2px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem;">
+                    <h4 style="margin: 0 0 1rem 0; color: #1f2937;">
+                        <i class="fas fa-files"></i> ${selectedFiles.length} Datei(en) ausgewählt
+                    </h4>
+                    ${selectedFiles.map((file, index) => `
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
+                            <i class="fas fa-file" style="color: #3b82f6;"></i>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #1f2937;">${file.name}</div>
+                                <div style="font-size: 0.8rem; color: #6b7280;">${formatFileSize(file.size)} • ${file.type || 'Unbekannt'}</div>
+                            </div>
+                            <button onclick="removeFile(${index})" style="background: #ef4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer;">×</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Remove file from selection
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            displaySelectedFiles();
+            updateUploadButton();
+            if (selectedFiles.length === 0) {
+                updateWorkflowStep(1);
+            }
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Category selection
+            document.getElementById('docCategory').addEventListener('change', (e) => {
+                selectedCategory = e.target.value;
+                updateUploadButton();
+                if (selectedCategory) updateWorkflowStep(3);
+            });
+
+            // Document type selection
+            document.getElementById('docType').addEventListener('change', (e) => {
+                selectedDocType = e.target.value;
+                updateUploadButton();
+            });
+
+            // Priority selection
+            document.querySelectorAll('.priority-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedPriority = btn.dataset.priority;
+                    updateUploadButton();
+                });
+            });
+
+            // Compliance standards selection
+            document.querySelectorAll('.compliance-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                    const standard = item.dataset.standard;
+                    if (complianceStandards.includes(standard)) {
+                        complianceStandards = complianceStandards.filter(s => s !== standard);
+                    } else {
+                        complianceStandards.push(standard);
+                    }
+                });
+            });
+
+            // Tags input
+            document.getElementById('tagInputField').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag();
+                }
+            });
+
+            // Form validation
+            ['docTitle', 'docAuthor', 'docDescription'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateUploadButton);
+            });
+
+            // Risk assessment
+            document.getElementById('riskProbability').addEventListener('change', updateRiskAssessment);
+            document.getElementById('riskImpact').addEventListener('change', updateRiskAssessment);
+        }
+
+        // Add tag
+        function addTag() {
+            const input = document.getElementById('tagInputField');
+            const tag = input.value.trim();
+            
+            if (tag && !documentTags.includes(tag)) {
+                documentTags.push(tag);
+                displayTags();
+                input.value = '';
+            }
+        }
+
+        // Display tags
+        function displayTags() {
+            const tagsInput = document.getElementById('tagsInput');
+            const input = tagsInput.querySelector('.tag-input');
+            
+            // Remove existing tags
+            tagsInput.querySelectorAll('.tag').forEach(tag => tag.remove());
+            
+            // Add tags before input
+            documentTags.forEach((tag, index) => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'tag';
+                tagElement.innerHTML = `
+                    ${tag}
+                    <span class="remove" onclick="removeTag(${index})">×</span>
+                `;
+                tagsInput.insertBefore(tagElement, input);
+            });
+        }
+
+        // Remove tag
+        function removeTag(index) {
+            documentTags.splice(index, 1);
+            displayTags();
+        }
+
+        // Create risk matrix
+        function createRiskMatrix() {
+            const matrix = document.getElementById('riskMatrix');
+            const risks = [
+                ['1,1', '2,1', '3,1', '4,1', '5,1'],
+                ['1,2', '2,2', '3,2', '4,2', '5,2'],
+                ['1,3', '2,3', '3,3', '4,3', '5,3'],
+                ['1,4', '2,4', '3,4', '4,4', '5,4'],
+                ['1,5', '2,5', '3,5', '4,5', '5,5']
+            ];
+            
+            matrix.innerHTML = '';
+            
+            for (let row = 4; row >= 0; row--) {
+                for (let col = 0; col < 5; col++) {
+                    const cell = document.createElement('div');
+                    const riskValue = (row + 1) * (col + 1);
+                    
+                    cell.className = 'risk-cell';
+                    cell.textContent = riskValue;
+                    cell.dataset.risk = riskValue;
+                    
+                    if (riskValue <= 6) {
+                        cell.classList.add('low');
+                    } else if (riskValue <= 15) {
+                        cell.classList.add('medium');
+                    } else {
+                        cell.classList.add('high');
+                    }
+                    
+                    cell.addEventListener('click', () => {
+                        document.querySelectorAll('.risk-cell').forEach(c => c.classList.remove('selected'));
+                        cell.classList.add('selected');
+                        showRiskResult(riskValue);
+                    });
+                    
+                    matrix.appendChild(cell);
+                }
+            }
+        }
+
+        // Show risk result
+        function showRiskResult(riskValue) {
+            const resultDiv = document.getElementById('riskResult');
+            let riskLevel, riskColor, riskAction;
+            
+            if (riskValue <= 6) {
+                riskLevel = 'NIEDRIG';
+                riskColor = '#10b981';
+                riskAction = 'Risiko akzeptabel. Regelmäßige Überwachung ausreichend.';
+            } else if (riskValue <= 15) {
+                riskLevel = 'MITTEL';
+                riskColor = '#f59e0b';
+                riskAction = 'Risikominderung erforderlich. Maßnahmen implementieren.';
+            } else {
+                riskLevel = 'HOCH';
+                riskColor = '#ef4444';
+                riskAction = 'Sofortige Maßnahmen erforderlich. Risiko nicht akzeptabel.';
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = riskColor + '20';
+            resultDiv.style.border = `2px solid ${riskColor}`;
+            resultDiv.innerHTML = `
+                <strong style="color: ${riskColor};">Risikobewertung: ${riskLevel} (${riskValue})</strong><br>
+                ${riskAction}
+            `;
+        }
+
+        // Update risk assessment
+        function updateRiskAssessment() {
+            const probability = parseInt(document.getElementById('riskProbability').value);
+            const impact = parseInt(document.getElementById('riskImpact').value);
+            
+            if (probability && impact) {
+                const riskValue = probability * impact;
+                const cells = document.querySelectorAll('.risk-cell');
+                cells.forEach(cell => {
+                    cell.classList.remove('selected');
+                    if (parseInt(cell.dataset.risk) === riskValue) {
+                        cell.classList.add('selected');
+                    }
+                });
+                showRiskResult(riskValue);
+            }
+        }
+
+        // Update workflow step
+        function updateWorkflowStep(step) {
+            currentWorkflowStep = step;
+            
+            document.querySelectorAll('.workflow-step').forEach((stepEl, index) => {
+                stepEl.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    stepEl.classList.add('completed');
+                } else if (index + 1 === step) {
+                    stepEl.classList.add('active');
+                }
+            });
+        }
+
+        // Update upload button
+        function updateUploadButton() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const title = document.getElementById('docTitle').value.trim();
+            const canUpload = selectedFiles.length > 0 && selectedCategory && selectedDocType && title;
+            
+            uploadBtn.disabled = !canUpload;
+            uploadBtn.innerHTML = canUpload ? 
+                '<i class="fas fa-cloud-upload-alt"></i> Dokument hochladen' : 
+                '<i class="fas fa-cloud-upload-alt"></i> Vollständige Angaben erforderlich';
+        }
+
+        // Upload document
+        function uploadDocument() {
+            if (selectedFiles.length === 0) {
+                alert('Bitte wählen Sie Dateien aus!');
+                return;
+            }
+            
+            const metadata = collectMetadata();
+            
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const document = {
+                        id: Date.now() + '_' + index,
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        content: e.target.result,
+                        uploadDate: new Date().toISOString(),
+                        ...metadata
+                    };
+                    
+                    uploadedDocuments.push(document);
+                    saveDocuments();
+                    
+                    if (index === selectedFiles.length - 1) {
+                        updateWorkflowStep(5);
+                        setTimeout(() => {
+                            alert('Upload erfolgreich abgeschlossen!');
+                            resetForm();
+                            updateStatistics();
+                            refreshDocumentLibrary();
+                        }, 500);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Collect metadata
+        function collectMetadata() {
+            return {
+                title: document.getElementById('docTitle').value.trim(),
+                category: selectedCategory,
+                docType: selectedDocType,
+                priority: selectedPriority,
+                version: document.getElementById('docVersion').value.trim(),
+                author: document.getElementById('docAuthor').value.trim(),
+                department: document.getElementById('docDepartment').value,
+                description: document.getElementById('docDescription').value.trim(),
+                tags: [...documentTags],
+                complianceStandards: [...complianceStandards],
+                standard: document.getElementById('docStandard').value,
+                legalBasis: document.getElementById('docLegalBasis').value.trim(),
+                complianceLevel: document.getElementById('complianceLevel').value,
+                riskProbability: document.getElementById('riskProbability').value,
+                riskImpact: document.getElementById('riskImpact').value,
+                protectiveMeasures: document.getElementById('protectiveMeasures').value.trim(),
+                validFrom: document.getElementById('docValidFrom').value,
+                validUntil: document.getElementById('docValidUntil').value,
+                reviewDate: document.getElementById('docReviewDate').value,
+                reviewInterval: document.getElementById('reviewInterval').value,
+                responsible: document.getElementById('docResponsible').value.trim(),
+                approver: document.getElementById('docApprover').value.trim(),
+                visibility: document.getElementById('docVisibility').value,
+                language: document.getElementById('docLanguage').value,
+                scope: document.getElementById('docScope').value.trim(),
+                mandatory: document.getElementById('docMandatory').checked,
+                training: document.getElementById('docTraining').checked,
+                archive: document.getElementById('docArchive').checked,
+                print: document.getElementById('docPrint').checked,
+                emergency: document.getElementById('docEmergency').checked,
+                audit: document.getElementById('docAudit').checked
+            };
+        }
+
+        // Save documents to localStorage
+        function saveDocuments() {
+            localStorage.setItem('qhse_documents_advanced', JSON.stringify(uploadedDocuments));
+        }
+
+        // Load existing documents
+        function loadExistingDocuments() {
+            const saved = localStorage.getItem('qhse_documents_advanced');
+            if (saved) {
+                uploadedDocuments = JSON.parse(saved);
+            }
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const today = new Date().toDateString();
+            const todayUploads = uploadedDocuments.filter(doc => 
+                new Date(doc.uploadDate).toDateString() === today
+            ).length;
+            
+            document.getElementById('totalDocs').textContent = uploadedDocuments.length;
+            document.getElementById('todayUploads').textContent = todayUploads;
+            document.getElementById('totalDocsAnalytics').textContent = uploadedDocuments.length;
+            
+            // Update pending approvals (mock data)
+            document.getElementById('pendingApprovals').textContent = Math.floor(uploadedDocuments.length * 0.1);
+            document.getElementById('pendingReviews').textContent = Math.floor(uploadedDocuments.length * 0.15);
+        }
+
+        // Refresh document library
+        function refreshDocumentLibrary() {
+            const library = document.getElementById('documentLibrary');
+            
+            if (uploadedDocuments.length === 0) {
+                library.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: #6b7280;">
+                        <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>Keine Dokumente vorhanden. Laden Sie Ihr erstes Dokument hoch!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            library.innerHTML = uploadedDocuments.map(doc => `
+                <div class="file-card">
+                    <div class="file-header">
+                        <i class="fas fa-file-alt file-icon"></i>
+                        <div class="file-info">
+                            <h4>${doc.title || doc.name}</h4>
+                            <div class="file-meta">
+                                <span style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem;">
+                                    ${doc.category?.toUpperCase()}
+                                </span>
+                                <span>${formatFileSize(doc.size)}</span>
+                                <span>${new Date(doc.uploadDate).toLocaleDateString('de-DE')}</span>
+                            </div>
+                        </div>
+                    </div>
+                    ${doc.description ? `<p style="color: #6b7280; font-size: 0.9rem; margin: 0.5rem 0;">${doc.description}</p>` : ''}
+                    <div class="file-actions">
+                        <button onclick="downloadDocument('${doc.id}')" style="background: #10b981; color: white;">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button onclick="previewDocument('${doc.id}')" style="background: #3b82f6; color: white;">
+                            <i class="fas fa-eye"></i> Vorschau
+                        </button>
+                        <button onclick="deleteDocument('${doc.id}')" style="background: #ef4444; color: white;">
+                            <i class="fas fa-trash"></i> Löschen
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Download document
+        function downloadDocument(id) {
+            const doc = uploadedDocuments.find(d => d.id === id);
+            if (!doc) return;
+            
+            const link = document.createElement('a');
+            link.href = doc.content;
+            link.download = doc.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Preview document
+        function previewDocument(id) {
+            const doc = uploadedDocuments.find(d => d.id === id);
+            if (!doc) return;
+            
+            alert(`Vorschau für: ${doc.title || doc.name}\n\nBeschreibung: ${doc.description || 'Keine Beschreibung'}\nKategorie: ${doc.category}\nGröße: ${formatFileSize(doc.size)}`);
+        }
+
+        // Delete document
+        function deleteDocument(id) {
+            if (confirm('Möchten Sie dieses Dokument wirklich löschen?')) {
+                uploadedDocuments = uploadedDocuments.filter(d => d.id !== id);
+                saveDocuments();
+                updateStatistics();
+                refreshDocumentLibrary();
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            selectedFiles = [];
+            selectedCategory = '';
+            selectedPriority = '';
+            selectedDocType = '';
+            documentTags = [];
+            complianceStandards = [];
+            
+            document.getElementById('selectedFiles').innerHTML = '';
+            document.querySelectorAll('input[type="text"], input[type="date"], textarea, select').forEach(input => {
+                input.value = '';
+            });
+            document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+                input.checked = false;
+            });
+            document.querySelectorAll('.priority-btn, .compliance-item').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelectorAll('.risk-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            document.getElementById('riskResult').style.display = 'none';
+            displayTags();
+            updateWorkflowStep(1);
+            updateUploadButton();
+        }
+
+        // Validate compliance
+        function validateCompliance() {
+            const category = document.getElementById('docCategory').value;
+            const standard = document.getElementById('docStandard').value;
+            const complianceLevel = document.getElementById('complianceLevel').value;
+            
+            let message = '✅ Compliance-Prüfung:\n\n';
+            
+            if (category) {
+                message += `✓ Kategorie definiert: ${category}\n`;
+            } else {
+                message += `❌ Kategorie fehlt\n`;
+            }
+            
+            if (standard) {
+                message += `✓ Standard definiert: ${standard}\n`;
+            } else {
+                message += `⚠️ Standard nicht definiert\n`;
+            }
+            
+            if (complianceStandards.length > 0) {
+                message += `✓ Compliance-Standards: ${complianceStandards.join(', ')}\n`;
+            } else {
+                message += `⚠️ Keine Compliance-Standards ausgewählt\n`;
+            }
+            
+            message += `\nCompliance-Level: ${complianceLevel || 'Nicht definiert'}`;
+            
+            alert(message);
+        }
+
+        // Save draft
+        function saveDraft() {
+            const metadata = collectMetadata();
+            const draft = {
+                id: 'draft_' + Date.now(),
+                files: selectedFiles.map(f => ({ name: f.name, size: f.size, type: f.type })),
+                metadata: metadata,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('qhse_document_draft', JSON.stringify(draft));
+            alert('Entwurf gespeichert!');
+        }
+
+        // Create template
+        function createTemplate() {
+            alert('Template-Erstellung wird implementiert...');
+        }
+
+        // Bulk upload
+        function bulkUpload() {
+            alert('Stapel-Upload wird implementiert...');
+        }
+
+        // Import from system
+        function importFromSystem() {
+            alert('System-Import wird implementiert...');
+        }
+
+        // Initialize library on page load
+        setTimeout(() => {
+            refreshDocumentLibrary();
+        }, 100);
+    </script>
+</body>
+</html>

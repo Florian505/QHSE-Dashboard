@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Machine Modal Fix</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background: #f8fafc;
+            padding: 2rem;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .fix-button {
+            background: #10b981;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .fix-button:hover {
+            background: #059669;
+        }
+        .status {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Machine Modal - Einfacher Fix</h1>
+        <p>Teste das Maschinenmanagement-Modal mit einem vereinfachten Ansatz.</p>
+        
+        <button class="fix-button" onclick="createSimpleMachineModal()">
+            <i class="fas fa-plus"></i> Einfaches Machine Modal testen
+        </button>
+        
+        <button class="fix-button" onclick="testOriginalFunction()" style="background: #3b82f6;">
+            <i class="fas fa-cogs"></i> Original Funktion testen
+        </button>
+        
+        <div class="status" id="status">
+            Bereit für Test...<br>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function log(message) {
+            const status = document.getElementById('status');
+            status.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            status.scrollTop = status.scrollHeight;
+        }
+
+        function createSimpleMachineModal() {
+            log('🧪 Erstelle einfaches Machine Modal...');
+            
+            try {
+                // Remove existing modal
+                const existing = document.getElementById('simpleMachineModal');
+                if (existing) existing.remove();
+                
+                // Create modal
+                const modal = document.createElement('div');
+                modal.id = 'simpleMachineModal';
+                modal.className = 'modal';
+                modal.style.cssText = `
+                    display: block;
+                    position: fixed;
+                    z-index: 1000;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0,0,0,0.5);
+                `;
+                
+                modal.innerHTML = `
+                    <div style="
+                        background: white;
+                        margin: 5% auto;
+                        padding: 2rem;
+                        border-radius: 1rem;
+                        width: 80%;
+                        max-width: 800px;
+                        position: relative;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h2><i class="fas fa-cogs"></i> Neue Maschine anlegen</h2>
+                            <span onclick="document.getElementById('simpleMachineModal').remove()" 
+                                  style="cursor: pointer; font-size: 1.5rem; font-weight: bold;">&times;</span>
+                        </div>
+                        
+                        <form id="simpleMachineForm">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <label>Maschinenname *</label>
+                                    <input type="text" id="simpleMachineName" required 
+                                           style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;"
+                                           placeholder="z.B. Spritzgussmaschine SGM-001">
+                                </div>
+                                <div>
+                                    <label>Maschinentyp *</label>
+                                    <select id="simpleMachineType" required 
+                                            style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+                                        <option value="">Typ wählen...</option>
+                                        <option value="injection-molding">Spritzgussmaschine</option>
+                                        <option value="extrusion">Extrusionsanlage</option>
+                                        <option value="cnc">CNC-Maschine</option>
+                                        <option value="robot">Industrieroboter</option>
+                                        <option value="other">Sonstige</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Standort *</label>
+                                    <input type="text" id="simpleMachineLocation" required 
+                                           style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;"
+                                           placeholder="z.B. Halle 1, Linie A">
+                                </div>
+                                <div>
+                                    <label>Status *</label>
+                                    <select id="simpleMachineStatus" required 
+                                            style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+                                        <option value="">Status wählen...</option>
+                                        <option value="active">In Betrieb</option>
+                                        <option value="maintenance">Wartung</option>
+                                        <option value="repair">Reparatur</option>
+                                        <option value="offline">Außer Betrieb</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label>Beschreibung</label>
+                                <textarea id="simpleMachineNotes" rows="3" 
+                                          style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;"
+                                          placeholder="Zusätzliche Informationen zur Maschine..."></textarea>
+                            </div>
+                            
+                            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                                <button type="button" onclick="document.getElementById('simpleMachineModal').remove()"
+                                        style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                                    Abbrechen
+                                </button>
+                                <button type="submit"
+                                        style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                                    <i class="fas fa-save"></i> Speichern
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                
+                // Add form submit handler
+                const form = modal.querySelector('#simpleMachineForm');
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    saveSimpleMachine();
+                });
+                
+                document.body.appendChild(modal);
+                
+                // Focus first field
+                setTimeout(() => {
+                    const firstField = modal.querySelector('#simpleMachineName');
+                    if (firstField) firstField.focus();
+                }, 100);
+                
+                log('✅ Einfaches Modal erfolgreich erstellt und angezeigt');
+                
+            } catch (error) {
+                log('❌ Fehler beim Erstellen: ' + error.message);
+            }
+        }
+
+        function saveSimpleMachine() {
+            log('💾 Speichere einfache Maschine...');
+            
+            try {
+                const name = document.getElementById('simpleMachineName').value.trim();
+                const type = document.getElementById('simpleMachineType').value;
+                const location = document.getElementById('simpleMachineLocation').value.trim();
+                const status = document.getElementById('simpleMachineStatus').value;
+                const notes = document.getElementById('simpleMachineNotes').value.trim();
+                
+                if (!name || !type || !location || !status) {
+                    alert('Bitte füllen Sie alle Pflichtfelder aus.');
+                    return;
+                }
+                
+                const machine = {
+                    id: 'MACHINE-' + Date.now(),
+                    name: name,
+                    type: type,
+                    location: location,
+                    status: status,
+                    notes: notes,
+                    createdAt: new Date().toISOString()
+                };
+                
+                log('✅ Maschine erstellt: ' + machine.name);
+                log('📋 Daten: ' + JSON.stringify(machine, null, 2));
+                
+                // Save to dashboard if available
+                if (window.qhseDashboard) {
+                    if (!Array.isArray(window.qhseDashboard.machines)) {
+                        window.qhseDashboard.machines = [];
+                    }
+                    window.qhseDashboard.machines.push(machine);
+                    window.qhseDashboard.saveMachinesToStorage();
+                    log('💾 In Dashboard gespeichert');
+                }
+                
+                // Close modal
+                document.getElementById('simpleMachineModal').remove();
+                
+                alert('✅ Maschine "' + machine.name + '" erfolgreich erstellt!');
+                
+            } catch (error) {
+                log('❌ Speicher-Fehler: ' + error.message);
+                alert('Fehler beim Speichern: ' + error.message);
+            }
+        }
+
+        function testOriginalFunction() {
+            log('🔍 Teste Original-Funktion...');
+            
+            try {
+                if (window.qhseDashboard) {
+                    log('✅ Dashboard gefunden');
+                    window.qhseDashboard.showAddMachineModal();
+                } else {
+                    log('❌ Dashboard nicht verfügbar');
+                }
+            } catch (error) {
+                log('❌ Original-Fehler: ' + error.message);
+            }
+        }
+
+        // Auto-load check
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (window.qhseDashboard) {
+                    log('✅ Dashboard geladen - bereit für Tests');
+                } else {
+                    log('⚠️ Dashboard noch nicht geladen');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

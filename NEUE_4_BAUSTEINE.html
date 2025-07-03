@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 4 NEUE QHSE BAUSTEINE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border-radius: 1rem;
+            color: white;
+        }
+        .header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .module-card {
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #8b5cf6, #06b6d4, #10b981, #f59e0b);
+        }
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: #8b5cf6;
+        }
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .module-icon {
+            width: 4rem;
+            height: 4rem;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+        .module-info h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .module-info .badge {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .feature-item {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .feature-item:hover {
+            background: #f1f5f9;
+            border-color: #8b5cf6;
+        }
+        .feature-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+        .feature-text {
+            flex: 1;
+        }
+        .feature-text h4 {
+            color: #1f2937;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        .feature-text p {
+            color: #6b7280;
+            font-size: 0.8rem;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .action-btn {
+            flex: 1;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+        }
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+        .stats-section {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 3rem 0;
+            color: white;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .implementation-timeline {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+        .timeline-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .timeline-header h3 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .timeline-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            position: relative;
+        }
+        .timeline-steps::before {
+            content: '';
+            position: absolute;
+            top: 2rem;
+            left: 12.5%;
+            right: 12.5%;
+            height: 3px;
+            background: linear-gradient(90deg, #8b5cf6, #06b6d4, #10b981, #f59e0b);
+            border-radius: 3px;
+        }
+        .timeline-step {
+            text-align: center;
+            position: relative;
+        }
+        .step-circle {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 1;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .step-circle.step-2 { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .step-circle.step-3 { background: linear-gradient(135deg, #10b981, #059669); }
+        .step-circle.step-4 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .step-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .step-desc {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        @media (max-width: 1200px) {
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .timeline-steps {
+                grid-template-columns: 1fr;
+            }
+            .timeline-steps::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 4 NEUE QHSE BAUSTEINE</h1>
+            <p>Komplettierung des professionellen QHSE-Management-Systems</p>
+        </div>
+
+        <div class="stats-section">
+            <h3 style="text-align: center; margin-bottom: 1rem;">🎯 SYSTEM-ÜBERSICHT</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">28</div>
+                    <div class="stat-label">Vorhandene Module</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Neue Bausteine</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">32</div>
+                    <div class="stat-label">Gesamt Module</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">QHSE Abdeckung</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modules-grid">
+            <!-- Modul 1: Incident Management -->
+            <div class="module-card">
+                <div class="module-header">
+                    <div class="module-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="module-info">
+                        <h2>🚨 Incident Management</h2>
+                        <span class="badge">Sicherheitskritisch</span>
+                    </div>
+                </div>
+                
+                <p style="color: #6b7280; margin-bottom: 2rem;">
+                    Professionelles Unfallmeldungs- und Incident-Management-System nach DGUV-Standards mit automatischer Meldekette und Auswertungen.
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-ambulance"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Unfallmeldung</h4>
+                            <p>Sofortige Erfassung von Arbeitsunfällen</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Beinahe-Unfälle</h4>
+                            <p>Präventive Erfassung kritischer Situationen</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Trend-Analyse</h4>
+                            <p>Statistische Auswertung und Hotspot-Identifikation</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Automatische Meldung</h4>
+                            <p>Sofortige Benachrichtigung aller Beteiligten</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Root-Cause-Analyse</h4>
+                            <p>Systematische Ursachenforschung</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Maßnahmen-Tracking</h4>
+                            <p>Verfolgung von Korrekturmaßnahmen</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="implementIncidentManagement()">
+                        <i class="fas fa-rocket"></i> Implementieren
+                    </button>
+                    <button class="action-btn secondary" onclick="showIncidentDemo()">
+                        <i class="fas fa-eye"></i> Demo anzeigen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modul 2: Energy Management -->
+            <div class="module-card">
+                <div class="module-header">
+                    <div class="module-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="module-info">
+                        <h2>⚡ Energiemanagement</h2>
+                        <span class="badge">ISO 50001</span>
+                    </div>
+                </div>
+                
+                <p style="color: #6b7280; margin-bottom: 2rem;">
+                    Vollständiges Energiemanagement-System nach ISO 50001 mit Verbrauchsüberwachung, Effizienzanalyse und CO₂-Bilanzierung.
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Verbrauchsmessung</h4>
+                            <p>Real-time Energieverbrauch aller Bereiche</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>CO₂-Bilanzierung</h4>
+                            <p>Automatische Berechnung der CO₂-Emissionen</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-target"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Zielmanagement</h4>
+                            <p>Definition und Verfolgung von Einsparzielen</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Effizienz-Analyse</h4>
+                            <p>Detaillierte Analyse der Energieeffizienz</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Einspar-Potentiale</h4>
+                            <p>Identifikation von Optimierungsmöglichkeiten</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>ISO 50001 Konformität</h4>
+                            <p>Vollständige Norm-Compliance</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="implementEnergyManagement()">
+                        <i class="fas fa-rocket"></i> Implementieren
+                    </button>
+                    <button class="action-btn secondary" onclick="showEnergyDemo()">
+                        <i class="fas fa-eye"></i> Demo anzeigen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modul 3: Legal Compliance -->
+            <div class="module-card">
+                <div class="module-header">
+                    <div class="module-icon">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <div class="module-info">
+                        <h2>⚖️ Legal Compliance</h2>
+                        <span class="badge">Rechtssicherheit</span>
+                    </div>
+                </div>
+                
+                <p style="color: #6b7280; margin-bottom: 2rem;">
+                    Umfassendes Rechtskataster mit automatischer Aktualisierung, Fristenüberwachung und Compliance-Monitoring für alle relevanten Gesetze.
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Rechtskataster</h4>
+                            <p>Vollständiges Verzeichnis aller Rechtsvorschriften</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-times"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Fristenüberwachung</h4>
+                            <p>Automatische Überwachung aller Termine</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Auto-Update</h4>
+                            <p>Automatische Aktualisierung der Rechtslage</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-check"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Compliance-Check</h4>
+                            <p>Kontinuierliche Überwachung der Einhaltung</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Risiko-Bewertung</h4>
+                            <p>Bewertung rechtlicher Risiken</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Vertragsmanagement</h4>
+                            <p>Zentrale Verwaltung aller Verträge</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="implementLegalCompliance()">
+                        <i class="fas fa-rocket"></i> Implementieren
+                    </button>
+                    <button class="action-btn secondary" onclick="showLegalDemo()">
+                        <i class="fas fa-eye"></i> Demo anzeigen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modul 4: Performance Analytics -->
+            <div class="module-card">
+                <div class="module-header">
+                    <div class="module-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="module-info">
+                        <h2>📊 Performance Analytics</h2>
+                        <span class="badge">KPI Dashboard</span>
+                    </div>
+                </div>
+                
+                <p style="color: #6b7280; margin-bottom: 2rem;">
+                    Erweiterte QHSE-Performance-Analyse mit KPI-Dashboards, Benchmarking und prädiktiver Analytik für optimale Entscheidungsfindung.
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>KPI-Dashboard</h4>
+                            <p>Real-time QHSE-Kennzahlen Übersicht</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Benchmarking</h4>
+                            <p>Vergleich mit Industriestandards</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-crystal-ball"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Prädiktive Analytik</h4>
+                            <p>Vorhersage zukünftiger Trends</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Ziel-Tracking</h4>
+                            <p>Verfolgung strategischer QHSE-Ziele</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-export"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Report-Generator</h4>
+                            <p>Automatische Berichtserstellung</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Mobile Analytics</h4>
+                            <p>Zugriff auf KPIs von überall</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="implementPerformanceAnalytics()">
+                        <i class="fas fa-rocket"></i> Implementieren
+                    </button>
+                    <button class="action-btn secondary" onclick="showAnalyticsDemo()">
+                        <i class="fas fa-eye"></i> Demo anzeigen
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="implementation-timeline">
+            <div class="timeline-header">
+                <h3>🗓️ Implementierungs-Roadmap</h3>
+                <p style="color: #6b7280;">Professionelle Einführung der 4 neuen QHSE-Bausteine</p>
+            </div>
+            
+            <div class="timeline-steps">
+                <div class="timeline-step">
+                    <div class="step-circle">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="step-title">Phase 1: Incident Management</div>
+                    <div class="step-desc">Sofortige Sicherheitsverbesserung durch systematische Unfallerfassung</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle step-2">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <div class="step-title">Phase 2: Legal Compliance</div>
+                    <div class="step-desc">Rechtssicherheit durch vollständiges Compliance-Management</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle step-3">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="step-title">Phase 3: Energiemanagement</div>
+                    <div class="step-desc">Nachhaltigkeit durch ISO 50001 konforme Energieoptimierung</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle step-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="step-title">Phase 4: Performance Analytics</div>
+                    <div class="step-desc">Datengetriebene Entscheidungen durch erweiterte Analytik</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 3rem 0;">
+            <button class="action-btn" style="max-width: 400px; font-size: 1.1rem; padding: 1.5rem 2rem;" onclick="implementAllModules()">
+                <i class="fas fa-rocket"></i> ALLE 4 MODULE IMPLEMENTIEREN
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Incident Management Implementation
+        function implementIncidentManagement() {
+            const features = [
+                'Unfallmeldungs-Formular mit Sofort-Benachrichtigung',
+                'Beinahe-Unfall Erfassung mit Risiko-Bewertung',
+                'Root-Cause-Analyse Tools',
+                'Automatische Meldekette an Berufsgenossenschaft',
+                'Statistik-Dashboard mit Trend-Analyse',
+                'Maßnahmen-Tracking mit Terminsetzung',
+                'Mobile App für Vor-Ort-Meldungen',
+                'Integration in bestehende QHSE-Workflows'
+            ];
+            
+            showImplementationDetails('🚨 Incident Management System', features, 'incident');
+        }
+
+        // Energy Management Implementation
+        function implementEnergyManagement() {
+            const features = [
+                'Energieverbrauchsmessung in Real-time',
+                'CO₂-Bilanzierung nach GHG-Protocol',
+                'ISO 50001 konforme Dokumentation',
+                'Energieziele-Management mit KPIs',
+                'Effizienz-Benchmarking',
+                'Kosteneinsparungs-Kalkulationen',
+                'Automatische Reporting-Funktionen',
+                'Integration mit Smart Meter Systemen'
+            ];
+            
+            showImplementationDetails('⚡ Energiemanagement System', features, 'energy');
+        }
+
+        // Legal Compliance Implementation
+        function implementLegalCompliance() {
+            const features = [
+                'Vollständiges Rechtskataster mit 500+ Gesetzen',
+                'Automatische Aktualisierung über Rechtsdatenbanken',
+                'Fristenüberwachung mit E-Mail-Benachrichtigungen',
+                'Compliance-Bewertungstools',
+                'Vertragsmanagement mit Kündigungsfristen',
+                'Rechtliche Risikobewertung',
+                'Audit-Trail für alle Änderungen',
+                'Integration mit externen Anwaltskanzleien'
+            ];
+            
+            showImplementationDetails('⚖️ Legal Compliance System', features, 'legal');
+        }
+
+        // Performance Analytics Implementation
+        function implementPerformanceAnalytics() {
+            const features = [
+                'Executive Dashboard mit 50+ QHSE-KPIs',
+                'Prädiktive Analytik mit Machine Learning',
+                'Benchmarking gegen Industriestandards',
+                'Automatische Report-Generierung',
+                'Mobile Analytics App',
+                'ROI-Kalkulationen für QHSE-Maßnahmen',
+                'Integration aller QHSE-Datenquellen',
+                'Interaktive Datenvisualisierung'
+            ];
+            
+            showImplementationDetails('📊 Performance Analytics System', features, 'analytics');
+        }
+
+        // Show implementation details
+        function showImplementationDetails(title, features, moduleType) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 1rem; padding: 2rem; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #f1f5f9;">
+                        <h2 style="margin: 0; color: #1f2937;">${title}</h2>
+                        <button onclick="this.closest('div').style.display='none'" style="background: #ef4444; color: white; border: none; border-radius: 50%; width: 2rem; height: 2rem; cursor: pointer; font-size: 1.2rem;">×</button>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="color: #374151; margin-bottom: 1rem;">🚀 Features & Funktionen:</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            ${features.map(feature => `
+                                <li style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #6b7280;">
+                                    <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                    ${feature}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-bottom: 2rem; padding: 1rem; background: #f0f9ff; border-radius: 0.5rem; border-left: 4px solid #3b82f6;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #1e40af;">💡 Implementierungs-Timeline:</h4>
+                        <p style="margin: 0; color: #1e40af; font-size: 0.9rem;">
+                            <strong>Entwicklungszeit:</strong> 2-3 Wochen<br>
+                            <strong>Testing & Integration:</strong> 1 Woche<br>
+                            <strong>Schulung & Rollout:</strong> 1 Woche
+                        </p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="startImplementation('${moduleType}')" style="flex: 1; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 1rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">
+                            <i class="fas fa-rocket"></i> Jetzt implementieren
+                        </button>
+                        <button onclick="this.closest('div').style.display='none'" style="flex: 1; background: #6b7280; color: white; padding: 1rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">
+                            <i class="fas fa-times"></i> Schließen
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // Start implementation
+        function startImplementation(moduleType) {
+            const messages = {
+                incident: '🚨 Incident Management System wird implementiert...',
+                energy: '⚡ Energiemanagement System wird implementiert...',
+                legal: '⚖️ Legal Compliance System wird implementiert...',
+                analytics: '📊 Performance Analytics System wird implementiert...'
+            };
+            
+            alert(messages[moduleType] + '\n\n✅ Entwicklung startet sofort!\n📅 Geschätzte Fertigstellung: 3-4 Wochen\n🎯 Vollständige Integration garantiert!');
+            
+            // Remove modal
+            document.querySelector('div[style*="position: fixed"]').remove();
+        }
+
+        // Implement all modules
+        function implementAllModules() {
+            const confirmation = confirm(
+                '🚀 VOLLSTÄNDIGE IMPLEMENTIERUNG ALLER 4 MODULE\n\n' +
+                '✅ Incident Management System\n' +
+                '✅ Energiemanagement System (ISO 50001)\n' +
+                '✅ Legal Compliance System\n' +
+                '✅ Performance Analytics Dashboard\n\n' +
+                '📅 Gesamtdauer: 6-8 Wochen\n' +
+                '💰 Vollpaket-Preis: Rabatt auf alle Module\n' +
+                '🎯 100% QHSE-Abdeckung garantiert!\n\n' +
+                'Möchten Sie die Implementierung aller Module starten?'
+            );
+            
+            if (confirmation) {
+                alert(
+                    '🎉 IMPLEMENTIERUNG GESTARTET!\n\n' +
+                    '✅ Alle 4 Module werden parallel entwickelt\n' +
+                    '📧 Sie erhalten regelmäßige Updates\n' +
+                    '🔄 Wöchentliche Demo-Termine\n' +
+                    '📞 Direkter Kontakt zum Entwicklungsteam\n\n' +
+                    '🚀 Ihr QHSE-System wird zum Industriestandard!'
+                );
+            }
+        }
+
+        // Demo functions
+        function showIncidentDemo() {
+            alert('🚨 INCIDENT MANAGEMENT DEMO\n\n' +
+                  '📱 Sofort-Meldung via Mobile App\n' +
+                  '🔔 Automatische Benachrichtigung aller Stakeholder\n' +
+                  '📊 Real-time Dashboard mit Unfallstatistiken\n' +
+                  '🔍 Root-Cause-Analyse Tools\n' +
+                  '📈 Trend-Analyse und Präventionsempfehlungen');
+        }
+
+        function showEnergyDemo() {
+            alert('⚡ ENERGIEMANAGEMENT DEMO\n\n' +
+                  '📊 Live-Verbrauchsdaten aller Anlagen\n' +
+                  '🌱 CO₂-Bilanz in Real-time\n' +
+                  '🎯 Energieziele mit Fortschritts-Tracking\n' +
+                  '💰 Kosteneinsparungs-Kalkulationen\n' +
+                  '📜 Automatische ISO 50001 Berichte');
+        }
+
+        function showLegalDemo() {
+            alert('⚖️ LEGAL COMPLIANCE DEMO\n\n' +
+                  '📚 500+ Gesetze automatisch überwacht\n' +
+                  '⏰ Fristen-Alerts mit 30/60/90 Tage Vorlauf\n' +
+                  '✅ Compliance-Status aller Bereiche\n' +
+                  '📄 Vertrags-Dashboard mit Kündigungsfristen\n' +
+                  '⚠️ Risiko-Bewertung rechtlicher Änderungen');
+        }
+
+        function showAnalyticsDemo() {
+            alert('📊 PERFORMANCE ANALYTICS DEMO\n\n' +
+                  '🎯 50+ QHSE-KPIs in Real-time\n' +
+                  '🔮 Prädiktive Analytik für Unfallprävention\n' +
+                  '📈 Benchmarking gegen Industriestandards\n' +
+                  '📱 Mobile Executive Dashboard\n' +
+                  '🤖 Automatische Report-Generierung');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 4 Neue QHSE-Bausteine geladen');
+            
+            // Animate stat numbers
+            setTimeout(() => {
+                const statNumbers = document.querySelectorAll('.stat-number');
+                statNumbers.forEach(stat => {
+                    const finalValue = stat.textContent;
+                    stat.textContent = '0';
+                    
+                    let current = 0;
+                    const target = parseInt(finalValue.replace('%', ''));
+                    const increment = target / 50;
+                    
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        stat.textContent = finalValue.includes('%') ? 
+                            Math.round(current) + '%' : 
+                            Math.round(current);
+                    }, 30);
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>

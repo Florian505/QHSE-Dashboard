@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINIMAL UPLOAD TEST</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #e74c3c;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        .upload-box {
+            border: 3px dashed #3498db;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-box:hover {
+            background: #ecf0f1;
+            border-color: #2980b9;
+        }
+        .upload-box.active {
+            background: #d5f4e6;
+            border-color: #27ae60;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        button {
+            background: #e74c3c;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            width: 100%;
+        }
+        button:hover {
+            background: #c0392b;
+        }
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d5f4e6; color: #27ae60; }
+        .error { background: #fadbd8; color: #e74c3c; }
+        .info { background: #d6eaf8; color: #2980b9; }
+        .file-list {
+            margin: 20px 0;
+        }
+        .file-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .download-btn {
+            background: #27ae60;
+            color: white;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: auto;
+            margin: 0;
+        }
+        .download-btn:hover {
+            background: #229954;
+        }
+        .debug {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 MINIMAL UPLOAD TEST 🚨</h1>
+        <p style="text-align: center; color: #7f8c8d;">
+            Einfachster Upload-Test möglich. Wenn das nicht funktioniert, ist der Browser defekt!
+        </p>
+        
+        <div class="upload-box" id="uploadBox">
+            <h3>📁 DATEIEN HIER ABLEGEN ODER KLICKEN</h3>
+            <p>Jeder Dateityp • Drag & Drop oder Klick</p>
+            <input type="file" id="fileInput" multiple>
+        </div>
+        
+        <button id="uploadBtn" disabled>UPLOAD STARTEN</button>
+        <button onclick="showFiles()">GESPEICHERTE DATEIEN ANZEIGEN</button>
+        <button onclick="clearAll()">ALLE LÖSCHEN</button>
+        <button onclick="testBrowser()">BROWSER TESTEN</button>
+        
+        <div id="status"></div>
+        
+        <div class="file-list" id="fileList"></div>
+        
+        <div class="debug" id="debug">
+Initialisiere Upload-Test...
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let savedFiles = [];
+        
+        function log(message) {
+            const debug = document.getElementById('debug');
+            const time = new Date().toLocaleTimeString();
+            debug.textContent += `\n${time}: ${message}`;
+            debug.scrollTop = debug.scrollHeight;
+        }
+        
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+        
+        function loadSavedFiles() {
+            try {
+                const saved = localStorage.getItem('minimal_test_files');
+                savedFiles = saved ? JSON.parse(saved) : [];
+                log(`Geladene Dateien: ${savedFiles.length}`);
+            } catch (error) {
+                log(`Fehler beim Laden: ${error.message}`);
+                savedFiles = [];
+            }
+        }
+        
+        function saveFiles() {
+            try {
+                localStorage.setItem('minimal_test_files', JSON.stringify(savedFiles));
+                log('Dateien gespeichert in localStorage');
+            } catch (error) {
+                log(`Speicher-Fehler: ${error.message}`);
+                showStatus('Speicher-Fehler: ' + error.message, 'error');
+            }
+        }
+        
+        function handleFiles(files) {
+            selectedFiles = Array.from(files);
+            log(`Dateien ausgewählt: ${selectedFiles.length}`);
+            
+            if (selectedFiles.length > 0) {
+                document.getElementById('uploadBtn').disabled = false;
+                showStatus(`${selectedFiles.length} Datei(en) ausgewählt`, 'info');
+                
+                selectedFiles.forEach((file, index) => {
+                    log(`Datei ${index + 1}: ${file.name} (${file.size} bytes, ${file.type})`);
+                });
+            }
+        }
+        
+        function uploadFiles() {
+            if (selectedFiles.length === 0) {
+                showStatus('Keine Dateien ausgewählt!', 'error');
+                return;
+            }
+            
+            log('Starte Upload...');
+            showStatus('Upload läuft...', 'info');
+            
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'UPLOADING...';
+            
+            let processed = 0;
+            
+            selectedFiles.forEach((file, index) => {
+                log(`Verarbeite Datei ${index + 1}: ${file.name}`);
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const fileData = {
+                            id: Date.now() + '_' + index,
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            content: e.target.result,
+                            uploadTime: new Date().toISOString()
+                        };
+                        
+                        savedFiles.push(fileData);
+                        processed++;
+                        
+                        log(`✅ Datei ${index + 1} verarbeitet: ${file.name}`);
+                        
+                        if (processed === selectedFiles.length) {
+                            finishUpload();
+                        }
+                    } catch (error) {
+                        log(`❌ Fehler bei Datei ${index + 1}: ${error.message}`);
+                        processed++;
+                        if (processed === selectedFiles.length) {
+                            finishUpload();
+                        }
+                    }
+                };
+                
+                reader.onerror = function() {
+                    log(`❌ FileReader Fehler bei: ${file.name}`);
+                    processed++;
+                    if (processed === selectedFiles.length) {
+                        finishUpload();
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function finishUpload() {
+            saveFiles();
+            showFiles();
+            
+            // Reset
+            selectedFiles = [];
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('uploadBtn').textContent = 'UPLOAD STARTEN';
+            
+            showStatus(`Upload fertig! ${savedFiles.length} Dateien gespeichert`, 'success');
+            log('Upload abgeschlossen!');
+        }
+        
+        function showFiles() {
+            const fileList = document.getElementById('fileList');
+            
+            if (savedFiles.length === 0) {
+                fileList.innerHTML = '<p style="text-align: center; color: #7f8c8d;">Keine Dateien gespeichert</p>';
+                return;
+            }
+            
+            fileList.innerHTML = '<h3>Gespeicherte Dateien:</h3>';
+            
+            savedFiles.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.innerHTML = `
+                    <div>
+                        <strong>${file.name}</strong><br>
+                        <small>${formatFileSize(file.size)} • ${new Date(file.uploadTime).toLocaleString()}</small>
+                    </div>
+                    <button class="download-btn" onclick="downloadFile('${file.id}')">DOWNLOAD</button>
+                `;
+                fileList.appendChild(item);
+            });
+            
+            log(`Angezeigt: ${savedFiles.length} Dateien`);
+        }
+        
+        function downloadFile(fileId) {
+            const file = savedFiles.find(f => f.id === fileId);
+            if (!file) {
+                showStatus('Datei nicht gefunden!', 'error');
+                return;
+            }
+            
+            try {
+                const link = document.createElement('a');
+                link.href = file.content;
+                link.download = file.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showStatus(`Download gestartet: ${file.name}`, 'success');
+                log(`Download: ${file.name}`);
+            } catch (error) {
+                showStatus(`Download-Fehler: ${error.message}`, 'error');
+                log(`Download-Fehler: ${error.message}`);
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+        
+        function clearAll() {
+            if (confirm('Alle Dateien löschen?')) {
+                savedFiles = [];
+                localStorage.removeItem('minimal_test_files');
+                showFiles();
+                showStatus('Alle Dateien gelöscht', 'info');
+                log('Alle Dateien gelöscht');
+            }
+        }
+        
+        function testBrowser() {
+            log('=== BROWSER TEST ===');
+            
+            // Test FileReader
+            if (window.FileReader) {
+                log('✅ FileReader API: Verfügbar');
+            } else {
+                log('❌ FileReader API: NICHT verfügbar');
+            }
+            
+            // Test localStorage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                log('✅ localStorage: Verfügbar');
+            } catch (error) {
+                log('❌ localStorage: NICHT verfügbar - ' + error.message);
+            }
+            
+            // Test File API
+            if (window.File && window.FileList) {
+                log('✅ File API: Verfügbar');
+            } else {
+                log('❌ File API: NICHT verfügbar');
+            }
+            
+            // Test Drag and Drop
+            if ('draggable' in document.createElement('span')) {
+                log('✅ Drag & Drop: Verfügbar');
+            } else {
+                log('❌ Drag & Drop: NICHT verfügbar');
+            }
+            
+            log('Browser: ' + navigator.userAgent);
+            log('=== TEST ENDE ===');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('System initialisiert');
+            
+            loadSavedFiles();
+            showFiles();
+            
+            const fileInput = document.getElementById('fileInput');
+            const uploadBox = document.getElementById('uploadBox');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            // Click handler
+            uploadBox.addEventListener('click', function() {
+                log('Upload-Box geklickt');
+                fileInput.click();
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', function(e) {
+                log('File input changed');
+                handleFiles(e.target.files);
+            });
+            
+            // Upload button
+            uploadBtn.addEventListener('click', function() {
+                log('Upload-Button geklickt');
+                uploadFiles();
+            });
+            
+            // Drag and drop
+            uploadBox.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadBox.classList.add('active');
+                log('Drag over');
+            });
+            
+            uploadBox.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadBox.classList.remove('active');
+                log('Drag leave');
+            });
+            
+            uploadBox.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadBox.classList.remove('active');
+                log('Drop event - Dateien empfangen');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            log('Event-Listener registriert');
+            testBrowser();
+        });
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            log(`💥 FEHLER: ${e.message} (${e.filename}:${e.lineno})`);
+            showStatus('JavaScript-Fehler aufgetreten!', 'error');
+        });
+    </script>
+</body>
+</html>

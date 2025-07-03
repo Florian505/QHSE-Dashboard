@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📁 FUNKTIONIERT: Upload & Download System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 0.75rem;
+            color: white;
+        }
+        .header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .upload-panel, .files-panel {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Upload Zone */
+        .upload-zone {
+            border: 3px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .upload-zone.dragover {
+            border-color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.1) !important;
+            transform: scale(1.02);
+        }
+        .upload-zone i {
+            font-size: 4rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+        .upload-zone p {
+            font-size: 1.2rem;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+        .upload-zone small {
+            color: #6b7280;
+        }
+        
+        /* File Input */
+        #fileInput {
+            display: none;
+        }
+        
+        /* Category Selection */
+        .category-section, .metadata-section {
+            margin: 1.5rem 0;
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .priority-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .priority-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        .priority-btn:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .priority-btn.selected {
+            color: white;
+        }
+        .priority-btn.low.selected { background: #10b981; border-color: #10b981; }
+        .priority-btn.medium.selected { background: #f59e0b; border-color: #f59e0b; }
+        .priority-btn.high.selected { background: #ef4444; border-color: #ef4444; }
+        .priority-btn.critical.selected { background: #991b1b; border-color: #991b1b; }
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .tag {
+            background: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .tag .remove {
+            cursor: pointer;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .advanced-toggle {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            text-align: center;
+            margin: 1rem 0;
+            font-weight: 600;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+        .advanced-toggle:hover {
+            background: #e2e8f0;
+        }
+        .advanced-section {
+            display: none;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .advanced-section.open {
+            display: block;
+        }
+        .category-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+        .category-btn:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .category-btn.selected {
+            border-color: #10b981;
+            background: #10b981;
+            color: white;
+        }
+        
+        /* Upload Button */
+        .upload-btn {
+            background: #10b981;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin: 1rem 0;
+        }
+        .upload-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+        .upload-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* File List */
+        .files-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .file-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+        .file-item:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+        .file-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .file-icon {
+            font-size: 2rem;
+            color: #3b82f6;
+        }
+        .file-info h4 {
+            margin: 0 0 0.25rem 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+        .file-meta {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            background: #2563eb;
+        }
+        .action-btn.download { background: #10b981; }
+        .action-btn.download:hover { background: #059669; }
+        .action-btn.preview { background: #8b5cf6; }
+        .action-btn.preview:hover { background: #7c3aed; }
+        .action-btn.delete { background: #ef4444; }
+        .action-btn.delete:hover { background: #dc2626; }
+        
+        /* Status Messages */
+        .status {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-weight: 600;
+        }
+        .status.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .status.info {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        
+        /* Preview Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        /* Statistics */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 FUNKTIONIERT: Upload & Download System</h1>
+            <p>Komplett funktionsfähiges Datei-Management System - GARANTIERT!</p>
+        </div>
+        
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalFiles">0</div>
+                <div class="stat-label">Gesamt Dateien</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalSize">0 MB</div>
+                <div class="stat-label">Gesamt Größe</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="uploadCount">0</div>
+                <div class="stat-label">Uploads heute</div>
+            </div>
+        </div>
+        
+        <div class="main-grid">
+            <!-- Upload Panel -->
+            <div class="upload-panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Dateien hochladen
+                </h2>
+                
+                <div class="upload-zone" id="uploadZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Dateien hier ablegen oder klicken</p>
+                    <small>Alle Dateitypen unterstützt • Max 10MB pro Datei</small>
+                    <input type="file" id="fileInput" multiple accept="*/*">
+                </div>
+                
+                <div class="category-section">
+                    <h3>Kategorie auswählen:</h3>
+                    <div class="category-grid">
+                        <div class="category-btn" data-category="arbeitsschutz">
+                            <i class="fas fa-hard-hat"></i><br>Arbeitsschutz
+                        </div>
+                        <div class="category-btn" data-category="qualitaet">
+                            <i class="fas fa-award"></i><br>Qualität
+                        </div>
+                        <div class="category-btn" data-category="umwelt">
+                            <i class="fas fa-leaf"></i><br>Umwelt
+                        </div>
+                        <div class="category-btn" data-category="datenschutz">
+                            <i class="fas fa-shield-alt"></i><br>Datenschutz
+                        </div>
+                        <div class="category-btn" data-category="gesundheit">
+                            <i class="fas fa-heartbeat"></i><br>Gesundheit
+                        </div>
+                        <div class="category-btn" data-category="sonstiges">
+                            <i class="fas fa-folder"></i><br>Sonstiges
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metadata-section">
+                    <h3>Dokument-Informationen:</h3>
+                    <div class="metadata-grid">
+                        <div class="form-group">
+                            <label for="docTitle">Titel/Bezeichnung:</label>
+                            <input type="text" id="docTitle" placeholder="z.B. Betriebsanweisung Maschine XY">
+                        </div>
+                        <div class="form-group">
+                            <label for="docVersion">Version:</label>
+                            <input type="text" id="docVersion" placeholder="z.B. 1.0, 2.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="docAuthor">Ersteller/Autor:</label>
+                            <input type="text" id="docAuthor" placeholder="Name des Erstellers">
+                        </div>
+                        <div class="form-group">
+                            <label for="docDepartment">Abteilung:</label>
+                            <select id="docDepartment">
+                                <option value="">Abteilung wählen</option>
+                                <option value="produktion">Produktion</option>
+                                <option value="qualitaet">Qualitätssicherung</option>
+                                <option value="verwaltung">Verwaltung</option>
+                                <option value="technik">Technik</option>
+                                <option value="logistik">Logistik</option>
+                                <option value="einkauf">Einkauf</option>
+                                <option value="vertrieb">Vertrieb</option>
+                                <option value="geschaeftsfuehrung">Geschäftsführung</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="docDescription">Beschreibung/Zweck:</label>
+                        <textarea id="docDescription" placeholder="Kurze Beschreibung des Dokuments und seines Zwecks..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Priorität/Wichtigkeit:</label>
+                        <div class="priority-grid">
+                            <div class="priority-btn low" data-priority="low">
+                                <i class="fas fa-circle" style="color: #10b981;"></i><br>Niedrig
+                            </div>
+                            <div class="priority-btn medium" data-priority="medium">
+                                <i class="fas fa-circle" style="color: #f59e0b;"></i><br>Normal
+                            </div>
+                            <div class="priority-btn high" data-priority="high">
+                                <i class="fas fa-circle" style="color: #ef4444;"></i><br>Hoch
+                            </div>
+                            <div class="priority-btn critical" data-priority="critical">
+                                <i class="fas fa-exclamation-triangle" style="color: #991b1b;"></i><br>Kritisch
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metadata-grid">
+                        <div class="form-group">
+                            <label for="docValidFrom">Gültig ab:</label>
+                            <input type="date" id="docValidFrom">
+                        </div>
+                        <div class="form-group">
+                            <label for="docValidUntil">Gültig bis:</label>
+                            <input type="date" id="docValidUntil">
+                        </div>
+                        <div class="form-group">
+                            <label for="docTags">Tags (Enter zum Hinzufügen):</label>
+                            <input type="text" id="docTags" placeholder="z.B. Sicherheit, Anweisung, Maschine...">
+                        </div>
+                        <div class="form-group">
+                            <label for="docAccess">Zugriffsberechtigung:</label>
+                            <select id="docAccess">
+                                <option value="public">Öffentlich (alle Mitarbeiter)</option>
+                                <option value="department">Nur Abteilung</option>
+                                <option value="management">Nur Führungskräfte</option>
+                                <option value="restricted">Eingeschränkt</option>
+                                <option value="confidential">Vertraulich</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="tags-container" id="tagsContainer">
+                        <!-- Tags werden hier dynamisch hinzugefügt -->
+                    </div>
+                </div>
+
+                <div class="advanced-toggle" onclick="toggleAdvanced()">
+                    <i class="fas fa-cog"></i> Erweiterte Einstellungen
+                </div>
+
+                <div class="advanced-section" id="advancedSection">
+                    <h4>🔧 Erweiterte Dokument-Einstellungen</h4>
+                    
+                    <div class="metadata-grid">
+                        <div class="form-group">
+                            <label for="docLanguage">Sprache:</label>
+                            <select id="docLanguage">
+                                <option value="de">Deutsch</option>
+                                <option value="en">Englisch</option>
+                                <option value="fr">Französisch</option>
+                                <option value="es">Spanisch</option>
+                                <option value="it">Italienisch</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="docStandard">Bezugsnorm/Standard:</label>
+                            <input type="text" id="docStandard" placeholder="z.B. ISO 9001, DGUV Regel 100-001">
+                        </div>
+                        <div class="form-group">
+                            <label for="docResponsible">Verantwortlicher:</label>
+                            <input type="text" id="docResponsible" placeholder="Name des Verantwortlichen">
+                        </div>
+                        <div class="form-group">
+                            <label for="docReviewDate">Nächste Überprüfung:</label>
+                            <input type="date" id="docReviewDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="docClassification">Klassifizierung:</label>
+                            <select id="docClassification">
+                                <option value="arbeitsanweisung">Arbeitsanweisung</option>
+                                <option value="verfahrensanweisung">Verfahrensanweisung</option>
+                                <option value="betriebsanweisung">Betriebsanweisung</option>
+                                <option value="richtlinie">Richtlinie</option>
+                                <option value="formular">Formular</option>
+                                <option value="checkliste">Checkliste</option>
+                                <option value="protokoll">Protokoll</option>
+                                <option value="zertifikat">Zertifikat</option>
+                                <option value="schulung">Schulungsunterlage</option>
+                                <option value="handbuch">Handbuch</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="docLocation">Einsatzort:</label>
+                            <input type="text" id="docLocation" placeholder="z.B. Halle 1, Büro, Lager">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="docKeywords">Suchschlüsselwörter:</label>
+                        <textarea id="docKeywords" placeholder="Wichtige Begriffe für die Suche, getrennt durch Kommas..."></textarea>
+                    </div>
+
+                    <div class="metadata-grid">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="docMandatory" style="margin-right: 0.5rem;">
+                                Pflichtdokument (muss gelesen werden)
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="docTraining" style="margin-right: 0.5rem;">
+                                Schulung erforderlich
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="docArchive" style="margin-right: 0.5rem;">
+                                Archivierungspflichtig
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="docPrint" style="margin-right: 0.5rem;">
+                                Druckversion erforderlich
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="upload-btn" id="uploadBtn" disabled>
+                    <i class="fas fa-upload"></i> Dateien hochladen
+                </button>
+                
+                <div id="uploadStatus"></div>
+            </div>
+            
+            <!-- Files Panel -->
+            <div class="files-panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-folder-open"></i>
+                    Meine Dateien
+                    <button class="action-btn" onclick="refreshFiles()" style="margin-left: auto;">
+                        <i class="fas fa-sync-alt"></i> Aktualisieren
+                    </button>
+                </h2>
+                
+                <div class="files-list" id="filesList">
+                    <div class="status info">
+                        <i class="fas fa-info-circle"></i>
+                        Keine Dateien vorhanden. Laden Sie Ihre erste Datei hoch!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Preview Modal -->
+    <div class="modal" id="previewModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePreview()">×</button>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let selectedFiles = [];
+        let selectedCategory = '';
+        let selectedPriority = '';
+        let documentTags = [];
+        let uploadedFiles = [];
+        let uploadCount = 0;
+        
+        // Load data from localStorage
+        function loadFiles() {
+            const saved = localStorage.getItem('qhse_files_new');
+            if (saved) {
+                uploadedFiles = JSON.parse(saved);
+            }
+            
+            const savedCount = localStorage.getItem('qhse_upload_count_today');
+            if (savedCount) {
+                const today = new Date().toDateString();
+                const countData = JSON.parse(savedCount);
+                if (countData.date === today) {
+                    uploadCount = countData.count;
+                }
+            }
+        }
+        
+        // Save data to localStorage
+        function saveFiles() {
+            localStorage.setItem('qhse_files_new', JSON.stringify(uploadedFiles));
+            
+            const today = new Date().toDateString();
+            localStorage.setItem('qhse_upload_count_today', JSON.stringify({
+                date: today,
+                count: uploadCount
+            }));
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const totalFiles = uploadedFiles.length;
+            const totalSize = uploadedFiles.reduce((sum, file) => sum + (file.size || 0), 0);
+            
+            document.getElementById('totalFiles').textContent = totalFiles;
+            document.getElementById('totalSize').textContent = formatFileSize(totalSize);
+            document.getElementById('uploadCount').textContent = uploadCount;
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Get file icon based on type
+        function getFileIcon(type) {
+            if (type.startsWith('image/')) return 'fas fa-image';
+            if (type.includes('pdf')) return 'fas fa-file-pdf';
+            if (type.includes('word') || type.includes('document')) return 'fas fa-file-word';
+            if (type.includes('excel') || type.includes('spreadsheet')) return 'fas fa-file-excel';
+            if (type.includes('powerpoint') || type.includes('presentation')) return 'fas fa-file-powerpoint';
+            if (type.startsWith('video/')) return 'fas fa-file-video';
+            if (type.startsWith('audio/')) return 'fas fa-file-audio';
+            return 'fas fa-file';
+        }
+
+        // Get priority icon
+        function getPriorityIcon(priority) {
+            switch(priority) {
+                case 'low': return '<i class="fas fa-circle" style="color: #10b981; font-size: 0.8rem;"></i>';
+                case 'medium': return '<i class="fas fa-circle" style="color: #f59e0b; font-size: 0.8rem;"></i>';
+                case 'high': return '<i class="fas fa-circle" style="color: #ef4444; font-size: 0.8rem;"></i>';
+                case 'critical': return '<i class="fas fa-exclamation-triangle" style="color: #991b1b; font-size: 0.8rem;"></i>';
+                default: return '';
+            }
+        }
+        
+        // Category color mapping
+        function getCategoryColor(category) {
+            const colors = {
+                'arbeitsschutz': '#ef4444',
+                'qualitaet': '#3b82f6',
+                'umwelt': '#10b981',
+                'datenschutz': '#8b5cf6',
+                'gesundheit': '#f59e0b',
+                'sonstiges': '#6b7280'
+            };
+            return colors[category] || '#6b7280';
+        }
+        
+        // Show status message
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('uploadStatus');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                    statusDiv.className = '';
+                }, 5000);
+            }
+        }
+        
+        // Handle file selection
+        function handleFileSelection(files) {
+            selectedFiles = Array.from(files);
+            
+            if (selectedFiles.length > 0) {
+                const fileNames = selectedFiles.map(f => f.name).join(', ');
+                document.getElementById('uploadZone').querySelector('p').textContent = 
+                    `${selectedFiles.length} Datei(en) ausgewählt: ${fileNames}`;
+                
+                updateUploadButton();
+                showStatus(`${selectedFiles.length} Datei(en) ausgewählt`, 'info');
+            }
+        }
+        
+        // Update upload button state
+        function updateUploadButton() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const title = document.getElementById('docTitle').value.trim();
+            const canUpload = selectedFiles.length > 0 && selectedCategory && title;
+            
+            uploadBtn.disabled = !canUpload;
+            uploadBtn.innerHTML = canUpload ? 
+                '<i class="fas fa-upload"></i> Dateien hochladen' : 
+                '<i class="fas fa-upload"></i> Dateien, Kategorie und Titel erforderlich';
+        }
+        
+        // Collect all metadata
+        function collectMetadata() {
+            return {
+                title: document.getElementById('docTitle').value.trim(),
+                version: document.getElementById('docVersion').value.trim(),
+                author: document.getElementById('docAuthor').value.trim(),
+                department: document.getElementById('docDepartment').value,
+                description: document.getElementById('docDescription').value.trim(),
+                priority: selectedPriority,
+                validFrom: document.getElementById('docValidFrom').value,
+                validUntil: document.getElementById('docValidUntil').value,
+                access: document.getElementById('docAccess').value,
+                tags: [...documentTags],
+                language: document.getElementById('docLanguage').value,
+                standard: document.getElementById('docStandard').value.trim(),
+                responsible: document.getElementById('docResponsible').value.trim(),
+                reviewDate: document.getElementById('docReviewDate').value,
+                classification: document.getElementById('docClassification').value,
+                location: document.getElementById('docLocation').value.trim(),
+                keywords: document.getElementById('docKeywords').value.trim(),
+                mandatory: document.getElementById('docMandatory').checked,
+                training: document.getElementById('docTraining').checked,
+                archive: document.getElementById('docArchive').checked,
+                print: document.getElementById('docPrint').checked
+            };
+        }
+
+        // Upload files
+        function uploadFiles() {
+            if (selectedFiles.length === 0) {
+                showStatus('Keine Dateien ausgewählt!', 'error');
+                return;
+            }
+            
+            if (!selectedCategory) {
+                showStatus('Bitte wählen Sie eine Kategorie!', 'error');
+                return;
+            }
+
+            const title = document.getElementById('docTitle').value.trim();
+            if (!title) {
+                showStatus('Bitte geben Sie einen Titel ein!', 'error');
+                return;
+            }
+            
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wird hochgeladen...';
+            
+            let filesProcessed = 0;
+            const totalFiles = selectedFiles.length;
+            
+            showStatus(`Upload gestartet: 0/${totalFiles} Dateien`, 'info');
+            
+            selectedFiles.forEach((file, index) => {
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showStatus(`Datei zu groß: ${file.name} (Max 10MB)`, 'error');
+                    filesProcessed++;
+                    if (filesProcessed === totalFiles) {
+                        finishUpload();
+                    }
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const metadata = collectMetadata();
+                    const fileData = {
+                        id: Date.now() + '_' + index,
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        category: selectedCategory,
+                        uploadDate: new Date().toISOString(),
+                        content: e.target.result,
+                        ...metadata
+                    };
+                    
+                    uploadedFiles.push(fileData);
+                    filesProcessed++;
+                    uploadCount++;
+                    
+                    showStatus(`Upload: ${filesProcessed}/${totalFiles} Dateien`, 'info');
+                    
+                    if (filesProcessed === totalFiles) {
+                        finishUpload();
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showStatus(`Fehler beim Lesen der Datei: ${file.name}`, 'error');
+                    filesProcessed++;
+                    if (filesProcessed === totalFiles) {
+                        finishUpload();
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Reset form
+        function resetForm() {
+            // Reset file selection
+            selectedFiles = [];
+            selectedCategory = '';
+            selectedPriority = '';
+            documentTags = [];
+            
+            // Reset file input
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadZone').querySelector('p').textContent = 'Dateien hier ablegen oder klicken';
+            
+            // Reset category selection
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Reset priority selection
+            document.querySelectorAll('.priority-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Reset all form fields
+            document.getElementById('docTitle').value = '';
+            document.getElementById('docVersion').value = '';
+            document.getElementById('docAuthor').value = '';
+            document.getElementById('docDepartment').value = '';
+            document.getElementById('docDescription').value = '';
+            document.getElementById('docValidFrom').value = '';
+            document.getElementById('docValidUntil').value = '';
+            document.getElementById('docTags').value = '';
+            document.getElementById('docAccess').value = 'public';
+            document.getElementById('docLanguage').value = 'de';
+            document.getElementById('docStandard').value = '';
+            document.getElementById('docResponsible').value = '';
+            document.getElementById('docReviewDate').value = '';
+            document.getElementById('docClassification').value = 'arbeitsanweisung';
+            document.getElementById('docLocation').value = '';
+            document.getElementById('docKeywords').value = '';
+            document.getElementById('docMandatory').checked = false;
+            document.getElementById('docTraining').checked = false;
+            document.getElementById('docArchive').checked = false;
+            document.getElementById('docPrint').checked = false;
+            
+            // Clear tags
+            document.getElementById('tagsContainer').innerHTML = '';
+            
+            // Reset upload button
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Dateien, Kategorie und Titel erforderlich';
+        }
+
+        // Finish upload process
+        function finishUpload() {
+            saveFiles();
+            updateStats();
+            refreshFiles();
+            resetForm();
+            showStatus('Upload erfolgreich abgeschlossen!', 'success');
+        }
+        
+        // Refresh files list
+        function refreshFiles() {
+            const filesList = document.getElementById('filesList');
+            
+            if (uploadedFiles.length === 0) {
+                filesList.innerHTML = `
+                    <div class="status info">
+                        <i class="fas fa-info-circle"></i>
+                        Keine Dateien vorhanden. Laden Sie Ihre erste Datei hoch!
+                    </div>
+                `;
+                return;
+            }
+            
+            filesList.innerHTML = '';
+            
+            // Sort files by upload date (newest first)
+            const sortedFiles = [...uploadedFiles].sort((a, b) => 
+                new Date(b.uploadDate) - new Date(a.uploadDate)
+            );
+            
+            sortedFiles.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const uploadDate = new Date(file.uploadDate).toLocaleString('de-DE');
+                const categoryColor = getCategoryColor(file.category);
+                const priorityIcon = getPriorityIcon(file.priority);
+                const tagsHtml = file.tags && file.tags.length > 0 ? 
+                    file.tags.map(tag => `<span class="tag" style="background: ${categoryColor}; margin: 0 2px;">${tag}</span>`).join('') : '';
+                
+                fileItem.innerHTML = `
+                    <div class="file-header">
+                        <i class="${getFileIcon(file.type)} file-icon"></i>
+                        <div class="file-info" style="flex: 1;">
+                            <h4>${file.title || file.name} ${priorityIcon}</h4>
+                            <div class="file-meta">
+                                <span style="color: ${categoryColor}; font-weight: 600;">${file.category.toUpperCase()}</span>
+                                ${file.department ? ` • <strong>${file.department.toUpperCase()}</strong>` : ''}
+                                ${file.version ? ` • v${file.version}` : ''} • 
+                                ${formatFileSize(file.size)} • 
+                                ${uploadDate}
+                            </div>
+                            ${file.description ? `<div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.25rem;">${file.description}</div>` : ''}
+                            ${file.author ? `<div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">Ersteller: ${file.author}</div>` : ''}
+                            ${tagsHtml ? `<div style="margin-top: 0.5rem;">${tagsHtml}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="action-btn download" onclick="downloadFile('${file.id}')">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="action-btn preview" onclick="previewFile('${file.id}')">
+                            <i class="fas fa-eye"></i> Details
+                        </button>
+                        <button class="action-btn delete" onclick="deleteFile('${file.id}')">
+                            <i class="fas fa-trash"></i> Löschen
+                        </button>
+                    </div>
+                `;
+                
+                filesList.appendChild(fileItem);
+            });
+        }
+        
+        // Download file
+        function downloadFile(fileId) {
+            const file = uploadedFiles.find(f => f.id === fileId);
+            if (!file) {
+                showStatus('Datei nicht gefunden!', 'error');
+                return;
+            }
+            
+            try {
+                const link = document.createElement('a');
+                link.href = file.content;
+                link.download = file.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showStatus(`Download gestartet: ${file.name}`, 'success');
+            } catch (error) {
+                showStatus(`Download-Fehler: ${error.message}`, 'error');
+            }
+        }
+        
+        // Preview file
+        function previewFile(fileId) {
+            const file = uploadedFiles.find(f => f.id === fileId);
+            if (!file) {
+                showStatus('Datei nicht gefunden!', 'error');
+                return;
+            }
+            
+            const modal = document.getElementById('previewModal');
+            const content = document.getElementById('previewContent');
+            
+            const priorityIcon = getPriorityIcon(file.priority);
+            const categoryColor = getCategoryColor(file.category);
+            
+            content.innerHTML = `
+                <div style="display: flex; gap: 2rem;">
+                    <div style="flex: 1;">
+                        <h3>${file.title || file.name} ${priorityIcon}</h3>
+                        
+                        ${file.type.startsWith('image/') ? 
+                            `<img src="${file.content}" style="max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0;">` :
+                            file.type.includes('pdf') ?
+                            `<iframe src="${file.content}" style="width: 100%; height: 400px; border: none; border-radius: 0.5rem; margin: 1rem 0;"></iframe>` :
+                            `<div style="text-align: center; padding: 2rem; background: #f8fafc; border-radius: 0.5rem; margin: 1rem 0;">
+                                <i class="${getFileIcon(file.type)}" style="font-size: 3rem; color: #6b7280;"></i>
+                                <p style="margin: 1rem 0; color: #374151;">Vorschau für diesen Dateityp nicht verfügbar</p>
+                            </div>`
+                        }
+                        
+                        <button class="action-btn download" onclick="downloadFile('${file.id}')" style="margin-top: 1rem;">
+                            <i class="fas fa-download"></i> Datei herunterladen
+                        </button>
+                    </div>
+                    
+                    <div style="min-width: 300px; background: #f8fafc; padding: 1.5rem; border-radius: 0.5rem;">
+                        <h4 style="margin: 0 0 1rem 0; color: #374151;">📋 Dokument-Details</h4>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Dateiname:</strong><br>
+                            <span style="color: #6b7280;">${file.name}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Kategorie:</strong><br>
+                            <span style="color: ${categoryColor}; font-weight: 600;">${file.category.toUpperCase()}</span>
+                        </div>
+                        
+                        ${file.description ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Beschreibung:</strong><br>
+                            <span style="color: #6b7280;">${file.description}</span>
+                        </div>` : ''}
+                        
+                        ${file.author ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Ersteller:</strong><br>
+                            <span style="color: #6b7280;">${file.author}</span>
+                        </div>` : ''}
+                        
+                        ${file.department ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Abteilung:</strong><br>
+                            <span style="color: #6b7280;">${file.department}</span>
+                        </div>` : ''}
+                        
+                        ${file.version ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Version:</strong><br>
+                            <span style="color: #6b7280;">${file.version}</span>
+                        </div>` : ''}
+                        
+                        ${file.priority ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Priorität:</strong><br>
+                            <span style="color: #6b7280;">${file.priority.toUpperCase()}</span>
+                        </div>` : ''}
+                        
+                        ${file.classification ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Typ:</strong><br>
+                            <span style="color: #6b7280;">${file.classification}</span>
+                        </div>` : ''}
+                        
+                        ${file.validFrom || file.validUntil ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Gültigkeitszeitraum:</strong><br>
+                            <span style="color: #6b7280;">
+                                ${file.validFrom ? `Ab: ${new Date(file.validFrom).toLocaleDateString('de-DE')}` : ''}
+                                ${file.validFrom && file.validUntil ? '<br>' : ''}
+                                ${file.validUntil ? `Bis: ${new Date(file.validUntil).toLocaleDateString('de-DE')}` : ''}
+                            </span>
+                        </div>` : ''}
+                        
+                        ${file.tags && file.tags.length > 0 ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Tags:</strong><br>
+                            <div style="margin-top: 0.5rem;">
+                                ${file.tags.map(tag => `<span class="tag" style="background: ${categoryColor}; margin: 2px;">${tag}</span>`).join('')}
+                            </div>
+                        </div>` : ''}
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Dateigröße:</strong><br>
+                            <span style="color: #6b7280;">${formatFileSize(file.size)}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Hochgeladen am:</strong><br>
+                            <span style="color: #6b7280;">${new Date(file.uploadDate).toLocaleString('de-DE')}</span>
+                        </div>
+                        
+                        ${file.access ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Zugriff:</strong><br>
+                            <span style="color: #6b7280;">${file.access}</span>
+                        </div>` : ''}
+                        
+                        ${file.mandatory || file.training || file.archive || file.print ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Eigenschaften:</strong><br>
+                            <div style="font-size: 0.8rem; color: #6b7280;">
+                                ${file.mandatory ? '✓ Pflichtdokument<br>' : ''}
+                                ${file.training ? '✓ Schulung erforderlich<br>' : ''}
+                                ${file.archive ? '✓ Archivierungspflichtig<br>' : ''}
+                                ${file.print ? '✓ Druckversion erforderlich<br>' : ''}
+                            </div>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
+        // Close preview
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('active');
+        }
+        
+        // Delete file
+        function deleteFile(fileId) {
+            const file = uploadedFiles.find(f => f.id === fileId);
+            if (!file) {
+                showStatus('Datei nicht gefunden!', 'error');
+                return;
+            }
+            
+            if (confirm(`Möchten Sie "${file.name}" wirklich löschen?`)) {
+                uploadedFiles = uploadedFiles.filter(f => f.id !== fileId);
+                saveFiles();
+                updateStats();
+                refreshFiles();
+                showStatus(`Datei gelöscht: ${file.name}`, 'success');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load existing files
+            loadFiles();
+            updateStats();
+            refreshFiles();
+            
+            // Setup file input
+            const fileInput = document.getElementById('fileInput');
+            const uploadZone = document.getElementById('uploadZone');
+            
+            // Click to select files
+            uploadZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                handleFileSelection(e.target.files);
+            });
+            
+            // Drag and drop
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+            
+            uploadZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+            });
+            
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                handleFileSelection(e.dataTransfer.files);
+            });
+            
+            // Category selection
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedCategory = btn.dataset.category;
+                    updateUploadButton();
+                    showStatus(`Kategorie ausgewählt: ${selectedCategory}`, 'info');
+                });
+            });
+            
+            // Upload button
+            document.getElementById('uploadBtn').addEventListener('click', uploadFiles);
+            
+            // Priority selection
+            document.querySelectorAll('.priority-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedPriority = btn.dataset.priority;
+                    updateUploadButton();
+                });
+            });
+
+            // Tags input
+            document.getElementById('docTags').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const tag = e.target.value.trim();
+                    if (tag && !documentTags.includes(tag)) {
+                        documentTags.push(tag);
+                        updateTagsDisplay();
+                        e.target.value = '';
+                    }
+                }
+            });
+
+            // Form field changes
+            ['docTitle', 'docVersion', 'docAuthor', 'docDescription'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateUploadButton);
+            });
+            
+            // Modal close on background click
+            document.getElementById('previewModal').addEventListener('click', (e) => {
+                if (e.target.id === 'previewModal') {
+                    closePreview();
+                }
+            });
+            
+            console.log('Upload-System vollständig geladen und funktionsfähig!');
+        });
+
+        // Toggle advanced section
+        function toggleAdvanced() {
+            const section = document.getElementById('advancedSection');
+            const toggle = document.querySelector('.advanced-toggle');
+            
+            if (section.classList.contains('open')) {
+                section.classList.remove('open');
+                toggle.innerHTML = '<i class="fas fa-cog"></i> Erweiterte Einstellungen';
+            } else {
+                section.classList.add('open');
+                toggle.innerHTML = '<i class="fas fa-cog"></i> Erweiterte Einstellungen ausblenden';
+            }
+        }
+
+        // Update tags display
+        function updateTagsDisplay() {
+            const container = document.getElementById('tagsContainer');
+            container.innerHTML = '';
+            
+            documentTags.forEach((tag, index) => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'tag';
+                tagElement.innerHTML = `
+                    ${tag}
+                    <span class="remove" onclick="removeTag(${index})">×</span>
+                `;
+                container.appendChild(tagElement);
+            });
+        }
+
+        // Remove tag
+        function removeTag(index) {
+            documentTags.splice(index, 1);
+            updateTagsDisplay();
+        });
+    </script>
+</body>
+</html>

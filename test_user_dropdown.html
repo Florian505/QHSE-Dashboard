@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dropdown Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-box { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        select { padding: 8px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 User Dropdown Test</h1>
+    
+    <div class="test-box">
+        <h3>Test 1: Einfacher Dropdown</h3>
+        <select id="testSelect">
+            <option value="user1">Max Mustermann (Admin)</option>
+            <option value="user2">Lisa Meyer (Geschäftsführung)</option>
+            <option value="user3">Thomas Schmidt (Betriebsleiter)</option>
+        </select>
+        <button onclick="testDropdown()">Test Auswahl</button>
+    </div>
+    
+    <div class="test-box">
+        <h3>Test 2: Original Dropdown aus Hauptdatei</h3>
+        <div class="user-selector">
+            <label for="userSelect">Nutzer wechseln:</label>
+            <select id="userSelect">
+                <!-- Wird von JavaScript befüllt -->
+            </select>
+        </div>
+        <button onclick="loadMainScript()">Hauptscript laden</button>
+    </div>
+    
+    <div class="test-box">
+        <h3>Debug Info</h3>
+        <div id="debugInfo"></div>
+    </div>
+
+    <script>
+        function testDropdown() {
+            const select = document.getElementById('testSelect');
+            alert('Ausgewählter Wert: ' + select.value);
+        }
+        
+        function loadMainScript() {
+            // Lade das Hauptscript
+            const script = document.createElement('script');
+            script.src = 'script.js';
+            document.head.appendChild(script);
+            
+            setTimeout(() => {
+                if (window.qhseDashboard) {
+                    document.getElementById('debugInfo').innerHTML = 'Hauptscript geladen! Nutzer: ' + window.qhseDashboard.users.length;
+                    window.qhseDashboard.populateUserDropdown();
+                } else {
+                    document.getElementById('debugInfo').innerHTML = 'Hauptscript nicht geladen';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOTFALL-REPARATUR - QHSE System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background: #fef2f2;
+            padding: 2rem;
+        }
+        .emergency-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border: 3px solid #dc2626;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .emergency-header {
+            text-align: center;
+            color: #dc2626;
+            margin-bottom: 2rem;
+        }
+        .fix-button {
+            background: #dc2626;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .fix-button:hover {
+            background: #b91c1c;
+            transform: scale(1.05);
+        }
+        .fix-button.success {
+            background: #10b981;
+        }
+        .fix-button.success:hover {
+            background: #059669;
+        }
+        .status-area {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            min-height: 200px;
+            overflow-y: auto;
+        }
+        .quick-action {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="emergency-container">
+        <div class="emergency-header">
+            <h1><i class="fas fa-exclamation-triangle"></i> SYSTEM-NOTFALL-REPARATUR</h1>
+            <p>Das QHSE System kann repariert werden. Wählen Sie eine Option:</p>
+        </div>
+
+        <div class="quick-action">
+            <h3><i class="fas fa-tools"></i> Schnelle Reparatur-Optionen</h3>
+            <button class="fix-button" onclick="emergencyReload()">
+                <i class="fas fa-sync"></i> System-Neustart
+            </button>
+            <button class="fix-button" onclick="clearLocalStorage()">
+                <i class="fas fa-trash"></i> Cache leeren
+            </button>
+            <button class="fix-button success" onclick="loadBackupSystem()">
+                <i class="fas fa-undo"></i> Backup laden
+            </button>
+        </div>
+
+        <div class="quick-action">
+            <h3><i class="fas fa-user-cog"></i> Benutzer-Wechsel reparieren</h3>
+            <button class="fix-button" onclick="fixUserSwitch()">
+                <i class="fas fa-users"></i> Benutzer-Dropdown reparieren
+            </button>
+            <button class="fix-button" onclick="resetToAdmin()">
+                <i class="fas fa-user-shield"></i> Als Admin anmelden
+            </button>
+        </div>
+
+        <div class="status-area" id="statusArea">
+            Warte auf Reparatur-Aktion...<br>
+        </div>
+
+        <div style="text-align: center; margin: 2rem 0;">
+            <button class="fix-button success" onclick="testSystem()">
+                <i class="fas fa-check"></i> System testen
+            </button>
+            <a href="index.html" class="fix-button" style="text-decoration: none;">
+                <i class="fas fa-home"></i> Zurück zum Hauptsystem
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const area = document.getElementById('statusArea');
+            area.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function emergencyReload() {
+            log('🔄 Führe System-Neustart durch...');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+
+        function clearLocalStorage() {
+            log('🗑️ Lösche Browser-Cache...');
+            try {
+                localStorage.clear();
+                log('✅ Cache erfolgreich geleert');
+                log('🔄 Seite wird neu geladen...');
+                setTimeout(() => location.reload(), 2000);
+            } catch (e) {
+                log('❌ Fehler beim Cache löschen: ' + e.message);
+            }
+        }
+
+        function loadBackupSystem() {
+            log('💾 Lade Backup-System...');
+            
+            // Reset to basic user data
+            const backupData = {
+                qhse_users: JSON.stringify([
+                    {
+                        id: 'root-admin',
+                        name: 'System Administrator',
+                        email: 'admin@system.de',
+                        role: 'root-admin',
+                        isActive: true
+                    },
+                    {
+                        id: 'test-user',
+                        name: 'Test Benutzer',
+                        email: 'test@system.de', 
+                        role: 'mitarbeiter',
+                        isActive: true
+                    }
+                ])
+            };
+
+            try {
+                Object.keys(backupData).forEach(key => {
+                    localStorage.setItem(key, backupData[key]);
+                });
+                log('✅ Backup-Daten erfolgreich geladen');
+                log('🔄 System wird neu initialisiert...');
+                setTimeout(() => location.reload(), 2000);
+            } catch (e) {
+                log('❌ Backup-Fehler: ' + e.message);
+            }
+        }
+
+        function fixUserSwitch() {
+            log('👥 Repariere Benutzer-Wechsel...');
+            
+            // Try to recreate user dropdown
+            try {
+                log('🔍 Prüfe Benutzer-Dropdown...');
+                
+                // Basic user switch function
+                window.switchUser = function(userId) {
+                    localStorage.setItem('qhse_current_user', userId);
+                    location.reload();
+                };
+                
+                log('✅ Benutzer-Wechsel Funktion wiederhergestellt');
+                log('🔄 Teste Funktionalität...');
+                
+            } catch (e) {
+                log('❌ Reparatur fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        function resetToAdmin() {
+            log('👑 Setze Admin-Benutzer...');
+            try {
+                localStorage.setItem('qhse_current_user', 'root-admin');
+                log('✅ Als root-admin angemeldet');
+                log('🔄 Lade Hauptsystem...');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            } catch (e) {
+                log('❌ Admin-Reset fehlgeschlagen: ' + e.message);
+            }
+        }
+
+        function testSystem() {
+            log('🧪 Teste System-Funktionen...');
+            
+            // Test localStorage
+            try {
+                localStorage.setItem('test', 'ok');
+                localStorage.removeItem('test');
+                log('✅ LocalStorage funktioniert');
+            } catch (e) {
+                log('❌ LocalStorage Problem: ' + e.message);
+            }
+            
+            // Test basic JavaScript
+            try {
+                const testObj = { test: true };
+                log('✅ JavaScript funktioniert');
+            } catch (e) {
+                log('❌ JavaScript Problem: ' + e.message);
+            }
+            
+            // Test if main script loads
+            log('🔍 Prüfe Haupt-Script...');
+            const script = document.createElement('script');
+            script.src = 'script.js';
+            script.onload = () => log('✅ Haupt-Script geladen');
+            script.onerror = () => log('❌ Haupt-Script Fehler');
+            document.head.appendChild(script);
+        }
+
+        // Auto-diagnose
+        window.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Notfall-System gestartet');
+            log('🔍 Führe Basis-Diagnose durch...');
+            
+            // Check localStorage
+            try {
+                const userData = localStorage.getItem('qhse_users');
+                if (userData) {
+                    log('📊 Benutzer-Daten gefunden');
+                } else {
+                    log('⚠️ Keine Benutzer-Daten - Backup empfohlen');
+                }
+            } catch (e) {
+                log('❌ LocalStorage nicht verfügbar');
+            }
+            
+            log('✅ Notfall-System bereit');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test - System-Reparatur</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div style="padding: 2rem; background: white; margin: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h1>🔧 JavaScript System Test</h1>
+        <div id="status">Lade JavaScript...</div>
+        
+        <div style="margin: 2rem 0;">
+            <button onclick="testUserSwitch()" style="background: #3b82f6; color: white; padding: 1rem; border: none; border-radius: 0.5rem; margin: 0.5rem;">
+                🔄 Benutzer-Wechsel testen
+            </button>
+            <button onclick="testBasicFunctions()" style="background: #10b981; color: white; padding: 1rem; border: none; border-radius: 0.5rem; margin: 0.5rem;">
+                ⚙️ Grundfunktionen testen
+            </button>
+        </div>
+        
+        <div id="results" style="background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; font-family: monospace; font-size: 0.875rem;"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            const colors = {
+                'info': '#3b82f6',
+                'success': '#10b981', 
+                'error': '#ef4444',
+                'warning': '#f59e0b'
+            };
+            status.style.color = colors[type];
+            status.textContent = message;
+        }
+
+        function logResult(message) {
+            const results = document.getElementById('results');
+            results.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+        }
+
+        function testUserSwitch() {
+            try {
+                if (window.qhseDashboard) {
+                    logResult('✅ QHSE Dashboard gefunden');
+                    
+                    // Test user switching
+                    const currentUser = window.qhseDashboard.getCurrentUser();
+                    logResult('✅ getCurrentUser() funktioniert: ' + currentUser.name);
+                    
+                    // Test user selection
+                    const userDropdown = document.getElementById('userSelector');
+                    if (userDropdown) {
+                        logResult('✅ User-Dropdown gefunden');
+                    } else {
+                        logResult('❌ User-Dropdown nicht gefunden');
+                    }
+                    
+                    updateStatus('Benutzer-Wechsel funktioniert', 'success');
+                } else {
+                    logResult('❌ QHSE Dashboard nicht geladen');
+                    updateStatus('Dashboard nicht geladen', 'error');
+                }
+            } catch (error) {
+                logResult('❌ Fehler beim Benutzer-Test: ' + error.message);
+                updateStatus('JavaScript Fehler: ' + error.message, 'error');
+            }
+        }
+
+        function testBasicFunctions() {
+            try {
+                if (window.qhseDashboard) {
+                    logResult('✅ Dashboard Objekt vorhanden');
+                    
+                    // Test basic methods
+                    const methods = ['updateUIForUser', 'setupNavigation', 'getCurrentUser'];
+                    methods.forEach(method => {
+                        if (typeof window.qhseDashboard[method] === 'function') {
+                            logResult('✅ ' + method + '() verfügbar');
+                        } else {
+                            logResult('❌ ' + method + '() fehlt');
+                        }
+                    });
+                    
+                    updateStatus('Grundfunktionen getestet', 'success');
+                } else {
+                    logResult('❌ Dashboard nicht verfügbar');
+                    updateStatus('Dashboard fehlt', 'error');
+                }
+            } catch (error) {
+                logResult('❌ Test-Fehler: ' + error.message);
+                updateStatus('Test fehlgeschlagen: ' + error.message, 'error');
+            }
+        }
+
+        // Auto-test when loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (window.qhseDashboard) {
+                    updateStatus('✅ JavaScript erfolgreich geladen', 'success');
+                    logResult('🚀 QHSE Dashboard erfolgreich initialisiert');
+                } else {
+                    updateStatus('❌ JavaScript Fehler - Dashboard nicht geladen', 'error');
+                    logResult('💥 Dashboard konnte nicht initialisiert werden');
+                }
+            }, 2000);
+        });
+
+        // Error handler
+        window.addEventListener('error', (e) => {
+            logResult('💥 JavaScript Fehler: ' + e.message + ' in ' + e.filename + ':' + e.lineno);
+            updateStatus('JavaScript Fehler erkannt', 'error');
+        });
+    </script>
+</body>
+</html>

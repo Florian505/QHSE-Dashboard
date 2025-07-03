@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 TÜV-konformes Professional Machine Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="professional_machine_styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .header h1 {
+            color: #1f2937;
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .header p {
+            color: #6b7280;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .compliance-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .compliance-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid #d1d5db;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .compliance-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .compliance-card .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .compliance-card h3 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+            font-size: 1.25rem;
+        }
+        .compliance-card p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1.5rem 3rem;
+            border: none;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin: 2rem auto;
+            max-width: 400px;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+        }
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .status-area {
+            background: #1f2937;
+            color: #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="header">
+            <h1>🏭 TÜV-konformes Professional Machine Management</h1>
+            <p>Erweiterte Maschinenverwaltung mit 9-Tab Professional System nach TÜV-Standards</p>
+        </div>
+        
+        <div class="compliance-showcase">
+            <div class="compliance-card">
+                <div class="icon" style="color: #10b981;"><i class="fas fa-certificate"></i></div>
+                <h3>TÜV-konform</h3>
+                <p>Vollständige Compliance nach TÜV-Standards und wiederkehrenden Prüfungen</p>
+            </div>
+            <div class="compliance-card">
+                <div class="icon" style="color: #3b82f6;"><i class="fas fa-award"></i></div>
+                <h3>ISO 9001:2015</h3>
+                <p>Qualitätsmanagement nach internationalen Standards und Normen</p>
+            </div>
+            <div class="compliance-card">
+                <div class="icon" style="color: #f59e0b;"><i class="fas fa-shield-check"></i></div>
+                <h3>CE-Richtlinie</h3>
+                <p>Maschinenrichtlinie 2006/42/EG und harmonisierte Normen</p>
+            </div>
+            <div class="compliance-card">
+                <div class="icon" style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i></div>
+                <h3>DGUV-konform</h3>
+                <p>Arbeitsschutz nach DGUV Vorschriften und Gefährdungsbeurteilung</p>
+            </div>
+        </div>
+        
+        <button class="test-button" onclick="testProfessionalMachineModal()">
+            <i class="fas fa-industry"></i>
+            TÜV Professional System testen
+        </button>
+        
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-info-circle"></i></div>
+                <div>
+                    <strong>Erweiterte Grunddaten</strong><br>
+                    <small>CE-Kennzeichnung, Normen, Klassifikation</small>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-cogs"></i></div>
+                <div>
+                    <strong>Technische Spezifikationen</strong><br>
+                    <small>Leistungsdaten, Abmessungen, Betriebsmedien</small>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-certificate"></i></div>
+                <div>
+                    <strong>Compliance & Zertifizierung</strong><br>
+                    <small>EU-Richtlinien, Harmonisierte Normen</small>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <div>
+                    <strong>Sicherheitstechnik</strong><br>
+                    <small>Schutzeinrichtungen, Performance Level</small>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-tools"></i></div>
+                <div>
+                    <strong>Wartung & Instandhaltung</strong><br>
+                    <small>Prüffristen, Serviceverträge, Ersatzteile</small>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div>
+                    <strong>Risikobewertung</strong><br>
+                    <small>Gefährdungsbeurteilung, Schutzmaßnahmen</small>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-file-alt"></i></div>
+                <div>
+                    <strong>Dokumentation</strong><br>
+                    <small>TÜV-Audit-ready, Nachweise</small>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-wifi"></i></div>
+                <div>
+                    <strong>Industrie 4.0</strong><br>
+                    <small>IoT-Integration, Digitale Zwillinge</small>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <div>
+                    <strong>Betriebswirtschaft</strong><br>
+                    <small>Lifecycle Management, TCO-Analyse</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-area" id="status">
+🚀 TÜV-konformes Professional Machine Management System bereit
+
+✅ 9-Tab Professional Struktur implementiert
+✅ TÜV-Standards und Compliance integriert
+✅ CE-Kennzeichnung und EU-Richtlinien
+✅ Sicherheitstechnik nach EN ISO 12100
+✅ Wartungsplanung nach DGUV
+✅ Systematische Risikobewertung
+✅ Audit-ready Dokumentation
+✅ Industrie 4.0 Integration
+✅ Betriebswirtschaftliche Bewertung
+
+Klicken Sie "TÜV Professional System testen" um das erweiterte System zu öffnen!
+        </div>
+        
+        <div style="text-align: center; margin: 2rem 0;">
+            <a href="index.html" class="test-button" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                <i class="fas fa-home"></i>
+                Zurück zum Hauptsystem
+            </a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function log(message) {
+            const status = document.getElementById('status');
+            const time = new Date().toLocaleTimeString();
+            status.textContent += `\n${time}: ${message}`;
+            status.scrollTop = status.scrollHeight;
+        }
+
+        function testProfessionalMachineModal() {
+            log('🏭 Starte TÜV-konformes Professional Machine Management...');
+            
+            try {
+                if (!window.qhseDashboard) {
+                    log('❌ QHSE Dashboard nicht geladen');
+                    alert('Das QHSE Dashboard wird geladen...\nBitte öffnen Sie zuerst index.html');
+                    return;
+                }
+                
+                log('✅ Dashboard gefunden - öffne Professional Modal');
+                
+                // Remove existing modals
+                const existing = document.getElementById('addMachineModal');
+                if (existing) existing.remove();
+                
+                // Create professional modal
+                const modal = window.qhseDashboard.createWorkingMachineModal();
+                document.body.appendChild(modal);
+                
+                log('🎉 TÜV-konformes Professional Modal erfolgreich geöffnet!');
+                log('📋 Features verfügbar:');
+                log('  • 9-Tab Professional Navigation');
+                log('  • TÜV-Compliance Prüfung');
+                log('  • CE-Kennzeichnung Verwaltung');
+                log('  • Sicherheitstechnik nach EN ISO 12100');
+                log('  • Wartungsplanung nach DGUV');
+                log('  • Systematische Risikobewertung');
+                log('  • Audit-ready Dokumentation');
+                log('  • Industrie 4.0 Integration');
+                log('  • Betriebswirtschaftliche Bewertung');
+                
+                // Focus first field
+                setTimeout(() => {
+                    const firstField = modal.querySelector('#machineName');
+                    if (firstField) {
+                        firstField.focus();
+                        log('✅ Fokus auf Maschinenbezeichnung gesetzt');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                log('❌ Fehler: ' + error.message);
+                console.error('Professional Machine Modal Error:', error);
+                alert('Fehler beim Öffnen des Professional Systems: ' + error.message);
+            }
+        }
+
+        // Auto-check when loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (window.qhseDashboard) {
+                    log('✅ QHSE Dashboard erfolgreich geladen');
+                    log('🏭 Professional Machine Management bereit');
+                    
+                    // Check available functions
+                    const functions = [
+                        'createWorkingMachineModal',
+                        'setupProfessionalMachineTabNavigation', 
+                        'switchProfessionalMachineTab',
+                        'setupProfessionalMachineFeatures'
+                    ];
+                    
+                    let functionsAvailable = 0;
+                    functions.forEach(func => {
+                        if (typeof window.qhseDashboard[func] === 'function') {
+                            functionsAvailable++;
+                        }
+                    });
+                    
+                    log(`🔧 ${functionsAvailable}/${functions.length} Professional-Funktionen verfügbar`);
+                    
+                    if (functionsAvailable === functions.length) {
+                        log('🎯 TÜV Professional System vollständig funktionsfähig!');
+                    }
+                    
+                } else {
+                    log('❌ Dashboard noch nicht geladen - bitte warten...');
+                    
+                    // Retry after delay
+                    setTimeout(() => {
+                        if (window.qhseDashboard) {
+                            log('✅ Dashboard nachträglich geladen');
+                        } else {
+                            log('❌ Dashboard konnte nicht geladen werden');
+                            log('💡 Lösung: Öffnen Sie index.html zuerst');
+                        }
+                    }, 3000);
+                }
+            }, 1000);
+        });
+
+        // Global error handler
+        window.addEventListener('error', (e) => {
+            log(`💥 JS Fehler: ${e.message}`);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 QHSE Erweiterte Bereiche - Maximum Detail</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+            border-radius: 1rem;
+            color: white;
+        }
+        .header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        /* Tabs System */
+        .main-tabs {
+            display: flex;
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            margin: 2rem 0;
+            border: 2px solid #e2e8f0;
+            overflow-x: auto;
+            gap: 0.25rem;
+        }
+        .tab-btn {
+            flex: 1;
+            min-width: 180px;
+            background: transparent;
+            border: none;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .tab-btn.active {
+            background: white;
+            color: #1e40af;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .tab-btn i {
+            font-size: 1.5rem;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Form Sections */
+        .section {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .section-header h3 {
+            font-size: 1.5rem;
+            color: #1f2937;
+            margin: 0;
+        }
+        .section-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .badge {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .form-grid.two-col {
+            grid-template-columns: 1fr 1fr;
+        }
+        .form-grid.three-col {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .form-grid.four-col {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .required {
+            color: #ef4444;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.875rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        /* Special Input Types */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .checkbox-item:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+        
+        /* Rating System */
+        .rating-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .rating-btn {
+            aspect-ratio: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .rating-btn:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        .rating-btn.selected {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .rating-btn.excellent { background: #10b981; color: white; border-color: #10b981; }
+        .rating-btn.good { background: #84cc16; color: white; border-color: #84cc16; }
+        .rating-btn.average { background: #f59e0b; color: white; border-color: #f59e0b; }
+        .rating-btn.poor { background: #f97316; color: white; border-color: #f97316; }
+        .rating-btn.critical { background: #ef4444; color: white; border-color: #ef4444; }
+        
+        /* File Upload Zone */
+        .upload-zone {
+            border: 3px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin: 1rem 0;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .upload-zone.dragover {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 1.5rem;
+            width: 1rem;
+            height: 1rem;
+            background: #3b82f6;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+        
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .data-table th {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        /* Action Buttons */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .action-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .action-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        .action-btn.success { background: #10b981; }
+        .action-btn.warning { background: #f59e0b; }
+        .action-btn.danger { background: #ef4444; }
+        
+        /* Progress Indicators */
+        .progress-bar {
+            width: 100%;
+            height: 1rem;
+            background: #f1f5f9;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            border-radius: 0.5rem;
+            transition: width 0.3s ease;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 1200px) {
+            .form-grid.four-col {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .form-grid.three-col {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .main-tabs {
+                flex-direction: column;
+            }
+            .tab-btn {
+                min-width: auto;
+            }
+            .form-grid.two-col {
+                grid-template-columns: 1fr;
+            }
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 QHSE Erweiterte Bereiche</h1>
+            <p>Vollständige Erfassung aller QHSE-relevanten Informationen mit maximaler Detailtiefe</p>
+        </div>
+
+        <!-- Main Tabs -->
+        <div class="main-tabs">
+            <button class="tab-btn active" onclick="switchTab('grunddaten')">
+                <i class="fas fa-info-circle"></i>
+                <span>Grunddaten</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('sicherheit')">
+                <i class="fas fa-shield-alt"></i>
+                <span>Sicherheit</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('details')">
+                <i class="fas fa-list-alt"></i>
+                <span>Details</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('dokumentation')">
+                <i class="fas fa-file-alt"></i>
+                <span>Dokumentation</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('compliance')">
+                <i class="fas fa-certificate"></i>
+                <span>Compliance</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('betrieb')">
+                <i class="fas fa-cogs"></i>
+                <span>Betrieb & Wartung</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('personal')">
+                <i class="fas fa-users"></i>
+                <span>Personal & Schulung</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('umwelt')">
+                <i class="fas fa-leaf"></i>
+                <span>Umwelt & Energie</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('qualitaet')">
+                <i class="fas fa-star"></i>
+                <span>Qualität & Prüfung</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('finanzen')">
+                <i class="fas fa-euro-sign"></i>
+                <span>Finanzen & Kosten</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('digitalisierung')">
+                <i class="fas fa-microchip"></i>
+                <span>Digitalisierung</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('kommunikation')">
+                <i class="fas fa-comments"></i>
+                <span>Kommunikation</span>
+            </button>
+        </div>
+
+        <!-- Grunddaten Tab -->
+        <div id="grunddaten-tab" class="tab-content active">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <h3>Allgemeine Grunddaten</h3>
+                    <span class="badge">Basis-Informationen</span>
+                </div>
+                
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Objekt-ID <span class="required">*</span></label>
+                        <input type="text" placeholder="Eindeutige Identifikationsnummer">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-signature"></i> Bezeichnung <span class="required">*</span></label>
+                        <input type="text" placeholder="Offizielle Bezeichnung des Objekts">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-sitemap"></i> Kategorie <span class="required">*</span></label>
+                        <select>
+                            <option value="">Kategorie wählen</option>
+                            <option value="maschine">Maschine/Anlage</option>
+                            <option value="gefahrstoff">Gefahrstoff</option>
+                            <option value="arbeitsplatz">Arbeitsplatz</option>
+                            <option value="verfahren">Verfahren/Prozess</option>
+                            <option value="gebaeude">Gebäude/Infrastruktur</option>
+                            <option value="fahrzeug">Fahrzeug/Transport</option>
+                            <option value="software">Software/IT-System</option>
+                            <option value="dokument">Dokument/Unterlage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-layer-group"></i> Subkategorie</label>
+                        <select>
+                            <option value="">Subkategorie wählen</option>
+                            <option value="produktionsmaschine">Produktionsmaschine</option>
+                            <option value="pruefeinnrichtung">Prüfeinrichtung</option>
+                            <option value="transportmittel">Transportmittel</option>
+                            <option value="sicherheitseinrichtung">Sicherheitseinrichtung</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid three-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-industry"></i> Hersteller</label>
+                        <input type="text" placeholder="Name des Herstellers">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-barcode"></i> Modell/Typ</label>
+                        <input type="text" placeholder="Modellbezeichnung oder Typ">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-hashtag"></i> Seriennummer</label>
+                        <input type="text" placeholder="Eindeutige Seriennummer">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Baujahr</label>
+                        <input type="number" placeholder="Jahr der Herstellung" min="1900" max="2030">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-plus"></i> Inbetriebnahme</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Standort</label>
+                        <input type="text" placeholder="Genauer Standort/Position">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Beschreibung</label>
+                    <textarea placeholder="Detaillierte Beschreibung des Objekts, Verwendungszweck, Besonderheiten..."></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h3>Verantwortlichkeiten</h3>
+                    <span class="badge">Zuständigkeiten</span>
+                </div>
+                
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-user-tie"></i> Objektverantwortlicher</label>
+                        <input type="text" placeholder="Name des Hauptverantwortlichen">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-building"></i> Verantwortliche Abteilung</label>
+                        <select>
+                            <option value="">Abteilung wählen</option>
+                            <option value="produktion">Produktion</option>
+                            <option value="technik">Technik</option>
+                            <option value="instandhaltung">Instandhaltung</option>
+                            <option value="qualitaet">Qualitätssicherung</option>
+                            <option value="arbeitssicherheit">Arbeitssicherheit</option>
+                            <option value="umwelt">Umweltschutz</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tools"></i> Wartungsverantwortlicher</label>
+                        <input type="text" placeholder="Zuständig für Wartung und Instandhaltung">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Notfall-Kontakt</label>
+                        <input type="tel" placeholder="Telefonnummer für Notfälle">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sicherheit Tab -->
+        <div id="sicherheit-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Gefährdungsbeurteilung</h3>
+                    <span class="badge">Risikobewertung</span>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-search"></i> Gefährdungsbeurteilung vorhanden?</label>
+                        <select>
+                            <option value="">Status wählen</option>
+                            <option value="ja">✅ Ja, aktuell</option>
+                            <option value="veraltet">⚠️ Ja, aber veraltet</option>
+                            <option value="nein">❌ Nein, nicht vorhanden</option>
+                            <option value="geplant">📋 Geplant</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-check"></i> Letzte Aktualisierung</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-user-shield"></i> Erstellt von</label>
+                        <input type="text" placeholder="Name des Erstellers">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-redo"></i> Nächste Überprüfung</label>
+                        <input type="date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-list"></i> Identifizierte Gefährdungen</label>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="mechanisch">
+                            <label for="mechanisch">⚙️ Mechanische Gefährdungen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="elektrisch">
+                            <label for="elektrisch">⚡ Elektrische Gefährdungen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="thermisch">
+                            <label for="thermisch">🔥 Thermische Gefährdungen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="chemisch">
+                            <label for="chemisch">🧪 Chemische Gefährdungen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="biologisch">
+                            <label for="biologisch">🦠 Biologische Gefährdungen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="psychisch">
+                            <label for="psychisch">🧠 Psychische Belastungen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ergonomisch">
+                            <label for="ergonomisch">👥 Ergonomische Gefährdungen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="laerm">
+                            <label for="laerm">🔊 Lärm</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="vibration">
+                            <label for="vibration">📳 Vibrationen</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="strahlung">
+                            <label for="strahlung">☢️ Strahlung</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-thermometer-half"></i> Gesamtrisiko-Bewertung</label>
+                    <div class="rating-grid">
+                        <div class="rating-btn critical" data-rating="5">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.2rem;">🔴</div>
+                                <div style="font-size: 0.8rem;">Sehr Hoch</div>
+                            </div>
+                        </div>
+                        <div class="rating-btn poor" data-rating="4">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.2rem;">🟠</div>
+                                <div style="font-size: 0.8rem;">Hoch</div>
+                            </div>
+                        </div>
+                        <div class="rating-btn average" data-rating="3">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.2rem;">🟡</div>
+                                <div style="font-size: 0.8rem;">Mittel</div>
+                            </div>
+                        </div>
+                        <div class="rating-btn good" data-rating="2">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.2rem;">🟢</div>
+                                <div style="font-size: 0.8rem;">Niedrig</div>
+                            </div>
+                        </div>
+                        <div class="rating-btn excellent" data-rating="1">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.2rem;">🔵</div>
+                                <div style="font-size: 0.8rem;">Sehr Niedrig</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h3>Schutzmaßnahmen</h3>
+                    <span class="badge">Safety</span>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-hard-hat"></i> Persönliche Schutzausrüstung (PSA)</label>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="schutzhelm">
+                            <label for="schutzhelm">⛑️ Schutzhelm</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="schutzbrille">
+                            <label for="schutzbrille">🥽 Schutzbrille</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="atemschutz">
+                            <label for="atemschutz">😷 Atemschutz</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="gehoerschutz">
+                            <label for="gehoerschutz">🎧 Gehörschutz</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="schutzhandschuhe">
+                            <label for="schutzhandschuhe">🧤 Schutzhandschuhe</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="sicherheitsschuhe">
+                            <label for="sicherheitsschuhe">👟 Sicherheitsschuhe</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="schutzkleidung">
+                            <label for="schutzkleidung">👔 Schutzkleidung</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="fallschutz">
+                            <label for="fallschutz">🪂 Fallschutz</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-tools"></i> Technische Schutzmaßnahmen</label>
+                    <textarea placeholder="Beschreibung technischer Schutzeinrichtungen, Sicherheitssysteme, Notaus-Schalter, etc."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-clipboard-list"></i> Organisatorische Schutzmaßnahmen</label>
+                    <textarea placeholder="Arbeitsanweisungen, Schulungen, Zugangskontrollen, Betriebszeiten, etc."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Tab -->
+        <div id="details-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3>Technische Spezifikationen</h3>
+                    <span class="badge">Technik</span>
+                </div>
+                
+                <div class="form-grid four-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-weight"></i> Gewicht</label>
+                        <input type="number" placeholder="in kg" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-ruler-combined"></i> Abmessungen L×B×H</label>
+                        <input type="text" placeholder="z.B. 200×150×180 cm">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-bolt"></i> Elektrische Leistung</label>
+                        <input type="number" placeholder="in kW" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-plug"></i> Spannung</label>
+                        <input type="text" placeholder="z.B. 400V, 3~ 50Hz">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tachometer-alt"></i> Max. Druck</label>
+                        <input type="number" placeholder="in bar" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-thermometer-half"></i> Betriebstemperatur</label>
+                        <input type="text" placeholder="z.B. -10°C bis +60°C">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tint"></i> Schutzart</label>
+                        <select>
+                            <option value="">IP-Schutzart wählen</option>
+                            <option value="IP20">IP20 - Berührungsschutz</option>
+                            <option value="IP44">IP44 - Spritzwasserschutz</option>
+                            <option value="IP54">IP54 - Staubschutz</option>
+                            <option value="IP65">IP65 - Strahlwasserschutz</option>
+                            <option value="IP67">IP67 - Wasserdicht</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-volume-up"></i> Geräuschpegel</label>
+                        <input type="number" placeholder="in dB(A)" step="0.1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-info-circle"></i> Weitere technische Details</label>
+                    <textarea placeholder="Zusätzliche technische Informationen, Besonderheiten, Zubehör, etc."></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Leistungsparameter</h3>
+                    <span class="badge">Performance</span>
+                </div>
+                
+                <div class="form-grid three-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-hourglass-half"></i> Zykluszeit</label>
+                        <input type="number" placeholder="in Sekunden" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-shipping-fast"></i> Durchsatz/Kapazität</label>
+                        <input type="text" placeholder="z.B. 1000 Stk/h">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-percentage"></i> Verfügbarkeit</label>
+                        <input type="number" placeholder="in %" min="0" max="100" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-target"></i> Genauigkeit</label>
+                        <input type="text" placeholder="z.B. ±0.1mm">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Rüstzeit</label>
+                        <input type="number" placeholder="in Minuten" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-battery-half"></i> Energieeffizienz</label>
+                        <select>
+                            <option value="">Effizienzklasse wählen</option>
+                            <option value="A+++">A+++ (Sehr effizient)</option>
+                            <option value="A++">A++ (Sehr effizient)</option>
+                            <option value="A+">A+ (Effizient)</option>
+                            <option value="A">A (Effizient)</option>
+                            <option value="B">B (Mäßig effizient)</option>
+                            <option value="C">C (Weniger effizient)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <h3>Komponenten & Zubehör</h3>
+                    <span class="badge">Bauteile</span>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-plus"></i> Komponente hinzufügen</label>
+                    <div id="komponenten-list">
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: end;">
+                            <div style="flex: 2;">
+                                <input type="text" placeholder="Komponenten-Bezeichnung" id="new-component-name">
+                            </div>
+                            <div style="flex: 1;">
+                                <input type="text" placeholder="Artikel-Nr." id="new-component-article">
+                            </div>
+                            <div style="flex: 1;">
+                                <input type="number" placeholder="Anzahl" id="new-component-count" min="1">
+                            </div>
+                            <button type="button" class="action-btn" onclick="addComponent()" style="padding: 0.5rem 1rem; margin: 0;">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <table class="data-table" id="components-table" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Komponente</th>
+                                <th>Artikel-Nr.</th>
+                                <th>Anzahl</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dokumentation Tab -->
+        <div id="dokumentation-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Dokumente & Unterlagen</h3>
+                    <span class="badge">Files</span>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-cloud-upload-alt"></i> Dokumente hochladen</label>
+                    <div class="upload-zone" onclick="document.getElementById('doc-upload').click()">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #6b7280; margin-bottom: 1rem;"></i>
+                        <p>Dokumente hier ablegen oder klicken zum Hochladen</p>
+                        <small style="color: #6b7280;">Unterstützt: PDF, DOC, XLS, JPG, PNG, etc.</small>
+                        <input type="file" id="doc-upload" multiple style="display: none;">
+                    </div>
+                </div>
+
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bedienungsanleitung">
+                        <label for="bedienungsanleitung">📖 Bedienungsanleitung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="wartungshandbuch">
+                        <label for="wartungshandbuch">🔧 Wartungshandbuch</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="schaltplaene">
+                        <label for="schaltplaene">⚡ Schaltpläne</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ersatzteilliste">
+                        <label for="ersatzteilliste">🔩 Ersatzteilliste</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ce-konformitaet">
+                        <label for="ce-konformitaet">✅ CE-Konformitätserklärung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pruefzertifikat">
+                        <label for="pruefzertifikat">🏆 Prüfzertifikate</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sicherheitsdatenblatt">
+                        <label for="sicherheitsdatenblatt">⚠️ Sicherheitsdatenblätter</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="arbeitsanweisung">
+                        <label for="arbeitsanweisung">📋 Arbeitsanweisungen</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3>Änderungshistorie</h3>
+                    <span class="badge">Timeline</span>
+                </div>
+                
+                <div class="timeline" id="change-timeline">
+                    <div class="timeline-item">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #1f2937;">Erstanlage</h4>
+                        <p style="margin: 0 0 0.5rem 0; color: #6b7280;">Initiale Erfassung des Objekts im System</p>
+                        <small style="color: #9ca3af;">Heute, 14:30 Uhr • Max Mustermann</small>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1rem;">Neue Änderung hinzufügen:</h4>
+                    <div class="form-grid two-col">
+                        <div class="form-group">
+                            <label><i class="fas fa-edit"></i> Änderungstyp</label>
+                            <select id="change-type">
+                                <option value="">Typ wählen</option>
+                                <option value="wartung">🔧 Wartung durchgeführt</option>
+                                <option value="reparatur">🛠️ Reparatur</option>
+                                <option value="upgrade">⬆️ Upgrade/Modernisierung</option>
+                                <option value="konfiguration">⚙️ Konfigurationsänderung</option>
+                                <option value="dokumentation">📄 Dokumentation aktualisiert</option>
+                                <option value="pruefung">🔍 Prüfung durchgeführt</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Durchgeführt von</label>
+                            <input type="text" id="change-user" placeholder="Name der Person">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-comment"></i> Beschreibung der Änderung</label>
+                        <textarea id="change-description" placeholder="Detaillierte Beschreibung der durchgeführten Änderung..."></textarea>
+                    </div>
+                    <button type="button" class="action-btn" onclick="addChangeEntry()">
+                        <i class="fas fa-plus"></i> Änderung hinzufügen
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Tab -->
+        <div id="compliance-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Zertifizierungen & Standards</h3>
+                    <span class="badge">Compliance</span>
+                </div>
+                
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ce-marking">
+                        <label for="ce-marking">🇪🇺 CE-Kennzeichnung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="iso-9001">
+                        <label for="iso-9001">⭐ ISO 9001 (QM)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="iso-14001">
+                        <label for="iso-14001">🌱 ISO 14001 (UM)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="iso-45001">
+                        <label for="iso-45001">🛡️ ISO 45001 (ASM)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="iso-50001">
+                        <label for="iso-50001">⚡ ISO 50001 (EnM)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="tuv-sued">
+                        <label for="tuv-sued">🏆 TÜV SÜD</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dekra">
+                        <label for="dekra">🔍 DEKRA</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="vde">
+                        <label for="vde">⚡ VDE</label>
+                    </div>
+                </div>
+
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-check"></i> Letzte Prüfung</label>
+                        <input type="date" id="last-inspection">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-plus"></i> Nächste Prüfung</label>
+                        <input type="date" id="next-inspection">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-user-check"></i> Prüfer/Organisation</label>
+                        <input type="text" placeholder="Name des Prüfers oder der Organisation">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-check-circle"></i> Prüfstatus</label>
+                        <select>
+                            <option value="">Status wählen</option>
+                            <option value="bestanden">✅ Bestanden</option>
+                            <option value="mangel">⚠️ Mängel festgestellt</option>
+                            <option value="durchgefallen">❌ Nicht bestanden</option>
+                            <option value="ausstehend">⏳ Prüfung ausstehend</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-exclamation-triangle"></i> Gefundene Mängel</label>
+                    <textarea placeholder="Beschreibung gefundener Mängel und erforderlicher Maßnahmen..."></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <h3>Rechtliche Anforderungen</h3>
+                    <span class="badge">Legal</span>
+                </div>
+                
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="arbschg">
+                        <label for="arbschg">⚖️ Arbeitsschutzgesetz</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="betrsichv">
+                        <label for="betrsichv">🔧 Betriebssicherheitsverordnung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="maschinenrichtlinie">
+                        <label for="maschinenrichtlinie">⚙️ Maschinenrichtlinie</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="gefahrstoffv">
+                        <label for="gefahrstoffv">⚠️ Gefahrstoffverordnung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dguv-vorschriften">
+                        <label for="dguv-vorschriften">🛡️ DGUV Vorschriften</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dsgvo">
+                        <label for="dsgvo">🔒 DSGVO</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Betrieb & Wartung Tab -->
+        <div id="betrieb-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <h3>Betriebszeiten & Auslastung</h3>
+                    <span class="badge">Operation</span>
+                </div>
+                
+                <div class="form-grid three-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Betriebsstunden/Tag</label>
+                        <input type="number" placeholder="Stunden pro Tag" min="0" max="24" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-week"></i> Betriebstage/Woche</label>
+                        <input type="number" placeholder="Tage pro Woche" min="0" max="7">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-percentage"></i> Durchschnittliche Auslastung</label>
+                        <input type="number" placeholder="in %" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-hourglass-end"></i> Gesamtbetriebsstunden</label>
+                        <input type="number" placeholder="Bisher gelaufene Stunden">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> Letzte Wartung</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-plus"></i> Nächste Wartung</label>
+                        <input type="date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-chart-line"></i> Wartungsintervalle</label>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="taeglich">
+                            <label for="taeglich">📅 Täglich</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="woechentlich">
+                            <label for="woechentlich">📅 Wöchentlich</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="monatlich">
+                            <label for="monatlich">📅 Monatlich</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="quartalsweise">
+                            <label for="quartalsweise">📅 Quartalsweise</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="halbjährlich">
+                            <label for="halbjährlich">📅 Halbjährlich</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="jaehrlich">
+                            <label for="jaehrlich">📅 Jährlich</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>Wartungshistorie</h3>
+                    <span class="badge">History</span>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Art</th>
+                            <th>Durchgeführt von</th>
+                            <th>Beschreibung</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>15.03.2024</td>
+                            <td>🔧 Planmäßige Wartung</td>
+                            <td>Max Mustermann</td>
+                            <td>Routinewartung gemäß Wartungsplan</td>
+                            <td><span style="color: #10b981;">✅ Abgeschlossen</span></td>
+                        </tr>
+                        <tr>
+                            <td>02.03.2024</td>
+                            <td>🛠️ Reparatur</td>
+                            <td>Servicetechniker</td>
+                            <td>Austausch defektes Lager</td>
+                            <td><span style="color: #10b981;">✅ Abgeschlossen</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Personal & Schulung Tab -->
+        <div id="personal-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Schulungsanforderungen</h3>
+                    <span class="badge">Training</span>
+                </div>
+                
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="unterweisung">
+                        <label for="unterweisung">📚 Allgemeine Unterweisung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="maschinenschulung">
+                        <label for="maschinenschulung">⚙️ Maschinenschulung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sicherheitsschulung">
+                        <label for="sicherheitsschulung">🛡️ Sicherheitsschulung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="erste-hilfe">
+                        <label for="erste-hilfe">🚑 Erste-Hilfe-Kurs</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="brandschutz">
+                        <label for="brandschutz">🔥 Brandschutzhelfer</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="gefahrstoffschulung">
+                        <label for="gefahrstoffschulung">⚠️ Gefahrstoffschulung</label>
+                    </div>
+                </div>
+
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-redo"></i> Schulungsintervall</label>
+                        <select>
+                            <option value="">Intervall wählen</option>
+                            <option value="6">6 Monate</option>
+                            <option value="12">12 Monate</option>
+                            <option value="24">24 Monate</option>
+                            <option value="36">36 Monate</option>
+                            <option value="einmalig">Einmalig</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Schulungsdauer</label>
+                        <input type="text" placeholder="z.B. 4 Stunden, 1 Tag">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-clipboard-list"></i> Schulungsinhalte</label>
+                    <textarea placeholder="Detaillierte Beschreibung der Schulungsinhalte..."></textarea>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Qualifikationsanforderungen</h3>
+                    <span class="badge">Skills</span>
+                </div>
+                
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ungelernt">
+                        <label for="ungelernt">👤 Ungelernte Hilfskraft</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="angelernt">
+                        <label for="angelernt">👥 Angelernte Kraft</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="facharbeiter">
+                        <label for="facharbeiter">🔧 Facharbeiter</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="meister">
+                        <label for="meister">👑 Meister/Techniker</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ingenieur">
+                        <label for="ingenieur">🎓 Ingenieur</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="spezialist">
+                        <label for="spezialist">⭐ Spezialist</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Umwelt & Energie Tab -->
+        <div id="umwelt-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>Umweltauswirkungen</h3>
+                    <span class="badge">Environment</span>
+                </div>
+                
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-cloud"></i> CO₂-Emissionen</label>
+                        <input type="number" placeholder="kg CO₂/Jahr" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tint"></i> Wasserverbrauch</label>
+                        <input type="number" placeholder="Liter/Jahr" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-trash"></i> Abfallproduktion</label>
+                        <input type="number" placeholder="kg/Jahr" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-volume-up"></i> Lärmemission</label>
+                        <input type="number" placeholder="dB(A)" step="0.1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-recycle"></i> Verwendete Materialien</label>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="recycelbar">
+                            <label for="recycelbar">♻️ Recycelbare Materialien</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="biologisch-abbaubar">
+                            <label for="biologisch-abbaubar">🌱 Biologisch abbaubar</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="nachhaltig">
+                            <label for="nachhaltig">🌿 Nachhaltige Materialien</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="gefaehrlich">
+                            <label for="gefaehrlich">⚠️ Gefährliche Stoffe</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Energieverbrauch</h3>
+                    <span class="badge">Energy</span>
+                </div>
+                
+                <div class="form-grid three-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-plug"></i> Elektrischer Verbrauch</label>
+                        <input type="number" placeholder="kWh/Jahr" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-fire"></i> Gasverbrauch</label>
+                        <input type="number" placeholder="m³/Jahr" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-oil-can"></i> Ölverbrauch</label>
+                        <input type="number" placeholder="Liter/Jahr" step="0.1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-battery-half"></i> Energieeffizienz-Bewertung</label>
+                    <div class="rating-grid">
+                        <div class="rating-btn excellent" data-rating="1">A+++</div>
+                        <div class="rating-btn good" data-rating="2">A++</div>
+                        <div class="rating-btn average" data-rating="3">A+</div>
+                        <div class="rating-btn poor" data-rating="4">A</div>
+                        <div class="rating-btn critical" data-rating="5">B-G</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Qualität & Prüfung Tab -->
+        <div id="qualitaet-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3>Qualitätsparameter</h3>
+                    <span class="badge">Quality</span>
+                </div>
+                
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-percentage"></i> Ausschussrate</label>
+                        <input type="number" placeholder="in %" min="0" max="100" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-redo"></i> Nacharbeitsrate</label>
+                        <input type="number" placeholder="in %" min="0" max="100" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-chart-line"></i> Prozessfähigkeit Cp</label>
+                        <input type="number" placeholder="z.B. 1.33" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-chart-area"></i> Prozessfähigkeit Cpk</label>
+                        <input type="number" placeholder="z.B. 1.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-search"></i> Prüfverfahren</label>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="sichtpruefung">
+                            <label for="sichtpruefung">👁️ Sichtprüfung</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="masspruefung">
+                            <label for="masspruefung">📏 Maßprüfung</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="funktionspruefung">
+                            <label for="funktionspruefung">⚙️ Funktionsprüfung</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="materialpruefung">
+                            <label for="materialpruefung">🔬 Materialprüfung</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="dichtigkeitspruefung">
+                            <label for="dichtigkeitspruefung">💧 Dichtigkeitsprüfung</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="festigkeitspruefung">
+                            <label for="festigkeitspruefung">💪 Festigkeitsprüfung</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <h3>Prüfmittel & Kalibrierung</h3>
+                    <span class="badge">Calibration</span>
+                </div>
+                
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-check"></i> Letzte Kalibrierung</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-plus"></i> Nächste Kalibrierung</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-building"></i> Kalibrierstelle</label>
+                        <input type="text" placeholder="Name der Kalibrierstelle">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-certificate"></i> Kalibrierschein-Nr.</label>
+                        <input type="text" placeholder="Nummer des Kalibrierscheins">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finanzen & Kosten Tab -->
+        <div id="finanzen-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <h3>Anschaffung & Investition</h3>
+                    <span class="badge">Investment</span>
+                </div>
+                
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-shopping-cart"></i> Anschaffungskosten</label>
+                        <input type="number" placeholder="Euro" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Anschaffungsdatum</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-truck"></i> Lieferant</label>
+                        <input type="text" placeholder="Name des Lieferanten">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-file-invoice"></i> Rechnungsnummer</label>
+                        <input type="text" placeholder="Rechnungs-/Bestellnummer">
+                    </div>
+                </div>
+
+                <div class="form-grid three-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-chart-line"></i> Abschreibungsdauer</label>
+                        <input type="number" placeholder="Jahre" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-percentage"></i> Abschreibungssatz</label>
+                        <input type="number" placeholder="% pro Jahr" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-coins"></i> Restwert</label>
+                        <input type="number" placeholder="Euro" step="0.01">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3>Betriebskosten</h3>
+                    <span class="badge">Operating</span>
+                </div>
+                
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-tools"></i> Wartungskosten/Jahr</label>
+                        <input type="number" placeholder="Euro" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-bolt"></i> Energiekosten/Jahr</label>
+                        <input type="number" placeholder="Euro" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-cog"></i> Ersatzteilkosten/Jahr</label>
+                        <input type="number" placeholder="Euro" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-user-tie"></i> Personalkosten/Jahr</label>
+                        <input type="number" placeholder="Euro" step="0.01">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Digitalisierung Tab -->
+        <div id="digitalisierung-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                    <h3>Digitale Anbindung</h3>
+                    <span class="badge">IoT</span>
+                </div>
+                
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="internet">
+                        <label for="internet">🌐 Internet-Anbindung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lan">
+                        <label for="lan">🔗 LAN-Anschluss</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="wlan">
+                        <label for="wlan">📶 WLAN</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bluetooth">
+                        <label for="bluetooth">📲 Bluetooth</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sensoren">
+                        <label for="sensoren">📊 IoT-Sensoren</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="kamera">
+                        <label for="kamera">📹 Überwachungskamera</label>
+                    </div>
+                </div>
+
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-network-wired"></i> IP-Adresse</label>
+                        <input type="text" placeholder="z.B. 192.168.1.100">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-fingerprint"></i> MAC-Adresse</label>
+                        <input type="text" placeholder="z.B. 00:1B:44:11:3A:B7">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>Industrie 4.0 Features</h3>
+                    <span class="badge">Smart</span>
+                </div>
+                
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="predictive-maintenance">
+                        <label for="predictive-maintenance">🔮 Predictive Maintenance</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="remote-monitoring">
+                        <label for="remote-monitoring">📱 Remote Monitoring</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ai-optimization">
+                        <label for="ai-optimization">🤖 KI-Optimierung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="digital-twin">
+                        <label for="digital-twin">👥 Digital Twin</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="augmented-reality">
+                        <label for="augmented-reality">🥽 AR-Unterstützung</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="blockchain">
+                        <label for="blockchain">⛓️ Blockchain-Integration</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kommunikation Tab -->
+        <div id="kommunikation-tab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Interne Kommunikation</h3>
+                    <span class="badge">Internal</span>
+                </div>
+                
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> Stakeholder</label>
+                        <textarea placeholder="Liste aller beteiligten Personen und Abteilungen..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-bell"></i> Benachrichtigungen</label>
+                        <div class="checkbox-grid" style="grid-template-columns: 1fr;">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="email-benachrichtigung">
+                                <label for="email-benachrichtigung">📧 E-Mail Benachrichtigungen</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sms-benachrichtigung">
+                                <label for="sms-benachrichtigung">📱 SMS-Benachrichtigungen</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="push-benachrichtigung">
+                                <label for="push-benachrichtigung">🔔 Push-Benachrichtigungen</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>Externe Kommunikation</h3>
+                    <span class="badge">External</span>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-building"></i> Externe Partner</label>
+                        <textarea placeholder="Lieferanten, Servicepartner, Behörden, etc."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-file-export"></i> Meldepflichtig an</label>
+                        <div class="checkbox-grid" style="grid-template-columns: 1fr;">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="berufsgenossenschaft">
+                                <label for="berufsgenossenschaft">🏢 Berufsgenossenschaft</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="gewerbeaufsicht">
+                                <label for="gewerbeaufsicht">🏛️ Gewerbeaufsichtsamt</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tuv">
+                                <label for="tuv">🔍 TÜV/Prüforganisation</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="umweltamt">
+                                <label for="umweltamt">🌱 Umweltamt</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Actions -->
+        <div class="action-grid">
+            <button class="action-btn" onclick="saveDraft()">
+                <i class="fas fa-save"></i> Entwurf speichern
+            </button>
+            <button class="action-btn success" onclick="saveComplete()">
+                <i class="fas fa-check"></i> Vollständig speichern
+            </button>
+            <button class="action-btn warning" onclick="validateForm()">
+                <i class="fas fa-search"></i> Daten validieren
+            </button>
+            <button class="action-btn danger" onclick="resetAllForms()">
+                <i class="fas fa-undo"></i> Alles zurücksetzen
+            </button>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div style="margin: 2rem 0;">
+            <h4 style="margin-bottom: 1rem;">Vervollständigung:</h4>
+            <div class="progress-bar">
+                <div class="progress-fill" id="completionProgress" style="width: 0%;"></div>
+            </div>
+            <p style="text-align: center; margin-top: 0.5rem; color: #6b7280;">
+                <span id="completionText">0% abgeschlossen</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let components = [];
+        let currentTab = 'grunddaten';
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.closest('.tab-btn').classList.add('active');
+            
+            currentTab = tabName;
+            updateCompletionProgress();
+        }
+
+        // Rating system
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.rating-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const parent = this.parentElement;
+                    parent.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    updateCompletionProgress();
+                });
+            });
+
+            // File input change handlers
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('change', updateCompletionProgress);
+                input.addEventListener('input', updateCompletionProgress);
+            });
+
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateCompletionProgress);
+            });
+
+            updateCompletionProgress();
+        });
+
+        // Add component
+        function addComponent() {
+            const name = document.getElementById('new-component-name').value.trim();
+            const article = document.getElementById('new-component-article').value.trim();
+            const count = document.getElementById('new-component-count').value;
+
+            if (!name || !count) {
+                alert('Bitte füllen Sie mindestens Bezeichnung und Anzahl aus!');
+                return;
+            }
+
+            const component = {
+                id: Date.now(),
+                name: name,
+                article: article || 'N/A',
+                count: parseInt(count)
+            };
+
+            components.push(component);
+            updateComponentsTable();
+
+            // Clear inputs
+            document.getElementById('new-component-name').value = '';
+            document.getElementById('new-component-article').value = '';
+            document.getElementById('new-component-count').value = '';
+        }
+
+        // Update components table
+        function updateComponentsTable() {
+            const table = document.getElementById('components-table');
+            const tbody = table.querySelector('tbody');
+
+            if (components.length === 0) {
+                table.style.display = 'none';
+                return;
+            }
+
+            table.style.display = 'table';
+            tbody.innerHTML = '';
+
+            components.forEach(component => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${component.name}</td>
+                    <td>${component.article}</td>
+                    <td>${component.count}</td>
+                    <td>
+                        <button onclick="removeComponent(${component.id})" style="background: #ef4444; color: white; border: none; border-radius: 0.25rem; padding: 0.25rem 0.5rem; cursor: pointer;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+            });
+        }
+
+        // Remove component
+        function removeComponent(id) {
+            components = components.filter(c => c.id !== id);
+            updateComponentsTable();
+        }
+
+        // Add change entry
+        function addChangeEntry() {
+            const type = document.getElementById('change-type').value;
+            const user = document.getElementById('change-user').value.trim();
+            const description = document.getElementById('change-description').value.trim();
+
+            if (!type || !user || !description) {
+                alert('Bitte füllen Sie alle Felder aus!');
+                return;
+            }
+
+            const timeline = document.getElementById('change-timeline');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'timeline-item';
+            
+            const typeIcons = {
+                'wartung': '🔧',
+                'reparatur': '🛠️',
+                'upgrade': '⬆️',
+                'konfiguration': '⚙️',
+                'dokumentation': '📄',
+                'pruefung': '🔍'
+            };
+
+            newEntry.innerHTML = `
+                <h4 style="margin: 0 0 0.5rem 0; color: #1f2937;">${typeIcons[type] || '📝'} ${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
+                <p style="margin: 0 0 0.5rem 0; color: #6b7280;">${description}</p>
+                <small style="color: #9ca3af;">Heute, ${new Date().toLocaleTimeString()} • ${user}</small>
+            `;
+
+            timeline.insertBefore(newEntry, timeline.firstChild);
+
+            // Clear form
+            document.getElementById('change-type').value = '';
+            document.getElementById('change-user').value = '';
+            document.getElementById('change-description').value = '';
+
+            alert('Änderung erfolgreich hinzugefügt!');
+        }
+
+        // Update completion progress
+        function updateCompletionProgress() {
+            const allInputs = document.querySelectorAll('input:not([type="file"]), select, textarea');
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const ratings = document.querySelectorAll('.rating-btn.selected');
+
+            let totalFields = allInputs.length + Math.ceil(checkboxes.length / 5) + Math.ceil(document.querySelectorAll('.rating-grid').length);
+            let completedFields = 0;
+
+            // Count filled inputs
+            allInputs.forEach(input => {
+                if (input.value && input.value.trim() !== '') {
+                    completedFields++;
+                }
+            });
+
+            // Count checkbox groups (count each group as one field if at least one is checked)
+            const checkboxGroups = {};
+            checkboxes.forEach(checkbox => {
+                const groupName = checkbox.id.split('-')[0] || 'default';
+                if (!checkboxGroups[groupName]) {
+                    checkboxGroups[groupName] = false;
+                }
+                if (checkbox.checked) {
+                    checkboxGroups[groupName] = true;
+                }
+            });
+            completedFields += Object.values(checkboxGroups).filter(Boolean).length;
+
+            // Count ratings
+            completedFields += ratings.length;
+
+            const percentage = Math.round((completedFields / totalFields) * 100);
+            
+            document.getElementById('completionProgress').style.width = percentage + '%';
+            document.getElementById('completionText').textContent = percentage + '% abgeschlossen';
+        }
+
+        // Save functions
+        function saveDraft() {
+            const formData = collectAllFormData();
+            localStorage.setItem('qhse_extended_draft', JSON.stringify({
+                data: formData,
+                timestamp: new Date().toISOString(),
+                tab: currentTab
+            }));
+            alert('Entwurf gespeichert!');
+        }
+
+        function saveComplete() {
+            const formData = collectAllFormData();
+            localStorage.setItem('qhse_extended_complete', JSON.stringify({
+                data: formData,
+                timestamp: new Date().toISOString(),
+                completed: true
+            }));
+            alert('Daten vollständig gespeichert!');
+        }
+
+        function validateForm() {
+            const requiredFields = document.querySelectorAll('input[required], select[required]');
+            const missingFields = [];
+
+            requiredFields.forEach(field => {
+                if (!field.value || field.value.trim() === '') {
+                    const label = field.closest('.form-group').querySelector('label').textContent;
+                    missingFields.push(label.replace('*', '').trim());
+                }
+            });
+
+            if (missingFields.length > 0) {
+                alert('Folgende Pflichtfelder fehlen:\n\n' + missingFields.join('\n'));
+            } else {
+                alert('✅ Alle Pflichtfelder sind ausgefüllt!');
+            }
+        }
+
+        function resetAllForms() {
+            if (confirm('Möchten Sie wirklich alle Eingaben zurücksetzen?')) {
+                document.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+                document.querySelectorAll('.rating-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                components = [];
+                updateComponentsTable();
+                updateCompletionProgress();
+            }
+        }
+
+        function collectAllFormData() {
+            const data = {};
+            
+            // Collect all form inputs
+            document.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.type === 'checkbox') {
+                    data[input.id] = input.checked;
+                } else if (input.type === 'file') {
+                    // Skip file inputs for now
+                } else {
+                    data[input.id] = input.value;
+                }
+            });
+
+            // Collect rating selections
+            document.querySelectorAll('.rating-btn.selected').forEach(btn => {
+                const groupId = btn.closest('.form-group').querySelector('label').textContent;
+                data[groupId] = btn.dataset.rating;
+            });
+
+            // Add components
+            data.components = components;
+
+            return data;
+        }
+
+        // Initialize
+        console.log('🚀 QHSE Erweiterte Bereiche System geladen');
+    </script>
+</body>
+</html>

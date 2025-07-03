@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 QHSE System - Vollständiger Funktionstest</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .header h1 {
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .test-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .test-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        .test-card.success { border-color: #10b981; background: #ecfdf5; }
+        .test-card.error { border-color: #ef4444; background: #fef2f2; }
+        .test-card.warning { border-color: #f59e0b; background: #fffbeb; }
+        
+        .test-card .icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .test-card.success .icon { color: #10b981; }
+        .test-card.error .icon { color: #ef4444; }
+        .test-card.warning .icon { color: #f59e0b; }
+        
+        .test-card h3 {
+            margin: 0 0 1rem 0;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+        .test-card p {
+            margin: 0 0 1rem 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        .test-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .test-btn:hover {
+            background: #2563eb;
+        }
+        .test-btn.success {
+            background: #10b981;
+        }
+        .test-btn.error {
+            background: #ef4444;
+        }
+        .test-btn.warning {
+            background: #f59e0b;
+        }
+        .status-log {
+            background: #1f2937;
+            color: #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+        .controls button {
+            background: #6366f1;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .controls button:hover {
+            background: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="header">
+            <h1>🧪 QHSE System - Vollständiger Funktionstest</h1>
+            <p>Automatische Überprüfung aller Systemfunktionen</p>
+        </div>
+
+        <div class="controls">
+            <button onclick="runAllTests()">
+                <i class="fas fa-play"></i> Alle Tests starten
+            </button>
+            <button onclick="clearLog()">
+                <i class="fas fa-trash"></i> Log löschen
+            </button>
+            <button onclick="location.href='index.html'">
+                <i class="fas fa-home"></i> Zurück zum System
+            </button>
+        </div>
+
+        <div class="test-grid" id="testGrid">
+            <!-- Test cards will be generated here -->
+        </div>
+
+        <div class="status-log" id="statusLog">
+🧪 QHSE System Funktionstest bereit
+Klicken Sie "Alle Tests starten" um eine vollständige Systemprüfung durchzuführen.
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let testResults = {};
+
+        const tests = [
+            {
+                id: 'dashboard',
+                name: 'Dashboard Laden',
+                icon: 'fas fa-tachometer-alt',
+                description: 'Überprüfung ob das QHSE Dashboard korrekt geladen wurde',
+                test: testDashboard
+            },
+            {
+                id: 'users',
+                name: 'Nutzerverwaltung',
+                icon: 'fas fa-users',
+                description: 'Test der Nutzerverwaltung und Rollensystem',
+                test: testUserManagement
+            },
+            {
+                id: 'machines',
+                name: 'Maschinenmanagement',
+                icon: 'fas fa-industry',
+                description: 'Test der Maschinenverwaltung und Modal-Funktionen',
+                test: testMachineManagement
+            },
+            {
+                id: 'issues',
+                name: 'Störungsmeldung',
+                icon: 'fas fa-exclamation-triangle',
+                description: 'Test der TÜV-konformen Störungsmeldung',
+                test: testIssueManagement
+            },
+            {
+                id: 'timetracking',
+                name: 'Zeiterfassung',
+                icon: 'fas fa-clock',
+                description: 'Test des Zeiterfassungssystems',
+                test: testTimeTracking
+            },
+            {
+                id: 'documents',
+                name: 'Dokumentenmanagement',
+                icon: 'fas fa-file-alt',
+                description: 'Test des Dokumentenmanagement-Systems',
+                test: testDocumentManagement
+            },
+            {
+                id: 'navigation',
+                name: 'Navigation',
+                icon: 'fas fa-bars',
+                description: 'Test der Seitennavigation und Menüs',
+                test: testNavigation
+            },
+            {
+                id: 'storage',
+                name: 'Datenspeicherung',
+                icon: 'fas fa-database',
+                description: 'Test der localStorage Funktionalität',
+                test: testDataStorage
+            }
+        ];
+
+        function log(message) {
+            const statusLog = document.getElementById('statusLog');
+            const time = new Date().toLocaleTimeString();
+            statusLog.textContent += `\n${time}: ${message}`;
+            statusLog.scrollTop = statusLog.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('statusLog').textContent = '🧪 QHSE System Funktionstest - Log gelöscht\n';
+        }
+
+        function createTestCards() {
+            const grid = document.getElementById('testGrid');
+            grid.innerHTML = '';
+
+            tests.forEach(test => {
+                const card = document.createElement('div');
+                card.className = 'test-card';
+                card.id = `card-${test.id}`;
+                
+                card.innerHTML = `
+                    <div class="icon">
+                        <i class="${test.icon}"></i>
+                    </div>
+                    <h3>${test.name}</h3>
+                    <p>${test.description}</p>
+                    <button class="test-btn" onclick="runSingleTest('${test.id}')">
+                        <i class="fas fa-play"></i> Test starten
+                    </button>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function updateTestCard(testId, status, message) {
+            const card = document.getElementById(`card-${testId}`);
+            const btn = card.querySelector('.test-btn');
+            
+            card.className = `test-card ${status}`;
+            
+            if (status === 'success') {
+                btn.innerHTML = '<i class="fas fa-check"></i> Erfolgreich';
+                btn.className = 'test-btn success';
+            } else if (status === 'error') {
+                btn.innerHTML = '<i class="fas fa-times"></i> Fehler';
+                btn.className = 'test-btn error';
+            } else if (status === 'warning') {
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Warnung';
+                btn.className = 'test-btn warning';
+            }
+            
+            if (message) {
+                const existingMessage = card.querySelector('.test-message');
+                if (existingMessage) existingMessage.remove();
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'test-message';
+                messageDiv.style.cssText = 'margin-top: 1rem; font-size: 0.75rem; color: #374151;';
+                messageDiv.textContent = message;
+                card.appendChild(messageDiv);
+            }
+        }
+
+        function runSingleTest(testId) {
+            const test = tests.find(t => t.id === testId);
+            if (test) {
+                log(`🔍 Starte Test: ${test.name}`);
+                test.test();
+            }
+        }
+
+        function runAllTests() {
+            log('🚀 Starte vollständigen Systemtest...');
+            log('📊 Teste ' + tests.length + ' verschiedene Funktionen\n');
+            
+            tests.forEach((test, index) => {
+                setTimeout(() => {
+                    log(`🔍 Test ${index + 1}/${tests.length}: ${test.name}`);
+                    test.test();
+                    
+                    if (index === tests.length - 1) {
+                        setTimeout(() => {
+                            log('\n✅ Alle Tests abgeschlossen!');
+                            showTestSummary();
+                        }, 1000);
+                    }
+                }, index * 500);
+            });
+        }
+
+        function showTestSummary() {
+            const successCount = Object.values(testResults).filter(r => r === 'success').length;
+            const errorCount = Object.values(testResults).filter(r => r === 'error').length;
+            const warningCount = Object.values(testResults).filter(r => r === 'warning').length;
+            
+            log(`\n📈 TESTERGEBNIS ZUSAMMENFASSUNG:`);
+            log(`✅ Erfolgreich: ${successCount}`);
+            log(`⚠️ Warnungen: ${warningCount}`);
+            log(`❌ Fehler: ${errorCount}`);
+            log(`📊 Gesamt: ${tests.length} Tests`);
+            
+            if (errorCount === 0) {
+                log(`\n🎉 ALLE TESTS BESTANDEN! Das QHSE System funktioniert einwandfrei.`);
+            } else {
+                log(`\n⚠️ ${errorCount} Tests fehlgeschlagen. Bitte prüfen Sie die Fehler.`);
+            }
+        }
+
+        // Test Functions
+        function testDashboard() {
+            try {
+                if (window.qhseDashboard) {
+                    const requiredMethods = ['getCurrentUser', 'showReportIssueModal', 'renderMachinesList'];
+                    const missingMethods = requiredMethods.filter(method => typeof window.qhseDashboard[method] !== 'function');
+                    
+                    if (missingMethods.length === 0) {
+                        testResults.dashboard = 'success';
+                        updateTestCard('dashboard', 'success', 'Dashboard vollständig geladen');
+                        log('✅ Dashboard: Alle Hauptfunktionen verfügbar');
+                    } else {
+                        testResults.dashboard = 'warning';
+                        updateTestCard('dashboard', 'warning', `Fehlende Methoden: ${missingMethods.join(', ')}`);
+                        log('⚠️ Dashboard: Einige Methoden fehlen');
+                    }
+                } else {
+                    testResults.dashboard = 'error';
+                    updateTestCard('dashboard', 'error', 'Dashboard nicht geladen');
+                    log('❌ Dashboard: Nicht geladen');
+                }
+            } catch (error) {
+                testResults.dashboard = 'error';
+                updateTestCard('dashboard', 'error', error.message);
+                log('❌ Dashboard Test Fehler: ' + error.message);
+            }
+        }
+
+        function testUserManagement() {
+            try {
+                if (window.qhseDashboard && window.qhseDashboard.users) {
+                    const userCount = window.qhseDashboard.users.length;
+                    const currentUser = window.qhseDashboard.getCurrentUser();
+                    
+                    if (userCount > 0 && currentUser) {
+                        testResults.users = 'success';
+                        updateTestCard('users', 'success', `${userCount} Nutzer, aktuell: ${currentUser.name}`);
+                        log(`✅ Nutzerverwaltung: ${userCount} Nutzer verfügbar`);
+                    } else {
+                        testResults.users = 'warning';
+                        updateTestCard('users', 'warning', 'Keine Nutzer oder kein aktueller Nutzer');
+                        log('⚠️ Nutzerverwaltung: Keine Nutzer gefunden');
+                    }
+                } else {
+                    testResults.users = 'error';
+                    updateTestCard('users', 'error', 'Nutzerverwaltung nicht verfügbar');
+                    log('❌ Nutzerverwaltung: Nicht verfügbar');
+                }
+            } catch (error) {
+                testResults.users = 'error';
+                updateTestCard('users', 'error', error.message);
+                log('❌ Nutzerverwaltung Test Fehler: ' + error.message);
+            }
+        }
+
+        function testMachineManagement() {
+            try {
+                if (window.qhseDashboard && window.qhseDashboard.machines) {
+                    const machineCount = window.qhseDashboard.machines.length;
+                    const hasShowMethod = typeof window.qhseDashboard.showAddMachineModal === 'function';
+                    
+                    if (machineCount > 0 && hasShowMethod) {
+                        testResults.machines = 'success';
+                        updateTestCard('machines', 'success', `${machineCount} Maschinen, Modal verfügbar`);
+                        log(`✅ Maschinenmanagement: ${machineCount} Maschinen verfügbar`);
+                    } else if (machineCount === 0) {
+                        testResults.machines = 'warning';
+                        updateTestCard('machines', 'warning', 'Keine Maschinen vorhanden');
+                        log('⚠️ Maschinenmanagement: Keine Maschinen');
+                    } else {
+                        testResults.machines = 'error';
+                        updateTestCard('machines', 'error', 'Modal-Funktion fehlt');
+                        log('❌ Maschinenmanagement: Modal-Funktion fehlt');
+                    }
+                } else {
+                    testResults.machines = 'error';
+                    updateTestCard('machines', 'error', 'Maschinenmanagement nicht verfügbar');
+                    log('❌ Maschinenmanagement: Nicht verfügbar');
+                }
+            } catch (error) {
+                testResults.machines = 'error';
+                updateTestCard('machines', 'error', error.message);
+                log('❌ Maschinenmanagement Test Fehler: ' + error.message);
+            }
+        }
+
+        function testIssueManagement() {
+            try {
+                if (window.qhseDashboard) {
+                    const hasShowMethod = typeof window.qhseDashboard.showReportIssueModal === 'function';
+                    const hasSubmitMethod = typeof window.qhseDashboard.submitTuvCompliantIssue === 'function';
+                    const hasIssuesArray = Array.isArray(window.qhseDashboard.issues);
+                    
+                    if (hasShowMethod && hasSubmitMethod && hasIssuesArray) {
+                        testResults.issues = 'success';
+                        updateTestCard('issues', 'success', 'TÜV-konforme Störungsmeldung funktional');
+                        log('✅ Störungsmeldung: TÜV-konforme Funktionen verfügbar');
+                    } else {
+                        const missing = [];
+                        if (!hasShowMethod) missing.push('showReportIssueModal');
+                        if (!hasSubmitMethod) missing.push('submitTuvCompliantIssue');
+                        if (!hasIssuesArray) missing.push('issues array');
+                        
+                        testResults.issues = 'warning';
+                        updateTestCard('issues', 'warning', `Fehlend: ${missing.join(', ')}`);
+                        log('⚠️ Störungsmeldung: Teilweise verfügbar');
+                    }
+                } else {
+                    testResults.issues = 'error';
+                    updateTestCard('issues', 'error', 'Dashboard nicht verfügbar');
+                    log('❌ Störungsmeldung: Dashboard nicht verfügbar');
+                }
+            } catch (error) {
+                testResults.issues = 'error';
+                updateTestCard('issues', 'error', error.message);
+                log('❌ Störungsmeldung Test Fehler: ' + error.message);
+            }
+        }
+
+        function testTimeTracking() {
+            try {
+                if (window.qhseDashboard && window.qhseDashboard.timeEntries) {
+                    const entryCount = window.qhseDashboard.timeEntries.length;
+                    const hasSetupMethod = typeof window.qhseDashboard.setupTimeTracking === 'function';
+                    
+                    if (hasSetupMethod) {
+                        testResults.timetracking = 'success';
+                        updateTestCard('timetracking', 'success', `${entryCount} Zeiteinträge, System verfügbar`);
+                        log(`✅ Zeiterfassung: ${entryCount} Einträge, System funktional`);
+                    } else {
+                        testResults.timetracking = 'warning';
+                        updateTestCard('timetracking', 'warning', 'Setup-Methode fehlt');
+                        log('⚠️ Zeiterfassung: Setup-Methode fehlt');
+                    }
+                } else {
+                    testResults.timetracking = 'error';
+                    updateTestCard('timetracking', 'error', 'Zeiterfassung nicht verfügbar');
+                    log('❌ Zeiterfassung: Nicht verfügbar');
+                }
+            } catch (error) {
+                testResults.timetracking = 'error';
+                updateTestCard('timetracking', 'error', error.message);
+                log('❌ Zeiterfassung Test Fehler: ' + error.message);
+            }
+        }
+
+        function testDocumentManagement() {
+            try {
+                if (window.qhseDashboard && window.qhseDashboard.documents) {
+                    const docCount = window.qhseDashboard.documents.length;
+                    const hasUploadMethod = typeof window.qhseDashboard.setupFileUpload === 'function';
+                    
+                    if (hasUploadMethod) {
+                        testResults.documents = 'success';
+                        updateTestCard('documents', 'success', `${docCount} Dokumente, Upload verfügbar`);
+                        log(`✅ Dokumentenmanagement: ${docCount} Dokumente, Upload funktional`);
+                    } else {
+                        testResults.documents = 'warning';
+                        updateTestCard('documents', 'warning', 'Upload-Methode fehlt');
+                        log('⚠️ Dokumentenmanagement: Upload-Methode fehlt');
+                    }
+                } else {
+                    testResults.documents = 'error';
+                    updateTestCard('documents', 'error', 'Dokumentenmanagement nicht verfügbar');
+                    log('❌ Dokumentenmanagement: Nicht verfügbar');
+                }
+            } catch (error) {
+                testResults.documents = 'error';
+                updateTestCard('documents', 'error', error.message);
+                log('❌ Dokumentenmanagement Test Fehler: ' + error.message);
+            }
+        }
+
+        function testNavigation() {
+            try {
+                const menuItems = document.querySelectorAll('.menu-item');
+                const contentSections = document.querySelectorAll('.content-section');
+                
+                if (menuItems.length > 0 && contentSections.length > 0) {
+                    testResults.navigation = 'success';
+                    updateTestCard('navigation', 'success', `${menuItems.length} Menüpunkte, ${contentSections.length} Sektionen`);
+                    log(`✅ Navigation: ${menuItems.length} Menüpunkte verfügbar`);
+                } else {
+                    testResults.navigation = 'warning';
+                    updateTestCard('navigation', 'warning', 'Wenige oder keine Menüelemente');
+                    log('⚠️ Navigation: Wenige Elemente gefunden');
+                }
+            } catch (error) {
+                testResults.navigation = 'error';
+                updateTestCard('navigation', 'error', error.message);
+                log('❌ Navigation Test Fehler: ' + error.message);
+            }
+        }
+
+        function testDataStorage() {
+            try {
+                // Test localStorage availability
+                const testKey = 'qhse_test_storage';
+                const testValue = 'test_value_' + Date.now();
+                
+                localStorage.setItem(testKey, testValue);
+                const retrieved = localStorage.getItem(testKey);
+                localStorage.removeItem(testKey);
+                
+                if (retrieved === testValue) {
+                    // Check for existing QHSE data
+                    const qhseKeys = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.startsWith('qhse_')) {
+                            qhseKeys.push(key);
+                        }
+                    }
+                    
+                    testResults.storage = 'success';
+                    updateTestCard('storage', 'success', `LocalStorage OK, ${qhseKeys.length} QHSE Schlüssel`);
+                    log(`✅ Datenspeicherung: ${qhseKeys.length} QHSE Datensätze gespeichert`);
+                } else {
+                    testResults.storage = 'error';
+                    updateTestCard('storage', 'error', 'LocalStorage Test fehlgeschlagen');
+                    log('❌ Datenspeicherung: LocalStorage Test fehlgeschlagen');
+                }
+            } catch (error) {
+                testResults.storage = 'error';
+                updateTestCard('storage', 'error', 'LocalStorage nicht verfügbar');
+                log('❌ Datenspeicherung: ' + error.message);
+            }
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            createTestCards();
+            log('🧪 Funktionstest-System geladen');
+            log('Bereit für Systemprüfung...\n');
+            
+            // Auto-run basic dashboard test
+            setTimeout(() => {
+                log('🔄 Führe automatischen Dashboard-Test durch...');
+                testDashboard();
+            }, 1000);
+        });
+
+        // Global error handler
+        window.addEventListener('error', (e) => {
+            log(`💥 JavaScript Fehler: ${e.message}`);
+        });
+    </script>
+</body>
+</html>

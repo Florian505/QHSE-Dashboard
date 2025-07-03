@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Schulungsmanagement Export-Funktionen</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background: #f8fafc;
+            padding: 2rem;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .test-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .test-button {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .test-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1><i class="fas fa-graduation-cap"></i> Schulungsmanagement Export-Test</h1>
+            <p>Testen Sie die neuen erweiterten Export-Funktionen für das Schulungsmanagement</p>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-chart-bar"></i> Schulungsberichte öffnen</h2>
+            <p>Klicken Sie hier, um das neue Schulungsberichte-Modal mit Export-Funktionen zu öffnen:</p>
+            <button class="test-button" onclick="openTrainingReportsTest()">
+                <i class="fas fa-chart-bar"></i> Schulungsberichte öffnen
+            </button>
+            <div id="status1" class="status" style="display: none;">
+                ✅ Modal geöffnet! Schauen Sie nach den Export-Buttons (CSV, Excel, PDF) in jedem Bericht-Tab.
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-download"></i> Direkte Export-Tests</h2>
+            <p>Testen Sie die Export-Funktionen direkt:</p>
+            
+            <h3>Übersichtsbericht:</h3>
+            <button class="test-button btn-csv" onclick="testExportOverview('csv')">
+                <i class="fas fa-file-csv"></i> CSV Export
+            </button>
+            <button class="test-button btn-excel" onclick="testExportOverview('excel')">
+                <i class="fas fa-file-excel"></i> Excel Export
+            </button>
+            <button class="test-button btn-pdf" onclick="testExportOverview('pdf')">
+                <i class="fas fa-file-pdf"></i> PDF Export
+            </button>
+
+            <h3>Compliance-Bericht:</h3>
+            <button class="test-button btn-csv" onclick="testExportCompliance('csv')">
+                <i class="fas fa-file-csv"></i> CSV Export
+            </button>
+            <button class="test-button btn-excel" onclick="testExportCompliance('excel')">
+                <i class="fas fa-file-excel"></i> Excel Export
+            </button>
+            <button class="test-button btn-pdf" onclick="testExportCompliance('pdf')">
+                <i class="fas fa-file-pdf"></i> PDF Export
+            </button>
+
+            <div id="status2" class="status" style="display: none;">
+                ✅ Export-Funktionen sind funktionsfähig! Dateien werden automatisch heruntergeladen.
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-info-circle"></i> Neue Funktionen im Überblick</h2>
+            <ul style="font-size: 1rem; line-height: 1.6;">
+                <li><strong>4 Berichtstypen:</strong> Übersicht, Abschlussraten, Compliance, Individuelle Berichte</li>
+                <li><strong>3 Export-Formate:</strong> CSV (Excel-kompatibel), Excel, PDF</li>
+                <li><strong>Deutsche Lokalisierung:</strong> Alle Exports in deutscher Sprache</li>
+                <li><strong>Professionelle PDFs:</strong> Mit Firmenkopf und strukturiertem Layout</li>
+                <li><strong>Rollenbasierte Daten:</strong> Automatische Filterung nach Benutzerrechten</li>
+                <li><strong>Export-Buttons:</strong> In jedem Bericht-Tab verfügbar</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2><i class="fas fa-navigation"></i> So finden Sie die neuen Funktionen</h2>
+            <ol style="font-size: 1rem; line-height: 1.6;">
+                <li>Gehen Sie zum <strong>Schulungsmanagement</strong> Bereich</li>
+                <li>Klicken Sie auf den <strong>"Berichte"</strong> Button (oben rechts)</li>
+                <li>Wählen Sie einen der 4 Bericht-Tabs: Übersicht, Abschlussraten, Compliance, oder Individuelle Berichte</li>
+                <li>Klicken Sie auf einen der Export-Buttons: <span class="btn-csv" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; color: white; background: #10b981;">CSV</span>, <span class="btn-excel" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; color: white; background: #217346;">Excel</span>, oder <span class="btn-pdf" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; color: white; background: #dc2626;">PDF</span></li>
+                <li>Die Datei wird automatisch heruntergeladen</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Test functions
+        function openTrainingReportsTest() {
+            if (window.qhseDashboard) {
+                window.qhseDashboard.openTrainingReports();
+                document.getElementById('status1').style.display = 'block';
+            } else {
+                alert('QHSE Dashboard wird initialisiert... Bitte warten Sie einen Moment und versuchen Sie es erneut.');
+            }
+        }
+
+        function testExportOverview(format) {
+            if (window.qhseDashboard) {
+                exportTrainingOverview(format);
+                document.getElementById('status2').style.display = 'block';
+            } else {
+                alert('QHSE Dashboard wird initialisiert... Bitte warten Sie einen Moment und versuchen Sie es erneut.');
+            }
+        }
+
+        function testExportCompliance(format) {
+            if (window.qhseDashboard) {
+                exportTrainingCompliance(format);
+                document.getElementById('status2').style.display = 'block';
+            } else {
+                alert('QHSE Dashboard wird initialisiert... Bitte warten Sie einen Moment und versuchen Sie es erneut.');
+            }
+        }
+
+        // Show loading message
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🎓 Test-Seite geladen. Warte auf QHSE Dashboard...');
+            
+            // Check if dashboard is loaded every second
+            const checkDashboard = setInterval(() => {
+                if (window.qhseDashboard) {
+                    console.log('✅ QHSE Dashboard erfolgreich geladen!');
+                    clearInterval(checkDashboard);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

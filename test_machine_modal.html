@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Modal Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background: #f8fafc;
+            padding: 2rem;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .test-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        .status-area {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            min-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Machine Modal Test</h1>
+        <p>Diese Seite testet das erweiterte Maschinenmanagement-Modal.</p>
+        
+        <div style="margin: 2rem 0;">
+            <button id="testDirectModal" class="test-button">
+                <i class="fas fa-cogs"></i> Modal direkt testen
+            </button>
+            
+            <button id="testButtonClick" class="test-button">
+                <i class="fas fa-mouse-pointer"></i> Button-Click simulieren
+            </button>
+            
+            <button id="checkDashboard" class="test-button">
+                <i class="fas fa-search"></i> Dashboard prüfen
+            </button>
+        </div>
+        
+        <!-- Hidden button to test -->
+        <button id="addMachineBtn" class="test-button" style="background: #10b981;">
+            <i class="fas fa-plus"></i> Neue Maschine (Original Button)
+        </button>
+        
+        <div class="status-area" id="statusArea">
+            Warte auf Test-Aktion...<br>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function log(message) {
+            const area = document.getElementById('statusArea');
+            area.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            area.scrollTop = area.scrollHeight;
+        }
+
+        // Test functions
+        document.getElementById('testDirectModal').addEventListener('click', () => {
+            log('🧪 Teste Modal direkt...');
+            
+            try {
+                if (window.qhseDashboard) {
+                    log('✅ Dashboard gefunden');
+                    window.qhseDashboard.showAddMachineModal();
+                    log('✅ showAddMachineModal() aufgerufen');
+                } else {
+                    log('❌ Dashboard nicht verfügbar');
+                }
+            } catch (error) {
+                log('❌ Fehler: ' + error.message);
+            }
+        });
+
+        document.getElementById('testButtonClick').addEventListener('click', () => {
+            log('🖱️ Simuliere Button-Click...');
+            
+            try {
+                const btn = document.getElementById('addMachineBtn');
+                if (btn) {
+                    log('✅ Button gefunden, klicke...');
+                    btn.click();
+                } else {
+                    log('❌ Button nicht gefunden');
+                }
+            } catch (error) {
+                log('❌ Button-Fehler: ' + error.message);
+            }
+        });
+
+        document.getElementById('checkDashboard').addEventListener('click', () => {
+            log('🔍 Prüfe Dashboard-Status...');
+            
+            try {
+                if (window.qhseDashboard) {
+                    log('✅ QHSE Dashboard vorhanden');
+                    log('📊 Dashboard Typ: ' + typeof window.qhseDashboard);
+                    
+                    if (typeof window.qhseDashboard.showAddMachineModal === 'function') {
+                        log('✅ showAddMachineModal Funktion vorhanden');
+                    } else {
+                        log('❌ showAddMachineModal Funktion fehlt');
+                    }
+                    
+                    if (typeof window.qhseDashboard.createAdvancedMachineModal === 'function') {
+                        log('✅ createAdvancedMachineModal Funktion vorhanden');
+                    } else {
+                        log('❌ createAdvancedMachineModal Funktion fehlt');
+                    }
+                    
+                    log('🔧 Departments: ' + (window.qhseDashboard.departments ? window.qhseDashboard.departments.length : 'undefined'));
+                    
+                } else {
+                    log('❌ QHSE Dashboard nicht geladen');
+                }
+            } catch (error) {
+                log('❌ Check-Fehler: ' + error.message);
+            }
+        });
+
+        // Auto-check when loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                log('🚀 Test-Seite geladen');
+                
+                if (window.qhseDashboard) {
+                    log('✅ Dashboard erfolgreich geladen');
+                } else {
+                    log('❌ Dashboard nicht geladen - warte...');
+                    
+                    // Try again after a delay
+                    setTimeout(() => {
+                        if (window.qhseDashboard) {
+                            log('✅ Dashboard nachträglich gefunden');
+                        } else {
+                            log('❌ Dashboard immer noch nicht verfügbar');
+                        }
+                    }, 2000);
+                }
+            }, 1000);
+        });
+
+        // Error handler
+        window.addEventListener('error', (e) => {
+            log('💥 JavaScript Fehler: ' + e.message + ' in ' + e.filename + ':' + e.lineno);
+        });
+    </script>
+</body>
+</html>
