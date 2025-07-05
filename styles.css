@@ -5175,22 +5175,36 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 
 .form-group select,
 .form-group input[type="text"],
-.form-group input[type="number"] {
-    padding: 10px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    background: var(--card-bg);
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select {
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
     color: var(--text-primary);
-    font-size: 0.95em;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
 }
 
 .form-group select:focus,
 .form-group input[type="text"]:focus,
-.form-group input[type="number"]:focus {
+.form-group input[type="number"]:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    transform: translateY(-1px);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.05em;
 }
 
 .checkbox-group {
@@ -5529,22 +5543,67 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 .audit-plan-generator {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.audit-plan-generator::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06d6a0, #f59e0b);
+    border-radius: 20px 20px 0 0;
 }
 
 .plan-header {
-    text-align: center;
-    margin-bottom: 30px;
+    background: linear-gradient(135deg, var(--card-bg) 0%, #ffffff 100%);
+    border: 3px solid var(--accent-color);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 40px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(59, 130, 246, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06d6a0);
 }
 
 .plan-header h3 {
     color: var(--text-primary);
-    font-size: 1.8em;
-    margin-bottom: 10px;
+    font-size: 2.2em;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+}
+
+.plan-header h3 i {
+    background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.2em;
 }
 
 .plan-subtitle {
@@ -5564,11 +5623,31 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 }
 
 .config-section {
-    margin-bottom: 30px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    background: var(--secondary-bg);
+    margin-bottom: 40px;
+    border: 2px solid transparent;
+    background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+                linear-gradient(135deg, var(--accent-color), #8b5cf6, #06d6a0) border-box;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.config-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-color), #8b5cf6, #06d6a0);
+}
+
+.config-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
 }
 
 .config-section:last-child {
@@ -5577,13 +5656,26 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 
 .config-section h4 {
     color: var(--text-primary);
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    font-size: 1.4em;
+    font-weight: 700;
+    border-bottom: 3px solid transparent;
+    background: linear-gradient(90deg, var(--accent-color), #8b5cf6) 0 100% no-repeat;
+    background-size: 100% 3px;
+    padding-bottom: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.config-section h4 i {
+    background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-size: 1.2em;
-    border-bottom: 2px solid var(--accent-color);
-    padding-bottom: 10px;
 }
 
 .audit-blocks-section {
@@ -6093,17 +6185,40 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 }
 
 .zn-selection {
-    background: var(--hover-bg);
-    border-radius: 8px;
-    padding: 15px;
-    border-left: 4px solid var(--accent-color);
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #0ea5e9;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.zn-selection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0ea5e9, #06b6d4, #0891b2);
 }
 
 .zn-selection label {
-    display: block;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    position: relative;
+    z-index: 1;
+}
+
+.zn-selection label::before {
+    content: '🏷️';
+    font-size: 1.2em;
 }
 
 .zn-input-section {
@@ -6178,55 +6293,91 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 }
 
 .btn-add-zn {
-    background: var(--accent-color);
+    background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
     color: white;
     border: none;
-    border-radius: 5px;
-    padding: 8px 12px;
+    border-radius: 10px;
+    padding: 12px 20px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 1em;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .btn-add-zn:hover {
-    background: var(--primary-bg);
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
 /* Logo Upload Section */
 .logo-upload-section {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 15px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    padding: 20px;
     text-align: center;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-upload-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #eab308, #ca8a04);
 }
 
 .logo-upload-section label {
-    display: block;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    position: relative;
+    z-index: 1;
+}
+
+.logo-upload-section label::before {
+    content: '🖼️';
+    font-size: 1.2em;
 }
 
 .logo-upload-area {
-    border: 2px dashed var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
+    border: 3px dashed #d97706;
+    border-radius: 12px;
+    padding: 25px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    min-height: 120px;
+    gap: 10px;
+    min-height: 130px;
     justify-content: center;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    position: relative;
+    z-index: 1;
 }
 
 .logo-upload-area:hover {
-    border-color: var(--accent-color);
-    background: var(--hover-bg);
+    border-color: #ca8a04;
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.2);
 }
 
 .logo-upload-area i {
@@ -6320,6 +6471,636 @@ body:not([data-role="root-admin"]) .edit-company-btn {
     color: var(--text-secondary);
     font-size: 1em;
     font-weight: 500;
+}
+
+/* Revision Tracking Styles */
+.revision-tracking-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+.revision-header {
+    margin-bottom: 20px;
+}
+
+.revision-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0;
+    padding: 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 4px;
+}
+
+.revision-table-container {
+    margin-bottom: 20px;
+}
+
+.revision-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.revision-table th {
+    background: var(--primary-bg);
+    color: var(--text-secondary);
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.revision-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    vertical-align: middle;
+}
+
+.revision-table tr:hover {
+    background: var(--hover-bg);
+}
+
+.revision-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.revision-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.revision-input::placeholder {
+    color: #9ca3af;
+}
+
+.revision-controls {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 10px;
+}
+
+.revision-details {
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.revision-details .form-group {
+    margin-bottom: 15px;
+}
+
+.revision-details label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.revision-details input,
+.revision-details textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+    font-family: inherit;
+}
+
+.revision-details input:focus,
+.revision-details textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.revision-details textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Button styles for revision controls */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+}
+
+/* Revision Display in Generated Plan */
+.revision-display {
+    margin: 15px 0;
+}
+
+.revision-display-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 12px;
+}
+
+.revision-display-table th {
+    background: var(--primary-bg);
+    color: var(--text-secondary);
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.revision-display-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    vertical-align: top;
+    font-size: 11px;
+}
+
+.revision-display-table tr:last-child td {
+    border-bottom: none;
+}
+
+.revision-display-table tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* Responsive adjustments for revision table */
+@media (max-width: 768px) {
+    .revision-table {
+        font-size: 12px;
+    }
+    
+    .revision-table th,
+    .revision-table td {
+        padding: 8px 6px;
+    }
+    
+    .revision-input {
+        font-size: 12px;
+        padding: 6px 8px;
+    }
+    
+    .revision-display-table {
+        font-size: 10px;
+    }
+    
+    .revision-display-table th,
+    .revision-display-table td {
+        padding: 4px 6px;
+        font-size: 10px;
+    }
+}
+
+/* Chapters Input Container Styles */
+.chapters-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+
+.chapters-input-container select[name="chaptersSelect"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    min-height: 120px;
+    overflow-y: auto;
+}
+
+.chapters-input-container select[name="chaptersSelect"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.chapters-input-container select[name="chaptersSelect"] optgroup {
+    font-weight: bold;
+    color: var(--accent-color);
+    background: rgba(59, 130, 246, 0.05);
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.chapters-input-container select[name="chaptersSelect"] option {
+    padding: 6px 8px;
+    font-size: 12px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: none;
+}
+
+.chapters-input-container select[name="chaptersSelect"] option:hover {
+    background: var(--hover-bg);
+}
+
+.chapters-input-container select[name="chaptersSelect"] option:checked {
+    background: var(--accent-color);
+    color: white;
+    font-weight: 500;
+}
+
+.chapters-input-container input[name="chapters"] {
+    width: 100%;
+    padding: 8px 35px 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    min-height: 60px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.chapters-input-container input[name="chapters"]:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.chapters-input-container input[name="chapters"][readonly] {
+    background: #f0f9ff;
+    color: #1e40af;
+    cursor: default;
+}
+
+.chapters-clear-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.chapters-clear-btn:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+.chapters-clear-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive adjustments for chapters */
+@media (max-width: 768px) {
+    .chapters-input-container select[name="chaptersSelect"] {
+        font-size: 12px;
+        min-height: 100px;
+    }
+    
+    .chapters-input-container select[name="chaptersSelect"] option {
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+    
+    .chapters-input-container input[name="chapters"] {
+        font-size: 13px;
+        padding: 6px 30px 6px 10px;
+    }
+    
+    .chapters-clear-btn {
+        width: 20px;
+        height: 20px;
+        bottom: 18px;
+        right: 6px;
+        font-size: 9px;
+    }
+}
+
+/* Audit Notes & Distribution Styles */
+.audit-notes-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+.audit-notes-container .form-group {
+    margin-bottom: 20px;
+}
+
+.audit-notes-container .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.audit-notes-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.audit-notes-container input[type="text"],
+.audit-notes-container textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+    resize: vertical;
+}
+
+.audit-notes-container input[type="text"]:focus,
+.audit-notes-container textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.distribution-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+    padding: 15px;
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 6px;
+}
+
+.distribution-checkboxes .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.distribution-checkboxes .checkbox-label:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.distribution-checkboxes .checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--accent-color);
+    border-radius: 3px;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.distribution-checkboxes input[type="checkbox"] {
+    display: none;
+}
+
+.distribution-checkboxes input[type="checkbox"]:checked + .checkmark {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.distribution-checkboxes input[type="checkbox"]:checked + .checkmark::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Responsive adjustments for audit notes */
+@media (max-width: 768px) {
+    .audit-notes-container {
+        padding: 15px;
+    }
+    
+    .distribution-checkboxes {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .distribution-checkboxes .checkbox-label {
+        font-size: 13px;
+        padding: 6px;
+    }
+}
+
+/* Page Header Styles for Generated Plan */
+.page-header {
+    background: var(--card-bg);
+    border: 2px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-content-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.header-left-content {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.audit-title {
+    margin: 0 0 5px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent-color);
+    line-height: 1.2;
+}
+
+.zn-numbers {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding: 2px 8px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.header-logo-container {
+    flex: 0 0 auto;
+    max-width: 150px;
+}
+
+.header-logo {
+    max-height: 80px;
+    max-width: 150px;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Print styles for page headers */
+@media print {
+    .page-header {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        height: auto;
+        min-height: 50px;
+        background: white !important;
+        border: none !important;
+        border-bottom: 1px solid #333 !important;
+        border-radius: 0 !important;
+        margin: 0 0 15px 0 !important;
+        padding: 8px 15px !important;
+        box-shadow: none !important;
+        z-index: auto;
+        page-break-inside: avoid;
+        page-break-after: avoid;
+        text-align: center;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .header-content-display {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 15px !important;
+        flex-wrap: wrap !important;
+        text-align: center !important;
+        width: 100% !important;
+    }
+    
+    .header-left-content {
+        flex: 1 !important;
+        text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .header-logo {
+        flex: 0 0 auto !important;
+        text-align: center !important;
+        max-height: 40px !important;
+    }
+    
+    .audit-title {
+        font-size: 20px !important;
+        color: #333 !important;
+        margin: 0 0 3px 0 !important;
+        line-height: 1.1 !important;
+    }
+    
+    .zn-numbers {
+        font-size: 12px !important;
+        color: #666 !important;
+        background: transparent !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .header-logo {
+        max-height: 50px !important;
+        max-width: 120px !important;
+        box-shadow: none !important;
+    }
+    
+    /* Adjust content to account for fixed header */
+    .plan-info {
+        margin-top: 100px !important;
+    }
+    
+    body {
+        padding-top: 100px !important;
+    }
+}
+
+/* Responsive adjustments for page header */
+@media (max-width: 768px) {
+    .header-content-display {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .audit-title {
+        font-size: 24px;
+    }
+    
+    .zn-numbers {
+        font-size: 14px;
+    }
+    
+    .header-logo {
+        max-height: 60px;
+        max-width: 120px;
+    }
 }
 
 /* Responsive header */
@@ -6803,23 +7584,47 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 
 .plan-actions {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     flex-wrap: wrap;
     justify-content: center;
+    margin-top: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 16px;
+    border: 2px solid #e2e8f0;
 }
 
 .plan-actions .btn {
-    padding: 8px 16px;
+    padding: 14px 24px;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 0.9em;
-    font-weight: 500;
-    transition: all 0.2s;
+    font-size: 1em;
+    font-weight: 600;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-actions .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.plan-actions .btn:hover::before {
+    transform: translateX(100%);
 }
 
 .plan-actions .btn-success {
@@ -6829,8 +7634,8 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 
 .plan-actions .btn-success:hover {
     background: linear-gradient(135deg, #059669, #047857);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
 .plan-actions .btn-primary {
@@ -6840,8 +7645,8 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 
 .plan-actions .btn-primary:hover {
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
 }
 
 .plan-actions .btn-secondary {

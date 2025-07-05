@@ -4987,7 +4987,7 @@
                                     
                                     <div class="form-group">
                                         <label for="auditLocation">Standort(e) / Produktionsstätte(n) / temporäre Standorte / andere Orte der Leistungserbringung:</label>
-                                        <textarea id="auditLocation" rows="2" placeholder="z.B. Hoffmann & Voss GmbH, Hauptwerk Hamburg, Musterstraße 123"></textarea>
+                                        <textarea id="auditLocation" rows="2" placeholder="z.B. Hauptwerk Hamburg, Musterstraße 123"></textarea>
                                     </div>
                                     
                                     <div class="form-group">
@@ -5227,6 +5227,66 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
 
                             </div>
 
+                            <!-- Revision Tracking -->
+                            <div class="config-section">
+                                <h4><i class="fas fa-edit"></i> Revisions-Verfolgung</h4>
+                                
+                                <div class="revision-tracking-container">
+                                    <div class="revision-header">
+                                        <p class="revision-info">
+                                            <i class="fas fa-info-circle"></i>
+                                            Dokumentation von Änderungen und Überarbeitungen des Auditplans
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="revision-table-container">
+                                        <table class="revision-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Revision</th>
+                                                    <th>Auditplan erstellt</th>
+                                                    <th>Änderung während des Audits</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="revisionTableBody">
+                                                <tr class="revision-row">
+                                                    <td>
+                                                        <input type="text" class="revision-input" placeholder="Rev. 1.0" name="revisionNumber">
+                                                    </td>
+                                                    <td>
+                                                        <input type="date" class="revision-input" name="planCreated">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="revision-input" placeholder="Beschreibung der Änderung..." name="auditChange">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        
+                                        <div class="revision-controls">
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="addRevisionRow()">
+                                                <i class="fas fa-plus"></i>
+                                                Revision hinzufügen
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="revision-details">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="revisionLocation">Ort, Datum:</label>
+                                                <input type="text" id="revisionLocation" placeholder="z.B. Hamburg, 05.07.2025">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="revisionComments">Kommentare:</label>
+                                            <textarea id="revisionComments" rows="3" placeholder="Zusätzliche Anmerkungen und Kommentare zur Revision..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Audit Times Overview -->
                             <div class="audit-times-section">
                                 <div class="times-header">
@@ -5328,6 +5388,59 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                     <!-- Audit blocks will be dynamically added here -->
                                 </div>
                                 
+                                <!-- Audit Plan Notes & Distribution -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-clipboard-list"></i> Hinweise und Verteiler</h4>
+                                    
+                                    <div class="audit-notes-container">
+                                        <div class="form-group">
+                                            <label for="remoteIndicator">Remote-Teilnahme Hinweis:</label>
+                                            <input type="text" id="remoteIndicator" value="* = Auditor nimmt remote am Audit teil" placeholder="Hinweis für Remote-Teilnahme">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="auditorsNote">Hinweis für mehrere Auditoren:</label>
+                                            <textarea id="auditorsNote" rows="3" placeholder="Hinweise zur Nachweisführung bei mehreren Auditoren">Auditieren mehrere Auditoren, so muss die Nachweisführung getrennt erfolgen (Ausnahme Top Management). Entsprechende Ansprechpartner im Unternehmen sind im Auditplan zu benennen.</textarea>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="confidentialityNote">Vertraulichkeits-Hinweis:</label>
+                                            <textarea id="confidentialityNote" rows="2" placeholder="Hinweis zur Vertraulichkeit">Arbeitsunterlagen werden vertragsgemäß vertraulich behandelt und gesichert aufbewahrt.</textarea>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="clientDistribution">Verteiler beim Auftraggeber:</label>
+                                            <textarea id="clientDistribution" rows="2" placeholder="Verteiler beim Auftraggeber">(vom Auftraggeber festzulegen)</textarea>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>Verteiler zum Auditplan:</label>
+                                            <div class="distribution-checkboxes">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="auditPlanDistribution" value="Auftraggeber" checked>
+                                                    <span class="checkmark"></span>
+                                                    Auftraggeber
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="auditPlanDistribution" value="Zertifizierungsstelle(n)" checked>
+                                                    <span class="checkmark"></span>
+                                                    Zertifizierungsstelle(n)
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="auditPlanDistribution" value="Auditor/Gutachter/Experte" checked>
+                                                    <span class="checkmark"></span>
+                                                    Auditor/Gutachter/Experte
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="auditPlanDistribution" value="Datenbank" checked>
+                                                    <span class="checkmark"></span>
+                                                    Datenbank
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="blocks-actions">
                                     <button type="button" class="btn btn-success" onclick="generateAuditPlan()">
                                         <i class="fas fa-calendar-check"></i>

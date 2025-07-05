@@ -40081,6 +40081,9 @@ QHSEDashboard.prototype.initializeAuditPlanGenerator = function() {
     window.saveAuditPlan = () => this.saveAuditPlan();
     window.exportAuditPlanWord = () => this.exportAuditPlanWord();
     window.exportAuditPlanPDF = () => this.exportAuditPlanPDF();
+    window.addRevisionRow = () => this.addRevisionRow();
+    window.updateChaptersField = (selectElement) => this.updateChaptersField(selectElement);
+    window.clearChaptersSelection = (button) => this.clearChaptersSelection(button);
 };
 
 QHSEDashboard.prototype.addAuditBlock = function() {
@@ -40196,7 +40199,146 @@ QHSEDashboard.prototype.addAuditBlock = function() {
                 </div>
                 <div class="block-form-group">
                     <label>Normkapitel</label>
-                    <input type="text" name="chapters" placeholder="z.B. 7.5, 8.5.1, 9.2">
+                    <div class="chapters-input-container">
+                        <select name="chaptersSelect" multiple size="5" onchange="updateChaptersField(this)">
+                            <optgroup label="ISO 9001:2015 - Qualitätsmanagement">
+                                <option value="4.1">4.1 - Verstehen der Organisation und ihres Kontextes</option>
+                                <option value="4.2">4.2 - Verstehen der Erfordernisse und Erwartungen interessierter Parteien</option>
+                                <option value="4.3">4.3 - Festlegen des Anwendungsbereichs des Qualitätsmanagementsystems</option>
+                                <option value="4.4">4.4 - Qualitätsmanagementsystem und seine Prozesse</option>
+                                <option value="5.1">5.1 - Führung und Verpflichtung</option>
+                                <option value="5.2">5.2 - Politik</option>
+                                <option value="5.3">5.3 - Rollen, Verantwortlichkeiten und Befugnisse in der Organisation</option>
+                                <option value="6.1">6.1 - Maßnahmen zum Umgang mit Risiken und Chancen</option>
+                                <option value="6.2">6.2 - Qualitätsziele und Planung zu deren Verwirklichung</option>
+                                <option value="6.3">6.3 - Planung von Änderungen</option>
+                                <option value="7.1">7.1 - Ressourcen</option>
+                                <option value="7.2">7.2 - Kompetenz</option>
+                                <option value="7.3">7.3 - Bewusstsein</option>
+                                <option value="7.4">7.4 - Kommunikation</option>
+                                <option value="7.5">7.5 - Dokumentierte Information</option>
+                                <option value="8.1">8.1 - Betriebliche Planung und Steuerung</option>
+                                <option value="8.2">8.2 - Anforderungen an Produkte und Dienstleistungen</option>
+                                <option value="8.3">8.3 - Entwicklung von Produkten und Dienstleistungen</option>
+                                <option value="8.4">8.4 - Steuerung von extern bereitgestellten Prozessen, Produkten und Dienstleistungen</option>
+                                <option value="8.5">8.5 - Produktion und Dienstleistungserbringung</option>
+                                <option value="8.6">8.6 - Freigabe von Produkten und Dienstleistungen</option>
+                                <option value="8.7">8.7 - Steuerung nichtkonformer Ergebnisse</option>
+                                <option value="9.1">9.1 - Überwachung, Messung, Analyse und Bewertung</option>
+                                <option value="9.2">9.2 - Internes Audit</option>
+                                <option value="9.3">9.3 - Managementbewertung</option>
+                                <option value="10.1">10.1 - Allgemeines (Verbesserung)</option>
+                                <option value="10.2">10.2 - Nichtkonformität und Korrekturmaßnahmen</option>
+                                <option value="10.3">10.3 - Fortlaufende Verbesserung</option>
+                            </optgroup>
+                            <optgroup label="ISO 14001:2015 - Umweltmanagement">
+                                <option value="4.1 UMS">4.1 - Verstehen der Organisation und ihres Kontextes</option>
+                                <option value="4.2 UMS">4.2 - Verstehen der Erfordernisse und Erwartungen interessierter Parteien</option>
+                                <option value="4.3 UMS">4.3 - Festlegen des Anwendungsbereichs des Umweltmanagementsystems</option>
+                                <option value="4.4 UMS">4.4 - Umweltmanagementsystem</option>
+                                <option value="5.1 UMS">5.1 - Führung und Verpflichtung</option>
+                                <option value="5.2 UMS">5.2 - Umweltpolitik</option>
+                                <option value="5.3 UMS">5.3 - Rollen, Verantwortlichkeiten und Befugnisse in der Organisation</option>
+                                <option value="6.1 UMS">6.1 - Maßnahmen zum Umgang mit Risiken und Chancen</option>
+                                <option value="6.2 UMS">6.2 - Umweltziele und Planung zu deren Verwirklichung</option>
+                                <option value="7.1 UMS">7.1 - Ressourcen</option>
+                                <option value="7.2 UMS">7.2 - Kompetenz</option>
+                                <option value="7.3 UMS">7.3 - Bewusstsein</option>
+                                <option value="7.4 UMS">7.4 - Kommunikation</option>
+                                <option value="7.5 UMS">7.5 - Dokumentierte Information</option>
+                                <option value="8.1 UMS">8.1 - Betriebliche Planung und Steuerung</option>
+                                <option value="8.2 UMS">8.2 - Notfallvorsorge und Gefahrenabwehr</option>
+                                <option value="9.1 UMS">9.1 - Überwachung, Messung, Analyse und Bewertung</option>
+                                <option value="9.2 UMS">9.2 - Internes Audit</option>
+                                <option value="9.3 UMS">9.3 - Managementbewertung</option>
+                                <option value="10.1 UMS">10.1 - Allgemeines (Verbesserung)</option>
+                                <option value="10.2 UMS">10.2 - Nichtkonformität und Korrekturmaßnahmen</option>
+                                <option value="10.3 UMS">10.3 - Fortlaufende Verbesserung</option>
+                            </optgroup>
+                            <optgroup label="ISO 45001:2018 - Arbeitsschutzmanagement">
+                                <option value="4.1 AMS">4.1 - Verstehen der Organisation und ihres Kontextes</option>
+                                <option value="4.2 AMS">4.2 - Verstehen der Erfordernisse und Erwartungen der Arbeiter und anderer interessierter Parteien</option>
+                                <option value="4.3 AMS">4.3 - Bestimmung des Anwendungsbereichs des OH&S-Managementsystems</option>
+                                <option value="4.4 AMS">4.4 - OH&S-Managementsystem</option>
+                                <option value="5.1 AMS">5.1 - Führung und Verpflichtung</option>
+                                <option value="5.2 AMS">5.2 - OH&S-Politik</option>
+                                <option value="5.3 AMS">5.3 - Rollen, Verantwortlichkeiten und Befugnisse in der Organisation</option>
+                                <option value="5.4 AMS">5.4 - Konsultation und Beteiligung der Arbeiter</option>
+                                <option value="6.1 AMS">6.1 - Maßnahmen zum Umgang mit Risiken und Chancen</option>
+                                <option value="6.2 AMS">6.2 - OH&S-Ziele und Planung zu deren Verwirklichung</option>
+                                <option value="7.1 AMS">7.1 - Ressourcen</option>
+                                <option value="7.2 AMS">7.2 - Kompetenz</option>
+                                <option value="7.3 AMS">7.3 - Bewusstsein</option>
+                                <option value="7.4 AMS">7.4 - Kommunikation</option>
+                                <option value="7.5 AMS">7.5 - Dokumentierte Information</option>
+                                <option value="8.1 AMS">8.1 - Betriebliche Planung und Steuerung</option>
+                                <option value="8.2 AMS">8.2 - Notfallvorsorge und Gefahrenabwehr</option>
+                                <option value="9.1 AMS">9.1 - Überwachung, Messung, Analyse und Leistungsbewertung</option>
+                                <option value="9.2 AMS">9.2 - Internes Audit</option>
+                                <option value="9.3 AMS">9.3 - Managementbewertung</option>
+                                <option value="10.1 AMS">10.1 - Zwischenfälle, Nichtkonformitäten und Korrekturmaßnahmen</option>
+                                <option value="10.2 AMS">10.2 - Fortlaufende Verbesserung</option>
+                            </optgroup>
+                            <optgroup label="ISO 50001:2018 - Energiemanagement">
+                                <option value="4.1 EnMS">4.1 - Verstehen der Organisation und ihres Kontextes</option>
+                                <option value="4.2 EnMS">4.2 - Verstehen der Erfordernisse und Erwartungen interessierter Parteien</option>
+                                <option value="4.3 EnMS">4.3 - Bestimmung des Anwendungsbereichs des Energiemanagementsystems</option>
+                                <option value="4.4 EnMS">4.4 - Energiemanagementsystem</option>
+                                <option value="5.1 EnMS">5.1 - Führung und Verpflichtung</option>
+                                <option value="5.2 EnMS">5.2 - Energiepolitik</option>
+                                <option value="5.3 EnMS">5.3 - Rollen, Verantwortlichkeiten und Befugnisse in der Organisation</option>
+                                <option value="6.1 EnMS">6.1 - Maßnahmen zum Umgang mit Risiken und Chancen</option>
+                                <option value="6.2 EnMS">6.2 - Energieziele und Planung zu deren Verwirklichung</option>
+                                <option value="6.3 EnMS">6.3 - Energiebasislinie und energiebezogene Leistungskennzahlen</option>
+                                <option value="6.4 EnMS">6.4 - Energiedatensammlung</option>
+                                <option value="6.5 EnMS">6.5 - Energiebewertung</option>
+                                <option value="6.6 EnMS">6.6 - Energiebewertung und Möglichkeiten zur Verbesserung der energiebezogenen Leistung</option>
+                                <option value="7.1 EnMS">7.1 - Ressourcen</option>
+                                <option value="7.2 EnMS">7.2 - Kompetenz</option>
+                                <option value="7.3 EnMS">7.3 - Bewusstsein</option>
+                                <option value="7.4 EnMS">7.4 - Kommunikation</option>
+                                <option value="7.5 EnMS">7.5 - Dokumentierte Information</option>
+                                <option value="8.1 EnMS">8.1 - Betriebliche Planung und Steuerung</option>
+                                <option value="8.2 EnMS">8.2 - Energiebewertung</option>
+                                <option value="8.3 EnMS">8.3 - Energiebewertung und Möglichkeiten zur Verbesserung der energiebezogenen Leistung</option>
+                                <option value="9.1 EnMS">9.1 - Überwachung, Messung, Analyse und Bewertung der energiebezogenen Leistung</option>
+                                <option value="9.2 EnMS">9.2 - Internes Audit</option>
+                                <option value="9.3 EnMS">9.3 - Managementbewertung</option>
+                                <option value="10.1 EnMS">10.1 - Nichtkonformitäten und Korrekturmaßnahmen</option>
+                                <option value="10.2 EnMS">10.2 - Fortlaufende Verbesserung</option>
+                            </optgroup>
+                            <optgroup label="ISO 27001:2022 - Informationssicherheitsmanagement">
+                                <option value="4.1 ISMS">4.1 - Verstehen der Organisation und ihres Kontextes</option>
+                                <option value="4.2 ISMS">4.2 - Verstehen der Erfordernisse und Erwartungen interessierter Parteien</option>
+                                <option value="4.3 ISMS">4.3 - Bestimmung des Anwendungsbereichs des ISMS</option>
+                                <option value="4.4 ISMS">4.4 - Informationssicherheits-Managementsystem</option>
+                                <option value="5.1 ISMS">5.1 - Führung und Verpflichtung</option>
+                                <option value="5.2 ISMS">5.2 - Politik</option>
+                                <option value="5.3 ISMS">5.3 - Rollen, Verantwortlichkeiten und Befugnisse in der Organisation</option>
+                                <option value="6.1 ISMS">6.1 - Maßnahmen zum Umgang mit Risiken und Chancen</option>
+                                <option value="6.2 ISMS">6.2 - Informationssicherheitsziele und Planung zu deren Verwirklichung</option>
+                                <option value="6.3 ISMS">6.3 - Planung von Änderungen</option>
+                                <option value="7.1 ISMS">7.1 - Ressourcen</option>
+                                <option value="7.2 ISMS">7.2 - Kompetenz</option>
+                                <option value="7.3 ISMS">7.3 - Bewusstsein</option>
+                                <option value="7.4 ISMS">7.4 - Kommunikation</option>
+                                <option value="7.5 ISMS">7.5 - Dokumentierte Information</option>
+                                <option value="8.1 ISMS">8.1 - Betriebliche Planung und Steuerung</option>
+                                <option value="8.2 ISMS">8.2 - Informationssicherheits-Risikobeurteilung</option>
+                                <option value="8.3 ISMS">8.3 - Informationssicherheits-Risikobehandlung</option>
+                                <option value="9.1 ISMS">9.1 - Überwachung, Messung, Analyse und Bewertung</option>
+                                <option value="9.2 ISMS">9.2 - Internes Audit</option>
+                                <option value="9.3 ISMS">9.3 - Managementbewertung</option>
+                                <option value="10.1 ISMS">10.1 - Nichtkonformität und Korrekturmaßnahmen</option>
+                                <option value="10.2 ISMS">10.2 - Fortlaufende Verbesserung</option>
+                            </optgroup>
+                        </select>
+                        <input type="text" name="chapters" placeholder="Oder eigene Kapitel eingeben...">
+                        <button type="button" class="chapters-clear-btn" onclick="clearChaptersSelection(this)" title="Auswahl löschen">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <small>Strg+Klick für Mehrfachauswahl, oder eigene Kapitel eingeben</small>
                 </div>
                 <div class="block-form-group full-width">
                     <label>Themen/Prozesse</label>
@@ -40543,51 +40685,73 @@ QHSEDashboard.prototype.collectAuditTimesData = function() {
 
 // Render audit plan footer with final notes and distribution
 QHSEDashboard.prototype.renderAuditPlanFooter = function(planData) {
+    const notes = planData.auditNotes || {};
+    
     return `
         <div class="audit-plan-footer">
             <div class="footer-notes">
+                ${notes.remoteIndicator ? `
                 <div class="note-section">
-                    <p class="remote-indicator"><strong>* = Auditor nimmt remote am Audit teil</strong></p>
+                    <p class="remote-indicator"><strong>${notes.remoteIndicator}</strong></p>
                 </div>
+                ` : ''}
                 
+                ${notes.auditorsNote ? `
                 <div class="note-section">
-                    <p><strong>Auditieren mehrere Auditoren, so muss die Nachweisführung getrennt erfolgen (Ausnahme Top Management). Entsprechende Ansprechpartner im Unternehmen sind im Auditplan zu benennen.</strong></p>
+                    <p><strong>${notes.auditorsNote}</strong></p>
                 </div>
+                ` : ''}
                 
+                ${notes.confidentialityNote ? `
                 <div class="note-section">
-                    <p><strong>Arbeitsunterlagen werden vertragsgemäß vertraulich behandelt und gesichert aufbewahrt.</strong></p>
+                    <p><strong>${notes.confidentialityNote}</strong></p>
                 </div>
+                ` : ''}
             </div>
             
             <div class="distribution-section">
                 <div class="distribution-column">
                     <h6><strong>Verteiler beim Auftraggeber:</strong></h6>
-                    <p class="distribution-note">(vom Auftraggeber festzulegen)</p>
-                    <div class="distribution-lines">
-                        <div class="distribution-line">_________________________________</div>
-                        <div class="distribution-line">_________________________________</div>
-                        <div class="distribution-line">_________________________________</div>
-                    </div>
+                    ${notes.clientDistribution ? `
+                        <p class="distribution-note">${notes.clientDistribution}</p>
+                    ` : `
+                        <p class="distribution-note">(vom Auftraggeber festzulegen)</p>
+                        <div class="distribution-lines">
+                            <div class="distribution-line">_________________________________</div>
+                            <div class="distribution-line">_________________________________</div>
+                            <div class="distribution-line">_________________________________</div>
+                        </div>
+                    `}
                 </div>
                 
                 <div class="distribution-column">
                     <h6><strong>Verteiler zum Auditplan:</strong></h6>
                     <div class="distribution-checkboxes">
-                        <div class="checkbox-row">
-                            <span class="checkbox">☑</span>
-                            <span class="checkbox-label">Auftraggeber</span>
-                            <span class="checkbox">☑</span>
-                            <span class="checkbox-label">Zertifizierungsstelle(n)</span>
-                        </div>
-                        <div class="checkbox-row">
-                            <span class="checkbox">☐</span>
-                            <span class="checkbox-label">Auditor/Gutachter/Experte</span>
-                            <span class="checkbox">☑</span>
-                            <span class="checkbox-label">Datenbank</span>
-                        </div>
+                        ${this.renderDistributionList(notes.distributionChannels)}
                     </div>
                 </div>
             </div>
+        </div>
+    `;
+};
+
+// Helper function to render distribution list
+QHSEDashboard.prototype.renderDistributionList = function(distributionChannels) {
+    const allChannels = ['Auftraggeber', 'Zertifizierungsstelle(n)', 'Auditor/Gutachter/Experte', 'Datenbank'];
+    const selectedChannels = distributionChannels || [];
+    
+    return `
+        <div class="checkbox-row">
+            ${allChannels.slice(0, 2).map(channel => `
+                <span class="checkbox">${selectedChannels.includes(channel) ? '☑' : '☐'}</span>
+                <span class="checkbox-label">${channel}</span>
+            `).join('')}
+        </div>
+        <div class="checkbox-row">
+            ${allChannels.slice(2).map(channel => `
+                <span class="checkbox">${selectedChannels.includes(channel) ? '☑' : '☐'}</span>
+                <span class="checkbox-label">${channel}</span>
+            `).join('')}
         </div>
     `;
 };
@@ -41343,6 +41507,7 @@ QHSEDashboard.prototype.generateAuditPlan = function() {
             blockData.blockDate = ''; // Use main audit date
         }
         
+        console.log('📋 Block data collected:', blockData);
         blocks.push(blockData);
     }
     
@@ -41404,6 +41569,8 @@ QHSEDashboard.prototype.generateAuditPlan = function() {
         breakType: 'standard',
         blocks,
         auditTimes: this.collectAuditTimesData(),
+        revisions: this.collectRevisionData(),
+        auditNotes: this.collectAuditNotesData(),
         createdAt: new Date().toISOString()
     };
     
@@ -41434,11 +41601,19 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
             else if (dept.includes('abschluss')) blockType = 'closing';
             else if (dept.includes('standortwechsel')) blockType = 'travel';
             
+            // Determine which date to use for this block
+            let blockDate = planData.date; // Default to main audit date
+            if (block.blockDate && block.blockDate !== '' && block.showDate !== false) {
+                blockDate = block.blockDate;
+            }
+            
             planItems.push({
                 type: blockType,
                 time: startTime,
                 endTime: endTime,
                 duration: duration,
+                date: blockDate,
+                showDate: block.showDate !== false, // Default to true if not explicitly false
                 department: block.department || 'Nicht angegeben',
                 auditors: block.auditors || 'Nicht angegeben',
                 contact: block.contact || 'Nicht angegeben',
@@ -41454,6 +41629,8 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
             time: '-',
             endTime: '-',
             duration: 0,
+            date: planData.date,
+            showDate: true,
             department: 'Keine Audit-Blöcke konfiguriert',
             auditors: '-',
             contact: '-',
@@ -41596,13 +41773,53 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
             </div>
             ` : ''}
 
-            <!-- Plan Header with Logo and ZN -->
-            <div class="plan-header-display">
-                ${planData.logoData ? `<div class="logo-display"><img src="${planData.logoData}" alt="Logo" class="plan-logo"></div>` : ''}
-                <div class="plan-title-display">
-                    <h2>Auditplan</h2>
-                    ${planData.znNumbers && planData.znNumbers.length > 0 ? `<p class="zn-info">ZN: ${planData.znNumbers.join(', ')}</p>` : ''}
+            <!-- Revision History -->
+            ${planData.revisions && (planData.revisions.entries.length > 0 || planData.revisions.location || planData.revisions.comments) ? `
+            <div class="config-section">
+                <h5><i class="fas fa-edit"></i> Revisions-Verfolgung</h5>
+                <div class="info-grid">
+                    ${planData.revisions.entries.length > 0 ? `
+                    <div class="revision-display">
+                        <table class="revision-display-table">
+                            <thead>
+                                <tr>
+                                    <th>Revision</th>
+                                    <th>Auditplan erstellt</th>
+                                    <th>Änderung während des Audits</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${planData.revisions.entries.map(revision => `
+                                    <tr>
+                                        <td>${revision.revisionNumber || '-'}</td>
+                                        <td>${revision.planCreated ? new Date(revision.planCreated).toLocaleDateString('de-DE') : '-'}</td>
+                                        <td>${revision.auditChange || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ` : ''}
+                    ${planData.revisions.location ? `<p><strong>Ort, Datum:</strong> ${planData.revisions.location}</p>` : ''}
+                    ${planData.revisions.comments ? `<p><strong>Kommentare:</strong> ${planData.revisions.comments}</p>` : ''}
                 </div>
+            </div>
+            ` : ''}
+
+        </div>
+        
+        <!-- Page Header for every page -->
+        <div class="page-header">
+            <div class="header-content-display">
+                <div class="header-left-content">
+                    <h1 class="audit-title">Auditplan</h1>
+                    ${planData.znNumbers && planData.znNumbers.length > 0 ? `<p class="zn-numbers">ZN: ${planData.znNumbers.join(', ')}</p>` : ''}
+                </div>
+                ${planData.logoData ? `
+                <div class="header-logo-container">
+                    <img src="${planData.logoData}" alt="Logo" class="header-logo">
+                </div>
+                ` : ''}
             </div>
         </div>
         
@@ -41636,9 +41853,10 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
         // Add date to time display based on block settings
         let dateTime;
         if (item.showDate !== false) { // Show date unless explicitly set to false
-            const displayDate = item.blockDate || planData.auditDate;
-            dateTime = displayDate ? 
-                `${displayDate}<br>${item.time} - ${endTimeFormatted}` : 
+            const displayDate = item.date || planData.date;
+            const formattedDate = displayDate ? new Date(displayDate).toLocaleDateString('de-DE') : '';
+            dateTime = formattedDate ? 
+                `${formattedDate}<br>${item.time} - ${endTimeFormatted}` : 
                 `${item.time} - ${endTimeFormatted}`;
         } else {
             // Only show time, no date
@@ -41825,14 +42043,75 @@ QHSEDashboard.prototype.exportAuditPlanWord = function() {
     // Get table HTML
     const tableHtml = document.getElementById('auditPlanTable').innerHTML;
     
-    // Create Word document content
+    // Create Word document content with header
+    const planData = this.currentPlanData;
     const wordContent = `
         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
         <head>
             <meta charset='utf-8'>
             <title>${title}</title>
+            <!--[if gte mso 9]>
+            <xml>
+                <w:WordDocument>
+                    <w:View>Print</w:View>
+                    <w:Zoom>90</w:Zoom>
+                    <w:DoNotPromptForConvert/>
+                    <w:DoNotShowInsertionsAndDeletions/>
+                </w:WordDocument>
+            </xml>
+            <![endif]-->
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; }
+                @page {
+                    margin: 2cm 2cm 2cm 2cm;
+                    mso-header-margin: 1cm;
+                    mso-footer-margin: 1cm;
+                }
+                .page-header { 
+                    text-align: center; 
+                    margin-bottom: 15px; 
+                    border-bottom: 1px solid #333; 
+                    padding-bottom: 10px;
+                    position: relative;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .header-content-display {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    position: relative;
+                }
+                .header-left-content {
+                    flex: 0 0 auto;
+                    text-align: center;
+                }
+                .audit-title {
+                    margin: 0;
+                    font-size: 16px;
+                    font-weight: bold;
+                    color: #333;
+                    line-height: 1;
+                }
+                .zn-numbers {
+                    margin: 0;
+                    font-size: 10px;
+                    color: #666;
+                    font-weight: 500;
+                }
+                .header-logo-container {
+                    position: absolute;
+                    right: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+                .header-logo {
+                    max-height: 30px;
+                    max-width: 80px;
+                    object-fit: contain;
+                }
                 .plan-info { margin-bottom: 20px; page-break-inside: avoid; }
                 .plan-info h4 { margin-bottom: 10px; font-size: 18px; }
                 .plan-info p { margin: 5px 0; }
@@ -41857,7 +42136,56 @@ QHSEDashboard.prototype.exportAuditPlanWord = function() {
             </style>
         </head>
         <body>
+            <!-- Page Header (repeated automatically on new pages) -->
+            <div style="mso-element:header" id="h1">
+                <div class="page-header">
+                    <div class="header-content-display">
+                        <div class="header-left-content">
+                            <h1 class="audit-title">Auditplan</h1>
+                            ${planData.znNumbers && planData.znNumbers.length > 0 ? `<p class="zn-numbers">ZN: ${planData.znNumbers.join(', ')}</p>` : ''}
+                        </div>
+                        ${planData.logoData ? `
+                        <div class="header-logo-container">
+                            <img src="${planData.logoData}" alt="Logo" class="header-logo">
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- First page header -->
+            <div class="page-header">
+                <div class="header-content-display">
+                    <div class="header-left-content">
+                        <h1 class="audit-title">Auditplan</h1>
+                        ${planData.znNumbers && planData.znNumbers.length > 0 ? `<p class="zn-numbers">ZN: ${planData.znNumbers.join(', ')}</p>` : ''}
+                    </div>
+                    ${planData.logoData ? `
+                    <div class="header-logo-container">
+                        <img src="${planData.logoData}" alt="Logo" class="header-logo">
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            
             ${tableHtml}
+            
+            <!-- Page break and header for subsequent pages -->
+            <div style="page-break-before: always;">
+                <div class="page-header">
+                    <div class="header-content-display">
+                        <div class="header-left-content">
+                            <h1 class="audit-title">Auditplan</h1>
+                            ${planData.znNumbers && planData.znNumbers.length > 0 ? `<p class="zn-numbers">ZN: ${planData.znNumbers.join(', ')}</p>` : ''}
+                        </div>
+                        ${planData.logoData ? `
+                        <div class="header-logo-container">
+                            <img src="${planData.logoData}" alt="Logo" class="header-logo">
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
         </body>
         </html>
     `;
@@ -41908,35 +42236,148 @@ QHSEDashboard.prototype.exportAuditPlanPDF = function() {
                     border-bottom: 2px solid #333; 
                     padding-bottom: 15px;
                 }
-                .plan-header-export {
+                /* Page Header for every page */
+                .page-header {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    width: 100%;
+                    height: 45px;
+                    background: white;
+                    border-bottom: 1px solid #333;
+                    padding: 5px 15px;
+                    margin: 0;
                     display: flex;
-                    justify-content: space-between;
                     align-items: center;
-                    gap: 20px;
+                    justify-content: center;
+                    z-index: 1000;
                 }
-                .logo-container {
+                .header-content-display {
+                    display: flex;
+                    width: 100%;
+                    justify-content: center;
+                    align-items: center;
+                    position: relative;
+                }
+                .header-left-content {
                     flex: 0 0 auto;
-                }
-                .export-logo {
-                    max-height: 60px;
-                    max-width: 120px;
-                    object-fit: contain;
-                }
-                .title-container {
-                    flex: 1;
                     text-align: center;
                 }
-                .title-container h2 { 
-                    margin: 0; 
-                    font-size: 24px; 
-                    color: #333;
+                .audit-title {
+                    margin: 0;
+                    font-size: 16px;
                     font-weight: bold;
+                    color: #333;
+                    line-height: 1;
                 }
-                .zn-display {
-                    margin: 5px 0 0 0;
-                    font-size: 14px;
+                .zn-numbers {
+                    margin: 0;
+                    font-size: 10px;
                     color: #666;
                     font-weight: 500;
+                }
+                .header-logo-container {
+                    position: absolute;
+                    right: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                }
+                .header-logo {
+                    max-height: 30px;
+                    max-width: 80px;
+                    object-fit: contain;
+                }
+                /* Add padding for fixed header */
+                body {
+                    padding-top: 65px !important;
+                }
+                
+                /* Print specific styles */
+                @media print {
+                    .page-header {
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        width: 100% !important;
+                        height: 40px !important;
+                        background: white !important;
+                        border-bottom: 1px solid #333 !important;
+                        padding: 5px 15px !important;
+                        margin: 0 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        z-index: 1000 !important;
+                        page-break-inside: avoid !important;
+                    }
+                    
+                    body {
+                        padding-top: 60px !important;
+                    }
+                    
+                    .header-content-display {
+                        display: flex !important;
+                        width: 100% !important;
+                        justify-content: center !important;
+                        align-items: center !important;
+                        position: relative !important;
+                    }
+                    
+                    .header-left-content {
+                        flex: 0 0 auto !important;
+                        text-align: center !important;
+                    }
+                    
+                    .audit-title {
+                        margin: 0 !important;
+                        font-size: 14px !important;
+                        font-weight: bold !important;
+                        color: #333 !important;
+                        line-height: 1 !important;
+                    }
+                    
+                    .zn-numbers {
+                        margin: 0 !important;
+                        font-size: 9px !important;
+                        color: #666 !important;
+                        font-weight: 500 !important;
+                    }
+                    
+                    .header-logo-container {
+                        position: absolute !important;
+                        right: 0 !important;
+                        top: 50% !important;
+                        transform: translateY(-50%) !important;
+                    }
+                    
+                    .header-logo {
+                        max-height: 25px !important;
+                        max-width: 70px !important;
+                        object-fit: contain !important;
+                    }
+                    
+                    table {
+                        margin-top: 20px !important;
+                        page-break-inside: avoid !important;
+                    }
+                    
+                    .plan-info {
+                        margin-top: 20px !important;
+                        page-break-inside: avoid !important;
+                    }
+                    
+                    /* Ensure all content has enough top margin to avoid header overlap */
+                    table tr, table td, table th {
+                        position: relative !important;
+                    }
+                    
+                    /* Add spacing for page breaks */
+                    @page {
+                        margin-top: 60px !important;
+                        margin-bottom: 20px !important;
+                    }
                 }
                 .plan-info { 
                     margin-bottom: 20px; 
@@ -42011,15 +42452,6 @@ QHSEDashboard.prototype.exportAuditPlanPDF = function() {
             </style>
         </head>
         <body>
-            <div class="header-info">
-                <div class="plan-header-export">
-                    ${this.currentPlanData.logoData ? `<div class="logo-container"><img src="${this.currentPlanData.logoData}" alt="Logo" class="export-logo"></div>` : ''}
-                    <div class="title-container">
-                        <h2>Auditplan</h2>
-                        ${this.currentPlanData.znNumbers && this.currentPlanData.znNumbers.length > 0 ? `<p class="zn-display">ZN: ${this.currentPlanData.znNumbers.join(', ')}</p>` : ''}
-                    </div>
-                </div>
-            </div>
             ${tableHtml}
         </body>
         </html>
@@ -42034,6 +42466,151 @@ QHSEDashboard.prototype.exportAuditPlanPDF = function() {
     }, 500);
     
     this.showNotification('PDF-Export gestartet! Wählen Sie "Als PDF speichern" im Druckdialog.', 'info');
+};
+
+// Revision Tracking Functions
+QHSEDashboard.prototype.addRevisionRow = function() {
+    const tableBody = document.getElementById('revisionTableBody');
+    if (!tableBody) {
+        console.error('Revision table body not found');
+        return;
+    }
+    
+    const newRow = document.createElement('tr');
+    newRow.className = 'revision-row';
+    
+    newRow.innerHTML = `
+        <td>
+            <input type="text" class="revision-input" placeholder="Rev. 1.1" name="revisionNumber">
+        </td>
+        <td>
+            <input type="date" class="revision-input" name="planCreated">
+        </td>
+        <td>
+            <input type="text" class="revision-input" placeholder="Beschreibung der Änderung..." name="auditChange">
+        </td>
+    `;
+    
+    tableBody.appendChild(newRow);
+    this.showNotification('Neue Revision hinzugefügt', 'success');
+};
+
+QHSEDashboard.prototype.collectRevisionData = function() {
+    console.log('🔄 Collecting revision data...');
+    const revisions = [];
+    const revisionRows = document.querySelectorAll('#revisionTableBody .revision-row');
+    console.log('📋 Found revision rows:', revisionRows.length);
+    
+    revisionRows.forEach(row => {
+        const revisionNumber = row.querySelector('input[name="revisionNumber"]')?.value || '';
+        const planCreated = row.querySelector('input[name="planCreated"]')?.value || '';
+        const auditChange = row.querySelector('input[name="auditChange"]')?.value || '';
+        
+        // Only add revision if at least one field has content
+        if (revisionNumber || planCreated || auditChange) {
+            revisions.push({
+                revisionNumber,
+                planCreated,
+                auditChange
+            });
+        }
+    });
+    
+    // Add location and comments if available
+    const revisionLocation = document.getElementById('revisionLocation')?.value || '';
+    const revisionComments = document.getElementById('revisionComments')?.value || '';
+    
+    const result = {
+        entries: revisions,
+        location: revisionLocation,
+        comments: revisionComments
+    };
+    
+    console.log('📊 Collected revision data:', result);
+    return result;
+};
+
+// Chapters Dropdown Functions
+QHSEDashboard.prototype.updateChaptersField = function(selectElement) {
+    const block = selectElement.closest('.audit-block');
+    const chaptersInput = block.querySelector('input[name="chapters"]');
+    
+    if (!chaptersInput) return;
+    
+    // Get selected options
+    const selectedOptions = Array.from(selectElement.selectedOptions);
+    
+    // Update the text input with selected chapters
+    if (selectedOptions.length > 0) {
+        // Store full chapter texts (number + description) for output
+        const selectedChaptersWithText = selectedOptions.map(option => option.textContent.trim());
+        chaptersInput.value = selectedChaptersWithText.join('; ');
+        
+        // Store the mapping as a data attribute for later reference
+        const chapterMapping = {};
+        selectedOptions.forEach(option => {
+            chapterMapping[option.value] = option.textContent.trim();
+        });
+        chaptersInput.setAttribute('data-chapter-mapping', JSON.stringify(chapterMapping));
+        
+        chaptersInput.style.backgroundColor = '#f0f9ff';
+        chaptersInput.style.color = '#1e40af';
+        chaptersInput.readOnly = true;
+    } else {
+        chaptersInput.value = '';
+        chaptersInput.style.backgroundColor = '';
+        chaptersInput.style.color = '';
+        chaptersInput.readOnly = false;
+        chaptersInput.placeholder = 'Oder eigene Kapitel eingeben...';
+        chaptersInput.removeAttribute('data-chapter-mapping');
+    }
+};
+
+QHSEDashboard.prototype.clearChaptersSelection = function(button) {
+    const block = button.closest('.audit-block');
+    const chaptersSelect = block.querySelector('select[name="chaptersSelect"]');
+    const chaptersInput = block.querySelector('input[name="chapters"]');
+    
+    if (chaptersSelect) {
+        // Clear all selections
+        Array.from(chaptersSelect.options).forEach(option => {
+            option.selected = false;
+        });
+    }
+    
+    if (chaptersInput) {
+        chaptersInput.value = '';
+        chaptersInput.style.backgroundColor = '';
+        chaptersInput.style.color = '';
+        chaptersInput.readOnly = false;
+        chaptersInput.placeholder = 'Oder eigene Kapitel eingeben...';
+        chaptersInput.removeAttribute('data-chapter-mapping');
+        chaptersInput.focus();
+    }
+    
+    this.showNotification('Kapitel-Auswahl gelöscht', 'success');
+};
+
+// Audit Notes & Distribution Data Collection
+QHSEDashboard.prototype.collectAuditNotesData = function() {
+    const remoteIndicator = document.getElementById('remoteIndicator')?.value || '* = Auditor nimmt remote am Audit teil';
+    const auditorsNote = document.getElementById('auditorsNote')?.value || '';
+    const confidentialityNote = document.getElementById('confidentialityNote')?.value || '';
+    const clientDistribution = document.getElementById('clientDistribution')?.value || '';
+    
+    // Collect selected distribution channels
+    const distributionChannels = [];
+    document.querySelectorAll('input[name="auditPlanDistribution"]:checked').forEach(checkbox => {
+        distributionChannels.push(checkbox.value);
+    });
+    
+    return {
+        remoteIndicator,
+        auditorsNote,
+        confidentialityNote,
+        clientDistribution,
+        distributionChannels
+    };
 };
 
 QHSEDashboard.prototype.printAuditPlan = function() {
