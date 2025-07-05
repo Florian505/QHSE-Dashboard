@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-ancestors 'none';">
     <title>QHSE Management System - Hoffmann und Voss GmbH</title>
-    <link rel="stylesheet" href="styles.css?v=2024070401">
+    <link rel="stylesheet" href="styles.css?v=2024070502">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -4931,8 +4931,43 @@
                     <div id="audit-plan-generator-tab" class="tab-content">
                         <div class="audit-plan-generator">
                             <div class="plan-header">
-                                <h3><i class="fas fa-calendar-check"></i> TÜV-konformer Auditplan-Generator</h3>
-                                <p class="plan-subtitle">Erstellen Sie strukturierte, professionelle Auditpläne für interne und externe Audits</p>
+                                <div class="header-content">
+                                    <div class="header-left">
+                                        <h3><i class="fas fa-calendar-check"></i> Auditplan</h3>
+                                        <div class="zn-selection">
+                                            <label>ZN (Zertifizierungsnummer):</label>
+                                            <div class="zn-input-section">
+                                                <div class="zn-input-group">
+                                                    <input type="text" id="znNumberInput" placeholder="ZN-Nummer eingeben (z.B. ZN001, ABC123...)" onkeypress="handleZNInputKeypress(event)">
+                                                    <button type="button" onclick="addZNNumber()" class="btn-add-zn">
+                                                        <i class="fas fa-plus"></i>
+                                                        Hinzufügen
+                                                    </button>
+                                                </div>
+                                                <div id="znNumbersList" class="zn-numbers-list">
+                                                    <!-- ZN-Nummern werden hier dynamisch angezeigt -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="header-right">
+                                        <div class="logo-upload-section">
+                                            <label>Logo hinzufügen:</label>
+                                            <div class="logo-upload-area" onclick="triggerLogoUpload()">
+                                                <i class="fas fa-image"></i>
+                                                <p>Logo hochladen</p>
+                                                <small>JPG, PNG, SVG (max. 2MB)</small>
+                                            </div>
+                                            <input type="file" id="logoUpload" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
+                                            <div id="logoPreview" class="logo-preview" style="display: none;">
+                                                <img id="logoImage" src="" alt="Logo Preview">
+                                                <button type="button" onclick="removeLogo()" class="btn-remove-logo">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Plan Configuration -->
@@ -4941,54 +4976,55 @@
                                 <div class="config-section">
                                     <h4><i class="fas fa-info-circle"></i> Grunddaten</h4>
                                     
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="auditTitle">Audit-Titel</label>
-                                            <input type="text" id="auditTitle" placeholder="z.B. Internes Audit ISO 9001:2015">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="auditDateType">Audit-Zeitraum</label>
-                                            <select id="auditDateType" onchange="toggleAuditDateInputs()">
-                                                <option value="single">Eintägiges Audit</option>
-                                                <option value="range">Mehrtägiges Audit</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-row">
-                                        <div class="form-group" id="singleDateGroup">
-                                            <label for="auditDate">Audit-Datum</label>
-                                            <input type="date" id="auditDate">
-                                        </div>
-                                        <div class="form-group" id="startDateGroup" style="display: none;">
-                                            <label for="auditStartDate">Audit von</label>
-                                            <input type="date" id="auditStartDate">
-                                        </div>
-                                        <div class="form-group" id="endDateGroup" style="display: none;">
-                                            <label for="auditEndDate">Audit bis</label>
-                                            <input type="date" id="auditEndDate">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="auditClient">Auftraggeber</label>
-                                            <input type="text" id="auditClient" placeholder="Name des Auftraggebers">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="clientContact">Beauftragter des Kunden</label>
-                                            <input type="text" id="clientContact" placeholder="Ansprechpartner beim Kunden">
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="auditClient">Auftraggeber:</label>
+                                        <input type="text" id="auditClient" placeholder="Name des Auftraggebers">
+                                        <p class="approval-notice">
+                                            <i class="fas fa-info-circle"></i>
+                                            Sofern vom Auftraggeber keine Änderungen des Auditplans bis 1 Woche vor dem Audittermin eingehen, so gilt dieser als genehmigt.
+                                        </p>
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="auditLocation">Standort(e) / Produktionsstätte(n) / temporäre Standorte</label>
+                                        <label for="auditLocation">Standort(e) / Produktionsstätte(n) / temporäre Standorte / andere Orte der Leistungserbringung:</label>
                                         <textarea id="auditLocation" rows="2" placeholder="z.B. Hoffmann & Voss GmbH, Hauptwerk Hamburg, Musterstraße 123"></textarea>
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="auditScope">Geltungsbereich</label>
+                                        <label for="auditScope">Geltungsbereich:</label>
                                         <textarea id="auditScope" rows="2" placeholder="z.B. Herstellung von Präzisionsteilen für die Automobilindustrie"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="auditCriteria">Normgrundlage, Auditkriterien:</label>
+                                        <div class="multi-select-container">
+                                            <div class="multi-select-display" onclick="toggleAuditCriteriaDropdown()">
+                                                <span id="auditCriteriaDisplay">Bitte wählen Sie Standards aus...</span>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                            <div id="auditCriteriaDropdown" class="multi-select-dropdown" style="display: none;">
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="auditCriteria" value="ISO 9001:2015, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen" onchange="updateAuditCriteriaDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 9001:2015, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="auditCriteria" value="ISO 14001:2015, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen" onchange="updateAuditCriteriaDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 14001:2015, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="auditCriteria" value="ISO 45001:2018, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen" onchange="updateAuditCriteriaDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 45001:2018, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="auditCriteria" value="ISO 50001:2018, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen" onchange="updateAuditCriteriaDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 50001:2018, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -4996,75 +5032,42 @@
                                 <div class="config-section">
                                     <h4><i class="fas fa-clipboard-check"></i> Audit-Details</h4>
                                     
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="auditType">Auditart</label>
-                                            <select id="auditType">
-                                                <option value="">Bitte wählen</option>
-                                                <option value="S1">S1: Erstzertifizierung - Stufe 1</option>
-                                                <option value="S2">S2: Erstzertifizierung - Stufe 2</option>
-                                                <option value="FSA">FSA: Folgeaudit/Überwachungsaudit</option>
-                                                <option value="RAU">RAU: Rezertifizierungsaudit</option>
-                                                <option value="IA">IA: Internes Audit</option>
-                                                <option value="LA">LA: Lieferanten-Audit</option>
-                                                <option value="SA">SA: Sonderaudit</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="auditLanguage">Auditsprache(n)</label>
-                                            <select id="auditLanguage">
-                                                <option value="Deutsch">Deutsch</option>
-                                                <option value="Englisch">Englisch</option>
-                                                <option value="Deutsch/Englisch">Deutsch/Englisch</option>
-                                                <option value="Andere">Andere</option>
-                                            </select>
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="auditType">Auditart:</label>
+                                        <select id="auditType">
+                                            <option value="">Bitte wählen</option>
+                                            <option value="S1">S1: Erstzertifizierung - Stufe 1</option>
+                                            <option value="S2">S2: Erstzertifizierung - Stufe 2</option>
+                                            <option value="FSA">FSA: Folgeaudit/Überwachungsaudit</option>
+                                            <option value="RAU">RAU: Rezertifizierungsaudit</option>
+                                            <option value="IA">IA: Internes Audit</option>
+                                            <option value="LA">LA: Lieferanten-Audit</option>
+                                            <option value="SA">SA: Sonderaudit</option>
+                                        </select>
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="auditCriteria">Normgrundlage, Auditkriterien</label>
-                                        <div class="checkbox-group">
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" name="auditStandards" value="ISO 9001:2015">
-                                                <span class="checkmark"></span>
-                                                ISO 9001:2015 (Qualitätsmanagement)
-                                            </label>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" name="auditStandards" value="ISO 14001:2015">
-                                                <span class="checkmark"></span>
-                                                ISO 14001:2015 (Umweltmanagement)
-                                            </label>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" name="auditStandards" value="ISO 45001:2018">
-                                                <span class="checkmark"></span>
-                                                ISO 45001:2018 (Arbeitsschutzmanagement)
-                                            </label>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" name="auditStandards" value="ISO 50001:2018">
-                                                <span class="checkmark"></span>
-                                                ISO 50001:2018 (Energiemanagement)
-                                            </label>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" name="auditStandards" value="IATF 16949">
-                                                <span class="checkmark"></span>
-                                                IATF 16949 (Automotive)
-                                            </label>
-                                            <label class="checkbox-label">
-                                                <input type="checkbox" name="auditStandards" value="ISO 27001">
-                                                <span class="checkmark"></span>
-                                                ISO 27001 (Informationssicherheit)
-                                            </label>
-                                        </div>
-                                        <small class="field-help">+ Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen</small>
+                                        <label for="clientContact">Beauftragter des Kunden:</label>
+                                        <input type="text" id="clientContact" placeholder="Ansprechpartner beim Kunden">
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="auditObjective">Auditziel</label>
-                                        <textarea id="auditObjective" rows="4" placeholder="z.B. Überprüfung des Managementsystems auf Konformität mit den Auditkriterien...">Überprüfung des Managementsystems auf Konformität mit den Auditkriterien, Stichprobenverfahren mit dem Ziel: Erstzertifizierung - Stufe 1 und Aufrechterhaltung der Zertifizierung
+                                        <label for="auditObjective">Auditziel:</label>
+                                        <textarea id="auditObjective" rows="8" readonly>Überprüfung des Managementsystems auf Konformität mit den Auditkriterien, Stichprobenverfahren mit dem Ziel: Erstzertifizierung - Stufe 1 und Aufrechterhaltung der Zertifizierung
 
 Feststellung der Fähigkeit des Managementsystems zur Sicherstellung der Erfüllung anzuwendender gesetzlicher, behördlicher und vertraglicher Anforderungen
 
 Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete Erwartung zur Erreichung der festgelegten Ziele der Organisation</textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="auditLanguage">Auditsprache(n):</label>
+                                        <select id="auditLanguage">
+                                            <option value="Deutsch">Deutsch</option>
+                                            <option value="Englisch">Englisch</option>
+                                            <option value="Deutsch/Englisch">Deutsch/Englisch</option>
+                                            <option value="Andere">Andere</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -5072,31 +5075,68 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                 <div class="config-section">
                                     <h4><i class="fas fa-users"></i> Audit-Team</h4>
                                     
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="leadAuditor">Auditleiter</label>
-                                            <input type="text" id="leadAuditor" placeholder="Name des Lead-Auditors">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="auditorExternal">Externe Auditoren</label>
-                                            <input type="text" id="auditorExternal" placeholder="Name, Firma">
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="leadAuditor">Auditleiter:</label>
+                                        <input type="text" id="leadAuditor" placeholder="Klicken oder tippen Sie hier, um Text einzugeben.">
                                     </div>
                                     
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="auditorTrainee">Trainee(s)</label>
-                                            <input type="text" id="auditorTrainee" placeholder="Name der Trainees">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="auditorExperts">Expert(en)</label>
-                                            <input type="text" id="auditorExperts" placeholder="Technische Experten">
+                                    <div class="form-group">
+                                        <label for="auditors">Auditor(en):</label>
+                                        <textarea id="auditors" rows="2" placeholder="hier können mehrere Auditoren stehen"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Externe Auditoren:</label>
+                                        <div class="external-auditors-list">
+                                            <div class="external-auditor-item">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="externalAuditor1" checked>
+                                                    <span class="checkmark"></span>
+                                                    extern, Firma:
+                                                </label>
+                                                <input type="text" class="external-auditor-input" placeholder="Name, Firma">
+                                            </div>
+                                            <div class="external-auditor-item">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="externalAuditor2">
+                                                    <span class="checkmark"></span>
+                                                    extern, Firma:
+                                                </label>
+                                                <input type="text" class="external-auditor-input" placeholder="Name, Firma">
+                                            </div>
                                         </div>
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="hostContact">Gastgeber (Host)</label>
-                                        <input type="text" id="hostContact" placeholder="Ansprechpartner vor Ort">
+                                        <label for="trainees">Trainee(s):</label>
+                                        <input type="text" id="trainees" placeholder="Name der Trainees">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="experts">Expert(en):</label>
+                                        <input type="text" id="experts" placeholder="Technische Experten">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Weitere externe Mitarbeiter:</label>
+                                        <div class="external-staff-list">
+                                            <div class="external-staff-item">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="externalStaff1">
+                                                    <span class="checkmark"></span>
+                                                    extern, Firma:
+                                                </label>
+                                                <input type="text" class="external-staff-input" placeholder="Name, Firma">
+                                            </div>
+                                            <div class="external-staff-item">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="externalStaff2">
+                                                    <span class="checkmark"></span>
+                                                    extern, Firma:
+                                                </label>
+                                                <input type="text" class="external-staff-input" placeholder="Name, Firma">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -5104,46 +5144,71 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                 <div class="config-section">
                                     <h4><i class="fas fa-clock"></i> Betriebsorganisation</h4>
                                     
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="shiftSystem">Schichtsystem</label>
-                                            <select id="shiftSystem">
-                                                <option value="1-Schicht">1-Schicht</option>
-                                                <option value="2-Schicht">2-Schicht</option>
-                                                <option value="3-Schicht">3-Schicht</option>
-                                                <option value="Andere">Andere</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="shiftChanges">Schichtübergaben</label>
-                                            <input type="text" id="shiftChanges" placeholder="z.B. 06:00, 14:00, 22:00">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="auditMethod">Auditmethode</label>
-                                            <select id="auditMethod">
-                                                <option value="vor-ort">vor Ort</option>
-                                                <option value="vor-ort-remote">vor Ort & remote</option>
-                                                <option value="100-remote">100% remote</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="ictTechnology">IKT Angaben - Eingesetzte Technik</label>
-                                            <input type="text" id="ictTechnology" placeholder="z.B. Teams, Zoom, WebEx">
+                                    <div class="form-group">
+                                        <label>Schichtsystem</label>
+                                        <div class="checkbox-group">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="shiftSystem" value="1-Schicht">
+                                                <span class="checkmark"></span>
+                                                1-Schicht
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="shiftSystem" value="2-Schicht">
+                                                <span class="checkmark"></span>
+                                                2-Schicht
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="shiftSystem" value="3-Schicht">
+                                                <span class="checkmark"></span>
+                                                3-Schicht
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="shiftSystem" value="other">
+                                                <span class="checkmark"></span>
+                                                <input type="text" id="shiftSystemOther" placeholder="Anderes Schichtsystem" class="inline-input">
+                                            </label>
                                         </div>
                                     </div>
                                     
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="ictTestDate">IKT Test - Positiv getestet am</label>
-                                            <input type="date" id="ictTestDate">
+                                    <div class="form-group">
+                                        <label for="shiftChanges">Schichtübergaben</label>
+                                        <input type="text" id="shiftChanges" placeholder="z.B. 06:00, 14:00, 22:00">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="remarks">Bemerkung</label>
+                                        <textarea id="remarks" rows="3" placeholder="Besondere Hinweise"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>Auditmethode</label>
+                                        <div class="checkbox-group">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditMethod" value="vor Ort">
+                                                <span class="checkmark"></span>
+                                                vor Ort
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditMethod" value="vor Ort & remote">
+                                                <span class="checkmark"></span>
+                                                vor Ort & remote
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditMethod" value="100% remote">
+                                                <span class="checkmark"></span>
+                                                100% remote
+                                            </label>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="auditRemarks">Bemerkungen</label>
-                                            <textarea id="auditRemarks" rows="2" placeholder="Besondere Hinweise zum Audit"></textarea>
-                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="ictTechnology">IKT Angaben - Eingesetzte Technik</label>
+                                        <input type="text" id="ictTechnology" placeholder="z.B. Teams, Zoom, WebEx">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="ictTestDate">IKT Test - Positiv getestet am</label>
+                                        <input type="date" id="ictTestDate">
                                     </div>
                                     
                                     <div class="form-group">
@@ -5154,8 +5219,9 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                         </label>
                                     </div>
                                     
-                                    <div class="form-group approval-note">
-                                        <p><strong>Wichtiger Hinweis:</strong> Sofern vom Auftraggeber keine Änderungen des Auditplans bis 1 Woche vor dem Audittermin eingehen, so gilt dieser als genehmigt.</p>
+                                    <div class="form-group">
+                                        <label for="hostContact">Gastgeber (host)</label>
+                                        <input type="text" id="hostContact" placeholder="Ansprechpartner vor Ort">
                                     </div>
                                 </div>
 
@@ -6944,7 +7010,7 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
         </div>
     </div>
 
-    <script src="script.js?v=2024070401"></script>
+    <script src="script.js?v=2024070502"></script>
     <script>
         // Initialize the dashboard and make it globally available
         document.addEventListener('DOMContentLoaded', () => {
@@ -10151,6 +10217,6 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
         </div>
     </div>
 
-    <script src="script.js?v=2024070401"></script>
+    <script src="script.js?v=2024070502"></script>
 </body>
 </html>

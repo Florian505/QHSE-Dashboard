@@ -1,5 +1,5 @@
 // QHSE Management System JavaScript
-console.log('🔄 QHSE Script wird geladen... Version 2024-07-04-01');
+console.log('🔄 QHSE Script wird geladen... Version 2024-07-05-02');
 
 class QHSEDashboard {
     constructor() {
@@ -33,6 +33,7 @@ class QHSEDashboard {
         this.auditExchanges = this.loadAuditExchangesFromStorage();
         this.exchangeRequests = this.loadExchangeRequestsFromStorage();
         this.auditors = this.loadAuditorsFromStorage();
+        this.znNumbers = [];
         this.initializeRootAdmin();
         this.initializeDefaultAreas();
         this.initializeDefaultDepartments();
@@ -94,6 +95,12 @@ class QHSEDashboard {
             this.setupExpandableInfo();
             this.setupCustomerFeedback();
             this.setupQHSENotesAreas();
+            
+            // Initialize ZN numbers display
+            this.updateZNNumbersDisplay();
+            
+            // Setup outside click for dropdown
+            this.setupDropdownOutsideClick();
             
             // Ensure machine management is properly initialized
             this.ensureMachineManagementWorks();
@@ -40099,41 +40106,36 @@ QHSEDashboard.prototype.addAuditBlock = function() {
             </div>
             
             <div class="block-form">
-                <div class="block-form-group">
-                    <label>Von (Uhrzeit)</label>
-                    <input type="time" name="startTime" value="09:00">
-                </div>
-                <div class="block-form-group">
-                    <label>Bis (Uhrzeit)</label>
-                    <input type="time" name="endTime" value="10:00">
-                </div>
-                <div class="block-form-group date-group">
-                    <div class="date-checkbox-container">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="useDifferentDate" onchange="toggleBlockDate(this)">
-                            <span class="checkmark"></span>
-                            Anderes Datum verwenden
-                        </label>
-                    </div>
-                    <div class="date-input-container" style="display: none;">
-                        <label>Datum</label>
-                        <input type="date" name="blockDate" value="">
-                    </div>
-                </div>
-                <div class="block-form-group time-calculation">
-                    <label>Zeitkalkulation</label>
-                    <div class="time-calc-display">
-                        <div class="calc-item">
-                            <span class="calc-label">Dauer:</span>
-                            <span class="calc-value duration-display">60 Min</span>
+                <div class="block-form-group datetime-group">
+                    <label>Datum und Uhrzeit</label>
+                    <div class="datetime-controls">
+                        <div class="datetime-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="showBlockDate" onchange="toggleBlockDateDisplay(this)" checked>
+                                <span class="checkmark"></span>
+                                Datum anzeigen
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="useDifferentDate" onchange="toggleBlockDateInput(this)">
+                                <span class="checkmark"></span>
+                                Anderes Datum verwenden
+                            </label>
                         </div>
-                        <div class="calc-item">
-                            <span class="calc-label">Pause (15%):</span>
-                            <span class="calc-value break-display">9 Min</span>
-                        </div>
-                        <div class="calc-item">
-                            <span class="calc-label">Gesamt:</span>
-                            <span class="calc-value total-display">69 Min</span>
+                        <div class="datetime-inputs">
+                            <div class="date-time-row">
+                                <div class="date-input-group" id="dateInputGroup">
+                                    <label>Datum</label>
+                                    <input type="date" name="blockDate" value="">
+                                </div>
+                                <div class="time-input-group">
+                                    <label>Von</label>
+                                    <input type="time" name="startTime" value="09:00">
+                                </div>
+                                <div class="time-input-group">
+                                    <label>Bis</label>
+                                    <input type="time" name="endTime" value="10:00">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -40219,30 +40221,15 @@ QHSEDashboard.prototype.addAuditBlock = function() {
     
     container.insertAdjacentHTML('beforeend', blockHtml);
     
-    // Add event listeners for time calculation
+    // Initialize date input state
     const block = document.getElementById(blockId);
-    const startTime = block.querySelector('input[name="startTime"]');
-    const endTime = block.querySelector('input[name="endTime"]');
-    const duration = block.querySelector('input[name="duration"]');
+    const dateInput = block.querySelector('input[name="blockDate"]');
     
-    const calculateDuration = () => {
-        if (startTime.value && endTime.value) {
-            const start = new Date(`2000-01-01T${startTime.value}`);
-            const end = new Date(`2000-01-01T${endTime.value}`);
-            const diffMs = end - start;
-            const diffMins = Math.round(diffMs / 60000);
-            const duration = diffMins > 0 ? diffMins : 0;
-            
-            // Update time calculation display
-            this.updateTimeCalculationDisplay(block, duration);
-        }
-    };
-    
-    startTime.addEventListener('change', calculateDuration);
-    endTime.addEventListener('change', calculateDuration);
-    
-    // Calculate initial duration
-    calculateDuration();
+    // Set initial state: date input disabled and semi-transparent
+    if (dateInput) {
+        dateInput.disabled = true;
+        dateInput.style.opacity = '0.5';
+    }
     
     // Enable drag and drop for the new block
     this.initializeDragAndDrop();
@@ -40680,43 +40667,279 @@ QHSEDashboard.prototype.renderAuditTimesOverview = function(auditTimesData) {
     `;
 };
 
-// Update time calculation display in audit block
-QHSEDashboard.prototype.updateTimeCalculationDisplay = function(block, durationMins) {
-    const durationDisplay = block.querySelector('.duration-display');
-    const breakDisplay = block.querySelector('.break-display');
-    const totalDisplay = block.querySelector('.total-display');
+
+// Toggle block date display visibility in generated plan
+QHSEDashboard.prototype.toggleBlockDateDisplay = function(checkbox) {
+    const block = checkbox.closest('.audit-block');
+    const dateInputGroup = block.querySelector('.date-input-group');
     
-    if (durationDisplay && breakDisplay && totalDisplay) {
-        const breakMins = Math.round(durationMins * 0.15); // 15% break time
-        const totalMins = durationMins + breakMins;
-        
-        durationDisplay.textContent = `${durationMins} Min`;
-        breakDisplay.textContent = `${breakMins} Min`;
-        totalDisplay.textContent = `${totalMins} Min`;
+    if (checkbox.checked) {
+        dateInputGroup.style.display = 'block';
+    } else {
+        dateInputGroup.style.display = 'none';
+        // Also uncheck "use different date" if hiding date display
+        const useDifferentDateCheckbox = block.querySelector('input[name="useDifferentDate"]');
+        if (useDifferentDateCheckbox) {
+            useDifferentDateCheckbox.checked = false;
+            this.toggleBlockDateInput(useDifferentDateCheckbox);
+        }
     }
 };
 
-// Toggle block date visibility
-QHSEDashboard.prototype.toggleBlockDate = function(checkbox) {
+// Toggle block date input functionality
+QHSEDashboard.prototype.toggleBlockDateInput = function(checkbox) {
     const block = checkbox.closest('.audit-block');
-    const dateContainer = block.querySelector('.date-input-container');
     const dateInput = block.querySelector('input[name="blockDate"]');
     
     if (checkbox.checked) {
-        dateContainer.style.display = 'block';
+        dateInput.disabled = false;
+        dateInput.style.opacity = '1';
         // Set default date to today
         if (!dateInput.value) {
             dateInput.value = new Date().toISOString().split('T')[0];
         }
     } else {
-        dateContainer.style.display = 'none';
+        dateInput.disabled = true;
+        dateInput.style.opacity = '0.5';
         dateInput.value = '';
     }
 };
 
+// Audit Plan Header Functions
+QHSEDashboard.prototype.addZNNumber = function() {
+    const znInput = document.getElementById('znNumberInput');
+    const znValue = znInput.value.trim();
+    
+    if (!znValue) {
+        this.showNotification('Bitte eine ZN-Nummer eingeben', 'warning');
+        return;
+    }
+    
+    // Check if ZN already exists
+    if (this.znNumbers && this.znNumbers.includes(znValue)) {
+        this.showNotification('Diese ZN-Nummer ist bereits vorhanden', 'warning');
+        return;
+    }
+    
+    // Initialize znNumbers array if not exists
+    if (!this.znNumbers) {
+        this.znNumbers = [];
+    }
+    
+    // Add to array
+    this.znNumbers.push(znValue);
+    
+    // Clear input
+    znInput.value = '';
+    
+    // Update display
+    this.updateZNNumbersDisplay();
+    this.showNotification('ZN-Nummer hinzugefügt', 'success');
+};
+
+QHSEDashboard.prototype.updateZNNumbersDisplay = function() {
+    const znNumbersList = document.getElementById('znNumbersList');
+    
+    if (!this.znNumbers || this.znNumbers.length === 0) {
+        znNumbersList.innerHTML = '<p class="zn-empty">Noch keine ZN-Nummern hinzugefügt</p>';
+        return;
+    }
+    
+    znNumbersList.innerHTML = this.znNumbers.map(zn => `
+        <div class="zn-number-item">
+            <span class="zn-number-text">${zn}</span>
+            <button type="button" onclick="removeZNNumber('${zn}')" class="btn-remove-zn" title="ZN-Nummer entfernen">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+};
+
+QHSEDashboard.prototype.removeZNNumber = function(znValue) {
+    if (confirm(`ZN-Nummer "${znValue}" entfernen?`)) {
+        this.znNumbers = this.znNumbers.filter(zn => zn !== znValue);
+        this.updateZNNumbersDisplay();
+        this.showNotification('ZN-Nummer entfernt', 'success');
+    }
+};
+
+QHSEDashboard.prototype.triggerLogoUpload = function() {
+    document.getElementById('logoUpload').click();
+};
+
+QHSEDashboard.prototype.handleLogoUpload = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validate file size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        this.showNotification('Logo zu groß. Maximum 2MB erlaubt.', 'error');
+        return;
+    }
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        this.showNotification('Nur Bilddateien erlaubt (JPG, PNG, SVG)', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const logoImage = document.getElementById('logoImage');
+        const logoPreview = document.getElementById('logoPreview');
+        const logoUploadArea = document.querySelector('.logo-upload-area');
+        
+        logoImage.src = e.target.result;
+        logoPreview.style.display = 'block';
+        logoUploadArea.style.display = 'none';
+        
+        // Store logo data for later use in plan generation
+        this.logoData = e.target.result;
+        this.showNotification('Logo hochgeladen', 'success');
+    };
+    
+    reader.readAsDataURL(file);
+};
+
+QHSEDashboard.prototype.removeLogo = function() {
+    const logoPreview = document.getElementById('logoPreview');
+    const logoUploadArea = document.querySelector('.logo-upload-area');
+    const logoUpload = document.getElementById('logoUpload');
+    
+    logoPreview.style.display = 'none';
+    logoUploadArea.style.display = 'flex';
+    logoUpload.value = '';
+    this.logoData = null;
+    
+    this.showNotification('Logo entfernt', 'success');
+};
+
 // Global functions for onclick handlers
-window.toggleBlockDate = function(checkbox) {
-    window.qhseDashboard.toggleBlockDate(checkbox);
+window.addZNNumber = function() {
+    window.qhseDashboard.addZNNumber();
+};
+
+window.removeZNNumber = function(znValue) {
+    window.qhseDashboard.removeZNNumber(znValue);
+};
+
+window.handleZNInputKeypress = function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        window.qhseDashboard.addZNNumber();
+    }
+};
+
+// Multi-Select Dropdown Functions
+window.toggleAuditCriteriaDropdown = function() {
+    const dropdown = document.getElementById('auditCriteriaDropdown');
+    const display = document.querySelector('.multi-select-display');
+    
+    if (dropdown.style.display === 'none') {
+        dropdown.style.display = 'block';
+        display.classList.add('open');
+    } else {
+        dropdown.style.display = 'none';
+        display.classList.remove('open');
+    }
+};
+
+// Update display when checkboxes change
+QHSEDashboard.prototype.updateAuditCriteriaDisplay = function() {
+    const checkboxes = document.querySelectorAll('input[name="auditCriteria"]:checked');
+    const display = document.getElementById('auditCriteriaDisplay');
+    
+    if (checkboxes.length === 0) {
+        display.textContent = 'Bitte wählen Sie Standards aus...';
+        display.style.color = 'var(--text-secondary)';
+    } else {
+        const selected = Array.from(checkboxes).map(cb => {
+            // Show only ISO standard part for display
+            return cb.value.split(',')[0];
+        });
+        display.textContent = selected.join(', ');
+        display.style.color = 'var(--text-primary)';
+    }
+};
+
+QHSEDashboard.prototype.getSelectedAuditCriteria = function() {
+    const checkboxes = document.querySelectorAll('input[name="auditCriteria"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+};
+
+QHSEDashboard.prototype.getExternalAuditors = function() {
+    const externalAuditors = [];
+    
+    // Check externe Auditoren
+    const auditor1Checkbox = document.querySelector('input[name="externalAuditor1"]');
+    const auditor1Input = document.querySelector('.external-auditor-item:nth-child(1) .external-auditor-input');
+    if (auditor1Checkbox && auditor1Checkbox.checked && auditor1Input && auditor1Input.value.trim()) {
+        externalAuditors.push(`extern, Firma: ${auditor1Input.value.trim()}`);
+    }
+    
+    const auditor2Checkbox = document.querySelector('input[name="externalAuditor2"]');
+    const auditor2Input = document.querySelector('.external-auditor-item:nth-child(2) .external-auditor-input');
+    if (auditor2Checkbox && auditor2Checkbox.checked && auditor2Input && auditor2Input.value.trim()) {
+        externalAuditors.push(`extern, Firma: ${auditor2Input.value.trim()}`);
+    }
+    
+    return externalAuditors;
+};
+
+QHSEDashboard.prototype.getExternalStaff = function() {
+    const externalStaff = [];
+    
+    // Check weitere externe Mitarbeiter
+    const staff1Checkbox = document.querySelector('input[name="externalStaff1"]');
+    const staff1Input = document.querySelector('.external-staff-item:nth-child(1) .external-staff-input');
+    if (staff1Checkbox && staff1Checkbox.checked && staff1Input && staff1Input.value.trim()) {
+        externalStaff.push(`extern, Firma: ${staff1Input.value.trim()}`);
+    }
+    
+    const staff2Checkbox = document.querySelector('input[name="externalStaff2"]');
+    const staff2Input = document.querySelector('.external-staff-item:nth-child(2) .external-staff-input');
+    if (staff2Checkbox && staff2Checkbox.checked && staff2Input && staff2Input.value.trim()) {
+        externalStaff.push(`extern, Firma: ${staff2Input.value.trim()}`);
+    }
+    
+    return externalStaff;
+};
+
+QHSEDashboard.prototype.setupDropdownOutsideClick = function() {
+    document.addEventListener('click', (event) => {
+        const dropdown = document.getElementById('auditCriteriaDropdown');
+        const container = document.querySelector('.multi-select-container');
+        const display = document.querySelector('.multi-select-display');
+        
+        if (dropdown && !container.contains(event.target)) {
+            dropdown.style.display = 'none';
+            display.classList.remove('open');
+        }
+    });
+};
+
+window.triggerLogoUpload = function() {
+    window.qhseDashboard.triggerLogoUpload();
+};
+
+window.updateAuditCriteriaDisplay = function() {
+    window.qhseDashboard.updateAuditCriteriaDisplay();
+};
+
+window.handleLogoUpload = function(event) {
+    window.qhseDashboard.handleLogoUpload(event);
+};
+
+window.removeLogo = function() {
+    window.qhseDashboard.removeLogo();
+};
+
+window.toggleBlockDateDisplay = function(checkbox) {
+    window.qhseDashboard.toggleBlockDateDisplay(checkbox);
+};
+
+window.toggleBlockDateInput = function(checkbox) {
+    window.qhseDashboard.toggleBlockDateInput(checkbox);
 };
 
 window.addAuditorRow = function() {
@@ -41066,26 +41289,15 @@ QHSEDashboard.prototype.calculateTimeDifference = function(startTime, endTime) {
 };
 
 QHSEDashboard.prototype.generateAuditPlan = function() {
-    // Collect basic configuration (no validation - all fields optional)
-    const title = document.getElementById('auditTitle').value || 'Neuer Auditplan';
+    // Set default values for removed fields
+    const title = 'Auditplan';
+    const date = new Date().toISOString().split('T')[0];
+    const dateDisplay = new Date(date).toLocaleDateString('de-DE');
+    const dateType = 'single';
     
-    // Handle single or multi-day audit dates
-    const dateType = document.getElementById('auditDateType').value;
-    let date, startDate, endDate, dateDisplay;
-    
-    if (dateType === 'single') {
-        date = document.getElementById('auditDate').value || new Date().toISOString().split('T')[0];
-        dateDisplay = new Date(date).toLocaleDateString('de-DE');
-    } else {
-        startDate = document.getElementById('auditStartDate').value || new Date().toISOString().split('T')[0];
-        endDate = document.getElementById('auditEndDate').value || new Date().toISOString().split('T')[0];
-        date = startDate; // Use start date as primary date for compatibility
-        dateDisplay = `${new Date(startDate).toLocaleDateString('de-DE')} - ${new Date(endDate).toLocaleDateString('de-DE')}`;
-    }
-    
-    const location = document.getElementById('auditLocation').value || 'Nicht angegeben';
-    const type = document.getElementById('auditType').value || 'IA';
-    const leadAuditor = document.getElementById('leadAuditor').value || 'Nicht angegeben';
+    const location = document.getElementById('auditLocation')?.value || 'Nicht angegeben';
+    const type = document.getElementById('auditType')?.value || 'IA';
+    const leadAuditor = document.getElementById('leadAuditor')?.value || 'Nicht angegeben';
     
     // Collect audit standards (optional)
     const auditStandards = [];
@@ -41116,26 +41328,19 @@ QHSEDashboard.prototype.generateAuditPlan = function() {
             }
         });
         
-        // Handle checkbox for different date
+        // Handle date display options
+        const showBlockDateCheckbox = block.querySelector('input[name="showBlockDate"]');
         const useDifferentDateCheckbox = block.querySelector('input[name="useDifferentDate"]');
         const blockDateInput = block.querySelector('input[name="blockDate"]');
         
+        // Determine if date should be shown in generated plan
+        blockData.showDate = showBlockDateCheckbox ? showBlockDateCheckbox.checked : true;
+        
+        // Determine which date to use
         if (useDifferentDateCheckbox && useDifferentDateCheckbox.checked && blockDateInput && blockDateInput.value) {
             blockData.blockDate = blockDateInput.value;
         } else {
             blockData.blockDate = ''; // Use main audit date
-        }
-        
-        // Add time calculation data
-        const startTime = blockData.startTime;
-        const endTime = blockData.endTime;
-        if (startTime && endTime && startTime !== 'Nicht angegeben' && endTime !== 'Nicht angegeben') {
-            const duration = this.calculateTimeDifference(startTime, endTime);
-            blockData.duration = duration;
-            blockData.durationFormatted = `${duration} Min`;
-            blockData.breakTime = Math.round(duration * 0.15);
-            blockData.totalTime = duration + blockData.breakTime;
-            blockData.totalTimeFormatted = `${blockData.totalTime} Min`;
         }
         
         blocks.push(blockData);
@@ -41150,6 +41355,9 @@ QHSEDashboard.prototype.generateAuditPlan = function() {
         });
     }
     
+    // Use stored ZN numbers
+    const selectedZNs = this.znNumbers || [];
+    
     // Generate plan with all configuration data
     const planData = {
         id: 'plan_' + Date.now(),
@@ -41157,32 +41365,36 @@ QHSEDashboard.prototype.generateAuditPlan = function() {
         date,
         dateDisplay,
         dateType,
-        startDate,
-        endDate,
+        startDate: date,
+        znNumbers: selectedZNs,
+        logoData: this.logoData || null,
+        endDate: date,
         location,
         type,
         leadAuditor,
         // Basic data
-        client: document.getElementById('auditClient').value,
-        clientContact: document.getElementById('clientContact').value,
-        scope: document.getElementById('auditScope').value,
+        client: document.getElementById('auditClient')?.value || '',
+        scope: document.getElementById('auditScope')?.value || '',
+        auditCriteria: this.getSelectedAuditCriteria(),
         // Audit details
-        language: document.getElementById('auditLanguage').value,
+        clientContact: document.getElementById('clientContact')?.value || '',
+        language: document.getElementById('auditLanguage')?.value || '',
         standards: auditStandards,
-        objective: document.getElementById('auditObjective').value,
+        objective: document.getElementById('auditObjective')?.value || '',
         // Team
-        externalAuditor: document.getElementById('auditorExternal').value,
-        trainee: document.getElementById('auditorTrainee').value,
-        experts: document.getElementById('auditorExperts').value,
-        host: document.getElementById('hostContact').value,
+        auditors: document.getElementById('auditors')?.value || '',
+        trainees: document.getElementById('trainees')?.value || '',
+        experts: document.getElementById('experts')?.value || '',
+        externalAuditors: this.getExternalAuditors(),
+        externalStaff: this.getExternalStaff(),
         // Organization
-        shiftSystem: document.getElementById('shiftSystem').value,
-        shiftChanges: document.getElementById('shiftChanges').value,
-        auditMethod: document.getElementById('auditMethod').value,
-        ictTechnology: document.getElementById('ictTechnology').value,
-        ictTestDate: document.getElementById('ictTestDate').value,
-        ictNoChanges: document.getElementById('ictNoChanges').checked,
-        remarks: document.getElementById('auditRemarks').value,
+        shiftSystem: document.getElementById('shiftSystem')?.value || '',
+        shiftChanges: document.getElementById('shiftChanges')?.value || '',
+        auditMethod: document.getElementById('auditMethod')?.value || '',
+        ictTechnology: document.getElementById('ictTechnology')?.value || '',
+        ictTestDate: document.getElementById('ictTestDate')?.value || '',
+        ictNoChanges: document.getElementById('ictNoChanges')?.checked || false,
+        remarks: document.getElementById('auditRemarks')?.value || '',
         // Default time configuration (Zeitkonfiguration removed from UI)
         startTime: '08:00',
         endTime: '16:00', 
@@ -41254,39 +41466,84 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
     // Generate HTML table with comprehensive TÜV-compliant header
     let tableHtml = `
         <div class="plan-info">
-            <h4>${planData.title}</h4>
-            
-            <!-- Audit Identification & Accreditation -->
+            <!-- Grunddaten -->
             <div class="config-section">
-                <h5><i class="fas fa-certificate"></i> Audit-Identifikation & Akkreditierung</h5>
                 <div class="info-grid">
-                    ${planData.auditId ? `<p><strong>Audit-ID:</strong> ${planData.auditId}</p>` : ''}
-                    ${planData.certificationBodyCode ? `<p><strong>Zertifizierungsstellen-Code:</strong> ${planData.certificationBodyCode}</p>` : ''}
-                    ${planData.accreditationNumber ? `<p><strong>Akkreditierungsnummer:</strong> ${planData.accreditationNumber}</p>` : ''}
-                    ${planData.iafCode ? `<p><strong>IAF-Industriecode:</strong> ${planData.iafCode}</p>` : ''}
+                    <p><strong>Auftraggeber:</strong> ${planData.client || ''}</p>
+                    <div class="approval-notice-display">
+                        <i class="fas fa-info-circle"></i>
+                        Sofern vom Auftraggeber keine Änderungen des Auditplans bis 1 Woche vor dem Audittermin eingehen, so gilt dieser als genehmigt.
+                    </div>
+                    <p><strong>Standort(e) / Produktionsstätte(n) / temporäre Standorte / andere Orte der Leistungserbringung:</strong> ${planData.location || ''}</p>
+                    <p><strong>Geltungsbereich:</strong> ${planData.scope || ''}</p>
+                    <p><strong>Normgrundlage, Auditkriterien:</strong></p>
+                    ${planData.auditCriteria && planData.auditCriteria.length > 0 ? 
+                        `<div class="criteria-display">${planData.auditCriteria.map(criteria => `• ${criteria}`).join('<br>')}</div>` : 
+                        '<div class="criteria-display">Bitte Standards auswählen</div>'
+                    }
                 </div>
             </div>
 
-            <!-- Basic Audit Information -->
+            <!-- Audit-Details -->
             <div class="config-section">
-                <h5><i class="fas fa-calendar-alt"></i> Audit-Grunddaten</h5>
                 <div class="info-grid">
-                    <p><strong>${planData.dateType === 'range' ? 'Zeitraum:' : 'Datum:'}</strong> ${planData.dateDisplay}</p>
-                    <p><strong>Standort:</strong> ${planData.location}</p>
-                    <p><strong>Audit-Typ:</strong> ${planData.type}</p>
-                    ${planData.auditDuration ? `<p><strong>Audit-Dauer:</strong> ${planData.auditDuration}</p>` : ''}
-                    ${planData.auditLanguage ? `<p><strong>Audit-Sprache:</strong> ${planData.auditLanguage}</p>` : ''}
-                    ${planData.travelRequired ? `<p><strong>Reise erforderlich:</strong> ${planData.travelRequired === 'yes' ? 'Ja' : 'Nein'}</p>` : ''}
-                    ${planData.overnightRequired ? `<p><strong>Übernachtung erforderlich:</strong> ${planData.overnightRequired === 'yes' ? 'Ja' : 'Nein'}</p>` : ''}
+                    <p><strong>Auditart:</strong> ${planData.type || ''}</p>
+                    <p><strong>Beauftragter des Kunden:</strong> ${planData.clientContact || ''}</p>
+                    <p><strong>Auditziel:</strong></p>
+                    <div class="audit-objective">${planData.objective ? planData.objective.replace(/\n/g, '<br>') : 'Überprüfung des Managementsystems auf Konformität mit den Auditkriterien, Stichprobenverfahren mit dem Ziel: Erstzertifizierung - Stufe 1 und Aufrechterhaltung der Zertifizierung<br><br>Feststellung der Fähigkeit des Managementsystems zur Sicherstellung der Erfüllung anzuwendender gesetzlicher, behördlicher und vertraglicher Anforderungen<br><br>Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete Erwartung zur Erreichung der festgelegten Ziele der Organisation'}</div>
+                    <p><strong>Auditsprache(n):</strong> ${planData.language || ''}</p>
                 </div>
             </div>
 
-            <!-- Auditor Information -->
+            <!-- Audit-Team -->
             <div class="config-section">
-                <h5><i class="fas fa-user-tie"></i> Auditor-Information</h5>
                 <div class="info-grid">
-                    <p><strong>Lead-Auditor:</strong> ${planData.leadAuditor}</p>
-                    ${planData.team ? `<p><strong>Audit-Team:</strong> ${planData.team}</p>` : ''}
+                    <p><strong>Auditleiter:</strong> ${planData.leadAuditor || 'Klicken oder tippen Sie hier, um Text einzugeben.'}</p>
+                    <p><strong>Auditor(en):</strong> ${planData.auditors || 'hier können mehrere Auditoren stehen'}</p>
+                    <p><strong>Externe Auditoren:</strong></p>
+                    <div class="external-team-display">
+                        ${planData.externalAuditors && planData.externalAuditors.length > 0 ? 
+                            planData.externalAuditors.map(auditor => `• ${auditor}`).join('<br>') :
+                            '☒ extern, Firma:<br>☐ extern, Firma:'
+                        }
+                    </div>
+                    <p><strong>Trainee(s):</strong> ${planData.trainees || ''}</p>
+                    <p><strong>Expert(en):</strong> ${planData.experts || ''}</p>
+                    <p><strong>Weitere externe Mitarbeiter:</strong></p>
+                    <div class="external-team-display">
+                        ${planData.externalStaff && planData.externalStaff.length > 0 ? 
+                            planData.externalStaff.map(staff => `• ${staff}`).join('<br>') :
+                            '☐ extern, Firma:<br>☐ extern, Firma:'
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Betriebsorganisation -->
+            <div class="config-section">
+                <div class="info-grid">
+                    <p><strong>Schichtsystem</strong></p>
+                    <div class="checkbox-display">
+                        ${planData.shiftSystems && planData.shiftSystems.length > 0 ? 
+                            planData.shiftSystems.map(system => `☑ ${system}`).join('<br>') :
+                            '☐ 1-Schicht<br>☐ 2-Schicht<br>☐ 3-Schicht<br>☐'
+                        }
+                    </div>
+                    <p><strong>Schichtübergaben</strong> ${planData.shiftChanges || ''}</p>
+                    <p><strong>Bemerkung</strong> ${planData.remarks || ''}</p>
+                    <p><strong>Auditmethode</strong></p>
+                    <div class="checkbox-display">
+                        ${planData.auditMethods && planData.auditMethods.length > 0 ? 
+                            planData.auditMethods.map(method => `☑ ${method}`).join('<br>') :
+                            '☐ vor Ort<br>☐ vor Ort & remote<br>☐ 100% remote'
+                        }
+                    </div>
+                    <p><strong>IKT Angaben</strong> Eingesetzte Technik ${planData.ictTechnology || ''}</p>
+                    <p><strong>IKT Test</strong> Positiv getestet am ${planData.ictTestDate || ''}</p>
+                    <div class="checkbox-display">
+                        ${planData.ictNoChanges ? '☑' : '☐'} Test erfolgte im letzten Audit, es gab keine Änderungen
+                    </div>
+                    <p><strong>Gastgeber (host)</strong> ${planData.hostContact || ''}</p>
                 </div>
             </div>
 
@@ -41339,10 +41596,13 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
             </div>
             ` : ''}
 
-            <!-- Approval Note -->
-            <div class="approval-note">
-                <p><strong><i class="fas fa-stamp"></i> Genehmigungsvermerk:</strong> Dieser Auditplan wurde gemäß TÜV-Standards erstellt und ist zur Durchführung freigegeben.</p>
-                <p><em>Erstellt am: ${new Date().toLocaleDateString('de-DE')} um ${new Date().toLocaleTimeString('de-DE')}</em></p>
+            <!-- Plan Header with Logo and ZN -->
+            <div class="plan-header-display">
+                ${planData.logoData ? `<div class="logo-display"><img src="${planData.logoData}" alt="Logo" class="plan-logo"></div>` : ''}
+                <div class="plan-title-display">
+                    <h2>Auditplan</h2>
+                    ${planData.znNumbers && planData.znNumbers.length > 0 ? `<p class="zn-info">ZN: ${planData.znNumbers.join(', ')}</p>` : ''}
+                </div>
             </div>
         </div>
         
@@ -41373,15 +41633,17 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
             item.topics ? `Prozesse: ${item.topics}` : ''
         ].filter(Boolean).join('<br>');
         
-        // Add date to time display - use block date if available, otherwise main audit date
-        const displayDate = item.blockDate || planData.auditDate;
-        const dateTime = displayDate ? 
-            `${displayDate}<br>${item.time} - ${endTimeFormatted}` : 
-            `${item.time} - ${endTimeFormatted}`;
-        
-        // Add time calculation to the display if available
-        const timeCalculation = item.totalTimeFormatted ? 
-            `<br><small class="time-calc-info">Gesamt: ${item.totalTimeFormatted} (inkl. ${item.breakTime} Min Pause)</small>` : '';
+        // Add date to time display based on block settings
+        let dateTime;
+        if (item.showDate !== false) { // Show date unless explicitly set to false
+            const displayDate = item.blockDate || planData.auditDate;
+            dateTime = displayDate ? 
+                `${displayDate}<br>${item.time} - ${endTimeFormatted}` : 
+                `${item.time} - ${endTimeFormatted}`;
+        } else {
+            // Only show time, no date
+            dateTime = `${item.time} - ${endTimeFormatted}`;
+        }
         
         // Combine standards and chapters for "Normkapitel"
         const normChapters = [
@@ -41391,7 +41653,7 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
 
         tableHtml += `
             <tr>
-                <td class="datetime-cell">${dateTime}${timeCalculation}</td>
+                <td class="datetime-cell">${dateTime}</td>
                 <td class="org-processes-cell">${orgUnitAndProcesses || '-'}</td>
                 <td class="auditors-cell">${item.auditors || '-'}</td>
                 <td class="contact-cell">${item.contact || '-'}</td>
@@ -41408,7 +41670,15 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
     // Add final audit plan notes and distribution list
     tableHtml += this.renderAuditPlanFooter(planData);
     
-    document.getElementById('auditPlanTable').innerHTML = tableHtml;
+    // Clear any cached content and render fresh
+    const auditPlanContainer = document.getElementById('auditPlanTable');
+    if (!auditPlanContainer) {
+        console.error('❌ auditPlanTable Container nicht gefunden');
+        return;
+    }
+    
+    auditPlanContainer.innerHTML = ''; // Clear first
+    auditPlanContainer.innerHTML = tableHtml;
     document.getElementById('generatedPlanSection').style.display = 'block';
     
     // Scroll to generated plan
@@ -41633,6 +41903,41 @@ QHSEDashboard.prototype.exportAuditPlanPDF = function() {
                     padding: 20px; 
                     font-size: 12px;
                 }
+                .header-info { 
+                    margin-bottom: 20px; 
+                    border-bottom: 2px solid #333; 
+                    padding-bottom: 15px;
+                }
+                .plan-header-export {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 20px;
+                }
+                .logo-container {
+                    flex: 0 0 auto;
+                }
+                .export-logo {
+                    max-height: 60px;
+                    max-width: 120px;
+                    object-fit: contain;
+                }
+                .title-container {
+                    flex: 1;
+                    text-align: center;
+                }
+                .title-container h2 { 
+                    margin: 0; 
+                    font-size: 24px; 
+                    color: #333;
+                    font-weight: bold;
+                }
+                .zn-display {
+                    margin: 5px 0 0 0;
+                    font-size: 14px;
+                    color: #666;
+                    font-weight: 500;
+                }
                 .plan-info { 
                     margin-bottom: 20px; 
                     page-break-inside: avoid;
@@ -41707,15 +42012,15 @@ QHSEDashboard.prototype.exportAuditPlanPDF = function() {
         </head>
         <body>
             <div class="header-info">
-                <h2>📋 TÜV-konformer Auditplan</h2>
-                <p>Erstellt mit QHSE Management System - ${new Date().toLocaleDateString('de-DE')} ${new Date().toLocaleTimeString('de-DE')}</p>
+                <div class="plan-header-export">
+                    ${this.currentPlanData.logoData ? `<div class="logo-container"><img src="${this.currentPlanData.logoData}" alt="Logo" class="export-logo"></div>` : ''}
+                    <div class="title-container">
+                        <h2>Auditplan</h2>
+                        ${this.currentPlanData.znNumbers && this.currentPlanData.znNumbers.length > 0 ? `<p class="zn-display">ZN: ${this.currentPlanData.znNumbers.join(', ')}</p>` : ''}
+                    </div>
+                </div>
             </div>
             ${tableHtml}
-            <div class="footer">
-                <p>Generiert am ${new Date().toLocaleDateString('de-DE')} um ${new Date().toLocaleTimeString('de-DE')} | 
-                   Lead-Auditor: ${this.currentPlanData.leadAuditor} | 
-                   System: QHSE Management - Hoffmann & Voss</p>
-            </div>
         </body>
         </html>
     `);
