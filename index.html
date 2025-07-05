@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-ancestors 'none';">
     <title>QHSE Management System - Hoffmann und Voss GmbH</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2024070401">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
 </head>
 <body>
+    <!-- TÜV-compliant notification system -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <nav class="sidebar">
@@ -120,6 +123,10 @@
                     <li class="menu-item static-item" data-section="audit-tauschboerse" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,admin,root-admin">
                         <i class="fas fa-exchange-alt"></i>
                         <span>Audit-Tauschbörse</span>
+                    </li>
+                    <li class="menu-item static-item" data-section="auditor-verwaltung" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,admin,root-admin">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Auditor-Verwaltung</span>
                     </li>
                     <li class="menu-item static-item" data-section="gefahrstoffe" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,techniker,admin,root-admin">
                         <i class="fas fa-exclamation-circle"></i>
@@ -3337,38 +3344,265 @@
 
                     <!-- Overview Tab -->
                     <div id="overview-tab" class="tab-content active">
-                        <div class="info-box">
-                            <h3>📊 Statistiken</h3>
-                            <div class="stats-row">
-                                <div class="stat-item">
-                                    <span class="stat-number" id="totalOffersCount">0</span>
-                                    <span class="stat-label">Meine Angebote</span>
+                        <!-- Hero Section -->
+                        <div class="exchange-hero">
+                            <div class="hero-content">
+                                <div class="hero-text">
+                                    <h2><i class="fas fa-handshake"></i> Willkommen in der Audit-Tauschbörse</h2>
+                                    <p>Verbinden Sie sich mit qualifizierten Auditoren, teilen Sie Expertise und erweitern Sie Ihr professionelles Netzwerk. Nutzen Sie die Kraft der Gemeinschaft für effizientere und bessere Audits.</p>
+                                    <div class="hero-actions">
+                                        <button class="btn btn-primary btn-hero" onclick="qhseDashboard.switchExchangeTab('offer')">
+                                            <i class="fas fa-plus-circle"></i>
+                                            Audit anbieten
+                                        </button>
+                                        <button class="btn btn-secondary btn-hero" onclick="qhseDashboard.switchExchangeTab('search')">
+                                            <i class="fas fa-search"></i>
+                                            Audits finden
+                                        </button>
+                                        <button class="btn btn-success btn-hero" onclick="window.qhseDashboard.createAdvancedAuditOffer()" style="background: #10b981;">
+                                            <i class="fas fa-star"></i>
+                                            TEST: TÜV-Formular
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-number" id="totalExchangesCount">0</span>
-                                    <span class="stat-label">Gesamt verfügbar</span>
+                                <div class="hero-illustration">
+                                    <div class="exchange-icon-large">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dashboard Statistics -->
+                        <div class="dashboard-stats">
+                            <div class="stats-grid">
+                                <div class="stat-card stat-primary">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="totalOffersCount">0</span>
+                                        <span class="stat-label">Meine Angebote</span>
+                                        <span class="stat-sublabel">Aktive Audit-Angebote</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card stat-success">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-globe"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="totalExchangesCount">0</span>
+                                        <span class="stat-label">Verfügbare Audits</span>
+                                        <span class="stat-sublabel">In der Tauschbörse</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card stat-info">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="totalAuditorsCountDashboard">0</span>
+                                        <span class="stat-label">Aktive Auditoren</span>
+                                        <span class="stat-sublabel">Verfügbare Experten</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card stat-warning">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-inbox"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="pendingRequestsCount">0</span>
+                                        <span class="stat-label">Offene Anfragen</span>
+                                        <span class="stat-sublabel">Zu bearbeiten</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="quick-actions-section">
+                            <h3><i class="fas fa-bolt"></i> Schnellaktionen</h3>
+                            <div class="quick-actions-grid">
+                                <div class="quick-action-card" onclick="qhseDashboard.switchExchangeTab('offer')">
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </div>
+                                    <h4>Neues Angebot</h4>
+                                    <p>Erstellen Sie ein neues Audit-Angebot für die Tauschbörse</p>
+                                </div>
+                                <div class="quick-action-card" onclick="qhseDashboard.switchExchangeTab('auditor-search')">
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-user-search"></i>
+                                    </div>
+                                    <h4>Auditor finden</h4>
+                                    <p>Suchen Sie nach qualifizierten Auditoren für Ihre Projekte</p>
+                                </div>
+                                <div class="quick-action-card" onclick="qhseDashboard.switchExchangeTab('my-requests')">
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-envelope-open-text"></i>
+                                    </div>
+                                    <h4>Anfragen verwalten</h4>
+                                    <p>Bearbeiten Sie eingehende und ausgehende Audit-Anfragen</p>
+                                </div>
+                                <div class="quick-action-card" onclick="window.open('/audit-best-practices', '_blank')">
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </div>
+                                    <h4>Best Practices</h4>
+                                    <p>Erfahren Sie mehr über erfolgreiche Audit-Kooperationen</p>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="info-box">
-                            <h3>📋 Meine Angebote</h3>
-                            <div id="myOffersList">
-                                <p class="no-offers">Noch keine Angebote erstellt. <button onclick="qhseDashboard.switchExchangeTab('offer')" class="btn-link">Erstes Angebot erstellen</button></p>
+                        <!-- Recent Activity & My Offers -->
+                        <div class="dashboard-content">
+                            <div class="content-grid">
+                                <div class="content-section">
+                                    <div class="section-header">
+                                        <h3><i class="fas fa-clock"></i> Aktuelle Aktivitäten</h3>
+                                        <button class="btn btn-small btn-outline">Alle anzeigen</button>
+                                    </div>
+                                    <div class="activity-list" id="recentActivityList">
+                                        <div class="activity-item">
+                                            <div class="activity-icon activity-success">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                            <div class="activity-content">
+                                                <h4>Audit-Anfrage bestätigt</h4>
+                                                <p>ISO 9001 Audit für TechCorp wurde bestätigt</p>
+                                                <span class="activity-time">vor 2 Stunden</span>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon activity-info">
+                                                <i class="fas fa-plus"></i>
+                                            </div>
+                                            <div class="activity-content">
+                                                <h4>Neues Angebot erstellt</h4>
+                                                <p>ISO 14001 Umweltaudit hinzugefügt</p>
+                                                <span class="activity-time">vor 1 Tag</span>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon activity-warning">
+                                                <i class="fas fa-eye"></i>
+                                            </div>
+                                            <div class="activity-content">
+                                                <h4>Profil angesehen</h4>
+                                                <p>3 Auditoren haben Ihr Profil besucht</p>
+                                                <span class="activity-time">vor 3 Tagen</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="content-section">
+                                    <div class="section-header">
+                                        <h3><i class="fas fa-clipboard-list"></i> Meine Angebote</h3>
+                                        <button class="btn btn-small btn-primary" onclick="qhseDashboard.switchExchangeTab('offer')">
+                                            <i class="fas fa-plus"></i> Neues Angebot
+                                        </button>
+                                    </div>
+                                    <div id="myOffersList" class="offers-preview">
+                                        <div class="no-offers-state">
+                                            <div class="empty-state-icon">
+                                                <i class="fas fa-clipboard"></i>
+                                            </div>
+                                            <h4>Noch keine Angebote</h4>
+                                            <p>Erstellen Sie Ihr erstes Audit-Angebot und beginnen Sie zu vernetzen</p>
+                                            <button class="btn btn-primary" onclick="qhseDashboard.switchExchangeTab('offer')">
+                                                <i class="fas fa-plus-circle"></i>
+                                                Erstes Angebot erstellen
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trending Standards -->
+                        <div class="trending-section">
+                            <h3><i class="fas fa-fire"></i> Beliebte Standards</h3>
+                            <div class="trending-grid">
+                                <div class="trending-card">
+                                    <div class="trending-header">
+                                        <span class="standard-badge iso-9001">ISO 9001</span>
+                                        <span class="trending-count">+23%</span>
+                                    </div>
+                                    <h4>Qualitätsmanagement</h4>
+                                    <p>47 aktive Angebote</p>
+                                </div>
+                                <div class="trending-card">
+                                    <div class="trending-header">
+                                        <span class="standard-badge iso-14001">ISO 14001</span>
+                                        <span class="trending-count">+18%</span>
+                                    </div>
+                                    <h4>Umweltmanagement</h4>
+                                    <p>32 aktive Angebote</p>
+                                </div>
+                                <div class="trending-card">
+                                    <div class="trending-header">
+                                        <span class="standard-badge iso-45001">ISO 45001</span>
+                                        <span class="trending-count">+31%</span>
+                                    </div>
+                                    <h4>Arbeitsschutz</h4>
+                                    <p>28 aktive Angebote</p>
+                                </div>
+                                <div class="trending-card">
+                                    <div class="trending-header">
+                                        <span class="standard-badge iatf-16949">IATF 16949</span>
+                                        <span class="trending-count">+15%</span>
+                                    </div>
+                                    <h4>Automobilindustrie</h4>
+                                    <p>19 aktive Angebote</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Offer Tab -->
                     <div id="offer-tab" class="tab-content">
+                        <!-- TÜV-konformes erweitertes Audit-Angebot -->
+                        <div class="action-buttons-section">
+                            <button class="btn btn-primary btn-large" onclick="window.qhseDashboard.createAdvancedAuditOffer()">
+                                <i class="fas fa-plus-circle"></i>
+                                TÜV-konformes Audit-Angebot erstellen
+                            </button>
+                            <p class="help-text">
+                                <i class="fas fa-info-circle"></i>
+                                Professionelles Audit-Angebot mit IAF-Codes, automatischer Kompetenzprüfung und vollständiger Dokumentation
+                            </p>
+                        </div>
+                        
+                        
+                        <!-- Info Section für nur TÜV-konformes System -->
+                        <div class="info-card modern-info">
+                            <div class="info-header">
+                                <h3><i class="fas fa-info-circle"></i> Professionelle Audit-Erstellung</h3>
+                            </div>
+                            <div class="info-content">
+                                <p>Unser System verwendet ausschließlich TÜV-konforme Verfahren für die Audit-Erstellung mit:</p>
+                                <ul class="feature-list">
+                                    <li><i class="fas fa-check text-success"></i> <strong>IAF-Code Klassifizierung</strong> - 39 Industriebereiche</li>
+                                    <li><i class="fas fa-check text-success"></i> <strong>Automatische Kompetenzprüfung</strong> - 6-Kriterien-Matching</li>
+                                    <li><i class="fas fa-check text-success"></i> <strong>TÜV-konforme Sicherheit</strong> - Vollständige Validierung</li>
+                                    <li><i class="fas fa-check text-success"></i> <strong>Disposition-Benachrichtigung</strong> - Automatisches Matching</li>
+                                    <li><i class="fas fa-check text-success"></i> <strong>Vollständige Dokumentation</strong> - Alle Pflichtfelder</li>
+                                </ul>
+                                <div class="info-action">
+                                    <p><strong>Klicken Sie auf den Button oben, um Ihr professionelles Audit-Angebot zu erstellen.</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Tab -->
+                    <div id="search-tab" class="tab-content">
                         <div class="info-box">
-                            <h3>📤 Neues Audit-Angebot erstellen</h3>
-                            <form id="offerForm">
-                                <!-- Grundlegende Audit-Informationen -->
-                                <div class="form-section">
-                                    <h4><i class="fas fa-info-circle"></i> Grundlegende Audit-Informationen</h4>
-                                    <div class="form-row">
-                                        <div class="form-group">
+                            <h3>🔍 Audit-Tauschbörsen suchen</h3>
+                            <div class="search-filters">
+                                <h4><i class="fas fa-filter"></i> Filter</h4>
+                                <div class="filter-row">
                                             <label for="auditTitle">Audit-Titel *</label>
                                             <input type="text" id="auditTitle" name="auditTitle" required placeholder="z.B. ISO 9001 Zertifizierungsaudit">
                                         </div>
@@ -3815,93 +4049,330 @@
 
                     <!-- Auditor Search Tab -->
                     <div id="auditor-search-tab" class="tab-content">
-                        <div class="info-box">
-                            <h3>👥 Auditoren suchen</h3>
-                            <p>Finden Sie qualifizierte Auditoren für Ihre spezifischen Anforderungen</p>
-                            
-                            <!-- Auditor Search Filters -->
-                            <div class="search-filters">
-                                <h4><i class="fas fa-filter"></i> Filter</h4>
-                                <div class="filter-row">
-                                    <div class="form-group">
-                                        <label for="auditorStandardFilter">Standard/Norm</label>
-                                        <select id="auditorStandardFilter" name="auditorStandardFilter">
-                                            <option value="">Alle Standards</option>
-                                            <option value="ISO 9001">ISO 9001</option>
-                                            <option value="ISO 14001">ISO 14001</option>
-                                            <option value="ISO 45001">ISO 45001</option>
-                                            <option value="ISO 27001">ISO 27001</option>
-                                            <option value="IATF 16949">IATF 16949</option>
-                                            <option value="AS9100">AS9100</option>
-                                            <option value="ISO 13485">ISO 13485</option>
-                                            <option value="ISO 22000">ISO 22000</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="auditorLocationFilter">Standort/Region</label>
-                                        <input type="text" id="auditorLocationFilter" name="auditorLocationFilter" placeholder="Stadt, Region oder 'Remote'">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="auditorCertificationFilter">Zertifizierung</label>
-                                        <select id="auditorCertificationFilter" name="auditorCertificationFilter">
-                                            <option value="">Alle Zertifizierungen</option>
-                                            <option value="IRCA">IRCA zertifiziert</option>
-                                            <option value="DQS">DQS zertifiziert</option>
-                                            <option value="TÜV">TÜV zertifiziert</option>
-                                            <option value="IIA">IIA zertifiziert</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="filter-row">
-                                    <div class="form-group">
-                                        <label for="auditorExperienceFilter">Erfahrung</label>
-                                        <select id="auditorExperienceFilter" name="auditorExperienceFilter">
-                                            <option value="">Alle Erfahrungsstufen</option>
-                                            <option value="1-2">1-2 Jahre</option>
-                                            <option value="3-5">3-5 Jahre</option>
-                                            <option value="6-10">6-10 Jahre</option>
-                                            <option value="10+">Mehr als 10 Jahre</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="auditorIndustryFilter">Branche</label>
-                                        <select id="auditorIndustryFilter" name="auditorIndustryFilter">
-                                            <option value="">Alle Branchen</option>
-                                            <option value="Automotive">Automotive</option>
-                                            <option value="Aerospace">Luft- und Raumfahrt</option>
-                                            <option value="Medical">Medizintechnik</option>
-                                            <option value="Food">Lebensmittel</option>
-                                            <option value="IT">IT/Software</option>
-                                            <option value="Manufacturing">Fertigung/Produktion</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="auditorAvailabilityFilter">Verfügbarkeit</label>
-                                        <select id="auditorAvailabilityFilter" name="auditorAvailabilityFilter">
-                                            <option value="">Alle Zeiträume</option>
-                                            <option value="sofort">Sofort verfügbar</option>
-                                            <option value="1-4 wochen">1-4 Wochen</option>
-                                            <option value="1-3 monate">1-3 Monate</option>
-                                            <option value="langfristig">Langfristig planbar</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-actions">
-                                    <button type="button" class="btn-primary" onclick="qhseDashboard.searchAuditors()">
-                                        <i class="fas fa-search"></i>
-                                        Auditoren suchen
-                                    </button>
-                                    <button type="button" class="btn-secondary" onclick="qhseDashboard.clearAuditorFilters()">
-                                        <i class="fas fa-times"></i>
-                                        Filter zurücksetzen
-                                    </button>
-                                </div>
+                        <div class="professional-auditor-search">
+                            <div class="search-header">
+                                <h3><i class="fas fa-user-tie"></i> Professionelle Auditor-Suche</h3>
+                                <p class="search-subtitle">Finden Sie TÜV-qualifizierte Auditoren mit spezifischen Kompetenzen für Ihre Audit-Anforderungen</p>
                             </div>
+                            
+                            <!-- Advanced Search Form -->
+                            <form class="advanced-auditor-search" id="advancedAuditorSearchForm">
+                                <!-- Qualifikationen & Akkreditierungen -->
+                                <div class="search-section">
+                                    <h4><i class="fas fa-certificate"></i> Qualifikationen & Akkreditierungen</h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="requiredAccreditation">Erforderliche Akkreditierung *</label>
+                                            <select id="requiredAccreditation" name="requiredAccreditation" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="IRCA">IRCA Lead Auditor</option>
+                                                <option value="DAkkS">DAkkS anerkannt</option>
+                                                <option value="TÜV">TÜV zertifiziert</option>
+                                                <option value="DQS">DQS qualifiziert</option>
+                                                <option value="DEKRA">DEKRA zertifiziert</option>
+                                                <option value="Bureau Veritas">Bureau Veritas qualifiziert</option>
+                                                <option value="SGS">SGS zertifiziert</option>
+                                                <option value="IATF">IATF Witness Auditor</option>
+                                            </select>
+                                            <small class="field-help">Auditoren müssen über gültige Akkreditierung verfügen</small>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="primaryStandard">Primärer Standard *</label>
+                                            <select id="primaryStandard" name="primaryStandard" required onchange="updateStandardSpecificRequirements()">
+                                                <option value="">Bitte wählen</option>
+                                                <option value="ISO 9001">ISO 9001:2015 - Qualitätsmanagement</option>
+                                                <option value="ISO 14001">ISO 14001:2015 - Umweltmanagement</option>
+                                                <option value="ISO 45001">ISO 45001:2018 - Arbeitsschutzmanagement</option>
+                                                <option value="ISO 27001">ISO 27001:2013 - Informationssicherheit</option>
+                                                <option value="IATF 16949">IATF 16949:2016 - Automotive QM</option>
+                                                <option value="AS9100">AS9100D - Aerospace QM</option>
+                                                <option value="ISO 13485">ISO 13485:2016 - Medizinprodukte</option>
+                                                <option value="ISO 22000">ISO 22000:2018 - Lebensmittelsicherheit</option>
+                                                <option value="ISO 50001">ISO 50001:2018 - Energiemanagement</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="secondaryStandards">Zusätzliche Standards</label>
+                                            <div class="checkbox-group" id="secondaryStandards">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="secondaryStandards" value="ISO 9001">
+                                                    <span class="checkmark"></span>
+                                                    ISO 9001 (QM)
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="secondaryStandards" value="ISO 14001">
+                                                    <span class="checkmark"></span>
+                                                    ISO 14001 (UM)
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="secondaryStandards" value="ISO 45001">
+                                                    <span class="checkmark"></span>
+                                                    ISO 45001 (ASM)
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="secondaryStandards" value="ISO 27001">
+                                                    <span class="checkmark"></span>
+                                                    ISO 27001 (ISMS)
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="minExperience">Mindesterfahrung (Jahre) *</label>
+                                            <select id="minExperience" name="minExperience" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="2">Mindestens 2 Jahre</option>
+                                                <option value="5">Mindestens 5 Jahre</option>
+                                                <option value="10">Mindestens 10 Jahre</option>
+                                                <option value="15">Mindestens 15 Jahre</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <!-- Auditor Search Results -->
-                            <div class="search-results">
-                                <div id="auditorSearchResultsList">
-                                    <p class="no-offers">Verwenden Sie die Filter oben, um nach Auditoren zu suchen</p>
+                                <!-- Branchenerfahrung -->
+                                <div class="search-section">
+                                    <h4><i class="fas fa-industry"></i> Branchenerfahrung & Sektor-Expertise</h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="requiredIndustry">Erforderliche Branche *</label>
+                                            <select id="requiredIndustry" name="requiredIndustry" required onchange="updateIndustryRequirements()">
+                                                <option value="">Bitte wählen</option>
+                                                <option value="Automotive">Automobilindustrie</option>
+                                                <option value="Aerospace">Luft- und Raumfahrt</option>
+                                                <option value="Medical">Medizintechnik & Pharma</option>
+                                                <option value="Food">Lebensmittel & Getränke</option>
+                                                <option value="Chemical">Chemie & Petrochemie</option>
+                                                <option value="IT">IT & Software</option>
+                                                <option value="Manufacturing">Maschinenbau & Fertigung</option>
+                                                <option value="Energy">Energie & Utilities</option>
+                                                <option value="Construction">Bau & Infrastruktur</option>
+                                                <option value="Healthcare">Gesundheitswesen</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="companySize">Unternehmensgröße (Erfahrung)</label>
+                                            <select id="companySize" name="companySize">
+                                                <option value="">Alle Größen</option>
+                                                <option value="KMU">KMU (< 250 Mitarbeiter)</option>
+                                                <option value="Mittelstand">Mittelstand (250-2500)</option>
+                                                <option value="Großunternehmen">Großunternehmen (> 2500)</option>
+                                                <option value="Konzern">Konzern/Multinational</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="riskCategory">Risikokategorie</label>
+                                            <select id="riskCategory" name="riskCategory">
+                                                <option value="">Alle Kategorien</option>
+                                                <option value="Niedrig">Niedriges Risiko</option>
+                                                <option value="Mittel">Mittleres Risiko</option>
+                                                <option value="Hoch">Hohes Risiko</option>
+                                                <option value="Kritisch">Kritisches Risiko</option>
+                                            </select>
+                                            <small class="field-help">Erfahrung mit entsprechenden Risikokategorien</small>
+                                        </div>
+                                    </div>
+
+                                    <div id="industrySpecificRequirements" class="industry-requirements">
+                                        <!-- Wird dynamisch gefüllt basierend auf Branchenauswahl -->
+                                    </div>
+                                </div>
+
+                                <!-- Geografische & Zeitliche Verfügbarkeit -->
+                                <div class="search-section">
+                                    <h4><i class="fas fa-map-marker-alt"></i> Verfügbarkeit & Einsatzbereich</h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="auditLocation">Audit-Standort *</label>
+                                            <input type="text" id="auditLocation" name="auditLocation" required 
+                                                   placeholder="Stadt, Region oder PLZ-Bereich (z.B. 40000-50000)">
+                                            <small class="field-help">Genaue Adresse oder Postleitzahl-Bereich</small>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="maxTravelDistance">Max. Anreise (km)</label>
+                                            <select id="maxTravelDistance" name="maxTravelDistance">
+                                                <option value="">Beliebig</option>
+                                                <option value="50">Bis 50 km</option>
+                                                <option value="100">Bis 100 km</option>
+                                                <option value="200">Bis 200 km</option>
+                                                <option value="500">Bis 500 km</option>
+                                                <option value="national">Deutschland</option>
+                                                <option value="international">International</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="requiredLanguages">Sprachen</label>
+                                            <div class="checkbox-group">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="requiredLanguages" value="Deutsch" checked>
+                                                    <span class="checkmark"></span>
+                                                    Deutsch (Muttersprache)
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="requiredLanguages" value="Englisch">
+                                                    <span class="checkmark"></span>
+                                                    Englisch (Business Level)
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="requiredLanguages" value="Französisch">
+                                                    <span class="checkmark"></span>
+                                                    Französisch
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="requiredLanguages" value="Spanisch">
+                                                    <span class="checkmark"></span>
+                                                    Spanisch
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="requiredAvailability">Verfügbarkeit *</label>
+                                            <select id="requiredAvailability" name="requiredAvailability" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="Sofort">Sofort (innerhalb 1 Woche)</option>
+                                                <option value="Kurzfristig">Kurzfristig (1-4 Wochen)</option>
+                                                <option value="Mittelfristig">Mittelfristig (1-3 Monate)</option>
+                                                <option value="Langfristig">Langfristig (> 3 Monate)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Audit-spezifische Anforderungen -->
+                                <div class="search-section">
+                                    <h4><i class="fas fa-clipboard-check"></i> Audit-spezifische Anforderungen</h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="auditType">Audit-Typ *</label>
+                                            <select id="auditType" name="auditType" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="Erstaudit">Erstaudit/Initial-Audit</option>
+                                                <option value="Überwachungsaudit">Überwachungsaudit (Surveillance)</option>
+                                                <option value="Rezertifizierung">Rezertifizierungsaudit</option>
+                                                <option value="Außerordentlich">Außerordentliches Audit</option>
+                                                <option value="Integriert">Integriertes Audit (Multi-Standard)</option>
+                                                <option value="Fernaudit">Remote/Hybrid-Audit</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="auditDuration">Audit-Dauer (Tage) *</label>
+                                            <select id="auditDuration" name="auditDuration" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="0.5">0,5 Tage</option>
+                                                <option value="1">1 Tag</option>
+                                                <option value="1.5">1,5 Tage</option>
+                                                <option value="2">2 Tage</option>
+                                                <option value="3">3 Tage</option>
+                                                <option value="4">4 Tage</option>
+                                                <option value="5">5 Tage</option>
+                                                <option value="5+">Mehr als 5 Tage</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="conflictCheck">Unabhängigkeitsprüfung</label>
+                                            <div class="checkbox-group">
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="conflictCheck" value="NoConsulting" checked>
+                                                    <span class="checkmark"></span>
+                                                    Keine Beratungstätigkeit beim Kunden
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="conflictCheck" value="NoCompetitor">
+                                                    <span class="checkmark"></span>
+                                                    Keine Tätigkeit bei Konkurrenten
+                                                </label>
+                                                <label class="checkbox-label">
+                                                    <input type="checkbox" name="conflictCheck" value="CurrentCertification">
+                                                    <span class="checkmark"></span>
+                                                    Gültige Auditor-Zertifizierung
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="additionalRequirements">Zusätzliche Anforderungen</label>
+                                            <textarea id="additionalRequirements" name="additionalRequirements" rows="3" 
+                                                      placeholder="Spezielle fachliche Anforderungen, Vorerfahrungen, besondere Qualifikationen..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Budget & Honorar -->
+                                <div class="search-section">
+                                    <h4><i class="fas fa-euro-sign"></i> Budget & Honorar</h4>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="budgetRange">Tagessatz-Budget</label>
+                                            <select id="budgetRange" name="budgetRange">
+                                                <option value="">Nicht spezifiziert</option>
+                                                <option value="500-800">500-800 EUR/Tag</option>
+                                                <option value="800-1200">800-1200 EUR/Tag</option>
+                                                <option value="1200-1500">1200-1500 EUR/Tag</option>
+                                                <option value="1500+">Über 1500 EUR/Tag</option>
+                                                <option value="Verhandlungsbasis">Verhandlungsbasis</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="travelCosts">Reisekosten</label>
+                                            <select id="travelCosts" name="travelCosts">
+                                                <option value="Übernommen">Vollständige Übernahme</option>
+                                                <option value="Teilweise">Teilweise Übernahme</option>
+                                                <option value="Pauschal">Pauschale Abgeltung</option>
+                                                <option value="Keine">Keine Übernahme</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Suchaktionen -->
+                                <div class="search-actions">
+                                    <button type="submit" class="btn btn-primary btn-large">
+                                        <i class="fas fa-search"></i>
+                                        Qualifizierte Auditoren finden
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="qhseDashboard.resetAdvancedAuditorSearch()">
+                                        <i class="fas fa-undo"></i>
+                                        Suche zurücksetzen
+                                    </button>
+                                    <button type="button" class="btn btn-outline" onclick="qhseDashboard.saveSearchCriteria()">
+                                        <i class="fas fa-bookmark"></i>
+                                        Suchkriterien speichern
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Suchergebnisse -->
+                            <div class="search-results-section" id="auditorSearchResults" style="display: none;">
+                                <div class="results-header">
+                                    <h4><i class="fas fa-list-ul"></i> Suchergebnisse</h4>
+                                    <div class="results-summary">
+                                        <span id="resultsCount">0</span> qualifizierte Auditoren gefunden
+                                    </div>
+                                </div>
+                                
+                                <div class="results-filters">
+                                    <label for="sortResults">Sortieren nach:</label>
+                                    <select id="sortResults" onchange="qhseDashboard.sortAuditorResults(this.value)">
+                                        <option value="relevance">Relevanz</option>
+                                        <option value="experience">Erfahrung</option>
+                                        <option value="location">Entfernung</option>
+                                        <option value="availability">Verfügbarkeit</option>
+                                        <option value="rating">Bewertung</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="searchResultsList" class="results-list">
+                                    <!-- Ergebnisse werden hier dynamisch eingefügt -->
                                 </div>
                             </div>
                         </div>
@@ -3922,6 +4393,918 @@
                             <p>Interessensbekundungen für Ihre Audit-Angebote</p>
                             <div id="receivedRequestsList">
                                 <p class="no-offers">Keine erhaltenen Anfragen vorhanden</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Auditor Management Section -->
+                <section id="auditor-verwaltung-section" class="content-section">
+                    <div class="content-header">
+                        <h1>
+                            <i class="fas fa-user-tie"></i>
+                            Auditor-Verwaltung
+                        </h1>
+                        <p class="section-description">
+                            Verwalten Sie Ihr Auditor-Netzwerk und legen Sie neue Auditoren an
+                        </p>
+                    </div>
+                    
+                    <div class="auditor-management-tabs">
+                        <button class="tab-btn active" data-tab="auditor-overview">
+                            <i class="fas fa-list"></i>
+                            Übersicht
+                        </button>
+                        <button class="tab-btn" data-tab="add-auditor">
+                            <i class="fas fa-plus"></i>
+                            Auditor hinzufügen
+                        </button>
+                        <button class="tab-btn" data-tab="auditor-search-manage">
+                            <i class="fas fa-search"></i>
+                            Suchen & Verwalten
+                        </button>
+                        <button class="tab-btn" data-tab="auditor-calendar">
+                            <i class="fas fa-calendar-alt"></i>
+                            Kalender
+                        </button>
+                        <button class="tab-btn" data-tab="auditor-import-export">
+                            <i class="fas fa-file-exchange-alt"></i>
+                            Import/Export
+                        </button>
+                        <button class="tab-btn" data-tab="audit-plan-generator">
+                            <i class="fas fa-calendar-check"></i>
+                            Auditplan-Generator
+                        </button>
+                    </div>
+
+                    <!-- Overview Tab -->
+                    <div id="auditor-overview-tab" class="tab-content active">
+                        <div class="info-box">
+                            <h3>📋 Registrierte Auditoren</h3>
+                            <div class="auditor-stats">
+                                <div class="stat-card">
+                                    <div class="stat-number" id="totalAuditors">0</div>
+                                    <div class="stat-label">Gesamtzahl Auditoren</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="activeAuditors">0</div>
+                                    <div class="stat-label">Aktive Auditoren</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="certifiedAuditors">0</div>
+                                    <div class="stat-label">Zertifizierte Auditoren</div>
+                                </div>
+                            </div>
+                            <div class="auditor-list" id="auditorList">
+                                <!-- Auditor cards will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Auditor Tab -->
+                    <div id="add-auditor-tab" class="tab-content">
+                        <div class="info-box">
+                            <h3>➕ Neuen Auditor hinzufügen</h3>
+                            <form id="addAuditorForm">
+                                <!-- Persönliche Informationen -->
+                                <div class="form-section">
+                                    <h4><i class="fas fa-user"></i> Persönliche Informationen</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditorFirstName">Vorname *</label>
+                                            <input type="text" id="auditorFirstName" name="auditorFirstName" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditorLastName">Nachname *</label>
+                                            <input type="text" id="auditorLastName" name="auditorLastName" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditorEmail">E-Mail *</label>
+                                            <input type="email" id="auditorEmail" name="auditorEmail" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditorPhone">Telefon</label>
+                                            <input type="tel" id="auditorPhone" name="auditorPhone">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditorCity">Stadt *</label>
+                                            <input type="text" id="auditorCity" name="auditorCity" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditorCountry">Land *</label>
+                                            <select id="auditorCountry" name="auditorCountry" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="Deutschland">Deutschland</option>
+                                                <option value="Österreich">Österreich</option>
+                                                <option value="Schweiz">Schweiz</option>
+                                                <option value="Andere">Andere</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Qualifikationen -->
+                                <div class="form-section">
+                                    <h4><i class="fas fa-certificate"></i> Qualifikationen & Zertifizierungen</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditorCertification">Hauptzertifizierung *</label>
+                                            <select id="auditorCertification" name="auditorCertification" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="IRCA">IRCA Lead Auditor</option>
+                                                <option value="DQS">DQS Auditor</option>
+                                                <option value="TÜV">TÜV Auditor</option>
+                                                <option value="IIA">IIA Auditor</option>
+                                                <option value="Andere">Andere</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditorExperience">Erfahrung (Jahre) *</label>
+                                            <select id="auditorExperience" name="auditorExperience" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="1-2">1-2 Jahre</option>
+                                                <option value="3-5">3-5 Jahre</option>
+                                                <option value="6-10">6-10 Jahre</option>
+                                                <option value="10+">10+ Jahre</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="auditorStandards">Standards & Normen *</label>
+                                        <div class="checkbox-group">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorStandards" value="ISO 9001">
+                                                <span class="checkmark"></span>
+                                                ISO 9001 - Qualitätsmanagement
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorStandards" value="ISO 14001">
+                                                <span class="checkmark"></span>
+                                                ISO 14001 - Umweltmanagement
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorStandards" value="ISO 45001">
+                                                <span class="checkmark"></span>
+                                                ISO 45001 - Arbeitsschutz
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorStandards" value="ISO 27001">
+                                                <span class="checkmark"></span>
+                                                ISO 27001 - Informationssicherheit
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorStandards" value="IATF 16949">
+                                                <span class="checkmark"></span>
+                                                IATF 16949 - Automotive
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorStandards" value="AS9100">
+                                                <span class="checkmark"></span>
+                                                AS9100 - Aerospace
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Branchenerfahrung -->
+                                <div class="form-section">
+                                    <h4><i class="fas fa-industry"></i> Branchenerfahrung</h4>
+                                    <div class="form-group">
+                                        <label for="auditorIndustries">Branchen *</label>
+                                        <div class="checkbox-group">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorIndustries" value="Automobilindustrie">
+                                                <span class="checkmark"></span>
+                                                Automobilindustrie
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorIndustries" value="Luft- und Raumfahrt">
+                                                <span class="checkmark"></span>
+                                                Luft- und Raumfahrt
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorIndustries" value="Medizintechnik">
+                                                <span class="checkmark"></span>
+                                                Medizintechnik
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorIndustries" value="Lebensmittel">
+                                                <span class="checkmark"></span>
+                                                Lebensmittelindustrie
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorIndustries" value="Chemie">
+                                                <span class="checkmark"></span>
+                                                Chemie & Pharma
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorIndustries" value="Maschinenbau">
+                                                <span class="checkmark"></span>
+                                                Maschinenbau
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorIndustries" value="IT">
+                                                <span class="checkmark"></span>
+                                                IT & Software
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditorIndustries" value="Energie">
+                                                <span class="checkmark"></span>
+                                                Energie
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Verfügbarkeit -->
+                                <div class="form-section">
+                                    <h4><i class="fas fa-calendar-check"></i> Verfügbarkeit</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditorAvailability">Verfügbarkeit *</label>
+                                            <select id="auditorAvailability" name="auditorAvailability" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="Sofort verfügbar">Sofort verfügbar</option>
+                                                <option value="Innerhalb 1 Woche">Innerhalb 1 Woche</option>
+                                                <option value="Innerhalb 1 Monat">Innerhalb 1 Monat</option>
+                                                <option value="Nach Absprache">Nach Absprache</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditorStatus">Status *</label>
+                                            <select id="auditorStatus" name="auditorStatus" required>
+                                                <option value="">Bitte wählen</option>
+                                                <option value="Aktiv">Aktiv</option>
+                                                <option value="Inaktiv">Inaktiv</option>
+                                                <option value="Urlaub">Im Urlaub</option>
+                                                <option value="Ausgebucht">Ausgebucht</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="auditorNotes">Notizen</label>
+                                        <textarea id="auditorNotes" name="auditorNotes" rows="3" placeholder="Besondere Qualifikationen, Spezialisierungen, Anmerkungen..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i>
+                                        Auditor hinzufügen
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearAuditorForm()">
+                                        <i class="fas fa-times"></i>
+                                        Abbrechen
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Search & Manage Tab -->
+                    <div id="auditor-search-manage-tab" class="tab-content">
+                        <div class="info-box">
+                            <h3>🔍 Auditoren suchen & verwalten</h3>
+                            
+                            <div class="search-filters">
+                                <div class="filter-row">
+                                    <div class="filter-group">
+                                        <label for="searchAuditorStandard">Standard</label>
+                                        <select id="searchAuditorStandard" name="searchAuditorStandard">
+                                            <option value="">Alle Standards</option>
+                                            <option value="ISO 9001">ISO 9001</option>
+                                            <option value="ISO 14001">ISO 14001</option>
+                                            <option value="ISO 45001">ISO 45001</option>
+                                            <option value="ISO 27001">ISO 27001</option>
+                                            <option value="IATF 16949">IATF 16949</option>
+                                            <option value="AS9100">AS9100</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="searchAuditorLocation">Standort</label>
+                                        <input type="text" id="searchAuditorLocation" name="searchAuditorLocation" placeholder="Stadt oder Region">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="searchAuditorIndustry">Branche</label>
+                                        <select id="searchAuditorIndustry" name="searchAuditorIndustry">
+                                            <option value="">Alle Branchen</option>
+                                            <option value="Automobilindustrie">Automobilindustrie</option>
+                                            <option value="Luft- und Raumfahrt">Luft- und Raumfahrt</option>
+                                            <option value="Medizintechnik">Medizintechnik</option>
+                                            <option value="Lebensmittel">Lebensmittelindustrie</option>
+                                            <option value="Chemie">Chemie & Pharma</option>
+                                            <option value="Maschinenbau">Maschinenbau</option>
+                                            <option value="IT">IT & Software</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="searchAuditorStatus">Status</label>
+                                        <select id="searchAuditorStatus" name="searchAuditorStatus">
+                                            <option value="">Alle Status</option>
+                                            <option value="Aktiv">Aktiv</option>
+                                            <option value="Inaktiv">Inaktiv</option>
+                                            <option value="Urlaub">Im Urlaub</option>
+                                            <option value="Ausgebucht">Ausgebucht</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="filter-actions">
+                                    <button type="button" class="btn btn-primary" onclick="searchAuditors()">
+                                        <i class="fas fa-search"></i>
+                                        Suchen
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearAuditorSearchFilters()">
+                                        <i class="fas fa-times"></i>
+                                        Filter zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="search-results" id="auditorSearchResults">
+                                <!-- Search results will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Tab -->
+                    <div id="auditor-calendar-tab" class="tab-content">
+                        <div class="auditor-calendar-container">
+                            <div class="calendar-header">
+                                <div class="calendar-navigation">
+                                    <button class="calendar-nav-btn" id="prevMonth">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <div class="calendar-month-year" id="calendarMonthYear">
+                                        Januar 2024
+                                    </div>
+                                    <button class="calendar-nav-btn" id="nextMonth">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="calendar-actions">
+                                    <div class="calendar-view-toggle">
+                                        <button class="calendar-view-btn active" data-view="month">Monat</button>
+                                        <button class="calendar-view-btn" data-view="week">Woche</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="availability-status-legend">
+                                <div class="status-item">
+                                    <div class="status-color status-available"></div>
+                                    <span>Verfügbar</span>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-color status-booked"></div>
+                                    <span>Gebucht</span>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-color status-unavailable"></div>
+                                    <span>Nicht verfügbar</span>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-color status-preferred"></div>
+                                    <span>Bevorzugt</span>
+                                </div>
+                            </div>
+
+                            <div class="auditor-selection-bar">
+                                <label for="calendarAuditorSelect">Auditor auswählen:</label>
+                                <select id="calendarAuditorSelect">
+                                    <option value="">Alle Auditoren</option>
+                                    <!-- Will be populated by JavaScript -->
+                                </select>
+                                <button class="btn btn-primary" onclick="window.qhseDashboard.showAddAvailabilityForm()">
+                                    <i class="fas fa-plus"></i>
+                                    Verfügbarkeit hinzufügen
+                                </button>
+                            </div>
+
+                            <div class="simple-calendar-grid" id="calendarGrid">
+                                <!-- Calendar will be rendered here -->
+                                <div class="calendar-day-header">Mo</div>
+                                <div class="calendar-day-header">Di</div>
+                                <div class="calendar-day-header">Mi</div>
+                                <div class="calendar-day-header">Do</div>
+                                <div class="calendar-day-header">Fr</div>
+                                <div class="calendar-day-header">Sa</div>
+                                <div class="calendar-day-header">So</div>
+                                
+                                <!-- Calendar days will be generated by JavaScript -->
+                            </div>
+
+                            <div class="calendar-info">
+                                <div class="info-box">
+                                    <h4>📅 Kalender-Funktionen</h4>
+                                    <ul>
+                                        <li><strong>Verfügbarkeit verwalten:</strong> Klicken Sie auf "Verfügbarkeit hinzufügen" um neue Termine zu erstellen</li>
+                                        <li><strong>Auditor wechseln:</strong> Wählen Sie einen Auditor aus dem Dropdown</li>
+                                        <li><strong>Navigation:</strong> Verwenden Sie die Pfeile um zwischen Monaten zu navigieren</li>
+                                        <li><strong>Details anzeigen:</strong> Klicken Sie auf einen Tag um Details zu sehen</li>
+                                    </ul>
+                                    
+                                    <div class="availability-legend">
+                                        <div class="availability-legend-item">
+                                            <div class="availability-legend-color available"></div>
+                                            <span>Verfügbar</span>
+                                        </div>
+                                        <div class="availability-legend-item">
+                                            <div class="availability-legend-color partially"></div>
+                                            <span>Teilweise verfügbar</span>
+                                        </div>
+                                        <div class="availability-legend-item">
+                                            <div class="availability-legend-color unavailable"></div>
+                                            <span>Nicht verfügbar</span>
+                                        </div>
+                                        <div class="availability-legend-item">
+                                            <div class="availability-legend-color preferred"></div>
+                                            <span>Bevorzugte Termine</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Import/Export Tab -->
+                    <div id="auditor-import-export-tab" class="tab-content">
+                        <div class="info-box">
+                            <h3>📁 Auditor-Daten Import/Export</h3>
+                            
+                            <div class="import-export-container">
+                                <!-- Export Section -->
+                                <div class="export-section">
+                                    <h4><i class="fas fa-download"></i> Daten exportieren</h4>
+                                    <p>Exportieren Sie alle Auditor-Daten in verschiedene Formate für Backup oder Datenaustausch.</p>
+                                    
+                                    <div class="export-options">
+                                        <div class="export-option">
+                                            <button class="btn btn-primary" onclick="qhseDashboard.exportAuditorsToJSON()">
+                                                <i class="fas fa-file-code"></i>
+                                                Als JSON exportieren
+                                            </button>
+                                            <p class="option-description">Vollständiger Export mit allen Daten (empfohlen für Backup)</p>
+                                        </div>
+                                        
+                                        <div class="export-option">
+                                            <button class="btn btn-primary" onclick="qhseDashboard.exportAuditorsToCSV()">
+                                                <i class="fas fa-file-csv"></i>
+                                                Als CSV exportieren
+                                            </button>
+                                            <p class="option-description">Tabellen-Format für Excel oder andere Programme</p>
+                                        </div>
+                                        
+                                        <div class="export-option">
+                                            <button class="btn btn-primary" onclick="qhseDashboard.exportAuditorReport()">
+                                                <i class="fas fa-file-pdf"></i>
+                                                Auditor-Bericht erstellen
+                                            </button>
+                                            <p class="option-description">Formatierter Bericht mit Statistiken und Übersicht</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Import Section -->
+                                <div class="import-section">
+                                    <h4><i class="fas fa-upload"></i> Daten importieren</h4>
+                                    <p>Importieren Sie Auditor-Daten aus einer JSON-Datei.</p>
+                                    
+                                    <div class="import-area">
+                                        <div class="file-upload-area" onclick="document.getElementById('auditorImportFile').click()">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>Klicken Sie hier oder ziehen Sie eine JSON-Datei hierher</p>
+                                            <input type="file" id="auditorImportFile" accept=".json" style="display: none;" onchange="qhseDashboard.handleAuditorImport(this)">
+                                        </div>
+                                        
+                                        <div class="import-options">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="mergeData" checked>
+                                                <span class="checkmark"></span>
+                                                Mit vorhandenen Daten zusammenführen (anstatt zu ersetzen)
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="skipDuplicates" checked>
+                                                <span class="checkmark"></span>
+                                                Duplikate überspringen (basierend auf E-Mail)
+                                            </label>
+                                        </div>
+                                        
+                                        <button class="btn btn-secondary" onclick="qhseDashboard.downloadSampleJSON()">
+                                            <i class="fas fa-download"></i>
+                                            Beispiel-JSON herunterladen
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Statistics Section -->
+                                <div class="stats-section">
+                                    <h4><i class="fas fa-chart-bar"></i> Daten-Statistiken</h4>
+                                    <div class="stats-grid">
+                                        <div class="stat-item">
+                                            <div class="stat-number" id="exportTotalAuditors">0</div>
+                                            <div class="stat-label">Auditoren gesamt</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number" id="exportActiveAuditors">0</div>
+                                            <div class="stat-label">Aktive Auditoren</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number" id="exportDataSize">0 KB</div>
+                                            <div class="stat-label">Datengröße</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number" id="exportLastUpdate">-</div>
+                                            <div class="stat-label">Letzte Änderung</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit Plan Generator Tab -->
+                    <div id="audit-plan-generator-tab" class="tab-content">
+                        <div class="audit-plan-generator">
+                            <div class="plan-header">
+                                <h3><i class="fas fa-calendar-check"></i> TÜV-konformer Auditplan-Generator</h3>
+                                <p class="plan-subtitle">Erstellen Sie strukturierte, professionelle Auditpläne für interne und externe Audits</p>
+                            </div>
+
+                            <!-- Plan Configuration -->
+                            <div class="plan-configuration">
+                                <!-- Grunddaten -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-info-circle"></i> Grunddaten</h4>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditTitle">Audit-Titel</label>
+                                            <input type="text" id="auditTitle" placeholder="z.B. Internes Audit ISO 9001:2015">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditDateType">Audit-Zeitraum</label>
+                                            <select id="auditDateType" onchange="toggleAuditDateInputs()">
+                                                <option value="single">Eintägiges Audit</option>
+                                                <option value="range">Mehrtägiges Audit</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group" id="singleDateGroup">
+                                            <label for="auditDate">Audit-Datum</label>
+                                            <input type="date" id="auditDate">
+                                        </div>
+                                        <div class="form-group" id="startDateGroup" style="display: none;">
+                                            <label for="auditStartDate">Audit von</label>
+                                            <input type="date" id="auditStartDate">
+                                        </div>
+                                        <div class="form-group" id="endDateGroup" style="display: none;">
+                                            <label for="auditEndDate">Audit bis</label>
+                                            <input type="date" id="auditEndDate">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditClient">Auftraggeber</label>
+                                            <input type="text" id="auditClient" placeholder="Name des Auftraggebers">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="clientContact">Beauftragter des Kunden</label>
+                                            <input type="text" id="clientContact" placeholder="Ansprechpartner beim Kunden">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="auditLocation">Standort(e) / Produktionsstätte(n) / temporäre Standorte</label>
+                                        <textarea id="auditLocation" rows="2" placeholder="z.B. Hoffmann & Voss GmbH, Hauptwerk Hamburg, Musterstraße 123"></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="auditScope">Geltungsbereich</label>
+                                        <textarea id="auditScope" rows="2" placeholder="z.B. Herstellung von Präzisionsteilen für die Automobilindustrie"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Audit-Details -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-clipboard-check"></i> Audit-Details</h4>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditType">Auditart</label>
+                                            <select id="auditType">
+                                                <option value="">Bitte wählen</option>
+                                                <option value="S1">S1: Erstzertifizierung - Stufe 1</option>
+                                                <option value="S2">S2: Erstzertifizierung - Stufe 2</option>
+                                                <option value="FSA">FSA: Folgeaudit/Überwachungsaudit</option>
+                                                <option value="RAU">RAU: Rezertifizierungsaudit</option>
+                                                <option value="IA">IA: Internes Audit</option>
+                                                <option value="LA">LA: Lieferanten-Audit</option>
+                                                <option value="SA">SA: Sonderaudit</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditLanguage">Auditsprache(n)</label>
+                                            <select id="auditLanguage">
+                                                <option value="Deutsch">Deutsch</option>
+                                                <option value="Englisch">Englisch</option>
+                                                <option value="Deutsch/Englisch">Deutsch/Englisch</option>
+                                                <option value="Andere">Andere</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="auditCriteria">Normgrundlage, Auditkriterien</label>
+                                        <div class="checkbox-group">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditStandards" value="ISO 9001:2015">
+                                                <span class="checkmark"></span>
+                                                ISO 9001:2015 (Qualitätsmanagement)
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditStandards" value="ISO 14001:2015">
+                                                <span class="checkmark"></span>
+                                                ISO 14001:2015 (Umweltmanagement)
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditStandards" value="ISO 45001:2018">
+                                                <span class="checkmark"></span>
+                                                ISO 45001:2018 (Arbeitsschutzmanagement)
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditStandards" value="ISO 50001:2018">
+                                                <span class="checkmark"></span>
+                                                ISO 50001:2018 (Energiemanagement)
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditStandards" value="IATF 16949">
+                                                <span class="checkmark"></span>
+                                                IATF 16949 (Automotive)
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="auditStandards" value="ISO 27001">
+                                                <span class="checkmark"></span>
+                                                ISO 27001 (Informationssicherheit)
+                                            </label>
+                                        </div>
+                                        <small class="field-help">+ Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="auditObjective">Auditziel</label>
+                                        <textarea id="auditObjective" rows="4" placeholder="z.B. Überprüfung des Managementsystems auf Konformität mit den Auditkriterien...">Überprüfung des Managementsystems auf Konformität mit den Auditkriterien, Stichprobenverfahren mit dem Ziel: Erstzertifizierung - Stufe 1 und Aufrechterhaltung der Zertifizierung
+
+Feststellung der Fähigkeit des Managementsystems zur Sicherstellung der Erfüllung anzuwendender gesetzlicher, behördlicher und vertraglicher Anforderungen
+
+Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete Erwartung zur Erreichung der festgelegten Ziele der Organisation</textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Audit-Team -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-users"></i> Audit-Team</h4>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="leadAuditor">Auditleiter</label>
+                                            <input type="text" id="leadAuditor" placeholder="Name des Lead-Auditors">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditorExternal">Externe Auditoren</label>
+                                            <input type="text" id="auditorExternal" placeholder="Name, Firma">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditorTrainee">Trainee(s)</label>
+                                            <input type="text" id="auditorTrainee" placeholder="Name der Trainees">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditorExperts">Expert(en)</label>
+                                            <input type="text" id="auditorExperts" placeholder="Technische Experten">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="hostContact">Gastgeber (Host)</label>
+                                        <input type="text" id="hostContact" placeholder="Ansprechpartner vor Ort">
+                                    </div>
+                                </div>
+
+                                <!-- Betriebsorganisation -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-clock"></i> Betriebsorganisation</h4>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="shiftSystem">Schichtsystem</label>
+                                            <select id="shiftSystem">
+                                                <option value="1-Schicht">1-Schicht</option>
+                                                <option value="2-Schicht">2-Schicht</option>
+                                                <option value="3-Schicht">3-Schicht</option>
+                                                <option value="Andere">Andere</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="shiftChanges">Schichtübergaben</label>
+                                            <input type="text" id="shiftChanges" placeholder="z.B. 06:00, 14:00, 22:00">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="auditMethod">Auditmethode</label>
+                                            <select id="auditMethod">
+                                                <option value="vor-ort">vor Ort</option>
+                                                <option value="vor-ort-remote">vor Ort & remote</option>
+                                                <option value="100-remote">100% remote</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="ictTechnology">IKT Angaben - Eingesetzte Technik</label>
+                                            <input type="text" id="ictTechnology" placeholder="z.B. Teams, Zoom, WebEx">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="ictTestDate">IKT Test - Positiv getestet am</label>
+                                            <input type="date" id="ictTestDate">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="auditRemarks">Bemerkungen</label>
+                                            <textarea id="auditRemarks" rows="2" placeholder="Besondere Hinweise zum Audit"></textarea>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="ictNoChanges">
+                                            <span class="checkmark"></span>
+                                            Test erfolgte im letzten Audit, es gab keine Änderungen
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-group approval-note">
+                                        <p><strong>Wichtiger Hinweis:</strong> Sofern vom Auftraggeber keine Änderungen des Auditplans bis 1 Woche vor dem Audittermin eingehen, so gilt dieser als genehmigt.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Audit Times Overview -->
+                            <div class="audit-times-section">
+                                <div class="times-header">
+                                    <h4><i class="fas fa-clock"></i> Auditzeiten-Übersicht nach Standards</h4>
+                                    <p class="times-description">Zur internen Auswertung sollte den Auditoren ein Raum zur Verfügung stehen. Auditbeauftragte begleiten die Auditoren während des gesamten Audits. Spätestens im Einführungsgespräch ist das Auditoren-Team über die arbeitssicherheitsrelevanten Aspekte im Unternehmen zu unterrichten.</p>
+                                </div>
+                                
+                                <div class="audit-times-container">
+                                    <div class="audit-times-controls">
+                                        <button type="button" class="btn btn-primary" onclick="addAuditorRow()">
+                                            <i class="fas fa-user-plus"></i>
+                                            Auditor hinzufügen
+                                        </button>
+                                        <div class="location-info">
+                                            <label>Standort:</label>
+                                            <input type="text" id="auditLocation" placeholder="Standort eingeben..." value="">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="audit-times-table-container">
+                                        <table class="audit-times-table">
+                                            <thead>
+                                                <tr>
+                                                    <th rowspan="2">Auditor</th>
+                                                    <th colspan="2">ISO 9001</th>
+                                                    <th colspan="2">ISO 14001</th>
+                                                    <th colspan="2">ISO 45001</th>
+                                                    <th colspan="2">ISO 50001</th>
+                                                    <th colspan="2">ISO 27001</th>
+                                                    <th rowspan="2">Zeit gesamt</th>
+                                                </tr>
+                                                <tr>
+                                                    <th>vor Ort</th>
+                                                    <th>remote</th>
+                                                    <th>vor Ort</th>
+                                                    <th>remote</th>
+                                                    <th>vor Ort</th>
+                                                    <th>remote</th>
+                                                    <th>vor Ort</th>
+                                                    <th>remote</th>
+                                                    <th>vor Ort</th>
+                                                    <th>remote</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="auditTimesTableBody">
+                                                <!-- Auditor rows will be added dynamically -->
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="totals-row">
+                                                    <td><strong>Auditzeit</strong></td>
+                                                    <td id="total-iso9001-onsite">0,00</td>
+                                                    <td id="total-iso9001-remote">0,00</td>
+                                                    <td id="total-iso14001-onsite">0,00</td>
+                                                    <td id="total-iso14001-remote">0,00</td>
+                                                    <td id="total-iso45001-onsite">0,00</td>
+                                                    <td id="total-iso45001-remote">0,00</td>
+                                                    <td id="total-iso50001-onsite">0,00</td>
+                                                    <td id="total-iso50001-remote">0,00</td>
+                                                    <td id="total-iso27001-onsite">0,00</td>
+                                                    <td id="total-iso27001-remote">0,00</td>
+                                                    <td id="total-overall">0,00</td>
+                                                </tr>
+                                                <tr class="remote-percentage-row">
+                                                    <td><strong>Remote-Anteil %</strong></td>
+                                                    <td id="remote-percent-iso9001">0</td>
+                                                    <td>-</td>
+                                                    <td id="remote-percent-iso14001">0</td>
+                                                    <td>-</td>
+                                                    <td id="remote-percent-iso45001">0</td>
+                                                    <td>-</td>
+                                                    <td id="remote-percent-iso50001">0</td>
+                                                    <td>-</td>
+                                                    <td id="remote-percent-iso27001">0</td>
+                                                    <td>-</td>
+                                                    <td id="remote-percent-overall">0</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Audit Blocks Configuration -->
+                            <div class="audit-blocks-section">
+                                <div class="blocks-header">
+                                    <h4><i class="fas fa-list"></i> Audit-Blöcke konfigurieren <small>(optional)</small></h4>
+                                    <button type="button" class="btn btn-primary" onclick="addAuditBlock()">
+                                        <i class="fas fa-plus"></i>
+                                        Block hinzufügen
+                                    </button>
+                                </div>
+                                
+                                <div class="info-notice">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Audit-Blöcke sind optional. Ohne Blöcke wird ein Standard-Auditplan mit allgemeiner Auditierung erstellt.</span>
+                                </div>
+                                
+                                <div id="auditBlocksContainer" class="audit-blocks">
+                                    <!-- Audit blocks will be dynamically added here -->
+                                </div>
+                                
+                                <div class="blocks-actions">
+                                    <button type="button" class="btn btn-success" onclick="generateAuditPlan()">
+                                        <i class="fas fa-calendar-check"></i>
+                                        Auditplan generieren
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearAuditPlan()">
+                                        <i class="fas fa-trash"></i>
+                                        Alles zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Generated Plan Display -->
+                            <div id="generatedPlanSection" class="generated-plan-section" style="display: none;">
+                                <div class="plan-header">
+                                    <h4><i class="fas fa-table"></i> Generierter Auditplan</h4>
+                                    <div class="plan-actions">
+                                        <button type="button" class="btn btn-success" onclick="saveAuditPlan()">
+                                            <i class="fas fa-save"></i>
+                                            Speichern
+                                        </button>
+                                        <button type="button" class="btn btn-primary" onclick="exportAuditPlanWord()">
+                                            <i class="fas fa-file-word"></i>
+                                            Word
+                                        </button>
+                                        <button type="button" class="btn btn-primary" onclick="exportAuditPlanPDF()">
+                                            <i class="fas fa-file-pdf"></i>
+                                            PDF
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="exportAuditPlan()">
+                                            <i class="fas fa-file-csv"></i>
+                                            CSV
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="printAuditPlan()">
+                                            <i class="fas fa-print"></i>
+                                            Drucken
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="auditPlanTable" class="audit-plan-table">
+                                    <!-- Generated table will be inserted here -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -5561,7 +6944,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=2024070401"></script>
     <script>
         // Initialize the dashboard and make it globally available
         document.addEventListener('DOMContentLoaded', () => {
@@ -8768,12 +10151,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-    <script>
-        // Initialize the QHSE Dashboard when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            window.qhseDashboard = new QHSEDashboard();
-        });
-    </script>
+    <script src="script.js?v=2024070401"></script>
 </body>
 </html>
