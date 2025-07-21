@@ -40169,6 +40169,19 @@ QHSEDashboard.prototype.addAuditBlock = function() {
                             <option value="Umweltmanagement">Umweltmanagement</option>
                             <option value="Kundenservice">Kundenservice</option>
                             <option value="Marketing">Marketing</option>
+                            <option value="Administration/Verwaltung">Administration/Verwaltung</option>
+                            <option value="Buchhaltung/Finanzen">Buchhaltung/Finanzen</option>
+                            <option value="Logistik/Lager">Logistik/Lager</option>
+                            <option value="Konstruktion/Entwicklung">Konstruktion/Entwicklung</option>
+                            <option value="Arbeitsvorbereitung">Arbeitsvorbereitung</option>
+                            <option value="Werkzeugbau">Werkzeugbau</option>
+                            <option value="Projektmanagement">Projektmanagement</option>
+                            <option value="Business Development">Business Development</option>
+                            <option value="Category Management">Category Management</option>
+                            <option value="Visual Merchandising">Visual Merchandising</option>
+                            <option value="E-Commerce">E-Commerce</option>
+                            <option value="Risk Management">Risk Management</option>
+                            <option value="Compliance">Compliance</option>
                             <option value="Eigene Eingabe">→ Eigene Eingabe</option>
                         </select>
                         <input type="text" name="department" placeholder="Oder eigene Eingabe..." style="margin-top: 5px;">
@@ -40999,12 +41012,12 @@ window.toggleAuditCriteriaDropdown = function() {
     const dropdown = document.getElementById('auditCriteriaDropdown');
     const display = document.querySelector('.multi-select-display');
     
-    if (dropdown.style.display === 'none') {
-        dropdown.style.display = 'block';
-        display.classList.add('open');
-    } else {
-        dropdown.style.display = 'none';
+    if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
         display.classList.remove('open');
+    } else {
+        dropdown.classList.add('show');
+        display.classList.add('open');
     }
 };
 
@@ -41297,36 +41310,136 @@ QHSEDashboard.prototype.updateTopicsDropdown = function(departmentSelect, depart
             'Audit-Ablauf und Zeitplan',
             'Organisatorische Hinweise',
             'Audit-Kriterien und -Umfang',
-            'Vertraulichkeitsvereinbarung'
+            'Vertraulichkeitsvereinbarung',
+            'Vorstellung des Audit-Teams',
+            'Klärung der Rollen und Verantwortlichkeiten',
+            'Sicherheitsunterweisung für Besucher',
+            'Notfallprozeduren und Evakuierungswege',
+            'Kommunikationsregeln während des Audits',
+            'Dokumentationsmethoden und -tools',
+            'Zeitmanagement und Pausenregelung',
+            'Kontaktpersonen und Ansprechpartner',
+            'Technische Ausstattung und Hilfsmittel',
+            'Erwartungen und Ziele des Audits'
         ],
-        'Mittagspause': ['Pause', 'Networking', 'Informeller Austausch'],
-        'Kaffeepause': ['Pause', 'Kurzer Austausch', 'Erholung'],
-        'Standortwechsel': ['Transport', 'Ortsbesichtigung', 'Sicherheitsunterweisung'],
+        'Mittagspause': [
+            'Pause',
+            'Networking',
+            'Informeller Austausch',
+            'Entspannung und Erholung',
+            'Teambildung',
+            'Kultureller Austausch',
+            'Diskussion aktueller Branchenthemen',
+            'Erfahrungsaustausch zwischen Auditor und Unternehmen',
+            'Aufbau persönlicher Beziehungen',
+            'Stressabbau und Regeneration',
+            'Vorbereitung auf den Nachmittag',
+            'Feedback zur bisherigen Audit-Durchführung',
+            'Klärung informeller Fragen',
+            'Atmosphäre-Aufbau für konstruktive Zusammenarbeit',
+            'Motivation und positive Einstellung stärken'
+        ],
+        'Kaffeepause': [
+            'Pause',
+            'Kurzer Austausch',
+            'Erholung',
+            'Energietankstelle',
+            'Zwischenfeedback',
+            'Auflockerung der Atmosphäre',
+            'Kurze Reflexion des bisherigen Verlaufs',
+            'Motivation für die nächste Phase',
+            'Informelle Gespräche',
+            'Stärkung der Zusammenarbeit',
+            'Entspannung und Konzentration',
+            'Netzwerkpflege',
+            'Spontane Ideenfindung',
+            'Vertrauensaufbau',
+            'Positive Energie tanken'
+        ],
+        'Standortwechsel': [
+            'Transport',
+            'Ortsbesichtigung',
+            'Sicherheitsunterweisung',
+            'Orientierung im neuen Bereich',
+            'Persönliche Schutzausrüstung (PSA) bereitstellen',
+            'Zugangsberechtigungen prüfen',
+            'Notausgänge und Sammelplätze zeigen',
+            'Besondere Gefahrenstellen identifizieren',
+            'Verhaltensregeln im Produktionsbereich',
+            'Hygienemaßnahmen und Reinigungsvorschriften',
+            'Fotografier- und Dokumentationsregeln',
+            'Ansprechpartner vor Ort vorstellen',
+            'Technische Einweisung in Anlagen',
+            'Umgebungsbedingungen erläutern',
+            'Zeitplan für Bereichsaudit abstimmen'
+        ],
         'Informationsaustausch': [
             'Zwischenbesprechung',
             'Abstimmung im Audit-Team',
             'Klärung offener Fragen',
-            'Dokumentenauswertung'
+            'Dokumentenauswertung',
+            'Bewertung der bisherigen Erkenntnisse',
+            'Priorisierung weiterer Audit-Schritte',
+            'Koordination zwischen verschiedenen Auditbereichen',
+            'Diskussion kritischer Punkte',
+            'Strategieabstimmung für Restaudit',
+            'Ressourcenplanung und Zeitmanagement',
+            'Qualitätssicherung der Audit-Durchführung',
+            'Kommunikation mit der Unternehmensleitung',
+            'Vorbereitung von Nachfragen',
+            'Synchronisation der Dokumentation',
+            'Festlegung des weiteren Vorgehens'
         ],
         'Auditorenzeit': [
             'Bewertung der Erkenntnisse',
             'Dokumentation der Feststellungen',
             'Vorbereitung Abschlussgespräch',
-            'Team-Abstimmung'
+            'Team-Abstimmung',
+            'Kategorisierung von Abweichungen',
+            'Bewertung der Schweregrade',
+            'Erstellung der Audit-Bewertung',
+            'Zusammenfassung der positiven Aspekte',
+            'Formulierung von Empfehlungen',
+            'Überprüfung der Vollständigkeit',
+            'Qualitätskontrolle der Dokumentation',
+            'Vorbereitung der Präsentation',
+            'Abstimmung der Zertifizierungsempfehlung',
+            'Strukturierung der Ergebnisdarstellung',
+            'Finale Bewertung und Entscheidungsfindung'
         ],
         'Abschlussgespräch': [
             'Präsentation der Audit-Ergebnisse',
             'Diskussion der Feststellungen',
             'Maßnahmenplanung',
             'Zertifizierungsempfehlung',
-            'Verabschiedung'
+            'Verabschiedung',
+            'Zusammenfassung der positiven Erkenntnisse',
+            'Erläuterung der Bewertungskriterien',
+            'Zeitplan für Korrekturmaßnahmen',
+            'Verantwortlichkeiten für Nachbesserungen',
+            'Überwachungsaudit-Planung',
+            'Kommunikation der nächsten Schritte',
+            'Feedback zur Audit-Durchführung',
+            'Dank an alle Beteiligten',
+            'Ausblick auf zukünftige Zusammenarbeit',
+            'Dokumentenübergabe und Formalitäten'
         ],
         'Geschäftsführung': [
             'Managementbewertung (9.3)',
             'Unternehmenspolitik und -ziele',
             'Ressourcenbereitstellung',
             'Führung und Verpflichtung (5.1)',
-            'Strategische Ausrichtung'
+            'Strategische Ausrichtung',
+            'Unternehmenskultur und Werte',
+            'Stakeholder-Management',
+            'Risikomanagement und Chancenbewertung',
+            'Compliance und rechtliche Anforderungen',
+            'Kommunikationsstrategie',
+            'Change Management',
+            'Organisationsentwicklung',
+            'Leistungsmessung und KPIs',
+            'Investitionsplanung und Budgetierung',
+            'Nachhaltigkeit und CSR-Strategie'
         ],
         'Qualitätsmanagement': [
             'QM-Handbuch und Dokumentation (7.5)',
@@ -41335,7 +41448,15 @@ QHSEDashboard.prototype.updateTopicsDropdown = function(departmentSelect, depart
             'Interne Audits (9.2)',
             'Managementbewertung (9.3)',
             'Korrektur- und Vorbeugungsmaßnahmen (10.2)',
-            'Kundenzufriedenheit (9.1.2)'
+            'Kundenzufriedenheit (9.1.2)',
+            'Dokumentenlenkung und -kontrolle',
+            'Prozessoptimierung und kontinuierliche Verbesserung',
+            'Qualitätskennzahlen und Monitoring',
+            'Lieferantenbewertung und -entwicklung',
+            'Reklamationsmanagement',
+            'Qualitätsplanung für neue Produkte',
+            'Schulungen und Kompetenzentwicklung',
+            'Zertifizierungsmanagement und -überwachung'
         ],
         'Produktion': [
             'Produktionsplanung und -steuerung (8.1)',
@@ -41344,7 +41465,15 @@ QHSEDashboard.prototype.updateTopicsDropdown = function(departmentSelect, depart
             'Nichtkonformität (10.2)',
             'Prüfmittelüberwachung (7.1.5)',
             'Arbeitsanweisungen (7.5)',
-            'Produktidentifikation und Rückverfolgbarkeit (8.5.2)'
+            'Produktidentifikation und Rückverfolgbarkeit (8.5.2)',
+            'Fertigungssteuerung und Kapazitätsplanung',
+            'Qualitätskontrolle und Endprüfung',
+            'Materialfluss und Lagermanagement',
+            'Produktionsumgebung und Infrastruktur',
+            'Wartung und Instandhaltung der Anlagen',
+            'Arbeitssicherheit in der Produktion',
+            'Energieeffizienz und Ressourcenverbrauch',
+            'Lean Production und Verschwendungsvermeidung'
         ],
         'Vertrieb': [
             'Kundenanforderungen (8.2.2)',
@@ -41352,56 +41481,373 @@ QHSEDashboard.prototype.updateTopicsDropdown = function(departmentSelect, depart
             'Vertragsprüfung (8.2.3)',
             'Kundenkommunikation (8.2.1)',
             'Kundenzufriedenheit (9.1.2)',
-            'Reklamationsbearbeitung (8.2.1)'
+            'Reklamationsbearbeitung (8.2.1)',
+            'Marktanalyse und Wettbewerbsbeobachtung',
+            'Vertriebsstrategie und Zielerreichung',
+            'CRM-System und Kundendatenmanagement',
+            'Verkaufsförderung und Marketing',
+            'Pricing und Konditionengestaltung',
+            'Key Account Management',
+            'After-Sales-Service und Support',
+            'Vertriebstraining und Kompetenzentwicklung',
+            'Export und internationale Märkte'
         ],
         'Einkauf': [
             'Lieferantenbewertung (8.4.1)',
             'Beschaffungsprozess (8.4)',
             'Eingangsprüfung (8.4.3)',
             'Lieferantenaudits (8.4.2)',
-            'Bestellabwicklung (8.4.2)'
+            'Bestellabwicklung (8.4.2)',
+            'Strategische Beschaffung und Sourcing',
+            'Lieferantenentwicklung und -qualifizierung',
+            'Vertragsmanagement und Rahmenvereinbarungen',
+            'Kostenanalyse und Preisverhandlungen',
+            'Supply Chain Management',
+            'Risikomanagement in der Beschaffung',
+            'Nachhaltige Beschaffung und CSR',
+            'E-Procurement und digitale Tools',
+            'Lagerbestandsoptimierung',
+            'Qualitätssicherung bei Zulieferern'
         ],
         'Personalwesen': [
             'Kompetenz und Bewusstsein (7.2)',
             'Schulungsmanagement (7.2)',
             'Personalplanung (7.1.2)',
             'Arbeitsplätze und Arbeitsumgebung (7.1.4)',
-            'Mitarbeiterzufriedenheit'
+            'Mitarbeiterzufriedenheit',
+            'Recruiting und Personalgewinnung',
+            'Onboarding und Einarbeitung neuer Mitarbeiter',
+            'Leistungsbeurteilung und Mitarbeitergespräche',
+            'Karriereentwicklung und Nachfolgeplanung',
+            'Arbeitszeitmanagement und Urlaubsplanung',
+            'Entgeltabrechnung und Benefits',
+            'Arbeitsrecht und Compliance',
+            'Diversity und Inclusion',
+            'Gesundheitsmanagement und Prävention',
+            'Change Management und Organisationsentwicklung'
         ],
         'IT': [
             'Dokumentenlenkung (7.5.3)',
             'Datensicherheit',
             'IT-Infrastruktur (7.1.3)',
             'Software-Validierung',
-            'Backup-Strategien'
+            'Backup-Strategien',
+            'Cyber Security und Bedrohungsschutz',
+            'Netzwerkmanagement und Systemadministration',
+            'Cloud Computing und SaaS-Lösungen',
+            'IT-Service-Management (ITSM)',
+            'Disaster Recovery und Business Continuity',
+            'Software-Entwicklung und DevOps',
+            'Digitalisierungsstrategien und -projekte',
+            'IT-Governance und Compliance',
+            'User Support und Help Desk',
+            'IT-Budgetplanung und -controlling'
         ],
         'Entwicklung': [
             'Designkontrolle (8.3)',
             'Produktentwicklung (8.3)',
             'Designvalidierung (8.3.5)',
             'Änderungsmanagement (8.3.6)',
-            'Konstruktionsunterlagen (7.5)'
+            'Konstruktionsunterlagen (7.5)',
+            'Innovationsmanagement und F&E-Strategie',
+            'Projektmanagement in der Entwicklung',
+            'CAD/CAM-Systeme und Design-Tools',
+            'Prototyping und Testing',
+            'Risikomanagement in der Produktentwicklung',
+            'Intellectual Property und Patentmanagement',
+            'Kooperationen mit Forschungseinrichtungen',
+            'Nachhaltiges Design und Ökodesign',
+            'Time-to-Market-Optimierung',
+            'Cross-funktionale Entwicklungsteams'
         ],
         'Wartung': [
             'Instandhaltungsplanung (7.1.3)',
             'Präventive Wartung',
             'Kalibrierung von Prüfmitteln (7.1.5)',
             'Störungsbearbeitung',
-            'Wartungsdokumentation'
+            'Wartungsdokumentation',
+            'Predictive Maintenance und Condition Monitoring',
+            'Ersatzteilmanagement und Logistik',
+            'Wartungskosten und Budgetplanung',
+            'CMMS (Computerized Maintenance Management System)',
+            'Sicherheit bei Wartungsarbeiten',
+            'Schulungen für Wartungspersonal',
+            'Outsourcing vs. Inhouse-Wartung',
+            'Anlagenverfügbarkeit und OEE',
+            'Energieeffizienz bei Wartungsmaßnahmen',
+            'Wartungsstrategien und -philosophien'
         ],
         'Arbeitssicherheit': [
             'Gefährdungsbeurteilung',
             'Arbeitsschutzmaßnahmen',
             'Sicherheitsunterweisungen',
             'Unfallberichterstattung',
-            'PSA-Management'
+            'PSA-Management',
+            'Sicherheitskultur und Bewusstseinsbildung',
+            'Notfallplanung und Krisenmanagement',
+            'Ergonomie am Arbeitsplatz',
+            'Gefahrstoffmanagement',
+            'Maschinensicherheit und CE-Kennzeichnung',
+            'Brandschutz und Evakuierung',
+            'Arbeitsmedizin und Gesundheitsvorsorge',
+            'Sicherheitsbeauftragte und -organisation',
+            'Betriebssicherheitsverordnung (BetrSichV)',
+            'Psychische Belastungen am Arbeitsplatz'
         ],
         'Umweltmanagement': [
             'Umweltaspekte und -auswirkungen',
             'Umweltziele und -programme',
             'Abfallmanagement',
             'Energiemanagement',
-            'Emissionsüberwachung'
+            'Emissionsüberwachung',
+            'Kreislaufwirtschaft und Recycling',
+            'Wassermanagement und Abwasserbehandlung',
+            'CO2-Bilanzierung und Klimaschutz',
+            'Nachhaltigkeitsberichterstattung',
+            'Umweltrecht und Compliance',
+            'Life Cycle Assessment (LCA)',
+            'Lieferantenbewertung nach Umweltkriterien',
+            'Umweltkommunikation und Stakeholder-Dialog',
+            'Biodiversität und Naturschutz',
+            'Green IT und nachhaltige Digitalisierung'
+        ],
+        'Administration/Verwaltung': [
+            'Büroorganisation und Workflow-Management',
+            'Terminplanung und Kalenderkoordination',
+            'Korrespondenz und Kommunikationsmanagement',
+            'Archivierung und Dokumentenverwaltung',
+            'Reiseplanung und Spesenverwaltung',
+            'Facility Management und Büroausstattung',
+            'Vertragsmanagement und -überwachung',
+            'Assistenztätigkeiten für Führungskräfte',
+            'Meeting-Organisation und -protokolle',
+            'Besuchermanagement und Empfang',
+            'Postbearbeitung und Versandorganisation',
+            'Telefonzentrale und Kommunikation',
+            'Office-Software und digitale Tools',
+            'Datenpflege und Systemadministration',
+            'Compliance und administrative Prozesse'
+        ],
+        'Buchhaltung/Finanzen': [
+            'Debitorenbuchhaltung und Forderungsmanagement',
+            'Kreditorenbuchhaltung und Zahlungsverkehr',
+            'Anlagenbuchhaltung und Abschreibungen',
+            'Lohn- und Gehaltsabrechnung',
+            'Steuerwesen und Steuererklärungen',
+            'Jahresabschluss und Bilanzierung',
+            'Controlling und Kostenrechnung',
+            'Budgetplanung und Finanzplanung',
+            'Treasury und Liquiditätssteuerung',
+            'Risikomanagement und Finanzanalyse',
+            'Investitionsrechnung und -bewertung',
+            'Reporting und Kennzahlensysteme',
+            'Compliance und Wirtschaftsprüfung',
+            'Kreditmanagement und Finanzierung',
+            'Internationale Rechnungslegung (IFRS/US-GAAP)'
+        ],
+        'Kundenservice': [
+            'First-Level-Support und Hotline',
+            'Reklamationsbearbeitung und Beschwerdemanagement',
+            'Technischer Support und Troubleshooting',
+            'Kundenbindung und Relationship Management',
+            'Service Level Agreement (SLA) Management',
+            'Ticketsystem und Case Management',
+            'Kundenschulungen und Training',
+            'Produktberatung und technische Unterstützung',
+            'After-Sales-Service und Wartung',
+            'Eskalationsmanagement',
+            'Kundenzufriedenheitsmessungen',
+            'Multi-Channel-Support (Telefon, E-Mail, Chat)',
+            'Wissensdatenbank und FAQ-Management',
+            'Reparatur- und Austauschservice',
+            'Garantie- und Gewährleistungsabwicklung'
+        ],
+        'Logistik/Lager': [
+            'Wareneingang und Eingangsprüfung',
+            'Lagerverwaltung und Bestandsführung',
+            'Kommissionierung und Picking',
+            'Verpackung und Versandvorbereitung',
+            'Warenausgang und Versandabwicklung',
+            'Inventur und Bestandsoptimierung',
+            'Lagertechnik und Fördersysteme',
+            'Transport- und Speditionsmanagement',
+            'Supply Chain Management',
+            'Cross-Docking und Just-in-Time-Belieferung',
+            'Retouren- und Retourmanagement',
+            'Gefahrgutlogistik und Sonderbehandlung',
+            'Lagerplatzverwaltung und -optimierung',
+            'RFID und Barcode-Systeme',
+            'Lean Logistics und Prozessoptimierung'
+        ],
+        'Konstruktion/Entwicklung': [
+            'Konzeptentwicklung und Ideenfindung',
+            'CAD-Konstruktion und 3D-Modellierung',
+            'Berechnungen und Simulationen (FEM)',
+            'Prototypenbau und Testing',
+            'Technische Dokumentation',
+            'Stücklisten- und Änderungsmanagement',
+            'Designvalidierung und -verifikation',
+            'Materialselektion und Werkstoffprüfung',
+            'Normgerechte Konstruktion',
+            'Patentrecherche und IP-Management',
+            'Kosten- und Fertigungsgerechte Konstruktion',
+            'Projektmanagement in der Entwicklung',
+            'Interdisziplinäre Zusammenarbeit',
+            'Reverse Engineering',
+            'Sustainable Design und Ökodesign'
+        ],
+        'Arbeitsvorbereitung': [
+            'Arbeitsplanung und Arbeitsfolgenbestimmung',
+            'Zeit- und Methodenstudien',
+            'Fertigungsverfahren-Auswahl',
+            'Werkzeug- und Vorrichtungsplanung',
+            'NC-Programmierung und CNC-Setup',
+            'Kapazitätsplanung und Maschinenbelegung',
+            'Kostenkalkulation für Fertigungsaufträge',
+            'Technische Unterlagen und Zeichnungen',
+            'Qualitätssicherungsplanung',
+            'Fertigungssteuerung und Terminplanung',
+            'Lean Manufacturing und Prozessoptimierung',
+            'Rüstzeitoptimierung',
+            'Ergonomie und Arbeitsplatzgestaltung',
+            'Digitale Fabrik und Simulation',
+            'Kontinuierliche Verbesserung (KVP)'
+        ],
+        'Werkzeugbau': [
+            'Werkzeugkonstruktion und -entwicklung',
+            'Formen- und Werkzeugherstellung',
+            'Werkzeugwartung und -instandhaltung',
+            'Härte- und Oberflächenbehandlung',
+            'Präzisionsbearbeitung und Feinmechanik',
+            'Werkzeugvermessung und Qualitätskontrolle',
+            'Spritzgießwerkzeuge und Formenbau',
+            'Stanztechnik und Umformwerkzeuge',
+            'CAM-Programmierung und CNC-Fertigung',
+            'Werkzeugorganisation und -verwaltung',
+            'Reparatur und Nacharbeit',
+            'Werkstoffkunde und Materialtechnik',
+            'Kosten- und Zeitplanung',
+            'Sondermaschinen- und Vorrichtungsbau',
+            'Digitalisierung im Werkzeugbau'
+        ],
+        'Projektmanagement': [
+            'Projektinitiierung und Scope-Definition',
+            'Projektplanung und Terminsteuerung',
+            'Ressourcenmanagement und -allokation',
+            'Stakeholder-Management und Kommunikation',
+            'Risikomanagement und Mitigation',
+            'Change Management und Scope Control',
+            'Qualitätsmanagement im Projekt',
+            'Kostencontrolling und Budgetüberwachung',
+            'Agile Methoden (Scrum, Kanban)',
+            'Projektdokumentation und Reporting',
+            'Team-Führung und Motivation',
+            'Vendor- und Lieferantenmanagement',
+            'Projektabschluss und Lessons Learned',
+            'Multi-Projekt-Management und Portfolio',
+            'Digitale Projektmanagement-Tools'
+        ],
+        'Business Development': [
+            'Marktanalyse und Competitive Intelligence',
+            'Geschäftsmodell-Entwicklung und Innovation',
+            'Strategische Partnerschaften und Allianzen',
+            'Neue Märkte und Zielgruppenerschließung',
+            'Produktportfolio-Management',
+            'M&A-Aktivitäten und Due Diligence',
+            'Investitions- und Finanzierungsstrategien',
+            'Internationale Expansion und Globalisierung',
+            'Digitale Transformation und Technologie-Trends',
+            'Startup-Kooperationen und Corporate Ventures',
+            'Licensing und IP-Monetarisierung',
+            'Plattform- und Ökosystem-Strategien',
+            'ESG und Sustainability Business Cases',
+            'Data-driven Business Models',
+            'Innovation Management und Corporate Innovation'
+        ],
+        'Category Management': [
+            'Sortimentsplanung und -gestaltung',
+            'Lieferantenverhandlungen und Konditionen',
+            'Preisgestaltung und Margin-Optimierung',
+            'Marktforschung und Consumer Insights',
+            'Planogramm-Entwicklung und Space Management',
+            'Promotion- und Marketing-Aktivitäten',
+            'Private Label und Eigenmarken-Entwicklung',
+            'Nachfrageprognose und Bestandsoptimierung',
+            'Competitive Analysis und Benchmarking',
+            'Category Performance und KPI-Monitoring',
+            'Cross-Category-Synergien',
+            'Seasonal Planning und Event-Management',
+            'Sustainability und Ethical Sourcing',
+            'Digital Category Management',
+            'Supplier Relationship Management'
+        ],
+        'Visual Merchandising': [
+            'Store-Design und Ladengestaltung',
+            'Warenpräsentation und Display-Konzepte',
+            'Schaufenstergestaltung und Window Displays',
+            'Beleuchtungskonzepte und Ambiente',
+            'Seasonal Decorations und Themeninszenierung',
+            'Point-of-Sale-Material und POS-Design',
+            'Customer Journey und Store Layout',
+            'Brand Experience und Markeninszenierung',
+            'Farb- und Materialkonzepte',
+            'Digital Signage und interaktive Displays',
+            'Planogramme und Produktplatzierung',
+            'Store Operations und Standards',
+            'Event- und Aktionsinszenierung',
+            'Trendscouts und Inspiration Research',
+            'Nachhaltiges Visual Merchandising'
+        ],
+        'E-Commerce': [
+            'Online-Shop-Management und -Optimierung',
+            'Produktdatenmanagement und Content',
+            'SEO/SEM und Online-Marketing',
+            'Conversion-Rate-Optimierung',
+            'User Experience (UX) und Usability',
+            'Payment-Systeme und Checkout-Prozesse',
+            'Fulfillment und Order Management',
+            'Customer Analytics und Personalisierung',
+            'Mobile Commerce und App-Development',
+            'Marketplace-Management (Amazon, eBay)',
+            'Social Commerce und Influencer Marketing',
+            'Retargeting und Customer Retention',
+            'A/B-Testing und Performance-Analyse',
+            'Cross-Channel-Integration',
+            'Cyber Security und Datenschutz'
+        ],
+        'Risk Management': [
+            'Risikoidentifikation und -bewertung',
+            'Risikostrategie und -politik',
+            'Operationelles Risikomanagement',
+            'Kreditrisikomanagement',
+            'Marktrisikomanagement',
+            'Liquiditätsrisikomanagement',
+            'Compliance-Risiken und Regulatory Risk',
+            'Business Continuity Planning',
+            'Cyber Risk und IT-Security',
+            'Reputationsrisikomanagement',
+            'ESG-Risiken und Nachhaltigkeitsrisiken',
+            'Risiko-Reporting und -Monitoring',
+            'Stresstests und Szenarioanalysen',
+            'Risiko-Governance und -Kultur',
+            'Versicherungsmanagement und Risk Transfer'
+        ],
+        'Compliance': [
+            'Regulatory Compliance und Aufsichtsrecht',
+            'Anti-Geldwäsche (AML) und KYC',
+            'Korruptionsprävention und Anti-Bribery',
+            'Datenschutz-Compliance (DSGVO)',
+            'Kartellrecht und Wettbewerbsrecht',
+            'Code of Conduct und Business Ethics',
+            'Compliance-Training und Awareness',
+            'Whistleblowing und Hinweisgebersysteme',
+            'Compliance-Monitoring und -Kontrollen',
+            'Sanktionslisten-Screening',
+            'Regulatory Reporting und Meldewesen',
+            'Third-Party-Risk-Management',
+            'Compliance-Audits und -Reviews',
+            'Legal Tech und RegTech-Lösungen',
+            'International Compliance Standards'
         ]
     };
     

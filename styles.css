@@ -7169,24 +7169,26 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 .multi-select-container {
     position: relative;
     width: 100%;
+    z-index: 1000;
 }
 
 .multi-select-display {
-    border: 1px solid var(--border-color);
+    border: 2px solid #ccc;
     border-radius: 5px;
     padding: 8px 12px;
-    background: var(--secondary-bg);
-    color: var(--text-primary);
+    background: white;
+    color: #333;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
     min-height: 40px;
     transition: border-color 0.2s;
+    font-size: 14px;
 }
 
 .multi-select-display:hover {
-    border-color: var(--accent-color);
+    border-color: #3b82f6;
 }
 
 .multi-select-display i {
@@ -7201,29 +7203,57 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 
 .multi-select-dropdown {
     position: absolute;
-    top: 100%;
+    bottom: 100%;
     left: 0;
     right: 0;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
+    background: white;
+    border: 2px solid #3b82f6;
     border-radius: 5px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    max-height: 250px;
+    box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    max-height: 300px;
     overflow-y: auto;
-    margin-top: 2px;
+    display: none;
+    margin-bottom: 2px;
 }
+
+.multi-select-dropdown.show {
+    display: block !important;
+    visibility: visible !important;
+}
+
 
 .multi-select-option {
     display: flex;
     align-items: flex-start;
-    padding: 10px 12px;
+    padding: 12px 15px;
     cursor: pointer;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #eee;
+    background: white;
+    font-size: 14px;
+    color: #333;
     transition: background-color 0.2s;
-    gap: 8px;
-    font-size: 0.9em;
+    min-height: 50px;
+}
+
+.multi-select-option:last-child {
+    border-bottom: none;
+}
+
+.multi-select-option:hover {
+    background-color: #f8f9fa;
+}
+
+.multi-select-option input[type="checkbox"] {
+    margin: 0 10px 0 0;
+    flex-shrink: 0;
+}
+
+.multi-select-option span:not(.checkmark) {
+    flex: 1;
+    word-break: break-word;
     line-height: 1.4;
+    padding-top: 3px;
 }
 
 .multi-select-option:last-child {
