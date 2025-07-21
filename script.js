@@ -40007,6 +40007,7 @@ QHSEDashboard.prototype.setupAuditPlanGenerator = function() {
     // Initialize audit plan data
     this.auditPlans = this.loadAuditPlansFromStorage();
     this.auditBlockCounter = 0;
+    this.auditorRowCounter = 0;
     
     // Setup event listeners after DOM is ready
     setTimeout(() => {
@@ -40084,6 +40085,9 @@ QHSEDashboard.prototype.initializeAuditPlanGenerator = function() {
     window.addRevisionRow = () => this.addRevisionRow();
     window.updateChaptersField = (selectElement) => this.updateChaptersField(selectElement);
     window.clearChaptersSelection = (button) => this.clearChaptersSelection(button);
+    window.addAuditorRow = () => this.addAuditorRow();
+    window.removeAuditorRow = (rowId) => this.removeAuditorRow(rowId);
+    window.updateAuditTimeTotals = () => this.updateAuditTimeTotals();
 };
 
 QHSEDashboard.prototype.addAuditBlock = function() {
@@ -40109,36 +40113,41 @@ QHSEDashboard.prototype.addAuditBlock = function() {
             </div>
             
             <div class="block-form">
-                <div class="block-form-group datetime-group">
-                    <label>Datum und Uhrzeit</label>
-                    <div class="datetime-controls">
-                        <div class="datetime-options">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="showBlockDate" onchange="toggleBlockDateDisplay(this)" checked>
-                                <span class="checkmark"></span>
-                                Datum anzeigen
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="useDifferentDate" onchange="toggleBlockDateInput(this)">
-                                <span class="checkmark"></span>
-                                Anderes Datum verwenden
-                            </label>
+                <div class="block-form-group">
+                    <label>Von (Uhrzeit)</label>
+                    <input type="time" name="startTime" value="09:00" onchange="calculateBlockTime('${blockId}')">
+                </div>
+                <div class="block-form-group">
+                    <label>Bis (Uhrzeit)</label>
+                    <input type="time" name="endTime" value="10:00" onchange="calculateBlockTime('${blockId}')">
+                </div>
+                <div class="block-form-group date-group">
+                    <div class="date-checkbox-container">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="useDifferentDate" onchange="toggleBlockDate(this)">
+                            <span class="checkmark"></span>
+                            Anderes Datum verwenden
+                        </label>
+                    </div>
+                    <div class="date-input-container" style="display: none;">
+                        <label>Datum</label>
+                        <input type="date" name="blockDate" value="">
+                    </div>
+                </div>
+                <div class="block-form-group time-calculation">
+                    <label>Zeitkalkulation</label>
+                    <div class="time-calc-display">
+                        <div class="calc-item">
+                            <span class="calc-label">Dauer:</span>
+                            <span class="calc-value duration-display">60 Min</span>
                         </div>
-                        <div class="datetime-inputs">
-                            <div class="date-time-row">
-                                <div class="date-input-group" id="dateInputGroup">
-                                    <label>Datum</label>
-                                    <input type="date" name="blockDate" value="">
-                                </div>
-                                <div class="time-input-group">
-                                    <label>Von</label>
-                                    <input type="time" name="startTime" value="09:00">
-                                </div>
-                                <div class="time-input-group">
-                                    <label>Bis</label>
-                                    <input type="time" name="endTime" value="10:00">
-                                </div>
-                            </div>
+                        <div class="calc-item">
+                            <span class="calc-label">Pause (15%):</span>
+                            <span class="calc-value break-display">9 Min</span>
+                        </div>
+                        <div class="calc-item">
+                            <span class="calc-label">Gesamt:</span>
+                            <span class="calc-value total-display">69 Min</span>
                         </div>
                     </div>
                 </div>
@@ -40389,7 +40398,74 @@ QHSEDashboard.prototype.addAuditBlock = function() {
     // Enable drag and drop for the new block
     this.initializeDragAndDrop();
     
+    // Calculate initial time for the new block
+    this.calculateBlockTime(blockId);
+    
     this.showNotification('Audit-Block hinzugefügt', 'success');
+};
+
+// Time calculation for audit blocks
+QHSEDashboard.prototype.calculateBlockTime = function(blockId) {
+    const block = document.getElementById(blockId);
+    if (!block) return;
+    
+    const startTimeInput = block.querySelector('input[name="startTime"]');
+    const endTimeInput = block.querySelector('input[name="endTime"]');
+    const durationDisplay = block.querySelector('.duration-display');
+    const breakDisplay = block.querySelector('.break-display');
+    const totalDisplay = block.querySelector('.total-display');
+    
+    if (!startTimeInput || !endTimeInput || !durationDisplay || !breakDisplay || !totalDisplay) return;
+    
+    const startTime = startTimeInput.value;
+    const endTime = endTimeInput.value;
+    
+    if (!startTime || !endTime) return;
+    
+    // Calculate duration in minutes
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    
+    if (end <= start) {
+        // Handle case where end time is before start time (next day)
+        end.setDate(end.getDate() + 1);
+    }
+    
+    const durationMinutes = Math.round((end - start) / (1000 * 60));
+    const breakMinutes = Math.round(durationMinutes * 0.15); // 15% break
+    const totalMinutes = durationMinutes + breakMinutes;
+    
+    // Update display
+    durationDisplay.textContent = `${durationMinutes} Min`;
+    breakDisplay.textContent = `${breakMinutes} Min`;
+    totalDisplay.textContent = `${totalMinutes} Min`;
+};
+
+// Toggle block date functionality
+QHSEDashboard.prototype.toggleBlockDate = function(checkbox) {
+    const block = checkbox.closest('.audit-block');
+    const dateContainer = block.querySelector('.date-input-container');
+    const dateInput = block.querySelector('input[name="blockDate"]');
+    
+    if (checkbox.checked) {
+        dateContainer.style.display = 'block';
+        // Set default date to today
+        if (!dateInput.value) {
+            dateInput.value = new Date().toISOString().split('T')[0];
+        }
+    } else {
+        dateContainer.style.display = 'none';
+        dateInput.value = '';
+    }
+};
+
+// Global functions for onclick handlers
+window.calculateBlockTime = function(blockId) {
+    window.qhseDashboard.calculateBlockTime(blockId);
+};
+
+window.toggleBlockDate = function(checkbox) {
+    window.qhseDashboard.toggleBlockDate(checkbox);
 };
 
 // Initialize drag and drop functionality for audit blocks
@@ -41117,18 +41193,6 @@ window.toggleBlockDateDisplay = function(checkbox) {
 
 window.toggleBlockDateInput = function(checkbox) {
     window.qhseDashboard.toggleBlockDateInput(checkbox);
-};
-
-window.addAuditorRow = function() {
-    window.qhseDashboard.addAuditorRow();
-};
-
-window.removeAuditorRow = function(rowId) {
-    window.qhseDashboard.removeAuditorRow(rowId);
-};
-
-window.updateAuditTimeTotals = function() {
-    window.qhseDashboard.updateAuditTimeTotals();
 };
 
 // Renumber audit blocks after reordering
