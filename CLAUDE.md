@@ -156,3 +156,37 @@ Targets modern browsers with ES6+ support. Uses:
 - LocalStorage API
 - FileReader API for file uploads
 - Modern JavaScript features (const/let, arrow functions, template literals)
+
+## Deployment
+
+The project is deployed on **Vercel** and automatically deployed from the **master branch**.
+
+### Deployment Process
+1. **Development**: Make changes locally and test thoroughly
+2. **Commit**: Create meaningful commits with descriptive messages
+3. **Push to Master**: Push changes to the master branch to trigger automatic deployment
+   ```bash
+   git add .
+   git commit -m "Your descriptive commit message"
+   git push origin master
+   ```
+4. **Automatic Deploy**: Vercel automatically detects the push to master and deploys the updated application
+5. **Live Update**: Changes are live within minutes of pushing to master
+
+### Deployment Configuration
+- **Platform**: Vercel
+- **Branch**: master (automatic deployment)
+- **Build Command**: None required (static files)
+- **Output Directory**: Root directory (index.html, script.js, styles.css)
+
+### Important Notes
+- **Only push to master when ready for production** - all changes go live immediately
+- Test all functionality locally before pushing
+- Use meaningful commit messages for better change tracking
+- The application is client-side only, so no server-side deployment configuration is needed
+
+### Vercel Features Used
+- Automatic deployments from GitHub master branch
+- Global CDN for fast loading times
+- HTTPS by default
+- Custom domain support (if configured)
