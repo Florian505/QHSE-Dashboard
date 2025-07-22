@@ -173,6 +173,41 @@ The project is deployed on **Vercel** and automatically deployed from the **mast
 4. **Automatic Deploy**: Vercel automatically detects the push to master and deploys the updated application
 5. **Live Update**: Changes are live within minutes of pushing to master
 
+### Git Authentication
+If you encounter authentication issues when pushing, use one of these methods:
+
+#### Option 1: Personal Access Token (Recommended)
+```bash
+git push https://USERNAME:YOUR_TOKEN@github.com/Florian505/QHSE-Dashboard.git master
+```
+- Replace `USERNAME` with your GitHub username (e.g., `QHSE`)
+- Replace `YOUR_TOKEN` with your GitHub Personal Access Token
+- **Note**: Store your actual token securely outside of version control
+
+#### Option 2: Store Credentials
+```bash
+git config credential.helper store
+git push origin master
+# Enter your username and Personal Access Token when prompted
+```
+
+#### Option 3: SSH Key
+```bash
+git remote set-url origin git@github.com:Florian505/QHSE-Dashboard.git
+git push origin master
+```
+
+#### Creating a Personal Access Token
+1. Go to GitHub.com → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Give it a name (e.g., "QHSE Dashboard Deploy")
+4. Set expiration (e.g., 90 days)
+5. Select "repo" scope (Full control of private repositories)
+6. Click "Generate token"
+7. Copy the token (it's only shown once)
+
+**Security Note**: Never commit tokens or credentials to the repository. Regenerate tokens periodically for security.
+
 ### Deployment Configuration
 - **Platform**: Vercel
 - **Branch**: master (automatic deployment)
