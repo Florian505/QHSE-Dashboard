@@ -176,13 +176,29 @@ The project is deployed on **Vercel** and automatically deployed from the **mast
 ### Git Authentication
 If you encounter authentication issues when pushing, use one of these methods:
 
-#### Option 1: Personal Access Token (Recommended)
-```bash
-git push https://USERNAME:YOUR_TOKEN@github.com/Florian505/QHSE-Dashboard.git master
-```
-- Replace `USERNAME` with your GitHub username (e.g., `QHSE`)
-- Replace `YOUR_TOKEN` with your GitHub Personal Access Token
-- **Note**: Store your actual token securely outside of version control
+#### Option 1: Personal Access Token with Environment Variables (Recommended)
+1. **Setup Environment Variables**:
+   ```bash
+   cp .env.template .env
+   # Edit .env file with your actual credentials
+   ```
+
+2. **Push using Environment Variables**:
+   ```bash
+   source .env
+   git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git master
+   ```
+
+3. **Direct Push** (if you know your credentials):
+   ```bash
+   git push https://USERNAME:YOUR_TOKEN@github.com/Florian505/QHSE-Dashboard.git master
+   ```
+
+**Environment Variable Setup**:
+- Copy `.env.template` to `.env`
+- Fill in your actual GitHub username and Personal Access Token
+- The `.env` file is automatically ignored by git (never committed)
+- Use `source .env` to load variables before pushing
 
 #### Option 2: Store Credentials
 ```bash
