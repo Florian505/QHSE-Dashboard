@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a German QHSE (Quality, Health, Safety, Environment) Management System for Hoffmann & Voss GmbH, built as a single-page web application. The system provides role-based access control for managing quality, safety, environmental, and health documentation across different organizational levels.
+This is a German QHSE (Quality, Health, Safety, Environment) Management System for QHSE GFT, built as a single-page web application. The system provides role-based access control for managing quality, safety, environmental, and health documentation across different organizational levels.
 
 ## Tech Stack & Architecture
 

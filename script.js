@@ -7182,7 +7182,7 @@ PLZ Ort">${user.address || ''}</textarea>
         
         doc.setFontSize(14);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${document.getElementById('companyName')?.textContent || 'Hoffmann & Voss'}`, margin, yPosition);
+        doc.text(`${document.getElementById('companyName')?.textContent || 'QHSE GFT'}`, margin, yPosition);
         yPosition += 15;
         
         // Report Header
@@ -11017,7 +11017,7 @@ ${newTraining.aiAdaptiveLearning || newTraining.experimentalFeatures ?
         // Initialize Company Name Settings
         if (saveCompanyNameBtn && resetCompanyNameBtn && settingsCompanyName) {
             // Load current company name
-            const savedCompanyName = localStorage.getItem('qhse_company_name') || 'Hoffmann & Voss';
+            const savedCompanyName = localStorage.getItem('qhse_company_name') || 'QHSE GFT';
             settingsCompanyName.value = savedCompanyName;
             
             // Save company name
@@ -11052,8 +11052,8 @@ ${newTraining.aiAdaptiveLearning || newTraining.experimentalFeatures ?
                     return;
                 }
                 
-                if (confirm('Möchten Sie den Firmennamen auf "Hoffmann & Voss" zurücksetzen?')) {
-                    const defaultName = 'Hoffmann & Voss';
+                if (confirm('Möchten Sie den Firmennamen auf "QHSE GFT" zurücksetzen?')) {
+                    const defaultName = 'QHSE GFT';
                     localStorage.setItem('qhse_company_name', defaultName);
                     settingsCompanyName.value = defaultName;
                     
@@ -17337,7 +17337,7 @@ Hochgeladene Dokumente: ${this.currentMachineDocuments?.length || 0}
 ═══════════════════════════════════════════════════════════════
 
 Dieser Bericht wurde automatisch generiert durch das
-QHSE Management System für Hoffmann & Voss GmbH.
+QHSE Management System für QHSE GFT.
 
 Bericht-ID: ${Date.now()}
 ═══════════════════════════════════════════════════════════════
@@ -23888,7 +23888,7 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
                 </head>
                 <body>
                     <div class="report-header">
-                        <h4>Hoffmann & Voss GmbH - QHSE Management</h4>
+                        <h4>QHSE GFT - QHSE Management</h4>
                     </div>
                     ${html}
                     <div style="margin-top: 30px; font-size: 10px; color: #666;">
@@ -32293,7 +32293,7 @@ ${auditor.notes ? `📝 Notizen:\n${auditor.notes}` : ''}
         
         doc.setFontSize(14);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${document.getElementById('companyName')?.textContent || 'Hoffmann & Voss'}`, margin, yPosition);
+        doc.text(`${document.getElementById('companyName')?.textContent || 'QHSE GFT'}`, margin, yPosition);
         yPosition += 15;
         
         // Document Header with legal compliance note
@@ -32818,7 +32818,7 @@ ${auditor.notes ? `📝 Notizen:\n${auditor.notes}` : ''}
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${document.getElementById('companyName')?.textContent || 'Hoffmann & Voss'}`, margin, yPosition);
+        doc.text(`${document.getElementById('companyName')?.textContent || 'QHSE GFT'}`, margin, yPosition);
         yPosition += 10;
         doc.text(`Erstellt am: ${data.reportGenerated}`, margin, yPosition);
         yPosition += 20;
@@ -32905,7 +32905,7 @@ ${auditor.notes ? `📝 Notizen:\n${auditor.notes}` : ''}
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
-        doc.text(`${document.getElementById('companyName')?.textContent || 'Hoffmann & Voss'}`, margin, yPosition);
+        doc.text(`${document.getElementById('companyName')?.textContent || 'QHSE GFT'}`, margin, yPosition);
         yPosition += 10;
         doc.text(`Arbeitsplatz: ${data.workplace || 'Nicht angegeben'}`, margin, yPosition);
         yPosition += 10;
@@ -38915,7 +38915,7 @@ function printSection(sectionId) {
     printWindow.document.write(`
         <html>
             <head>
-                <title>QHSE Bericht - Hoffmann & Voss GmbH</title>
+                <title>QHSE Bericht - QHSE GFT</title>
                 <style>
                     body { font-family: Arial, sans-serif; margin: 20px; }
                     .no-print { display: none; }
@@ -38925,7 +38925,7 @@ function printSection(sectionId) {
                 </style>
             </head>
             <body>
-                <h1>Hoffmann & Voss GmbH - QHSE Management System</h1>
+                <h1>QHSE GFT - QHSE Management System</h1>
                 <p>Erstellt am: ${new Date().toLocaleDateString('de-DE')}</p>
                 <hr>
                 ${section.innerHTML}
