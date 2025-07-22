@@ -5722,15 +5722,18 @@ body:not([data-role="root-admin"]) .edit-company-btn {
 }
 
 .audit-block.dragging {
-    opacity: 0.5;
-    transform: rotate(5deg);
+    opacity: 0.6;
+    transform: rotate(3deg) scale(1.02);
     z-index: 1000;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--accent-color);
 }
 
 .audit-block.drag-over {
     border: 2px dashed var(--accent-color);
     background: var(--hover-bg);
-    transform: scale(1.02);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 15px rgba(0, 122, 204, 0.2);
 }
 
 .audit-block:hover {
@@ -8156,6 +8159,37 @@ body:not([data-role="root-admin"]) .edit-company-btn {
     color: var(--text-primary);
     font-size: 0.9em;
     cursor: pointer;
+}
+
+/* Specific styling for multi-select dropdowns */
+.topics-input-container select[multiple] {
+    height: auto;
+    min-height: 120px;
+    padding: 4px;
+    overflow-y: auto;
+}
+
+.topics-input-container select[multiple] option {
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.topics-input-container select[multiple] option:hover {
+    background-color: var(--hover-bg);
+}
+
+.topics-input-container select[multiple] option:checked {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 500;
+}
+
+.topics-input-container select[multiple] option:checked:hover {
+    background-color: var(--accent-color);
+    opacity: 0.9;
 }
 
 .topics-input-container select:focus {

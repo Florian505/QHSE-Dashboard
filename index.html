@@ -184,16 +184,58 @@
             <div class="content-body">
                 <!-- Dashboard Section -->
                 <section id="dashboard-section" class="content-section active">
+                    <!-- Dashboard Header mit Live-Status -->
+                    <div class="dashboard-header">
+                        <div class="dashboard-title">
+                            <h2>QHSE Dashboard</h2>
+                            <div class="dashboard-status">
+                                <div class="status-indicator" id="dashboardStatus">
+                                    <i class="fas fa-circle status-online"></i>
+                                    <span>Live System</span>
+                                </div>
+                                <div class="last-update" id="lastUpdateTime">
+                                    Letztes Update: <span id="updateTimestamp">--:--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard-actions">
+                            <button id="refreshDashboardBtn" class="btn-refresh">
+                                <i class="fas fa-sync-alt"></i>
+                                Aktualisieren
+                            </button>
+                            <button id="exportDashboardBtn" class="btn-export">
+                                <i class="fas fa-download"></i>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="dashboard-grid">
+                        <!-- Enhanced KPI Cards mit Live-Updates -->
                         <div class="kpi-cards">
-                            <div class="kpi-card safety expandable-kpi">
-                                <div class="kpi-icon">
-                                    <i class="fas fa-hard-hat"></i>
+                            <div class="kpi-card safety expandable-kpi" data-kpi="safety">
+                                <div class="kpi-header">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-hard-hat"></i>
+                                    </div>
+                                    <div class="kpi-trend" id="safetyTrend">
+                                        <i class="fas fa-arrow-up trend-up"></i>
+                                        <span class="trend-value">+2.1%</span>
+                                    </div>
                                 </div>
                                 <div class="kpi-content">
                                     <h3>Arbeitsschutz</h3>
-                                    <div class="kpi-value">98.5%</div>
-                                    <p>Compliance Rate</p>
+                                    <div class="kpi-main-value">
+                                        <div class="kpi-value" id="safetyValue">98.5%</div>
+                                        <div class="kpi-sparkline" id="safetySparkline"></div>
+                                    </div>
+                                    <p class="kpi-label">Compliance Rate</p>
+                                    <div class="kpi-details">
+                                        <span class="kpi-detail-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span id="safetyLastIncident">45 Tage unfallfrei</span>
+                                        </span>
+                                    </div>
                                     <div class="kpi-actions">
                                         <button id="expandSafetyInfoBtn" class="expand-btn" title="Weitere Informationen hinzufügen">
                                             <i class="fas fa-chevron-down"></i>
@@ -4831,6 +4873,262 @@
                         </div>
                     </div>
 
+                    <!-- Dashboard Tab -->
+                    <div id="auditor-dashboard-tab" class="tab-content">
+                        <div class="exchange-dashboard">
+                            <div class="dashboard-header">
+                                <h3><i class="fas fa-chart-line"></i> Live Dashboard</h3>
+                                <div class="last-updated">
+                                    Letzte Aktualisierung: <span id="dashboardLastUpdate">-</span>
+                                    <button id="refreshDashboard" class="btn-refresh">
+                                        <i class="fas fa-sync-alt"></i> Aktualisieren
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Live Stats Cards -->
+                            <div class="dashboard-stats">
+                                <div class="stat-card live-stat">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="liveAuditorsCount">0</div>
+                                        <div class="stat-label">Aktive Auditoren</div>
+                                        <div class="stat-trend" id="auditorsTrend">
+                                            <i class="fas fa-arrow-up"></i> +5 diese Woche
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card live-stat">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-handshake"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="liveMatchesCount">0</div>
+                                        <div class="stat-label">Erfolgreiche Matches</div>
+                                        <div class="stat-trend" id="matchesTrend">
+                                            <i class="fas fa-arrow-up"></i> +12 diese Woche
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card live-stat">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="liveAvailabilityCount">0</div>
+                                        <div class="stat-label">Verfügbare Termine</div>
+                                        <div class="stat-trend" id="availabilityTrend">
+                                            <i class="fas fa-arrow-down"></i> -3 diese Woche
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card live-stat">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-number" id="liveRatingAverage">0.0</div>
+                                        <div class="stat-label">Ø Bewertung</div>
+                                        <div class="stat-trend" id="ratingTrend">
+                                            <i class="fas fa-arrow-up"></i> +0.2 diese Woche
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Charts -->
+                            <div class="dashboard-charts">
+                                <div class="chart-container">
+                                    <div class="chart-header">
+                                        <h4><i class="fas fa-chart-area"></i> Aktivitäts-Übersicht</h4>
+                                        <div class="chart-controls">
+                                            <select id="activityTimeframe">
+                                                <option value="7">Letzte 7 Tage</option>
+                                                <option value="30" selected>Letzte 30 Tage</option>
+                                                <option value="90">Letzte 90 Tage</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="chart-content" id="activityChart">
+                                        <div class="simple-chart">
+                                            <div class="chart-bars">
+                                                <div class="chart-bar" style="height: 60%;" title="Neue Auditoren: 15">
+                                                    <div class="bar-value">15</div>
+                                                    <div class="bar-label">Mo</div>
+                                                </div>
+                                                <div class="chart-bar" style="height: 80%;" title="Neue Auditoren: 22">
+                                                    <div class="bar-value">22</div>
+                                                    <div class="bar-label">Di</div>
+                                                </div>
+                                                <div class="chart-bar" style="height: 45%;" title="Neue Auditoren: 12">
+                                                    <div class="bar-value">12</div>
+                                                    <div class="bar-label">Mi</div>
+                                                </div>
+                                                <div class="chart-bar" style="height: 90%;" title="Neue Auditoren: 28">
+                                                    <div class="bar-value">28</div>
+                                                    <div class="bar-label">Do</div>
+                                                </div>
+                                                <div class="chart-bar" style="height: 70%;" title="Neue Auditoren: 19">
+                                                    <div class="bar-value">19</div>
+                                                    <div class="bar-label">Fr</div>
+                                                </div>
+                                                <div class="chart-bar" style="height: 35%;" title="Neue Auditoren: 8">
+                                                    <div class="bar-value">8</div>
+                                                    <div class="bar-label">Sa</div>
+                                                </div>
+                                                <div class="chart-bar" style="height: 25%;" title="Neue Auditoren: 5">
+                                                    <div class="bar-value">5</div>
+                                                    <div class="bar-label">So</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="chart-container">
+                                    <div class="chart-header">
+                                        <h4><i class="fas fa-pie-chart"></i> Audit-Bereiche</h4>
+                                    </div>
+                                    <div class="chart-content" id="areasChart">
+                                        <div class="donut-chart">
+                                            <div class="donut-segment" style="--percentage: 35%; --color: #3b82f6;" title="ISO 9001: 35%"></div>
+                                            <div class="donut-segment" style="--percentage: 25%; --color: #10b981;" title="ISO 14001: 25%"></div>
+                                            <div class="donut-segment" style="--percentage: 20%; --color: #f59e0b;" title="ISO 45001: 20%"></div>
+                                            <div class="donut-segment" style="--percentage: 20%; --color: #ef4444;" title="IATF 16949: 20%"></div>
+                                        </div>
+                                        <div class="chart-legend">
+                                            <div class="legend-item">
+                                                <div class="legend-color" style="background-color: #3b82f6;"></div>
+                                                <span>ISO 9001 (35%)</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-color" style="background-color: #10b981;"></div>
+                                                <span>ISO 14001 (25%)</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-color" style="background-color: #f59e0b;"></div>
+                                                <span>ISO 45001 (20%)</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-color" style="background-color: #ef4444;"></div>
+                                                <span>IATF 16949 (20%)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Activity Feed -->
+                            <div class="activity-feed">
+                                <div class="activity-header">
+                                    <h4><i class="fas fa-rss"></i> Live-Aktivitäten</h4>
+                                    <div class="activity-controls">
+                                        <button id="pauseActivityFeed" class="btn-toggle">
+                                            <i class="fas fa-pause"></i> Pausieren
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="activity-list" id="activityFeedList">
+                                    <div class="activity-item new">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-user-plus"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <div class="activity-title">Neuer Auditor registriert</div>
+                                            <div class="activity-description">Dr. Mueller (ISO 9001, 14001) hat sich registriert</div>
+                                            <div class="activity-time">vor 2 Minuten</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-handshake"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <div class="activity-title">Erfolgreiches Match</div>
+                                            <div class="activity-description">Auditor Schmidt wurde für BMW Audit vermittelt</div>
+                                            <div class="activity-time">vor 15 Minuten</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-calendar-plus"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <div class="activity-title">Verfügbarkeit aktualisiert</div>
+                                            <div class="activity-description">5 Auditoren haben neue Termine hinzugefügt</div>
+                                            <div class="activity-time">vor 32 Minuten</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <div class="activity-title">Bewertung eingegangen</div>
+                                            <div class="activity-description">Auditor Weber erhielt 5 Sterne für ISO 45001 Audit</div>
+                                            <div class="activity-time">vor 1 Stunde</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Regional Map -->
+                            <div class="regional-map">
+                                <div class="map-header">
+                                    <h4><i class="fas fa-map"></i> Regionale Verteilung</h4>
+                                    <div class="map-controls">
+                                        <select id="mapDataType">
+                                            <option value="auditoren">Auditoren</option>
+                                            <option value="anfragen">Anfragen</option>
+                                            <option value="matches">Matches</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="map-content" id="regionalMapContent">
+                                    <div class="germany-map">
+                                        <div class="region" data-region="nord" style="--intensity: 0.8;" title="Nord: 45 Auditoren">
+                                            <div class="region-label">Nord</div>
+                                            <div class="region-value">45</div>
+                                        </div>
+                                        <div class="region" data-region="ost" style="--intensity: 0.4;" title="Ost: 22 Auditoren">
+                                            <div class="region-label">Ost</div>
+                                            <div class="region-value">22</div>
+                                        </div>
+                                        <div class="region" data-region="west" style="--intensity: 0.9;" title="West: 67 Auditoren">
+                                            <div class="region-label">West</div>
+                                            <div class="region-value">67</div>
+                                        </div>
+                                        <div class="region" data-region="sued" style="--intensity: 0.7;" title="Süd: 38 Auditoren">
+                                            <div class="region-label">Süd</div>
+                                            <div class="region-value">38</div>
+                                        </div>
+                                        <div class="region" data-region="zentral" style="--intensity: 0.6;" title="Zentral: 31 Auditoren">
+                                            <div class="region-label">Zentral</div>
+                                            <div class="region-value">31</div>
+                                        </div>
+                                    </div>
+                                    <div class="map-legend">
+                                        <div class="legend-scale">
+                                            <div class="scale-title">Aktivität</div>
+                                            <div class="scale-bar">
+                                                <div class="scale-low">Niedrig</div>
+                                                <div class="scale-high">Hoch</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Import/Export Tab -->
                     <div id="auditor-import-export-tab" class="tab-content">
                         <div class="info-box">
@@ -5492,6 +5790,10 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                         <button type="button" class="btn btn-secondary" onclick="printAuditPlan()">
                                             <i class="fas fa-print"></i>
                                             Drucken
+                                        </button>
+                                        <button type="button" class="btn btn-info" onclick="exportAuditNotes()">
+                                            <i class="fas fa-sticky-note"></i>
+                                            Auditnotizen
                                         </button>
                                     </div>
                                 </div>

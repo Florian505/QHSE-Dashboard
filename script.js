@@ -40088,6 +40088,7 @@ QHSEDashboard.prototype.initializeAuditPlanGenerator = function() {
     window.addAuditorRow = () => this.addAuditorRow();
     window.removeAuditorRow = (rowId) => this.removeAuditorRow(rowId);
     window.updateAuditTimeTotals = () => this.updateAuditTimeTotals();
+    window.exportAuditNotes = () => this.exportAuditNotes();
 };
 
 QHSEDashboard.prototype.addAuditBlock = function() {
@@ -40132,23 +40133,6 @@ QHSEDashboard.prototype.addAuditBlock = function() {
                     <div class="date-input-container" style="display: none;">
                         <label>Datum</label>
                         <input type="date" name="blockDate" value="">
-                    </div>
-                </div>
-                <div class="block-form-group time-calculation">
-                    <label>Zeitkalkulation</label>
-                    <div class="time-calc-display">
-                        <div class="calc-item">
-                            <span class="calc-label">Dauer:</span>
-                            <span class="calc-value duration-display">60 Min</span>
-                        </div>
-                        <div class="calc-item">
-                            <span class="calc-label">Pause (15%):</span>
-                            <span class="calc-value break-display">9 Min</span>
-                        </div>
-                        <div class="calc-item">
-                            <span class="calc-label">Gesamt:</span>
-                            <span class="calc-value total-display">69 Min</span>
-                        </div>
                     </div>
                 </div>
                 <div class="block-form-group">
@@ -40203,6 +40187,68 @@ QHSEDashboard.prototype.addAuditBlock = function() {
                 <div class="block-form-group">
                     <label>Gesprächspartner</label>
                     <input type="text" name="contact" placeholder="z.B. Max Müller (QM-Leiter)">
+                </div>
+                <div class="block-form-group">
+                    <label>Themen und Prozesse</label>
+                    <div class="topics-processes-container">
+                        <select name="topicsAndProcesses" multiple size="6" style="width: 100%;">
+                            <optgroup label="Allgemeine Managementsystem-Themen">
+                                <option value="Führung und Verpflichtung">Führung und Verpflichtung</option>
+                                <option value="Strategische Ausrichtung">Strategische Ausrichtung</option>
+                                <option value="Risiko- und Chancenmanagement">Risiko- und Chancenmanagement</option>
+                                <option value="Interessierte Parteien">Interessierte Parteien</option>
+                                <option value="Dokumentierte Information">Dokumentierte Information</option>
+                                <option value="Managementbewertung">Managementbewertung</option>
+                                <option value="Internes Audit">Internes Audit</option>
+                                <option value="Korrekturmaßnahmen">Korrekturmaßnahmen</option>
+                                <option value="Kontinuierliche Verbesserung">Kontinuierliche Verbesserung</option>
+                            </optgroup>
+                            <optgroup label="Qualitätsmanagement-Prozesse">
+                                <option value="Produktplanung und -entwicklung">Produktplanung und -entwicklung</option>
+                                <option value="Kundenzufriedenheit">Kundenzufriedenheit</option>
+                                <option value="Lieferantenbewertung">Lieferantenbewertung</option>
+                                <option value="Produktionsplanung">Produktionsplanung</option>
+                                <option value="Qualitätskontrolle">Qualitätskontrolle</option>
+                                <option value="Beschwerdemanagement">Beschwerdemanagement</option>
+                                <option value="Kalibrierung und Prüfmittelüberwachung">Kalibrierung und Prüfmittelüberwachung</option>
+                                <option value="Nichtkonformitäten">Nichtkonformitäten</option>
+                            </optgroup>
+                            <optgroup label="Umweltmanagement-Prozesse">
+                                <option value="Umweltaspekte und -auswirkungen">Umweltaspekte und -auswirkungen</option>
+                                <option value="Rechtliche Verpflichtungen">Rechtliche Verpflichtungen</option>
+                                <option value="Umweltziele und -programm">Umweltziele und -programm</option>
+                                <option value="Ressourcenverbrauch">Ressourcenverbrauch</option>
+                                <option value="Abfallmanagement">Abfallmanagement</option>
+                                <option value="Emissionsüberwachung">Emissionsüberwachung</option>
+                                <option value="Notfallvorsorge">Notfallvorsorge</option>
+                            </optgroup>
+                            <optgroup label="Arbeitsschutzmanagement-Prozesse">
+                                <option value="Gefährdungsbeurteilung">Gefährdungsbeurteilung</option>
+                                <option value="Arbeitsschutzunterweisung">Arbeitsschutzunterweisung</option>
+                                <option value="Persönliche Schutzausrüstung">Persönliche Schutzausrüstung</option>
+                                <option value="Arbeitsplatzgestaltung">Arbeitsplatzgestaltung</option>
+                                <option value="Unfallmeldung und -untersuchung">Unfallmeldung und -untersuchung</option>
+                                <option value="Beteiligung der Beschäftigten">Beteiligung der Beschäftigten</option>
+                                <option value="Gesundheitsförderung">Gesundheitsförderung</option>
+                            </optgroup>
+                            <optgroup label="Energiemanagement-Prozesse">
+                                <option value="Energieplanung">Energieplanung</option>
+                                <option value="Energieleistungskennzahlen">Energieleistungskennzahlen</option>
+                                <option value="Energiebewertung">Energiebewertung</option>
+                                <option value="Energieverbrauchsüberwachung">Energieverbrauchsüberwachung</option>
+                                <option value="Energieeffizienzmaßnahmen">Energieeffizienzmaßnahmen</option>
+                            </optgroup>
+                            <optgroup label="Informationssicherheits-Prozesse">
+                                <option value="Informationssicherheitsrisikobeurteilung">Informationssicherheitsrisikobeurteilung</option>
+                                <option value="Zugangskontrollen">Zugangskontrollen</option>
+                                <option value="Verschlüsselung">Verschlüsselung</option>
+                                <option value="Incident Management">Incident Management</option>
+                                <option value="Business Continuity">Business Continuity</option>
+                                <option value="Mitarbeitersensibilisierung">Mitarbeitersensibilisierung</option>
+                            </optgroup>
+                        </select>
+                        <small>Strg+Klick für Mehrfachauswahl mehrerer Themen und Prozesse</small>
+                    </div>
                 </div>
                 <div class="block-form-group">
                     <label>Norm(en)</label>
@@ -40365,9 +40411,10 @@ QHSEDashboard.prototype.addAuditBlock = function() {
                 <div class="block-form-group full-width">
                     <label>Themen/Prozesse</label>
                     <div class="topics-input-container">
-                        <select name="topicsSelect" onchange="updateTopicsField(this)">
+                        <select name="topicsSelect" multiple size="5" onchange="updateTopicsField(this)">
                             <option value="">Themen auswählen (abhängig von Abteilung)...</option>
                         </select>
+                        <small>Strg+Klick für Mehrfachauswahl mehrerer Themen</small>
                         <textarea name="topics" rows="3" placeholder="Oder eigene Themen/Prozesse eingeben..."></textarea>
                     </div>
                 </div>
@@ -40471,36 +40518,69 @@ window.toggleBlockDate = function(checkbox) {
 // Initialize drag and drop functionality for audit blocks
 QHSEDashboard.prototype.initializeDragAndDrop = function() {
     const container = document.getElementById('auditBlocksContainer');
+    if (!container) return;
+    
+    // Make the entire container a drop zone
+    container.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    });
+    
+    container.addEventListener('drop', (e) => {
+        e.preventDefault();
+        this.handleContainerDrop(e);
+    });
+    
     const blocks = container.querySelectorAll('.audit-block');
     
     blocks.forEach(block => {
-        // Make block draggable
-        block.draggable = true;
-        
-        // Remove existing event listeners to prevent duplicates
-        block.removeEventListener('dragstart', this.handleDragStart);
-        block.removeEventListener('dragover', this.handleDragOver);
-        block.removeEventListener('dragenter', this.handleDragEnter);
-        block.removeEventListener('dragleave', this.handleDragLeave);
-        block.removeEventListener('drop', this.handleDrop);
-        block.removeEventListener('dragend', this.handleDragEnd);
-        
-        // Add event listeners
-        block.addEventListener('dragstart', this.handleDragStart.bind(this));
-        block.addEventListener('dragover', this.handleDragOver.bind(this));
-        block.addEventListener('dragenter', this.handleDragEnter.bind(this));
-        block.addEventListener('dragleave', this.handleDragLeave.bind(this));
-        block.addEventListener('drop', this.handleDrop.bind(this));
-        block.addEventListener('dragend', this.handleDragEnd.bind(this));
+        // Only make draggable if not already processed
+        if (!block.hasAttribute('data-draggable-initialized')) {
+            // Make block draggable
+            block.draggable = true;
+            block.setAttribute('data-draggable-initialized', 'true');
+            
+            // Add event listeners with bound context
+            block.addEventListener('dragstart', (e) => this.handleDragStart(e));
+            block.addEventListener('dragover', (e) => this.handleDragOver(e));
+            block.addEventListener('dragenter', (e) => this.handleDragEnter(e));
+            block.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+            block.addEventListener('drop', (e) => this.handleDrop(e));
+            block.addEventListener('dragend', (e) => this.handleDragEnd(e));
+            
+            // Add visual feedback for drag handle and entire block
+            const dragHandle = block.querySelector('.drag-handle');
+            if (dragHandle) {
+                // Make the entire block draggable, not just the handle
+                block.style.cursor = 'move';
+                
+                dragHandle.addEventListener('mouseenter', () => {
+                    dragHandle.style.color = 'var(--accent-color)';
+                    block.style.transform = 'translateY(-1px)';
+                    block.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                });
+                
+                dragHandle.addEventListener('mouseleave', () => {
+                    dragHandle.style.color = '';
+                    block.style.transform = '';
+                    block.style.boxShadow = '';
+                });
+            }
+        }
     });
 };
 
 // Drag and drop event handlers
 QHSEDashboard.prototype.handleDragStart = function(e) {
-    this.draggedElement = e.target;
-    e.target.classList.add('dragging');
+    // Find the actual audit-block element (in case drag started on a child element)
+    this.draggedElement = e.target.closest('.audit-block');
+    if (!this.draggedElement) return;
+    
+    this.draggedElement.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.target.outerHTML);
+    e.dataTransfer.setData('text/plain', this.draggedElement.id);
+    
+    console.log('Drag started for block:', this.draggedElement.id);
 };
 
 QHSEDashboard.prototype.handleDragOver = function(e) {
@@ -40510,32 +40590,74 @@ QHSEDashboard.prototype.handleDragOver = function(e) {
 
 QHSEDashboard.prototype.handleDragEnter = function(e) {
     e.preventDefault();
-    if (e.target.classList.contains('audit-block') && e.target !== this.draggedElement) {
-        e.target.classList.add('drag-over');
+    const targetBlock = e.target.closest('.audit-block');
+    if (targetBlock && targetBlock !== this.draggedElement) {
+        // Remove drag-over from all blocks first
+        document.querySelectorAll('.audit-block').forEach(block => {
+            block.classList.remove('drag-over');
+        });
+        // Add to current target
+        targetBlock.classList.add('drag-over');
     }
 };
 
 QHSEDashboard.prototype.handleDragLeave = function(e) {
-    if (e.target.classList.contains('audit-block')) {
-        e.target.classList.remove('drag-over');
+    const targetBlock = e.target.closest('.audit-block');
+    if (targetBlock) {
+        // Only remove if we're actually leaving the block (not just moving to a child)
+        const rect = targetBlock.getBoundingClientRect();
+        if (e.clientX < rect.left || e.clientX > rect.right || 
+            e.clientY < rect.top || e.clientY > rect.bottom) {
+            targetBlock.classList.remove('drag-over');
+        }
     }
 };
 
 QHSEDashboard.prototype.handleDrop = function(e) {
     e.preventDefault();
     
-    if (e.target.classList.contains('audit-block') && e.target !== this.draggedElement) {
+    const targetBlock = e.target.closest('.audit-block');
+    if (targetBlock && targetBlock !== this.draggedElement) {
+        this.moveBlockToPosition(this.draggedElement, targetBlock);
+    }
+    
+    // Clean up
+    document.querySelectorAll('.audit-block').forEach(block => {
+        block.classList.remove('drag-over');
+    });
+};
+
+QHSEDashboard.prototype.handleContainerDrop = function(e) {
+    e.preventDefault();
+    
+    // If dropped on container but not on a specific block, move to end
+    if (!e.target.closest('.audit-block')) {
         const container = document.getElementById('auditBlocksContainer');
-        const allBlocks = Array.from(container.querySelectorAll('.audit-block'));
-        const draggedIndex = allBlocks.indexOf(this.draggedElement);
-        const targetIndex = allBlocks.indexOf(e.target);
-        
+        container.appendChild(this.draggedElement);
+        this.renumberAuditBlocks();
+        this.showNotification('Audit-Block an das Ende verschoben', 'success');
+    }
+};
+
+QHSEDashboard.prototype.moveBlockToPosition = function(draggedBlock, targetBlock) {
+    const container = document.getElementById('auditBlocksContainer');
+    const allBlocks = Array.from(container.querySelectorAll('.audit-block'));
+    const draggedIndex = allBlocks.indexOf(draggedBlock);
+    const targetIndex = allBlocks.indexOf(targetBlock);
+    
+    console.log('Moving block from index', draggedIndex, 'to', targetIndex);
+    
+    if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
         if (draggedIndex < targetIndex) {
             // Insert after target
-            container.insertBefore(this.draggedElement, e.target.nextSibling);
+            if (targetBlock.nextSibling) {
+                container.insertBefore(draggedBlock, targetBlock.nextSibling);
+            } else {
+                container.appendChild(draggedBlock);
+            }
         } else {
             // Insert before target
-            container.insertBefore(this.draggedElement, e.target);
+            container.insertBefore(draggedBlock, targetBlock);
         }
         
         // Re-number the blocks
@@ -40543,17 +40665,19 @@ QHSEDashboard.prototype.handleDrop = function(e) {
         
         this.showNotification('Audit-Block verschoben', 'success');
     }
-    
-    e.target.classList.remove('drag-over');
 };
 
 QHSEDashboard.prototype.handleDragEnd = function(e) {
-    e.target.classList.remove('dragging');
+    if (this.draggedElement) {
+        this.draggedElement.classList.remove('dragging');
+        this.draggedElement.style.display = ''; // Restore visibility
+    }
     
-    // Remove drag-over class from all blocks
+    // Clean up all drag states
     const allBlocks = document.querySelectorAll('.audit-block');
     allBlocks.forEach(block => {
-        block.classList.remove('drag-over');
+        block.classList.remove('drag-over', 'dragging');
+        block.style.display = ''; // Ensure all blocks are visible
     });
     
     this.draggedElement = null;
@@ -41364,8 +41488,8 @@ QHSEDashboard.prototype.updateTopicsDropdown = function(departmentSelect, depart
     
     if (!topicsSelect) return;
     
-    // Clear existing options except the first one
-    topicsSelect.innerHTML = '<option value="">Themen auswählen...</option>';
+    // Clear existing options - for multiple select, don't include placeholder
+    topicsSelect.innerHTML = '';
     
     // Define topics based on department
     const topicsMap = {
@@ -41936,23 +42060,40 @@ QHSEDashboard.prototype.updateTopicsDropdown = function(departmentSelect, depart
 QHSEDashboard.prototype.updateTopicsField = function(selectElement) {
     const container = selectElement.closest('.topics-input-container');
     const textArea = container.querySelector('textarea[name="topics"]');
-    const selectedValue = selectElement.value;
     
-    if (selectedValue === "Eigene Eingabe") {
+    // Get all selected values from the multiple select
+    const selectedOptions = Array.from(selectElement.selectedOptions);
+    const selectedValues = selectedOptions.map(option => option.value).filter(value => value !== "");
+    
+    if (selectedValues.length === 0) {
+        return;
+    }
+    
+    if (selectedValues.includes("Eigene Eingabe")) {
         // Focus on textarea for custom entry
         textArea.value = '';
         textArea.focus();
         textArea.placeholder = "Eigene Themen/Prozesse eingeben...";
-    } else if (selectedValue) {
-        // Add selected value to textarea (append if there's already content)
-        const currentValue = textArea.value.trim();
-        if (currentValue) {
-            textArea.value = currentValue + '\n• ' + selectedValue;
-        } else {
-            textArea.value = '• ' + selectedValue;
-        }
-        textArea.placeholder = "Weitere Themen hinzufügen...";
+        return;
     }
+    
+    // Add selected values to textarea
+    const currentValue = textArea.value.trim();
+    const newTopics = selectedValues.map(value => '• ' + value);
+    
+    if (currentValue) {
+        // Check which topics are already present to avoid duplicates
+        const existingTopics = currentValue.split('\n').map(line => line.trim());
+        const topicsToAdd = newTopics.filter(topic => !existingTopics.includes(topic));
+        
+        if (topicsToAdd.length > 0) {
+            textArea.value = currentValue + '\n' + topicsToAdd.join('\n');
+        }
+    } else {
+        textArea.value = newTopics.join('\n');
+    }
+    
+    textArea.placeholder = "Weitere Themen hinzufügen...";
 };
 
 QHSEDashboard.prototype.calculateTimeDifference = function(startTime, endTime) {
@@ -42089,6 +42230,27 @@ QHSEDashboard.prototype.generateAuditPlan = function() {
     this.showNotification('Auditplan erfolgreich generiert!', 'success');
 };
 
+// Helper function to format topics and processes
+QHSEDashboard.prototype.formatTopicsAndProcesses = function(topicsArray) {
+    if (!Array.isArray(topicsArray) || topicsArray.length === 0) {
+        return null;
+    }
+    
+    // Filter out empty values and join with line breaks for better display
+    const validTopics = topicsArray.filter(topic => topic && topic !== 'Nicht angegeben');
+    
+    if (validTopics.length === 0) {
+        return null;
+    }
+    
+    // Group similar topics or return as list
+    if (validTopics.length > 3) {
+        return validTopics.slice(0, 3).join(', ') + ` (+${validTopics.length - 3} weitere)`;
+    }
+    
+    return validTopics.join(', ');
+};
+
 QHSEDashboard.prototype.renderAuditPlan = function(planData) {
     const planItems = [];
     
@@ -42127,7 +42289,7 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
                 department: block.department || 'Nicht angegeben',
                 auditors: block.auditors || 'Nicht angegeben',
                 contact: block.contact || 'Nicht angegeben',
-                topics: block.topics || 'Noch zu definieren',
+                topics: this.formatTopicsAndProcesses(block.topicsAndProcesses) || block.topics || 'Noch zu definieren',
                 standards: Array.isArray(block.standards) ? block.standards.join(', ') : (block.standards || 'Noch nicht festgelegt'),
                 chapters: block.chapters || '-'
             });
@@ -42680,21 +42842,46 @@ QHSEDashboard.prototype.exportAuditPlanWord = function() {
             
             ${tableHtml}
             
-            <!-- Page break and header for subsequent pages -->
-            <div style="page-break-before: always;">
-                <div class="page-header">
-                    <div class="header-content-display">
-                        <div class="header-left-content">
-                            <h1 class="audit-title">Auditplan</h1>
-                            ${planData.znNumbers && planData.znNumbers.length > 0 ? `<p class="zn-numbers">ZN: ${planData.znNumbers.join(', ')}</p>` : ''}
-                        </div>
-                        ${planData.logoData ? `
-                        <div class="header-logo-container">
-                            <img src="${planData.logoData}" alt="Logo" class="header-logo">
-                        </div>
-                        ` : ''}
-                    </div>
+            <!-- Audit Plan Notes and Distribution -->
+            <div class="audit-notes-section" style="margin-top: 30px; page-break-inside: avoid;">
+                <h3 style="border-bottom: 1px solid #333; padding-bottom: 5px;">Hinweise und Verteiler</h3>
+                
+                ${planData.auditNotes && planData.auditNotes.remoteIndicator ? `
+                <div style="margin: 15px 0;">
+                    <strong>${planData.auditNotes.remoteIndicator}</strong>
                 </div>
+                ` : ''}
+                
+                ${planData.auditNotes && planData.auditNotes.auditorsNote ? `
+                <div style="margin: 15px 0;">
+                    <p><strong>Hinweis für mehrere Auditoren:</strong></p>
+                    <p>${planData.auditNotes.auditorsNote}</p>
+                </div>
+                ` : ''}
+                
+                ${planData.auditNotes && planData.auditNotes.confidentialityNote ? `
+                <div style="margin: 15px 0;">
+                    <p><strong>Vertraulichkeits-Hinweis:</strong></p>
+                    <p>${planData.auditNotes.confidentialityNote}</p>
+                </div>
+                ` : ''}
+                
+                <div style="margin: 20px 0;">
+                    <p><strong>Verteiler beim Auftraggeber:</strong></p>
+                    ${planData.auditNotes && planData.auditNotes.clientDistribution ? 
+                        `<p>${planData.auditNotes.clientDistribution}</p>` : 
+                        '<p>(vom Auftraggeber festzulegen)</p>'
+                    }
+                </div>
+                
+                ${planData.auditNotes && planData.auditNotes.distributionChannels && planData.auditNotes.distributionChannels.length > 0 ? `
+                <div style="margin: 20px 0;">
+                    <p><strong>Verteiler zum Auditplan:</strong></p>
+                    <ul>
+                        ${planData.auditNotes.distributionChannels.map(channel => `<li>${channel}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
             </div>
         </body>
         </html>
@@ -42976,6 +43163,194 @@ QHSEDashboard.prototype.exportAuditPlanPDF = function() {
     }, 500);
     
     this.showNotification('PDF-Export gestartet! Wählen Sie "Als PDF speichern" im Druckdialog.', 'info');
+};
+
+// Export nur die Auditnotizen als separates Word-Dokument
+QHSEDashboard.prototype.exportAuditNotes = function() {
+    if (!this.currentPlanData || !this.currentPlanData.auditNotes) {
+        this.showNotification('Keine Auditnotizen zum Exportieren vorhanden.', 'error');
+        return;
+    }
+    
+    const planData = this.currentPlanData;
+    const notes = planData.auditNotes;
+    const title = 'Auditnotizen';
+    const date = new Date().toISOString().split('T')[0];
+    
+    // Create Word document content for audit notes only
+    const notesContent = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+            <meta charset='utf-8'>
+            <title>${title}</title>
+            <style>
+                body { 
+                    font-family: Arial, sans-serif; 
+                    margin: 40px; 
+                    font-size: 12pt;
+                    line-height: 1.4;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                    border-bottom: 2px solid #333;
+                    padding-bottom: 20px;
+                }
+                .header h1 {
+                    margin: 0 0 10px 0;
+                    font-size: 18pt;
+                    color: #333;
+                }
+                .header-info {
+                    font-size: 10pt;
+                    color: #666;
+                }
+                .notes-section {
+                    margin: 20px 0;
+                    padding: 15px 0;
+                }
+                .notes-section h2 {
+                    font-size: 14pt;
+                    color: #333;
+                    border-bottom: 1px solid #666;
+                    padding-bottom: 5px;
+                    margin-bottom: 15px;
+                }
+                .note-item {
+                    margin: 15px 0;
+                }
+                .note-label {
+                    font-weight: bold;
+                    color: #444;
+                    margin-bottom: 5px;
+                }
+                .note-content {
+                    margin-left: 10px;
+                    padding: 8px;
+                    background-color: #f9f9f9;
+                    border-left: 3px solid #007acc;
+                }
+                .distribution-list {
+                    margin: 10px 0;
+                }
+                .distribution-list ul {
+                    margin: 5px 0;
+                    padding-left: 20px;
+                }
+                .distribution-list li {
+                    margin: 3px 0;
+                }
+                @page { margin: 2.5cm; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Auditnotizen und Hinweise</h1>
+                <div class="header-info">
+                    ${planData.client ? `<p>Auftraggeber: ${planData.client}</p>` : ''}
+                    ${planData.location ? `<p>Standort: ${planData.location}</p>` : ''}
+                    <p>Erstellt am: ${new Date().toLocaleDateString('de-DE')}</p>
+                    ${planData.znNumbers && planData.znNumbers.length > 0 ? `<p>ZN: ${planData.znNumbers.join(', ')}</p>` : ''}
+                </div>
+            </div>
+            
+            <div class="notes-section">
+                <h2>Audit-Hinweise und Besonderheiten</h2>
+                
+                ${notes.remoteIndicator ? `
+                <div class="note-item">
+                    <div class="note-label">Remote-Teilnahme:</div>
+                    <div class="note-content">${notes.remoteIndicator}</div>
+                </div>
+                ` : ''}
+                
+                ${notes.auditorsNote ? `
+                <div class="note-item">
+                    <div class="note-label">Hinweis für mehrere Auditoren:</div>
+                    <div class="note-content">${notes.auditorsNote}</div>
+                </div>
+                ` : ''}
+                
+                ${notes.confidentialityNote ? `
+                <div class="note-item">
+                    <div class="note-label">Vertraulichkeits-Hinweis:</div>
+                    <div class="note-content">${notes.confidentialityNote}</div>
+                </div>
+                ` : ''}
+            </div>
+            
+            <div class="notes-section">
+                <h2>Verteiler und Kommunikation</h2>
+                
+                <div class="note-item">
+                    <div class="note-label">Verteiler beim Auftraggeber:</div>
+                    <div class="note-content">
+                        ${notes.clientDistribution || '(vom Auftraggeber festzulegen)'}
+                    </div>
+                </div>
+                
+                ${notes.distributionChannels && notes.distributionChannels.length > 0 ? `
+                <div class="note-item">
+                    <div class="note-label">Verteiler zum Auditplan:</div>
+                    <div class="note-content">
+                        <div class="distribution-list">
+                            <ul>
+                                ${notes.distributionChannels.map(channel => `<li>${channel}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            
+            <div class="notes-section">
+                <h2>Zusätzliche Informationen</h2>
+                
+                <div class="note-item">
+                    <div class="note-label">Audit-Team:</div>
+                    <div class="note-content">
+                        ${planData.leadAuditor ? `<p><strong>Auditleiter:</strong> ${planData.leadAuditor}</p>` : ''}
+                        ${planData.auditors ? `<p><strong>Auditoren:</strong> ${planData.auditors}</p>` : ''}
+                    </div>
+                </div>
+                
+                ${planData.auditLanguage ? `
+                <div class="note-item">
+                    <div class="note-label">Auditsprache:</div>
+                    <div class="note-content">${planData.auditLanguage}</div>
+                </div>
+                ` : ''}
+                
+                ${planData.scope ? `
+                <div class="note-item">
+                    <div class="note-label">Geltungsbereich:</div>
+                    <div class="note-content">${planData.scope}</div>
+                </div>
+                ` : ''}
+            </div>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; font-size: 10pt; color: #666;">
+                <p>Dieses Dokument wurde automatisch generiert aus dem QHSE Management System.</p>
+                <p>Erstellt am: ${new Date().toLocaleString('de-DE')}</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    const blob = new Blob([notesContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    
+    const filename = `Auditnotizen_${date}.doc`;
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    this.showNotification('Auditnotizen als Word-Dokument exportiert!', 'success');
 };
 
 // Revision Tracking Functions
