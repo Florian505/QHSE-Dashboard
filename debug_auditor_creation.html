@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditor Creation Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            background-color: #f9f9f9;
+        }
+        .result { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 3px; 
+            border: 1px solid #ddd;
+        }
+        .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; color: #856404; border-color: #ffeaa7; }
+        button { 
+            padding: 10px 15px; 
+            margin: 5px; 
+            cursor: pointer; 
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover { background-color: #0056b3; }
+        .code-block { 
+            background-color: #f8f9fa; 
+            padding: 10px; 
+            border-radius: 3px; 
+            font-family: monospace;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+        }
+        .test-form {
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Auditor Creation Debug Tool</h1>
+    <p>Dieses Tool diagnostiziert warum Sie keine neuen Auditoren anlegen können.</p>
+    
+    <div class="debug-section">
+        <h2>Schritt 1: Benutzer-Berechtigungen prüfen</h2>
+        <div id="permission-results"></div>
+        <button onclick="checkPermissions()">Berechtigungen prüfen</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Schritt 2: Formular-Elemente testen</h2>
+        <div id="form-elements-results"></div>
+        <button onclick="testFormElements()">Formular-Elemente prüfen</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Schritt 3: Validierung testen</h2>
+        <div class="test-form">
+            <h4>Test-Auditor anlegen:</h4>
+            <div class="form-group">
+                <label>Vorname *</label>
+                <input type="text" id="testFirstName" value="Max" required>
+            </div>
+            <div class="form-group">
+                <label>Nachname *</label>
+                <input type="text" id="testLastName" value="Mustermann" required>
+            </div>
+            <div class="form-group">
+                <label>E-Mail *</label>
+                <input type="email" id="testEmail" value="max.mustermann@test.de" required>
+            </div>
+            <div class="form-group">
+                <label>Stadt *</label>
+                <input type="text" id="testCity" value="Hamburg" required>
+            </div>
+            <div class="form-group">
+                <label>Land *</label>
+                <input type="text" id="testCountry" value="Deutschland" required>
+            </div>
+            <div class="form-group">
+                <label>Zertifizierung *</label>
+                <select id="testCertification" required>
+                    <option value="">Bitte auswählen</option>
+                    <option value="IRCA" selected>IRCA</option>
+                    <option value="TÜV">TÜV</option>
+                    <option value="DAkkS">DAkkS</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Erfahrung *</label>
+                <select id="testExperience" required>
+                    <option value="">Bitte auswählen</option>
+                    <option value="1-5 Jahre" selected>1-5 Jahre</option>
+                    <option value="5+ Jahre">5+ Jahre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Verfügbarkeit *</label>
+                <select id="testAvailability" required>
+                    <option value="">Bitte auswählen</option>
+                    <option value="sofort" selected>Sofort</option>
+                    <option value="1-4 wochen">1-4 Wochen</option>
+                </select>
+            </div>
+            <button onclick="testAuditorCreation()">Test-Auditor erstellen</button>
+        </div>
+        <div id="validation-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Schritt 4: LocalStorage testen</h2>
+        <div id="storage-results"></div>
+        <button onclick="testLocalStorage()">LocalStorage prüfen</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Schritt 5: JavaScript-Fehler prüfen</h2>
+        <div id="javascript-results"></div>
+        <button onclick="checkJavaScriptErrors()">JavaScript-Fehler prüfen</button>
+    </div>
+
+    <script>
+        // Mock der wichtigsten QHSE Dashboard Funktionen für Testing
+        class MockQHSEDashboard {
+            constructor() {
+                this.currentUserId = 'root-admin';
+                this.users = [
+                    {
+                        id: 'root-admin',
+                        name: 'Root Administrator',
+                        displayName: 'Root Administrator',
+                        role: 'root-admin',
+                        isActive: true
+                    }
+                ];
+                this.auditors = this.loadAuditorsFromStorage() || [];
+                this.roleDefinitions = {
+                    'root-admin': {
+                        name: 'Root Administrator',
+                        allowedSections: ['auditor-verwaltung'],
+                        canManageUsers: true
+                    },
+                    'admin': {
+                        name: 'Administrator',
+                        allowedSections: ['auditor-verwaltung'],
+                        canManageUsers: true
+                    },
+                    'geschaeftsfuehrung': {
+                        name: 'Geschäftsführung',
+                        allowedSections: ['auditor-verwaltung']
+                    },
+                    'qhse': {
+                        name: 'QHSE-Mitarbeiter',
+                        allowedSections: ['auditor-verwaltung']
+                    },
+                    'mitarbeiter': {
+                        name: 'Mitarbeiter',
+                        allowedSections: ['dashboard']
+                    }
+                };
+            }
+            
+            getCurrentUser() {
+                return this.users.find(u => u.id === this.currentUserId) || this.users[0];
+            }
+            
+            validatePermissions(user, action) {
+                if (!user) return false;
+                
+                const allowedRoles = {
+                    'create_auditor': ['geschaeftsfuehrung', 'betriebsleiter', 'qhse', 'admin', 'root-admin']
+                };
+                
+                return allowedRoles[action]?.includes(user.role) || false;
+            }
+            
+            validateAuditorData(data) {
+                const errors = [];
+                
+                if (!data.firstName || data.firstName.length < 2) {
+                    errors.push('Vorname muss mindestens 2 Zeichen haben');
+                }
+                if (!data.lastName || data.lastName.length < 2) {
+                    errors.push('Nachname muss mindestens 2 Zeichen haben');
+                }
+                if (!data.email || !this.isValidEmail(data.email)) {
+                    errors.push('Gültige E-Mail-Adresse erforderlich');
+                }
+                if (!data.city || data.city.length < 2) {
+                    errors.push('Stadt muss mindestens 2 Zeichen haben');
+                }
+                if (!data.country || data.country.length < 2) {
+                    errors.push('Land muss mindestens 2 Zeichen haben');
+                }
+                if (!data.certification) {
+                    errors.push('Zertifizierung ist erforderlich');
+                }
+                if (!data.experience) {
+                    errors.push('Erfahrung ist erforderlich');
+                }
+                if (!data.availability) {
+                    errors.push('Verfügbarkeit ist erforderlich');
+                }
+                
+                return errors;
+            }
+            
+            isValidEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+            
+            loadAuditorsFromStorage() {
+                try {
+                    const stored = localStorage.getItem('qhse_auditors');
+                    return stored ? JSON.parse(stored) : [];
+                } catch (error) {
+                    return [];
+                }
+            }
+            
+            saveAuditorsToStorage() {
+                try {
+                    localStorage.setItem('qhse_auditors', JSON.stringify(this.auditors));
+                    return true;
+                } catch (error) {
+                    console.error('LocalStorage save failed:', error);
+                    return false;
+                }
+            }
+            
+            createTestAuditor(data) {
+                const auditor = {
+                    id: 'auditor_' + Date.now(),
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    email: data.email,
+                    city: data.city,
+                    country: data.country,
+                    certification: data.certification,
+                    experience: data.experience,
+                    availability: data.availability,
+                    isActive: true,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.auditors.push(auditor);
+                return this.saveAuditorsToStorage();
+            }
+        }
+        
+        // Global instance
+        const mockDashboard = new MockQHSEDashboard();
+        
+        function checkPermissions() {
+            const results = document.getElementById('permission-results');
+            const currentUser = mockDashboard.getCurrentUser();
+            
+            let html = '<h3>Berechtigungs-Check:</h3>';
+            
+            if (currentUser) {
+                const hasPermission = mockDashboard.validatePermissions(currentUser, 'create_auditor');
+                
+                html += `<div class="result ${hasPermission ? 'success' : 'error'}">
+                    <strong>${hasPermission ? '✅' : '❌'} Berechtigung für Auditor-Erstellung</strong><br>
+                    <div class="code-block">
+                        Benutzer: ${currentUser.displayName || currentUser.name}
+                        Rolle: ${currentUser.role}
+                        Berechtigung: ${hasPermission ? 'JA' : 'NEIN'}
+                        
+                        Erlaubte Rollen für create_auditor:
+                        • geschaeftsfuehrung
+                        • betriebsleiter  
+                        • qhse
+                        • admin
+                        • root-admin
+                        
+                        Aktuelle Rolle: ${currentUser.role} ${hasPermission ? '← BERECHTIGT' : '← NICHT BERECHTIGT'}
+                    </div>
+                </div>`;
+                
+                if (!hasPermission) {
+                    html += `<div class="result warning">
+                        <strong>Lösung:</strong> Wechseln Sie zu einer berechtigten Rolle (z.B. root-admin) über das Benutzer-Dropdown in der Haupt-Anwendung.
+                    </div>`;
+                }
+            } else {
+                html += `<div class="result error">
+                    <strong>❌ Kein Benutzer gefunden</strong>
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function testFormElements() {
+            const results = document.getElementById('form-elements-results');
+            
+            const requiredFields = [
+                'auditorFirstName',
+                'auditorLastName', 
+                'auditorEmail',
+                'auditorCity',
+                'auditorCountry',
+                'auditorCertification',
+                'auditorExperience',
+                'auditorAvailability'
+            ];
+            
+            let html = '<h3>Formular-Elemente Check:</h3>';
+            let allPresent = true;
+            
+            requiredFields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    html += `<div class="result success">✅ ${fieldId} - VORHANDEN</div>`;
+                } else {
+                    html += `<div class="result error">❌ ${fieldId} - FEHLT</div>`;
+                    allPresent = false;
+                }
+            });
+            
+            html += `<div class="result ${allPresent ? 'success' : 'error'}">
+                <strong>Gesamtergebnis: ${allPresent ? 'ALLE FELDER VORHANDEN' : 'FELDER FEHLEN'}</strong>
+            </div>`;
+            
+            if (!allPresent) {
+                html += `<div class="result warning">
+                    <strong>Problem:</strong> Einige Formular-Felder fehlen in der HTML-Struktur.
+                    Diese müssen im Auditor-Verwaltung-Tab vorhanden sein.
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function testAuditorCreation() {
+            const results = document.getElementById('validation-results');
+            
+            const testData = {
+                firstName: document.getElementById('testFirstName').value,
+                lastName: document.getElementById('testLastName').value,
+                email: document.getElementById('testEmail').value,
+                city: document.getElementById('testCity').value,
+                country: document.getElementById('testCountry').value,
+                certification: document.getElementById('testCertification').value,
+                experience: document.getElementById('testExperience').value,
+                availability: document.getElementById('testAvailability').value
+            };
+            
+            let html = '<h3>Validierungs-Test:</h3>';
+            
+            // Berechtigungen prüfen
+            const currentUser = mockDashboard.getCurrentUser();
+            const hasPermission = mockDashboard.validatePermissions(currentUser, 'create_auditor');
+            
+            if (!hasPermission) {
+                html += `<div class="result error">
+                    <strong>❌ Keine Berechtigung</strong><br>
+                    Benutzer-Rolle: ${currentUser.role}<br>
+                    Benötigte Rollen: geschaeftsfuehrung, betriebsleiter, qhse, admin, root-admin
+                </div>`;
+                results.innerHTML = html;
+                return;
+            }
+            
+            // Validierung prüfen
+            const validationErrors = mockDashboard.validateAuditorData(testData);
+            
+            if (validationErrors.length > 0) {
+                html += `<div class="result error">
+                    <strong>❌ Validierungsfehler:</strong><br>
+                    ${validationErrors.map(error => `• ${error}`).join('<br>')}
+                </div>`;
+            } else {
+                html += `<div class="result success">
+                    <strong>✅ Validierung erfolgreich</strong><br>
+                    Alle Pflichtfelder sind korrekt ausgefüllt.
+                </div>`;
+                
+                // E-Mail-Duplikat prüfen
+                const existingAuditor = mockDashboard.auditors.find(auditor => 
+                    auditor.email.toLowerCase() === testData.email.toLowerCase()
+                );
+                
+                if (existingAuditor) {
+                    html += `<div class="result error">
+                        <strong>❌ E-Mail bereits vergeben</strong><br>
+                        Ein Auditor mit der E-Mail "${testData.email}" existiert bereits.
+                    </div>`;
+                } else {
+                    // Test-Auditor erstellen
+                    const success = mockDashboard.createTestAuditor(testData);
+                    
+                    if (success) {
+                        html += `<div class="result success">
+                            <strong>✅ Test-Auditor erfolgreich erstellt!</strong><br>
+                            Auditor wurde zu localStorage hinzugefügt.<br>
+                            Aktuelle Anzahl Auditoren: ${mockDashboard.auditors.length}
+                        </div>`;
+                    } else {
+                        html += `<div class="result error">
+                            <strong>❌ LocalStorage-Fehler</strong><br>
+                            Auditor konnte nicht gespeichert werden.
+                        </div>`;
+                    }
+                }
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function testLocalStorage() {
+            const results = document.getElementById('storage-results');
+            let html = '<h3>LocalStorage Test:</h3>';
+            
+            try {
+                // Test ob localStorage verfügbar ist
+                const testKey = 'test_storage_' + Date.now();
+                const testValue = 'test_value';
+                
+                localStorage.setItem(testKey, testValue);
+                const retrieved = localStorage.getItem(testKey);
+                localStorage.removeItem(testKey);
+                
+                if (retrieved === testValue) {
+                    html += `<div class="result success">
+                        <strong>✅ LocalStorage funktioniert</strong>
+                    </div>`;
+                } else {
+                    html += `<div class="result error">
+                        <strong>❌ LocalStorage Lese-/Schreibfehler</strong>
+                    </div>`;
+                }
+                
+                // Aktueller localStorage Status
+                const currentAuditors = mockDashboard.loadAuditorsFromStorage();
+                html += `<div class="result info">
+                    <strong>Aktuelle Auditoren in localStorage:</strong> ${currentAuditors.length}<br>
+                    <strong>LocalStorage Größe:</strong> ${JSON.stringify(localStorage).length} Zeichen
+                </div>`;
+                
+                // Speicher-Test mit großen Daten
+                try {
+                    const largeTestData = 'x'.repeat(1000000); // 1MB Test
+                    localStorage.setItem('large_test', largeTestData);
+                    localStorage.removeItem('large_test');
+                    
+                    html += `<div class="result success">
+                        <strong>✅ Speicherplatz ausreichend</strong>
+                    </div>`;
+                } catch (e) {
+                    html += `<div class="result warning">
+                        <strong>⚠️ LocalStorage möglicherweise voll</strong><br>
+                        Fehler: ${e.message}
+                    </div>`;
+                }
+                
+            } catch (error) {
+                html += `<div class="result error">
+                    <strong>❌ LocalStorage nicht verfügbar</strong><br>
+                    Fehler: ${error.message}
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function checkJavaScriptErrors() {
+            const results = document.getElementById('javascript-results');
+            let html = '<h3>JavaScript-Fehler Check:</h3>';
+            
+            // Console Errors sammeln
+            const originalError = console.error;
+            const errors = [];
+            
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            // Test verschiedene Funktionen
+            try {
+                // Test Form Access
+                const form = document.getElementById('addAuditorForm');
+                if (form) {
+                    html += `<div class="result success">✅ Auditor-Formular gefunden</div>`;
+                } else {
+                    html += `<div class="result warning">⚠️ Auditor-Formular nicht gefunden (addAuditorForm)</div>`;
+                }
+                
+                // Test Global Functions
+                if (typeof window.qhseDashboard !== 'undefined') {
+                    html += `<div class="result success">✅ window.qhseDashboard verfügbar</div>`;
+                } else {
+                    html += `<div class="result warning">⚠️ window.qhseDashboard nicht verfügbar</div>`;
+                }
+                
+                // Test Submit Function
+                if (typeof window.qhseDashboard?.submitNewAuditor === 'function') {
+                    html += `<div class="result success">✅ submitNewAuditor Funktion gefunden</div>`;
+                } else {
+                    html += `<div class="result error">❌ submitNewAuditor Funktion nicht verfügbar</div>`;
+                }
+                
+            } catch (error) {
+                html += `<div class="result error">
+                    <strong>❌ JavaScript-Fehler:</strong><br>
+                    ${error.message}
+                </div>`;
+            }
+            
+            // Restore console.error
+            console.error = originalError;
+            
+            if (errors.length > 0) {
+                html += `<div class="result error">
+                    <strong>Console-Fehler gefunden:</strong><br>
+                    ${errors.map(error => `• ${error}`).join('<br>')}
+                </div>`;
+            } else {
+                html += `<div class="result success">
+                    <strong>✅ Keine Console-Fehler gefunden</strong>
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        // Automatischer Start
+        document.addEventListener('DOMContentLoaded', function() {
+            checkPermissions();
+        });
+    </script>
+</body>
+</html>

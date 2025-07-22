@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug User Switching - QHSE System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .debug-info {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .debug-error {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        .debug-success {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        .test-dropdown {
+            margin-top: 20px;
+        }
+        .test-dropdown select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug User Switching Functionality</h1>
+    
+    <div class="debug-container">
+        <div class="debug-title">1. HTML Elements Check</div>
+        <div id="elementsCheck"></div>
+    </div>
+    
+    <div class="debug-container">
+        <div class="debug-title">2. Users Data Check</div>
+        <div id="usersDataCheck"></div>
+    </div>
+    
+    <div class="debug-container">
+        <div class="debug-title">3. Function Availability Check</div>
+        <div id="functionsCheck"></div>
+    </div>
+    
+    <div class="debug-container">
+        <div class="debug-title">4. Event Listeners Check</div>
+        <div id="eventListenersCheck"></div>
+    </div>
+    
+    <div class="debug-container">
+        <div class="debug-title">5. Test User Dropdown</div>
+        <div class="test-dropdown">
+            <label for="testUserSelect">Test User Selection:</label>
+            <select id="testUserSelect">
+                <option value="">Loading...</option>
+            </select>
+        </div>
+        <div id="testDropdownResult"></div>
+    </div>
+    
+    <div class="debug-container">
+        <div class="debug-title">6. Console Logs</div>
+        <div id="consoleLogs"></div>
+    </div>
+
+    <script>
+        // Debug function to check user switching functionality
+        function debugUserSwitching() {
+            console.log('🔍 Starting user switching debug...');
+            
+            // 1. Check if required HTML elements exist
+            const elementsCheck = document.getElementById('elementsCheck');
+            const userSelect = document.getElementById('userSelect');
+            const userRole = document.getElementById('userRole');
+            const userName = document.getElementById('userName');
+            
+            if (userSelect && userRole && userName) {
+                elementsCheck.innerHTML = `
+                    <div class="debug-success">✅ All required elements found:</div>
+                    <div class="debug-info">
+                        • userSelect: ${userSelect ? 'Found' : 'Not found'}<br>
+                        • userRole: ${userRole ? 'Found' : 'Not found'}<br>
+                        • userName: ${userName ? 'Found' : 'Not found'}
+                    </div>
+                `;
+            } else {
+                elementsCheck.innerHTML = `
+                    <div class="debug-error">❌ Missing required elements:</div>
+                    <div class="debug-info">
+                        • userSelect: ${userSelect ? 'Found' : 'Missing'}<br>
+                        • userRole: ${userRole ? 'Found' : 'Missing'}<br>
+                        • userName: ${userName ? 'Found' : 'Missing'}
+                    </div>
+                `;
+            }
+            
+            // 2. Check users data
+            const usersDataCheck = document.getElementById('usersDataCheck');
+            if (window.qhseDashboard && window.qhseDashboard.users) {
+                const users = window.qhseDashboard.users;
+                const activeUsers = users.filter(user => user.isActive);
+                usersDataCheck.innerHTML = `
+                    <div class="debug-success">✅ Users data available:</div>
+                    <div class="debug-info">
+                        • Total users: ${users.length}<br>
+                        • Active users: ${activeUsers.length}<br>
+                        • Current user ID: ${window.qhseDashboard.currentUserId}
+                    </div>
+                `;
+            } else {
+                usersDataCheck.innerHTML = `
+                    <div class="debug-error">❌ Users data not available:</div>
+                    <div class="debug-info">
+                        • QHSE Dashboard: ${window.qhseDashboard ? 'Available' : 'Not available'}<br>
+                        • Users array: ${window.qhseDashboard?.users ? 'Available' : 'Not available'}
+                    </div>
+                `;
+            }
+            
+            // 3. Check function availability
+            const functionsCheck = document.getElementById('functionsCheck');
+            if (window.qhseDashboard) {
+                const populateUserDropdown = window.qhseDashboard.populateUserDropdown;
+                const setupUserSelection = window.qhseDashboard.setupUserSelection;
+                functionsCheck.innerHTML = `
+                    <div class="debug-success">✅ Functions available:</div>
+                    <div class="debug-info">
+                        • populateUserDropdown: ${populateUserDropdown ? 'Available' : 'Not available'}<br>
+                        • setupUserSelection: ${setupUserSelection ? 'Available' : 'Not available'}
+                    </div>
+                `;
+            } else {
+                functionsCheck.innerHTML = `
+                    <div class="debug-error">❌ QHSE Dashboard not available</div>
+                `;
+            }
+            
+            // 4. Check event listeners
+            const eventListenersCheck = document.getElementById('eventListenersCheck');
+            if (userSelect) {
+                const listeners = getEventListeners ? getEventListeners(userSelect) : 'DevTools required';
+                eventListenersCheck.innerHTML = `
+                    <div class="debug-info">
+                        • Event listeners on userSelect: ${listeners === 'DevTools required' ? 'Cannot check (DevTools required)' : Object.keys(listeners).length}<br>
+                        • Select has onChange handler: ${userSelect.onchange ? 'Yes' : 'No'}
+                    </div>
+                `;
+            } else {
+                eventListenersCheck.innerHTML = `
+                    <div class="debug-error">❌ Cannot check event listeners - userSelect not found</div>
+                `;
+            }
+            
+            // 5. Test the dropdown manually
+            const testUserSelect = document.getElementById('testUserSelect');
+            const testDropdownResult = document.getElementById('testDropdownResult');
+            
+            if (window.qhseDashboard && window.qhseDashboard.users) {
+                const users = window.qhseDashboard.users.filter(user => user.isActive);
+                testUserSelect.innerHTML = '';
+                
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.displayName} (${user.role})`;
+                    testUserSelect.appendChild(option);
+                });
+                
+                testUserSelect.value = window.qhseDashboard.currentUserId;
+                
+                testUserSelect.addEventListener('change', (e) => {
+                    testDropdownResult.innerHTML = `
+                        <div class="debug-success">✅ Test dropdown works!</div>
+                        <div class="debug-info">Selected user: ${e.target.value}</div>
+                    `;
+                });
+                
+                testDropdownResult.innerHTML = `
+                    <div class="debug-success">✅ Test dropdown populated with ${users.length} users</div>
+                `;
+            } else {
+                testDropdownResult.innerHTML = `
+                    <div class="debug-error">❌ Cannot populate test dropdown - users data not available</div>
+                `;
+            }
+            
+            // 6. Capture console logs
+            const consoleLogs = document.getElementById('consoleLogs');
+            const originalLog = console.log;
+            const originalError = console.error;
+            const logs = [];
+            
+            console.log = function(...args) {
+                logs.push({ type: 'log', message: args.join(' ') });
+                originalLog.apply(console, args);
+            };
+            
+            console.error = function(...args) {
+                logs.push({ type: 'error', message: args.join(' ') });
+                originalError.apply(console, args);
+            };
+            
+            // Try to populate the dropdown
+            if (window.qhseDashboard && window.qhseDashboard.populateUserDropdown) {
+                window.qhseDashboard.populateUserDropdown();
+            }
+            
+            setTimeout(() => {
+                console.log = originalLog;
+                console.error = originalError;
+                
+                const logHtml = logs.map(log => 
+                    `<div class="${log.type === 'error' ? 'debug-error' : 'debug-info'}">
+                        ${log.type === 'error' ? '❌' : '📝'} ${log.message}
+                    </div>`
+                ).join('');
+                
+                consoleLogs.innerHTML = logHtml || '<div class="debug-info">No relevant logs captured</div>';
+            }, 1000);
+        }
+        
+        // Wait for the main script to load
+        window.addEventListener('load', () => {
+            setTimeout(debugUserSwitching, 2000);
+        });
+    </script>
+    
+    <!-- Include the main script -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -40189,68 +40189,6 @@ QHSEDashboard.prototype.addAuditBlock = function() {
                     <input type="text" name="contact" placeholder="z.B. Max Müller (QM-Leiter)">
                 </div>
                 <div class="block-form-group">
-                    <label>Themen und Prozesse</label>
-                    <div class="topics-processes-container">
-                        <select name="topicsAndProcesses" multiple size="6" style="width: 100%;">
-                            <optgroup label="Allgemeine Managementsystem-Themen">
-                                <option value="Führung und Verpflichtung">Führung und Verpflichtung</option>
-                                <option value="Strategische Ausrichtung">Strategische Ausrichtung</option>
-                                <option value="Risiko- und Chancenmanagement">Risiko- und Chancenmanagement</option>
-                                <option value="Interessierte Parteien">Interessierte Parteien</option>
-                                <option value="Dokumentierte Information">Dokumentierte Information</option>
-                                <option value="Managementbewertung">Managementbewertung</option>
-                                <option value="Internes Audit">Internes Audit</option>
-                                <option value="Korrekturmaßnahmen">Korrekturmaßnahmen</option>
-                                <option value="Kontinuierliche Verbesserung">Kontinuierliche Verbesserung</option>
-                            </optgroup>
-                            <optgroup label="Qualitätsmanagement-Prozesse">
-                                <option value="Produktplanung und -entwicklung">Produktplanung und -entwicklung</option>
-                                <option value="Kundenzufriedenheit">Kundenzufriedenheit</option>
-                                <option value="Lieferantenbewertung">Lieferantenbewertung</option>
-                                <option value="Produktionsplanung">Produktionsplanung</option>
-                                <option value="Qualitätskontrolle">Qualitätskontrolle</option>
-                                <option value="Beschwerdemanagement">Beschwerdemanagement</option>
-                                <option value="Kalibrierung und Prüfmittelüberwachung">Kalibrierung und Prüfmittelüberwachung</option>
-                                <option value="Nichtkonformitäten">Nichtkonformitäten</option>
-                            </optgroup>
-                            <optgroup label="Umweltmanagement-Prozesse">
-                                <option value="Umweltaspekte und -auswirkungen">Umweltaspekte und -auswirkungen</option>
-                                <option value="Rechtliche Verpflichtungen">Rechtliche Verpflichtungen</option>
-                                <option value="Umweltziele und -programm">Umweltziele und -programm</option>
-                                <option value="Ressourcenverbrauch">Ressourcenverbrauch</option>
-                                <option value="Abfallmanagement">Abfallmanagement</option>
-                                <option value="Emissionsüberwachung">Emissionsüberwachung</option>
-                                <option value="Notfallvorsorge">Notfallvorsorge</option>
-                            </optgroup>
-                            <optgroup label="Arbeitsschutzmanagement-Prozesse">
-                                <option value="Gefährdungsbeurteilung">Gefährdungsbeurteilung</option>
-                                <option value="Arbeitsschutzunterweisung">Arbeitsschutzunterweisung</option>
-                                <option value="Persönliche Schutzausrüstung">Persönliche Schutzausrüstung</option>
-                                <option value="Arbeitsplatzgestaltung">Arbeitsplatzgestaltung</option>
-                                <option value="Unfallmeldung und -untersuchung">Unfallmeldung und -untersuchung</option>
-                                <option value="Beteiligung der Beschäftigten">Beteiligung der Beschäftigten</option>
-                                <option value="Gesundheitsförderung">Gesundheitsförderung</option>
-                            </optgroup>
-                            <optgroup label="Energiemanagement-Prozesse">
-                                <option value="Energieplanung">Energieplanung</option>
-                                <option value="Energieleistungskennzahlen">Energieleistungskennzahlen</option>
-                                <option value="Energiebewertung">Energiebewertung</option>
-                                <option value="Energieverbrauchsüberwachung">Energieverbrauchsüberwachung</option>
-                                <option value="Energieeffizienzmaßnahmen">Energieeffizienzmaßnahmen</option>
-                            </optgroup>
-                            <optgroup label="Informationssicherheits-Prozesse">
-                                <option value="Informationssicherheitsrisikobeurteilung">Informationssicherheitsrisikobeurteilung</option>
-                                <option value="Zugangskontrollen">Zugangskontrollen</option>
-                                <option value="Verschlüsselung">Verschlüsselung</option>
-                                <option value="Incident Management">Incident Management</option>
-                                <option value="Business Continuity">Business Continuity</option>
-                                <option value="Mitarbeitersensibilisierung">Mitarbeitersensibilisierung</option>
-                            </optgroup>
-                        </select>
-                        <small>Strg+Klick für Mehrfachauswahl mehrerer Themen und Prozesse</small>
-                    </div>
-                </div>
-                <div class="block-form-group">
                     <label>Norm(en)</label>
                     <select name="standards" multiple style="height: 80px;">
                         <option value="ISO 9001">ISO 9001</option>

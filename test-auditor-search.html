@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditor Search Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .result { padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        input, select { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Auditor Search Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Element Existence</h2>
+        <p>Checking if all required elements exist in the DOM:</p>
+        <div id="element-test-results"></div>
+        <button onclick="testElementExistence()">Test Elements</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Mock Filter Elements</h2>
+        <p>Testing with mock filter elements:</p>
+        
+        <div>
+            <label>Standard: </label>
+            <select id="auditorStandardFilter">
+                <option value="">Alle Standards</option>
+                <option value="ISO 9001">ISO 9001</option>
+                <option value="ISO 14001">ISO 14001</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Location: </label>
+            <input type="text" id="auditorLocationFilter" placeholder="Stadt, Region">
+        </div>
+        
+        <div>
+            <label>Certification: </label>
+            <select id="auditorCertificationFilter">
+                <option value="">Alle Zertifizierungen</option>
+                <option value="IRCA">IRCA</option>
+                <option value="TÜV">TÜV</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Experience: </label>
+            <select id="auditorExperienceFilter">
+                <option value="">Alle Erfahrungen</option>
+                <option value="1-5 Jahre">1-5 Jahre</option>
+                <option value="5+ Jahre">5+ Jahre</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Industry: </label>
+            <select id="auditorIndustryFilter">
+                <option value="">Alle Branchen</option>
+                <option value="Automotive">Automotive</option>
+                <option value="Healthcare">Healthcare</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Availability: </label>
+            <select id="auditorAvailabilityFilter">
+                <option value="">Alle Verfügbarkeiten</option>
+                <option value="sofort">Sofort</option>
+                <option value="1-4 wochen">1-4 Wochen</option>
+            </select>
+        </div>
+        
+        <div id="auditorSearchResultsList" style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; min-height: 50px;"></div>
+        
+        <button onclick="testSearchFunction()">Test Search Function</button>
+        <button onclick="testClearFilters()">Test Clear Filters</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Mock QHSEDashboard class with just the auditor search functionality
+        class MockQHSEDashboard {
+            constructor() {
+                // Mock audit exchanges data
+                this.auditExchanges = [
+                    {
+                        id: '1',
+                        title: 'ISO 9001 Audit',
+                        standard: 'ISO 9001',
+                        location: 'Hamburg',
+                        leadAuditorCert: 'IRCA',
+                        auditExperience: '5+ Jahre',
+                        industryExperience: ['Automotive', 'Manufacturing'],
+                        availableFrom: '2024-01-15',
+                        offeredBy: 'user1',
+                        offeredByName: 'Max Mustermann'
+                    },
+                    {
+                        id: '2',
+                        title: 'ISO 14001 Audit',
+                        standard: 'ISO 14001',
+                        location: 'Berlin',
+                        leadAuditorCert: 'TÜV',
+                        auditExperience: '1-5 Jahre',
+                        industryExperience: ['Healthcare'],
+                        availableFrom: '2024-02-01',
+                        offeredBy: 'user2',
+                        offeredByName: 'Anna Schmidt'
+                    }
+                ];
+            }
+            
+            searchAuditors() {
+                console.log('🔍 Searching for auditors...');
+                
+                // Get filter values with error handling
+                const standardFilter = document.getElementById('auditorStandardFilter')?.value || '';
+                const locationFilter = document.getElementById('auditorLocationFilter')?.value.toLowerCase() || '';
+                const certificationFilter = document.getElementById('auditorCertificationFilter')?.value || '';
+                const experienceFilter = document.getElementById('auditorExperienceFilter')?.value || '';
+                const industryFilter = document.getElementById('auditorIndustryFilter')?.value || '';
+                const availabilityFilter = document.getElementById('auditorAvailabilityFilter')?.value || '';
+                
+                // Check if we have any audit exchanges to search through
+                if (!this.auditExchanges || this.auditExchanges.length === 0) {
+                    const resultsList = document.getElementById('auditorSearchResultsList');
+                    if (resultsList) {
+                        resultsList.innerHTML = '<p class="no-offers">Aktuell sind keine Auditoren verfügbar.</p>';
+                    }
+                    return;
+                }
+
+                // Filter available auditors based on their offers
+                let availableAuditors = this.auditExchanges.filter(offer => {
+                    let matches = true;
+
+                    // Filter by standard
+                    if (standardFilter && offer.standard !== standardFilter) {
+                        matches = false;
+                    }
+
+                    // Filter by location
+                    if (locationFilter && !offer.location.toLowerCase().includes(locationFilter)) {
+                        matches = false;
+                    }
+
+                    // Filter by auditor certification
+                    if (certificationFilter && offer.leadAuditorCert !== certificationFilter) {
+                        matches = false;
+                    }
+
+                    // Filter by experience
+                    if (experienceFilter && offer.auditExperience !== experienceFilter) {
+                        matches = false;
+                    }
+
+                    // Filter by industry experience
+                    if (industryFilter && (!offer.industryExperience || !offer.industryExperience.includes(industryFilter))) {
+                        matches = false;
+                    }
+
+                    return matches;
+                });
+
+                // Group by auditor (offeredBy) to avoid duplicates
+                const auditorMap = new Map();
+                availableAuditors.forEach(offer => {
+                    if (!auditorMap.has(offer.offeredBy)) {
+                        auditorMap.set(offer.offeredBy, {
+                            auditorId: offer.offeredBy,
+                            auditorName: offer.offeredByName,
+                            offers: []
+                        });
+                    }
+                    auditorMap.get(offer.offeredBy).offers.push(offer);
+                });
+
+                const uniqueAuditors = Array.from(auditorMap.values());
+
+                // Display results
+                const resultsList = document.getElementById('auditorSearchResultsList');
+                if (resultsList) {
+                    if (uniqueAuditors.length === 0) {
+                        resultsList.innerHTML = '<p class="no-offers">Keine Auditoren entsprechen den gewählten Filtern.</p>';
+                    } else {
+                        resultsList.innerHTML = `
+                            <p style="color: #666; margin-bottom: 1rem;">
+                                <strong>${uniqueAuditors.length}</strong> Auditor${uniqueAuditors.length !== 1 ? 'en' : ''} gefunden
+                            </p>
+                            ${uniqueAuditors.map(auditor => this.generateAuditorCard(auditor)).join('')}
+                        `;
+                    }
+                }
+            }
+            
+            generateAuditorCard(auditor) {
+                const latestOffer = auditor.offers[0];
+                return `
+                    <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                        <h4>${auditor.auditorName}</h4>
+                        <p><strong>Standard:</strong> ${latestOffer.standard}</p>
+                        <p><strong>Location:</strong> ${latestOffer.location}</p>
+                        <p><strong>Certification:</strong> ${latestOffer.leadAuditorCert}</p>
+                        <p><strong>Experience:</strong> ${latestOffer.auditExperience}</p>
+                        <p><strong>Industry:</strong> ${latestOffer.industryExperience?.join(', ') || 'N/A'}</p>
+                        <p><strong>Offers:</strong> ${auditor.offers.length}</p>
+                    </div>
+                `;
+            }
+            
+            clearAuditorFilters() {
+                const filterElements = [
+                    'auditorStandardFilter',
+                    'auditorLocationFilter', 
+                    'auditorCertificationFilter',
+                    'auditorExperienceFilter',
+                    'auditorIndustryFilter',
+                    'auditorAvailabilityFilter'
+                ];
+                
+                filterElements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.value = '';
+                    }
+                });
+                
+                const resultsList = document.getElementById('auditorSearchResultsList');
+                if (resultsList) {
+                    resultsList.innerHTML = '<p class="no-offers">Verwenden Sie die Filter oben, um nach Auditoren zu suchen</p>';
+                }
+            }
+        }
+        
+        // Create global instance
+        const qhseDashboard = new MockQHSEDashboard();
+        
+        function testElementExistence() {
+            const requiredElements = [
+                'auditorStandardFilter',
+                'auditorLocationFilter',
+                'auditorCertificationFilter',
+                'auditorExperienceFilter',
+                'auditorIndustryFilter',
+                'auditorAvailabilityFilter',
+                'auditorSearchResultsList'
+            ];
+            
+            let results = '<h3>Element Existence Test:</h3>';
+            let allExist = true;
+            
+            requiredElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    results += `<div class="result success">✅ ${elementId} - EXISTS</div>`;
+                } else {
+                    results += `<div class="result error">❌ ${elementId} - MISSING</div>`;
+                    allExist = false;
+                }
+            });
+            
+            results += `<div class="result ${allExist ? 'success' : 'error'}">
+                <strong>Overall: ${allExist ? 'PASS' : 'FAIL'}</strong>
+            </div>`;
+            
+            document.getElementById('element-test-results').innerHTML = results;
+        }
+        
+        function testSearchFunction() {
+            try {
+                qhseDashboard.searchAuditors();
+                document.getElementById('test-results').innerHTML += 
+                    '<div class="result success">✅ Search function executed successfully</div>';
+            } catch (error) {
+                document.getElementById('test-results').innerHTML += 
+                    `<div class="result error">❌ Search function failed: ${error.message}</div>`;
+            }
+        }
+        
+        function testClearFilters() {
+            try {
+                qhseDashboard.clearAuditorFilters();
+                document.getElementById('test-results').innerHTML += 
+                    '<div class="result success">✅ Clear filters function executed successfully</div>';
+            } catch (error) {
+                document.getElementById('test-results').innerHTML += 
+                    `<div class="result error">❌ Clear filters function failed: ${error.message}</div>`;
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            testElementExistence();
+            document.getElementById('test-results').innerHTML = '<div class="result info">Ready for testing...</div>';
+        });
+    </script>
+</body>
+</html>

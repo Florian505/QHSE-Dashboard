@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditor-Verwaltung Zugriff Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            background-color: #f9f9f9;
+        }
+        .result { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 3px; 
+            border: 1px solid #ddd;
+        }
+        .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; color: #856404; border-color: #ffeaa7; }
+        button { 
+            padding: 10px 15px; 
+            margin: 5px; 
+            cursor: pointer; 
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover { background-color: #0056b3; }
+        .code-block { 
+            background-color: #f8f9fa; 
+            padding: 10px; 
+            border-radius: 3px; 
+            font-family: monospace;
+            border: 1px solid #e9ecef;
+        }
+        .menu-item { 
+            display: block; 
+            padding: 8px; 
+            margin: 5px 0; 
+            background-color: #e9ecef; 
+            border-radius: 3px;
+        }
+        .menu-item.visible { background-color: #d4edda; }
+        .menu-item.hidden { background-color: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Auditor-Verwaltung Zugriff Debug Tool</h1>
+    <p>Dieses Tool diagnostiziert warum Sie nicht auf die Auditor-Verwaltung zugreifen können.</p>
+    
+    <div class="debug-section">
+        <h2>Schritt 1: Benutzer-Informationen</h2>
+        <div id="user-info-results"></div>
+        <button onclick="checkUserInfo()">Benutzer-Info prüfen</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Schritt 2: Rolle und Berechtigungen</h2>
+        <div id="role-permissions-results"></div>
+        <button onclick="checkRolePermissions()">Berechtigungen prüfen</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Schritt 3: Menü-Sichtbarkeit</h2>
+        <div id="menu-visibility-results"></div>
+        <button onclick="checkMenuVisibility()">Menü-Sichtbarkeit prüfen</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Schritt 4: Navigation Test</h2>
+        <div id="navigation-test-results"></div>
+        <button onclick="testNavigation()">Navigation testen</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Schritt 5: Lösung anwenden</h2>
+        <div id="solution-results"></div>
+        <button onclick="applySolution()">Lösung anwenden</button>
+    </div>
+
+    <script>
+        // Mock der wichtigsten QHSE Dashboard Funktionen
+        class MockQHSEDashboard {
+            constructor() {
+                this.currentUserId = 'root-admin';
+                this.users = this.loadUsersFromStorage();
+                this.roleDefinitions = {
+                    'root-admin': {
+                        name: 'Root Administrator',
+                        allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'einstellungen', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                        canManageUsers: true,
+                        canManageAreas: true,
+                        canManageDepartments: true,
+                        canViewAllTimeEntries: true
+                    },
+                    admin: {
+                        name: 'Administrator',
+                        allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                        canManageUsers: true,
+                        canManageAreas: true,
+                        canManageDepartments: true,
+                        canViewAllTimeEntries: true
+                    },
+                    geschaeftsfuehrung: {
+                        name: 'Geschäftsführung',
+                        allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                        hierarchyLevel: 1,
+                        canSupervise: ['betriebsleiter', 'qhse']
+                    },
+                    qhse: {
+                        name: 'QHSE-Mitarbeiter',
+                        allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                        hierarchyLevel: 2,
+                        isStaffPosition: true,
+                        mustHaveSupervisor: ['geschaeftsfuehrung']
+                    },
+                    mitarbeiter: {
+                        name: 'Mitarbeiter',
+                        allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'urlaubsplanung', 'mein-profil'],
+                        hierarchyLevel: 4,
+                        mustHaveSupervisor: ['abteilungsleiter']
+                    }
+                };
+                this.initializeDefaultUsers();
+            }
+            
+            loadUsersFromStorage() {
+                try {
+                    const stored = localStorage.getItem('qhse_users');
+                    return stored ? JSON.parse(stored) : [];
+                } catch (error) {
+                    return [];
+                }
+            }
+            
+            initializeDefaultUsers() {
+                if (this.users.length === 0) {
+                    this.users = [
+                        {
+                            id: 'root-admin',
+                            name: 'Root Administrator',
+                            displayName: 'Root Administrator',
+                            email: 'admin@hoffmann-voss.de',
+                            role: 'root-admin',
+                            department: 'IT',
+                            isActive: true,
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            id: 'admin',
+                            name: 'Administrator',
+                            displayName: 'Administrator',
+                            email: 'admin@hoffmann-voss.de',
+                            role: 'admin',
+                            department: 'IT',
+                            isActive: true,
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            id: 'geschaeftsfuehrung',
+                            name: 'Geschäftsführung',
+                            displayName: 'Geschäftsführung',
+                            email: 'gf@hoffmann-voss.de',
+                            role: 'geschaeftsfuehrung',
+                            department: 'Management',
+                            isActive: true,
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            id: 'qhse',
+                            name: 'QHSE Manager',
+                            displayName: 'QHSE Manager',
+                            email: 'qhse@hoffmann-voss.de',
+                            role: 'qhse',
+                            department: 'QHSE',
+                            isActive: true,
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            id: 'mitarbeiter',
+                            name: 'Mitarbeiter',
+                            displayName: 'Mitarbeiter',
+                            email: 'mitarbeiter@hoffmann-voss.de',
+                            role: 'mitarbeiter',
+                            department: 'Produktion',
+                            isActive: true,
+                            createdAt: new Date().toISOString()
+                        }
+                    ];
+                }
+            }
+            
+            getCurrentUser() {
+                let user = this.users.find(user => user.id === this.currentUserId && user.isActive);
+                if (!user) {
+                    user = this.users.find(user => user.id === 'root-admin');
+                    if (user) {
+                        this.currentUserId = 'root-admin';
+                    }
+                }
+                return user;
+            }
+            
+            canAccessSection(sectionId) {
+                const currentUser = this.getCurrentUser();
+                if (!currentUser) return false;
+                
+                const roleDefinition = this.roleDefinitions[currentUser.role];
+                if (!roleDefinition) return false;
+                
+                return roleDefinition.allowedSections.includes(sectionId);
+            }
+        }
+        
+        // Global instance
+        const mockDashboard = new MockQHSEDashboard();
+        
+        function checkUserInfo() {
+            const results = document.getElementById('user-info-results');
+            const currentUser = mockDashboard.getCurrentUser();
+            
+            let html = '<h3>Aktuelle Benutzerinformationen:</h3>';
+            
+            if (currentUser) {
+                html += `<div class="result success">
+                    <strong>✅ Benutzer gefunden</strong><br>
+                    <div class="code-block">
+                        ID: ${currentUser.id}<br>
+                        Name: ${currentUser.displayName || currentUser.name}<br>
+                        E-Mail: ${currentUser.email}<br>
+                        Rolle: ${currentUser.role}<br>
+                        Abteilung: ${currentUser.department || 'Nicht zugewiesen'}<br>
+                        Aktiv: ${currentUser.isActive ? 'Ja' : 'Nein'}<br>
+                        Current User ID: ${mockDashboard.currentUserId}
+                    </div>
+                </div>`;
+            } else {
+                html += `<div class="result error">
+                    <strong>❌ Kein Benutzer gefunden</strong><br>
+                    Current User ID: ${mockDashboard.currentUserId}<br>
+                    Verfügbare Benutzer: ${mockDashboard.users.length}
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function checkRolePermissions() {
+            const results = document.getElementById('role-permissions-results');
+            const currentUser = mockDashboard.getCurrentUser();
+            
+            let html = '<h3>Rolle und Berechtigungen:</h3>';
+            
+            if (currentUser) {
+                const roleDefinition = mockDashboard.roleDefinitions[currentUser.role];
+                const hasAuditorAccess = mockDashboard.canAccessSection('auditor-verwaltung');
+                
+                if (roleDefinition) {
+                    html += `<div class="result ${hasAuditorAccess ? 'success' : 'error'}">
+                        <strong>${hasAuditorAccess ? '✅' : '❌'} Auditor-Verwaltung Zugriff</strong><br>
+                        <div class="code-block">
+                            Rolle: ${roleDefinition.name}<br>
+                            Zugriff auf 'auditor-verwaltung': ${hasAuditorAccess ? 'JA' : 'NEIN'}<br>
+                            <br>
+                            Erlaubte Sektionen:<br>
+                            ${roleDefinition.allowedSections.map(s => 
+                                `• ${s} ${s === 'auditor-verwaltung' ? '← ZIEL' : ''}`
+                            ).join('<br>')}
+                        </div>
+                    </div>`;
+                } else {
+                    html += `<div class="result error">
+                        <strong>❌ Rollendefinition nicht gefunden</strong><br>
+                        Rolle: ${currentUser.role}
+                    </div>`;
+                }
+            } else {
+                html += `<div class="result error">
+                    <strong>❌ Kein Benutzer für Rollenprüfung</strong>
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function checkMenuVisibility() {
+            const results = document.getElementById('menu-visibility-results');
+            const currentUser = mockDashboard.getCurrentUser();
+            
+            let html = '<h3>Menü-Sichtbarkeit Analyse:</h3>';
+            
+            // Simuliere die Menü-Items
+            const menuItems = [
+                { section: 'dashboard', roles: ['all'], name: 'Dashboard' },
+                { section: 'audit-tauschboerse', roles: ['geschaeftsfuehrung','betriebsleiter','abteilungsleiter','qhse','admin','root-admin'], name: 'Audit-Tauschbörse' },
+                { section: 'auditor-verwaltung', roles: ['geschaeftsfuehrung','betriebsleiter','abteilungsleiter','qhse','admin','root-admin'], name: 'Auditor-Verwaltung' },
+                { section: 'zeiterfassung', roles: ['geschaeftsfuehrung','betriebsleiter','abteilungsleiter','qhse','mitarbeiter','admin','root-admin'], name: 'Zeiterfassung' }
+            ];
+            
+            menuItems.forEach(item => {
+                const hasAccess = mockDashboard.canAccessSection(item.section);
+                const roleMatches = item.roles.includes('all') || item.roles.includes(currentUser?.role);
+                
+                html += `<div class="menu-item ${hasAccess ? 'visible' : 'hidden'}">
+                    <strong>${item.name}</strong><br>
+                    Sektion: ${item.section}<br>
+                    Zugriff: ${hasAccess ? '✅ JA' : '❌ NEIN'}<br>
+                    Rolle passend: ${roleMatches ? '✅ JA' : '❌ NEIN'}
+                </div>`;
+            });
+            
+            results.innerHTML = html;
+        }
+        
+        function testNavigation() {
+            const results = document.getElementById('navigation-test-results');
+            
+            let html = '<h3>Navigation Test:</h3>';
+            
+            try {
+                const hasAccess = mockDashboard.canAccessSection('auditor-verwaltung');
+                
+                if (hasAccess) {
+                    html += `<div class="result success">
+                        <strong>✅ Navigation sollte funktionieren</strong><br>
+                        Der Benutzer hat Zugriff auf die Auditor-Verwaltung.
+                    </div>`;
+                } else {
+                    html += `<div class="result error">
+                        <strong>❌ Navigation blockiert</strong><br>
+                        Der Benutzer hat keinen Zugriff auf die Auditor-Verwaltung.
+                    </div>`;
+                }
+                
+                // Teste andere kritische Funktionen
+                const currentUser = mockDashboard.getCurrentUser();
+                if (currentUser) {
+                    html += `<div class="result info">
+                        <strong>ℹ️ Weitere Tests:</strong><br>
+                        getCurrentUser(): ✅ OK<br>
+                        Benutzer aktiv: ${currentUser.isActive ? '✅ JA' : '❌ NEIN'}<br>
+                        Rolle definiert: ${mockDashboard.roleDefinitions[currentUser.role] ? '✅ JA' : '❌ NEIN'}
+                    </div>`;
+                }
+                
+            } catch (error) {
+                html += `<div class="result error">
+                    <strong>❌ JavaScript Fehler</strong><br>
+                    ${error.message}
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function applySolution() {
+            const results = document.getElementById('solution-results');
+            const currentUser = mockDashboard.getCurrentUser();
+            
+            let html = '<h3>Lösungsvorschläge:</h3>';
+            
+            if (!currentUser) {
+                html += `<div class="result error">
+                    <strong>Problem: Kein Benutzer gefunden</strong><br>
+                    Lösung: Überprüfen Sie die Benutzerdaten im localStorage
+                </div>`;
+            } else if (!currentUser.isActive) {
+                html += `<div class="result error">
+                    <strong>Problem: Benutzer ist inaktiv</strong><br>
+                    Lösung: Aktivieren Sie den Benutzer oder wechseln Sie zu einem aktiven Benutzer
+                </div>`;
+            } else if (!mockDashboard.canAccessSection('auditor-verwaltung')) {
+                html += `<div class="result error">
+                    <strong>Problem: Rolle hat keinen Zugriff</strong><br>
+                    Aktuelle Rolle: ${currentUser.role}<br>
+                    Lösung: Wechseln Sie zu einer berechtigten Rolle (root-admin, admin, geschaeftsfuehrung, qhse)
+                </div>`;
+                
+                // Automatische Rollenänderung anbieten
+                html += `<div class="result info">
+                    <strong>Automatische Lösung:</strong><br>
+                    <button onclick="switchToAdminRole()">Zu Root-Admin wechseln</button>
+                    <button onclick="switchToQhseRole()">Zu QHSE-Rolle wechseln</button>
+                </div>`;
+            } else {
+                html += `<div class="result success">
+                    <strong>✅ Alles konfiguriert</strong><br>
+                    Die Auditor-Verwaltung sollte zugänglich sein.<br>
+                    Falls nicht, überprüfen Sie die Haupt-Anwendung auf JavaScript-Fehler.
+                </div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function switchToAdminRole() {
+            mockDashboard.currentUserId = 'root-admin';
+            alert('Zu Root-Admin gewechselt! Führen Sie alle Tests erneut aus.');
+            
+            // Alle Ergebnisse zurücksetzen
+            document.getElementById('user-info-results').innerHTML = '';
+            document.getElementById('role-permissions-results').innerHTML = '';
+            document.getElementById('menu-visibility-results').innerHTML = '';
+            document.getElementById('navigation-test-results').innerHTML = '';
+            document.getElementById('solution-results').innerHTML = '';
+        }
+        
+        function switchToQhseRole() {
+            mockDashboard.currentUserId = 'qhse';
+            alert('Zu QHSE-Rolle gewechselt! Führen Sie alle Tests erneut aus.');
+            
+            // Alle Ergebnisse zurücksetzen
+            document.getElementById('user-info-results').innerHTML = '';
+            document.getElementById('role-permissions-results').innerHTML = '';
+            document.getElementById('menu-visibility-results').innerHTML = '';
+            document.getElementById('navigation-test-results').innerHTML = '';
+            document.getElementById('solution-results').innerHTML = '';
+        }
+        
+        // Automatischer Start
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserInfo();
+            checkRolePermissions();
+            checkMenuVisibility();
+            testNavigation();
+            applySolution();
+        });
+    </script>
+</body>
+</html>
