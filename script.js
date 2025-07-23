@@ -42828,7 +42828,7 @@ QHSEDashboard.prototype.exportAuditPlanWord = function() {
     const blob = new Blob([wordContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
     const url = URL.createObjectURL(blob);
     
-    const filename = `${title}_${date}.doc`;
+    const filename = `${title}_${date}.docx`;
     
     const link = document.createElement('a');
     link.href = url;
@@ -43278,7 +43278,7 @@ QHSEDashboard.prototype.exportAuditNotes = function() {
     const blob = new Blob([notesContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
     const url = URL.createObjectURL(blob);
     
-    const filename = `Auditnotizen_${date}.doc`;
+    const filename = `Auditnotizen_${date}.docx`;
     
     const link = document.createElement('a');
     link.href = url;
