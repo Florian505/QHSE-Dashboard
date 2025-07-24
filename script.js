@@ -43808,6 +43808,7 @@ QHSEDashboard.prototype.setupIncidentReporting = function() {
     // Setup event listeners after DOM is ready
     setTimeout(() => {
         this.initializeIncidentReporting();
+        this.initializeMandatoryReportingChecker();
     }, 100);
 };
 
@@ -44696,6 +44697,249 @@ window.closeIncidentModal = function() {
 window.openIncidentModal = function(type) {
     if (window.qhseDashboard) {
         window.qhseDashboard.openIncidentModal(type);
+    }
+};
+
+/**
+ * TÜV/Behörden Compliance - Meldepflicht-Integration
+ */
+QHSEDashboard.prototype.initializeMandatoryReportingChecker = function() {
+    if (typeof MandatoryReportingChecker === 'undefined') {
+        console.warn('⚠️ MandatoryReportingChecker nicht verfügbar - Compliance-Module nicht geladen');
+        return;
+    }
+
+    this.mandatoryChecker = new MandatoryReportingChecker();
+    console.log('✅ Meldepflicht-Checker initialisiert');
+
+    // Event-Listener für Formular-Eingaben hinzufügen
+    this.setupMandatoryReportingChecks();
+};
+
+QHSEDashboard.prototype.setupMandatoryReportingChecks = function() {
+    // Wichtige Felder für Meldepflicht-Prüfung
+    const criticalFields = [
+        'incidentSeverity',
+        'incidentCategory', 
+        'hospitalTreatment',
+        'workdaysLost',
+        'fatality',
+        'affectedPersonsCount',
+        'equipmentInvolved'
+    ];
+
+    criticalFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', () => {
+                this.checkMandatoryReporting();
+            });
+        }
+    });
+
+    // Auch bei Tab-Wechsel prüfen
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('incident-tab-btn')) {
+            setTimeout(() => this.checkMandatoryReporting(), 100);
+        }
+    });
+};
+
+QHSEDashboard.prototype.checkMandatoryReporting = function() {
+    if (!this.mandatoryChecker) return;
+
+    const incidentData = this.collectIncidentFormData();
+    const mandatoryResult = this.mandatoryChecker.checkMandatoryReporting(incidentData);
+    const warning = this.mandatoryChecker.generateWarning(mandatoryResult);
+
+    this.displayMandatoryReportingAlert(warning, mandatoryResult);
+};
+
+QHSEDashboard.prototype.collectIncidentFormData = function() {
+    // Sammelt aktuelle Formulardaten für Meldepflicht-Prüfung
+    const formData = {};
+
+    // Schweregrad
+    const severity = document.getElementById('incidentSeverity');
+    if (severity) formData.severity = severity.value;
+
+    // Kategorie
+    const category = document.getElementById('incidentCategory');
+    if (category) formData.category = category.value;
+
+    // Folgen
+    formData.consequences = {};
+    
+    const hospitalTreatment = document.getElementById('hospitalTreatment');
+    if (hospitalTreatment) formData.consequences.hospitalTreatment = hospitalTreatment.checked;
+
+    const workdaysLost = document.getElementById('workdaysLost');
+    if (workdaysLost) formData.consequences.workdaysLost = workdaysLost.value;
+
+    const fatality = document.getElementById('fatality');
+    if (fatality) formData.consequences.fatality = fatality.checked;
+
+    const injuries = document.getElementById('injuryDescription');
+    if (injuries) formData.consequences.injuries = injuries.value;
+
+    // Personen
+    formData.persons = {};
+    const affectedCount = document.getElementById('affectedPersonsCount');
+    if (affectedCount) formData.persons.affectedCount = affectedCount.value;
+
+    // Ausrüstung/Maschinen
+    const equipment = document.getElementById('equipmentInvolved');
+    if (equipment) formData.equipment = equipment.value;
+
+    // Umweltauswirkungen
+    const envImpact = document.getElementById('environmentalImpact');
+    if (envImpact) formData.consequences.environmentalImpact = envImpact.checked;
+
+    return formData;
+};
+
+QHSEDashboard.prototype.displayMandatoryReportingAlert = function(warning, mandatoryResult) {
+    const alertContainer = document.getElementById('mandatoryReportingAlert');
+    if (!alertContainer) return;
+
+    const alertTitle = document.getElementById('alertTitle');
+    const alertMessage = document.getElementById('alertMessage');
+    const alertDetails = document.getElementById('alertDetails');
+
+    // Alert-Level CSS-Klassen anwenden
+    alertContainer.className = `mandatory-alert ${warning.level}`;
+    
+    if (alertTitle) alertTitle.textContent = warning.title;
+    if (alertMessage) alertMessage.textContent = warning.message;
+
+    // Details erstellen
+    if (alertDetails && mandatoryResult.authorities.length > 0) {
+        let detailsHTML = '<h5>Betroffene Behörden:</h5>';
+        mandatoryResult.authorities.forEach(authority => {
+            detailsHTML += `
+                <div class="authority-info">
+                    <strong>${authority.authority}</strong><br>
+                    <small>Frist: ${authority.deadline}</small>
+                </div>
+            `;
+        });
+        alertDetails.innerHTML = detailsHTML;
+    }
+
+    // Alert anzeigen
+    alertContainer.style.display = 'block';
+
+    // Fristen-Button Event-Listener
+    const deadlinesBtn = document.getElementById('viewDeadlines');
+    if (deadlinesBtn) {
+        deadlinesBtn.onclick = () => {
+            this.showDeadlinesModal(mandatoryResult);
+        };
+    }
+};
+
+QHSEDashboard.prototype.showDeadlinesModal = function(mandatoryResult) {
+    // Erstelle eine detaillierte Fristen-Übersicht
+    const incidentDateTime = new Date(document.getElementById('incidentDateTime')?.value || new Date());
+    const deadlines = this.mandatoryChecker.calculateDeadlines(mandatoryResult, incidentDateTime);
+    
+    let modalContent = `
+        <div class="deadlines-modal">
+            <h3>🕐 Meldepflicht-Fristen Übersicht</h3>
+    `;
+
+    if (deadlines.immediate.length > 0) {
+        modalContent += `
+            <div class="immediate-deadlines">
+                <h4 style="color: #f44336;">🚨 SOFORTIGE MELDUNGEN</h4>
+        `;
+        deadlines.immediate.forEach(deadline => {
+            modalContent += `
+                <div class="deadline-item critical">
+                    <strong>${deadline.authority}</strong><br>
+                    <span>Frist: SOFORT bis ${deadline.calculatedDeadline.toLocaleString('de-DE')}</span><br>
+                    <small>Verbleibend: ${deadline.hoursRemaining}h</small>
+                </div>
+            `;
+        });
+        modalContent += `</div>`;
+    }
+
+    if (deadlines.scheduled.length > 0) {
+        modalContent += `
+            <div class="scheduled-deadlines">
+                <h4 style="color: #ff9800;">⏰ TERMINIERTE MELDUNGEN</h4>
+        `;
+        deadlines.scheduled.forEach(deadline => {
+            modalContent += `
+                <div class="deadline-item">
+                    <strong>${deadline.authority}</strong><br>
+                    <span>Frist: bis ${deadline.calculatedDeadline.toLocaleString('de-DE')}</span><br>
+                    <small>Verbleibend: ${deadline.hoursRemaining}h</small>
+                </div>
+            `;
+        });
+        modalContent += `</div>`;
+    }
+
+    modalContent += `
+            <div class="modal-actions">
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="btn-primary">
+                    Verstanden
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Modal erstellen und anzeigen
+    const modal = document.createElement('div');
+    modal.className = 'compliance-modal';
+    modal.innerHTML = `
+        <div class="compliance-modal-content">
+            ${modalContent}
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // CSS für neues Modal (falls nicht vorhanden)
+    if (!document.getElementById('compliance-modal-styles')) {
+        const style = document.createElement('style');
+        style.id = 'compliance-modal-styles';
+        style.textContent = `
+            .compliance-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10001;
+            }
+            .compliance-modal-content {
+                background: white;
+                padding: 2rem;
+                border-radius: 12px;
+                max-width: 600px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            .deadline-item {
+                background: #f8f9fa;
+                padding: 1rem;
+                margin: 0.5rem 0;
+                border-radius: 8px;
+                border-left: 4px solid #28a745;
+            }
+            .deadline-item.critical {
+                border-left-color: #dc3545;
+                background: #fff5f5;
+            }
+        `;
+        document.head.appendChild(style);
     }
 };
 

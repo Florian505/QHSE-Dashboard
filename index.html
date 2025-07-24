@@ -10384,6 +10384,25 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                 <div class="incident-form-content">
                     <!-- Tab 1: Grunddaten -->
                     <div class="incident-tab-content active" id="tab-basic">
+                        <!-- Meldepflicht-Warnbereich -->
+                        <div id="mandatoryReportingAlert" class="mandatory-alert" style="display: none;">
+                            <div class="alert-content">
+                                <div class="alert-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="alert-text">
+                                    <h4 id="alertTitle">Meldepflicht-Prüfung</h4>
+                                    <p id="alertMessage">Prüfung läuft...</p>
+                                    <div id="alertDetails" class="alert-details"></div>
+                                </div>
+                                <div class="alert-actions">
+                                    <button type="button" id="viewDeadlines" class="btn-alert-action">
+                                        <i class="fas fa-clock"></i> Fristen anzeigen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-section">
                             <h3><i class="fas fa-info-circle"></i> Grundlegende Informationen</h3>
                             
@@ -11258,6 +11277,9 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
             </form>
         </div>
     </div>
+
+    <!-- TÜV/Behörden Compliance Module -->
+    <script src="compliance-mandatory-reporting.js"></script>
 
 </body>
 </html>
