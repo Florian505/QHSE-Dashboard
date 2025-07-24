@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-ancestors 'none';">
-    <title>QHSE</title>
+    <title>QHSE Management System - Hoffmann und Voss GmbH</title>
     <link rel="stylesheet" href="styles.css?v=2024070502">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,7 @@
                     <i class="fas fa-industry"></i>
                     <div class="company-info">
                         <div class="company-name-container">
-                            <h2 id="companyName" class="editable-company-name" title="Klicken zum Bearbeiten">QHSE GFT</h2>
+                            <h2 id="companyName" class="editable-company-name" title="Klicken zum Bearbeiten">Hoffmann & Voss</h2>
                             <button class="edit-company-btn" id="editCompanyBtn" title="Firmennamen bearbeiten">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -136,6 +136,14 @@
                         <i class="fas fa-graduation-cap"></i>
                         <span>Schulungen</span>
                     </li>
+                    <li class="menu-item incident-report" data-type="accident" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,mitarbeiter,techniker,admin,root-admin">
+                        <i class="fas fa-ambulance"></i>
+                        <span>Unfall melden</span>
+                    </li>
+                    <li class="menu-item incident-report" data-type="near_miss" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,mitarbeiter,techniker,admin,root-admin">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Beinaheunfall melden</span>
+                    </li>
                     <li class="menu-item static-item" data-section="lieferanten" data-roles="geschaeftsfuehrung,betriebsleiter,abteilungsleiter,qhse,admin,root-admin">
                         <i class="fas fa-truck"></i>
                         <span>Lieferantenbewertung</span>
@@ -154,6 +162,7 @@
                     </li>
                 </ul>
             </div>
+
 
             <div class="sidebar-footer">
                 <div class="user-selector">
@@ -184,58 +193,16 @@
             <div class="content-body">
                 <!-- Dashboard Section -->
                 <section id="dashboard-section" class="content-section active">
-                    <!-- Dashboard Header mit Live-Status -->
-                    <div class="dashboard-header">
-                        <div class="dashboard-title">
-                            <h2>QHSE Dashboard</h2>
-                            <div class="dashboard-status">
-                                <div class="status-indicator" id="dashboardStatus">
-                                    <i class="fas fa-circle status-online"></i>
-                                    <span>Live System</span>
-                                </div>
-                                <div class="last-update" id="lastUpdateTime">
-                                    Letztes Update: <span id="updateTimestamp">--:--</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dashboard-actions">
-                            <button id="refreshDashboardBtn" class="btn-refresh">
-                                <i class="fas fa-sync-alt"></i>
-                                Aktualisieren
-                            </button>
-                            <button id="exportDashboardBtn" class="btn-export">
-                                <i class="fas fa-download"></i>
-                                Export
-                            </button>
-                        </div>
-                    </div>
-
                     <div class="dashboard-grid">
-                        <!-- Enhanced KPI Cards mit Live-Updates -->
                         <div class="kpi-cards">
-                            <div class="kpi-card safety expandable-kpi" data-kpi="safety">
-                                <div class="kpi-header">
-                                    <div class="kpi-icon">
-                                        <i class="fas fa-hard-hat"></i>
-                                    </div>
-                                    <div class="kpi-trend" id="safetyTrend">
-                                        <i class="fas fa-arrow-up trend-up"></i>
-                                        <span class="trend-value">+2.1%</span>
-                                    </div>
+                            <div class="kpi-card safety expandable-kpi">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-hard-hat"></i>
                                 </div>
                                 <div class="kpi-content">
                                     <h3>Arbeitsschutz</h3>
-                                    <div class="kpi-main-value">
-                                        <div class="kpi-value" id="safetyValue">98.5%</div>
-                                        <div class="kpi-sparkline" id="safetySparkline"></div>
-                                    </div>
-                                    <p class="kpi-label">Compliance Rate</p>
-                                    <div class="kpi-details">
-                                        <span class="kpi-detail-item">
-                                            <i class="fas fa-clock"></i>
-                                            <span id="safetyLastIncident">45 Tage unfallfrei</span>
-                                        </span>
-                                    </div>
+                                    <div class="kpi-value">98.5%</div>
+                                    <p>Compliance Rate</p>
                                     <div class="kpi-actions">
                                         <button id="expandSafetyInfoBtn" class="expand-btn" title="Weitere Informationen hinzufügen">
                                             <i class="fas fa-chevron-down"></i>
@@ -1073,6 +1040,9 @@
                                 <button id="userReportsBtn" class="btn-secondary">
                                     <i class="fas fa-chart-line"></i> Mitarbeiter-Berichte
                                 </button>
+                                <button id="initializeUsersBtn" class="btn-warning">
+                                    <i class="fas fa-sync-alt"></i> Nutzer initialisieren
+                                </button>
                             </div>
                             <div class="users-list" id="usersList">
                                 <!-- Users will be populated by JavaScript -->
@@ -1122,7 +1092,7 @@
                                 <p>Ändern Sie den Firmennamen, der in der Seitenleiste angezeigt wird.</p>
                                 <div class="form-group">
                                     <label for="settingsCompanyName">Firmenname:</label>
-                                    <input type="text" id="settingsCompanyName" placeholder="QHSE GFT">
+                                    <input type="text" id="settingsCompanyName" placeholder="Hoffmann & Voss">
                                 </div>
                                 <div class="settings-actions">
                                     <button id="saveCompanyNameBtn" class="btn-primary">
@@ -4873,262 +4843,6 @@
                         </div>
                     </div>
 
-                    <!-- Dashboard Tab -->
-                    <div id="auditor-dashboard-tab" class="tab-content">
-                        <div class="exchange-dashboard">
-                            <div class="dashboard-header">
-                                <h3><i class="fas fa-chart-line"></i> Live Dashboard</h3>
-                                <div class="last-updated">
-                                    Letzte Aktualisierung: <span id="dashboardLastUpdate">-</span>
-                                    <button id="refreshDashboard" class="btn-refresh">
-                                        <i class="fas fa-sync-alt"></i> Aktualisieren
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Live Stats Cards -->
-                            <div class="dashboard-stats">
-                                <div class="stat-card live-stat">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-users"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-number" id="liveAuditorsCount">0</div>
-                                        <div class="stat-label">Aktive Auditoren</div>
-                                        <div class="stat-trend" id="auditorsTrend">
-                                            <i class="fas fa-arrow-up"></i> +5 diese Woche
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card live-stat">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-handshake"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-number" id="liveMatchesCount">0</div>
-                                        <div class="stat-label">Erfolgreiche Matches</div>
-                                        <div class="stat-trend" id="matchesTrend">
-                                            <i class="fas fa-arrow-up"></i> +12 diese Woche
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card live-stat">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-calendar-check"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-number" id="liveAvailabilityCount">0</div>
-                                        <div class="stat-label">Verfügbare Termine</div>
-                                        <div class="stat-trend" id="availabilityTrend">
-                                            <i class="fas fa-arrow-down"></i> -3 diese Woche
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card live-stat">
-                                    <div class="stat-icon">
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-number" id="liveRatingAverage">0.0</div>
-                                        <div class="stat-label">Ø Bewertung</div>
-                                        <div class="stat-trend" id="ratingTrend">
-                                            <i class="fas fa-arrow-up"></i> +0.2 diese Woche
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Interactive Charts -->
-                            <div class="dashboard-charts">
-                                <div class="chart-container">
-                                    <div class="chart-header">
-                                        <h4><i class="fas fa-chart-area"></i> Aktivitäts-Übersicht</h4>
-                                        <div class="chart-controls">
-                                            <select id="activityTimeframe">
-                                                <option value="7">Letzte 7 Tage</option>
-                                                <option value="30" selected>Letzte 30 Tage</option>
-                                                <option value="90">Letzte 90 Tage</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="chart-content" id="activityChart">
-                                        <div class="simple-chart">
-                                            <div class="chart-bars">
-                                                <div class="chart-bar" style="height: 60%;" title="Neue Auditoren: 15">
-                                                    <div class="bar-value">15</div>
-                                                    <div class="bar-label">Mo</div>
-                                                </div>
-                                                <div class="chart-bar" style="height: 80%;" title="Neue Auditoren: 22">
-                                                    <div class="bar-value">22</div>
-                                                    <div class="bar-label">Di</div>
-                                                </div>
-                                                <div class="chart-bar" style="height: 45%;" title="Neue Auditoren: 12">
-                                                    <div class="bar-value">12</div>
-                                                    <div class="bar-label">Mi</div>
-                                                </div>
-                                                <div class="chart-bar" style="height: 90%;" title="Neue Auditoren: 28">
-                                                    <div class="bar-value">28</div>
-                                                    <div class="bar-label">Do</div>
-                                                </div>
-                                                <div class="chart-bar" style="height: 70%;" title="Neue Auditoren: 19">
-                                                    <div class="bar-value">19</div>
-                                                    <div class="bar-label">Fr</div>
-                                                </div>
-                                                <div class="chart-bar" style="height: 35%;" title="Neue Auditoren: 8">
-                                                    <div class="bar-value">8</div>
-                                                    <div class="bar-label">Sa</div>
-                                                </div>
-                                                <div class="chart-bar" style="height: 25%;" title="Neue Auditoren: 5">
-                                                    <div class="bar-value">5</div>
-                                                    <div class="bar-label">So</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="chart-container">
-                                    <div class="chart-header">
-                                        <h4><i class="fas fa-pie-chart"></i> Audit-Bereiche</h4>
-                                    </div>
-                                    <div class="chart-content" id="areasChart">
-                                        <div class="donut-chart">
-                                            <div class="donut-segment" style="--percentage: 35%; --color: #3b82f6;" title="ISO 9001: 35%"></div>
-                                            <div class="donut-segment" style="--percentage: 25%; --color: #10b981;" title="ISO 14001: 25%"></div>
-                                            <div class="donut-segment" style="--percentage: 20%; --color: #f59e0b;" title="ISO 45001: 20%"></div>
-                                            <div class="donut-segment" style="--percentage: 20%; --color: #ef4444;" title="IATF 16949: 20%"></div>
-                                        </div>
-                                        <div class="chart-legend">
-                                            <div class="legend-item">
-                                                <div class="legend-color" style="background-color: #3b82f6;"></div>
-                                                <span>ISO 9001 (35%)</span>
-                                            </div>
-                                            <div class="legend-item">
-                                                <div class="legend-color" style="background-color: #10b981;"></div>
-                                                <span>ISO 14001 (25%)</span>
-                                            </div>
-                                            <div class="legend-item">
-                                                <div class="legend-color" style="background-color: #f59e0b;"></div>
-                                                <span>ISO 45001 (20%)</span>
-                                            </div>
-                                            <div class="legend-item">
-                                                <div class="legend-color" style="background-color: #ef4444;"></div>
-                                                <span>IATF 16949 (20%)</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Activity Feed -->
-                            <div class="activity-feed">
-                                <div class="activity-header">
-                                    <h4><i class="fas fa-rss"></i> Live-Aktivitäten</h4>
-                                    <div class="activity-controls">
-                                        <button id="pauseActivityFeed" class="btn-toggle">
-                                            <i class="fas fa-pause"></i> Pausieren
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="activity-list" id="activityFeedList">
-                                    <div class="activity-item new">
-                                        <div class="activity-icon">
-                                            <i class="fas fa-user-plus"></i>
-                                        </div>
-                                        <div class="activity-content">
-                                            <div class="activity-title">Neuer Auditor registriert</div>
-                                            <div class="activity-description">Dr. Mueller (ISO 9001, 14001) hat sich registriert</div>
-                                            <div class="activity-time">vor 2 Minuten</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="activity-item">
-                                        <div class="activity-icon">
-                                            <i class="fas fa-handshake"></i>
-                                        </div>
-                                        <div class="activity-content">
-                                            <div class="activity-title">Erfolgreiches Match</div>
-                                            <div class="activity-description">Auditor Schmidt wurde für BMW Audit vermittelt</div>
-                                            <div class="activity-time">vor 15 Minuten</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="activity-item">
-                                        <div class="activity-icon">
-                                            <i class="fas fa-calendar-plus"></i>
-                                        </div>
-                                        <div class="activity-content">
-                                            <div class="activity-title">Verfügbarkeit aktualisiert</div>
-                                            <div class="activity-description">5 Auditoren haben neue Termine hinzugefügt</div>
-                                            <div class="activity-time">vor 32 Minuten</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="activity-item">
-                                        <div class="activity-icon">
-                                            <i class="fas fa-star"></i>
-                                        </div>
-                                        <div class="activity-content">
-                                            <div class="activity-title">Bewertung eingegangen</div>
-                                            <div class="activity-description">Auditor Weber erhielt 5 Sterne für ISO 45001 Audit</div>
-                                            <div class="activity-time">vor 1 Stunde</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Regional Map -->
-                            <div class="regional-map">
-                                <div class="map-header">
-                                    <h4><i class="fas fa-map"></i> Regionale Verteilung</h4>
-                                    <div class="map-controls">
-                                        <select id="mapDataType">
-                                            <option value="auditoren">Auditoren</option>
-                                            <option value="anfragen">Anfragen</option>
-                                            <option value="matches">Matches</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="map-content" id="regionalMapContent">
-                                    <div class="germany-map">
-                                        <div class="region" data-region="nord" style="--intensity: 0.8;" title="Nord: 45 Auditoren">
-                                            <div class="region-label">Nord</div>
-                                            <div class="region-value">45</div>
-                                        </div>
-                                        <div class="region" data-region="ost" style="--intensity: 0.4;" title="Ost: 22 Auditoren">
-                                            <div class="region-label">Ost</div>
-                                            <div class="region-value">22</div>
-                                        </div>
-                                        <div class="region" data-region="west" style="--intensity: 0.9;" title="West: 67 Auditoren">
-                                            <div class="region-label">West</div>
-                                            <div class="region-value">67</div>
-                                        </div>
-                                        <div class="region" data-region="sued" style="--intensity: 0.7;" title="Süd: 38 Auditoren">
-                                            <div class="region-label">Süd</div>
-                                            <div class="region-value">38</div>
-                                        </div>
-                                        <div class="region" data-region="zentral" style="--intensity: 0.6;" title="Zentral: 31 Auditoren">
-                                            <div class="region-label">Zentral</div>
-                                            <div class="region-value">31</div>
-                                        </div>
-                                    </div>
-                                    <div class="map-legend">
-                                        <div class="legend-scale">
-                                            <div class="scale-title">Aktivität</div>
-                                            <div class="scale-bar">
-                                                <div class="scale-low">Niedrig</div>
-                                                <div class="scale-high">Hoch</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Import/Export Tab -->
                     <div id="auditor-import-export-tab" class="tab-content">
                         <div class="info-box">
@@ -5321,11 +5035,6 @@
                                                     <span class="checkmark"></span>
                                                     ISO 50001:2018, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen
                                                 </label>
-                                                <label class="multi-select-option">
-                                                    <input type="checkbox" name="auditCriteria" value="ISO 27001:2022, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen" onchange="updateAuditCriteriaDisplay()">
-                                                    <span class="checkmark"></span>
-                                                    ISO 27001:2022, Managementsystemdokumentation der Organisation, Zertifizierungsbedingungen
-                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -5368,17 +5077,7 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                         <select id="auditLanguage">
                                             <option value="Deutsch">Deutsch</option>
                                             <option value="Englisch">Englisch</option>
-                                            <option value="Französisch">Französisch</option>
-                                            <option value="Spanisch">Spanisch</option>
-                                            <option value="Italienisch">Italienisch</option>
-                                            <option value="Niederländisch">Niederländisch</option>
-                                            <option value="Polnisch">Polnisch</option>
-                                            <option value="Tschechisch">Tschechisch</option>
-                                            <option value="Russisch">Russisch</option>
-                                            <option value="Chinesisch">Chinesisch</option>
                                             <option value="Deutsch/Englisch">Deutsch/Englisch</option>
-                                            <option value="Deutsch/Französisch">Deutsch/Französisch</option>
-                                            <option value="Englisch/Französisch">Englisch/Französisch</option>
                                             <option value="Andere">Andere</option>
                                         </select>
                                     </div>
@@ -5790,10 +5489,6 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                         <button type="button" class="btn btn-secondary" onclick="printAuditPlan()">
                                             <i class="fas fa-print"></i>
                                             Drucken
-                                        </button>
-                                        <button type="button" class="btn btn-info" onclick="exportAuditNotes()">
-                                            <i class="fas fa-sticky-note"></i>
-                                            Auditnotizen
                                         </button>
                                     </div>
                                 </div>
@@ -10647,6 +10342,922 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
         </div>
     </div>
 
-    <script src="script.js?v=2024070502"></script>
+    <!-- QHSE Meldemodul - Modal-Overlay für Incident-Reporting -->
+    <div id="incidentReportModal" class="incident-modal">
+        <div class="incident-modal-content">
+            <div class="incident-modal-header">
+                <h2 id="incidentModalTitle">
+                    <i id="incidentModalIcon" class="fas fa-exclamation-triangle"></i>
+                    <span id="incidentModalText">Vorfall melden</span>
+                </h2>
+                <button id="closeIncidentModal" class="incident-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="incidentReportForm" class="incident-form" enctype="multipart/form-data">
+                <input type="hidden" id="incidentType" name="incidentType" value="">
+                <input type="hidden" name="csrf_token" value="">
+                
+                <!-- Formular-Tabs für bessere Organisation -->
+                <div class="incident-form-tabs">
+                    <button type="button" class="incident-tab-btn active" data-tab="basic">
+                        <i class="fas fa-info-circle"></i> Grunddaten
+                    </button>
+                    <button type="button" class="incident-tab-btn" data-tab="incident">
+                        <i class="fas fa-exclamation-triangle"></i> Ereignis
+                    </button>
+                    <button type="button" class="incident-tab-btn" data-tab="persons">
+                        <i class="fas fa-users"></i> Personen
+                    </button>
+                    <button type="button" class="incident-tab-btn" data-tab="consequences">
+                        <i class="fas fa-heartbeat"></i> Folgen
+                    </button>
+                    <button type="button" class="incident-tab-btn" data-tab="measures">
+                        <i class="fas fa-first-aid"></i> Maßnahmen
+                    </button>
+                    <button type="button" class="incident-tab-btn" data-tab="files">
+                        <i class="fas fa-paperclip"></i> Dokumente
+                    </button>
+                </div>
+
+                <div class="incident-form-content">
+                    <!-- Tab 1: Grunddaten -->
+                    <div class="incident-tab-content active" id="tab-basic">
+                        <div class="form-section">
+                            <h3><i class="fas fa-info-circle"></i> Grundlegende Informationen</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="incidentDateTime">
+                                        <i class="fas fa-calendar-alt"></i> Datum und Uhrzeit des Ereignisses *
+                                    </label>
+                                    <input type="datetime-local" id="incidentDateTime" name="incidentDateTime" required>
+                                    <small class="form-help">Wann ist das Ereignis aufgetreten?</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="incidentReportDate">
+                                        <i class="fas fa-clock"></i> Meldedatum und -zeit
+                                    </label>
+                                    <input type="datetime-local" id="incidentReportDate" name="incidentReportDate" readonly>
+                                    <small class="form-help">Automatisch beim Erstellen der Meldung gesetzt</small>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="incidentLocation">
+                                        <i class="fas fa-map-marker-alt"></i> Genauer Ort des Ereignisses *
+                                    </label>
+                                    <input type="text" id="incidentLocation" name="incidentLocation" required 
+                                           placeholder="z.B. Werkshalle 2, Arbeitsplatz 15, oder genaue Adresse">
+                                    <small class="form-help">Bitte so detailliert wie möglich angeben</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="incidentWeather">
+                                        <i class="fas fa-cloud-sun"></i> Wetterbedingungen (bei Außenarbeiten)
+                                    </label>
+                                    <select id="incidentWeather" name="incidentWeather">
+                                        <option value="">-- Nicht relevant / Innenbereich --</option>
+                                        <option value="sonnig">Sonnig/Klar</option>
+                                        <option value="bewoelkt">Bewölkt</option>
+                                        <option value="regnerisch">Regnerisch</option>
+                                        <option value="windig">Windig</option>
+                                        <option value="nebelig">Nebelig</option>
+                                        <option value="schnee">Schnee/Eis</option>
+                                        <option value="gewitter">Gewitter</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="incidentCategory">
+                                        <i class="fas fa-tags"></i> Ereigniskategorie *
+                                    </label>
+                                    <select id="incidentCategory" name="incidentCategory" required>
+                                        <option value="">-- Bitte wählen --</option>
+                                        <optgroup label="Arbeitsunfälle">
+                                            <option value="sturz">Sturz/Absturz</option>
+                                            <option value="schnitt">Schnitt-/Stichverletzung</option>
+                                            <option value="quetschung">Quetschung/Einklemmung</option>
+                                            <option value="verbrennung">Verbrennung/Verätzung</option>
+                                            <option value="stromschlag">Stromschlag</option>
+                                            <option value="augenverletzung">Augenverletzung</option>
+                                            <option value="rueckenverletzung">Rückenverletzung</option>
+                                            <option value="maschinenschaden">Maschinenschaden mit Personenschaden</option>
+                                        </optgroup>
+                                        <optgroup label="Beinaheunfälle">
+                                            <option value="beinahe-sturz">Beinahe-Sturz</option>
+                                            <option value="beinahe-kollision">Beinahe-Kollision</option>
+                                            <option value="technischer-defekt">Technischer Defekt erkannt</option>
+                                            <option value="unsichere-bedingung">Unsichere Arbeitsbedingung</option>
+                                            <option value="verhalten">Unsicheres Verhalten beobachtet</option>
+                                        </optgroup>
+                                        <optgroup label="Umweltereignisse">
+                                            <option value="chemikalienaustritt">Chemikalienaustritt</option>
+                                            <option value="oelleck">Ölleck</option>
+                                            <option value="laerm">Lärmbelastung</option>
+                                            <option value="abfall">Abfall-/Entsorgungsproblem</option>
+                                        </optgroup>
+                                        <optgroup label="Sonstiges">
+                                            <option value="brand">Brand/Rauchentwicklung</option>
+                                            <option value="diebstahl">Diebstahl/Vandalismus</option>
+                                            <option value="sicherheitsmangel">Sicherheitsmangel</option>
+                                            <option value="sonstiges">Sonstiges</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="incidentSeverity">
+                                        <i class="fas fa-exclamation-circle"></i> Schweregrad *
+                                    </label>
+                                    <select id="incidentSeverity" name="incidentSeverity" required>
+                                        <option value="">-- Bitte wählen --</option>
+                                        <option value="niedrig">Niedrig - Keine Verletzung/geringer Schaden</option>
+                                        <option value="mittel">Mittel - Leichte Verletzung/mäßiger Schaden</option>
+                                        <option value="hoch">Hoch - Schwere Verletzung/hoher Schaden</option>
+                                        <option value="kritisch">Kritisch - Lebensgefährlich/sehr hoher Schaden</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Ereignisbeschreibung -->
+                    <div class="incident-tab-content" id="tab-incident">
+                        <div class="form-section">
+                            <h3><i class="fas fa-file-alt"></i> Detaillierte Ereignisbeschreibung</h3>
+                            
+                            <div class="form-group">
+                                <label for="incidentDescription">
+                                    <i class="fas fa-align-left"></i> Wie ist das Ereignis abgelaufen? *
+                                </label>
+                                <textarea id="incidentDescription" name="incidentDescription" rows="6" required
+                                          placeholder="Beschreiben Sie den Hergang so detailliert wie möglich:
+- Was ist passiert?
+- Wie ist es passiert?
+- Warum ist es passiert?
+- Welche Umstände haben dazu beigetragen?"></textarea>
+                                <small class="form-help">Mindestens 50 Zeichen erforderlich. Je detaillierter, desto besser für die Ursachenanalyse.</small>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="incidentCause">
+                                        <i class="fas fa-search"></i> Vermutete Hauptursache
+                                    </label>
+                                    <select id="incidentCause" name="incidentCause">
+                                        <option value="">-- Noch nicht bekannt --</option>
+                                        <optgroup label="Menschliche Faktoren">
+                                            <option value="unachtsamkeit">Unachtsamkeit/Ablenkung</option>
+                                            <option value="muedigkeit">Müdigkeit/Erschöpfung</option>
+                                            <option value="fehlende-ausbildung">Fehlende Ausbildung/Erfahrung</option>
+                                            <option value="regelverstoß">Vorsätzlicher Regelverstoß</option>
+                                            <option value="zeitdruck">Zeitdruck/Stress</option>
+                                            <option value="routine">Routine/Gewöhnung</option>
+                                        </optgroup>
+                                        <optgroup label="Technische Faktoren">
+                                            <option value="maschinendefekt">Maschinendefekt</option>
+                                            <option value="werkzeugfehler">Defektes Werkzeug</option>
+                                            <option value="materialfehler">Materialfehler</option>
+                                            <option value="verschleiß">Verschleiß/Alterung</option>
+                                            <option value="design-fehler">Design-/Konstruktionsfehler</option>
+                                        </optgroup>
+                                        <optgroup label="Organisatorische Faktoren">
+                                            <option value="arbeitsanweisung">Unklare Arbeitsanweisung</option>
+                                            <option value="kommunikation">Kommunikationsfehler</option>
+                                            <option value="koordination">Fehlende Koordination</option>
+                                            <option value="aufsicht">Unzureichende Aufsicht</option>
+                                            <option value="planung">Mangelhafte Planung</option>
+                                        </optgroup>
+                                        <optgroup label="Umgebungsfaktoren">
+                                            <option value="beleuchtung">Schlechte Beleuchtung</option>
+                                            <option value="laerm">Lärm/Ablenkung</option>
+                                            <option value="temperatur">Extreme Temperatur</option>
+                                            <option value="platzmangel">Platzmangel</option>
+                                            <option value="ordnung">Unordnung/Sauberkeit</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="incidentActivity">
+                                        <i class="fas fa-hammer"></i> Welche Tätigkeit wurde ausgeführt?
+                                    </label>
+                                    <input type="text" id="incidentActivity" name="incidentActivity" 
+                                           placeholder="z.B. Schweißarbeiten, Transport von Material, Wartung der Maschine...">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="incidentEquipment">
+                                    <i class="fas fa-tools"></i> Beteiligte Maschinen, Geräte oder Werkzeuge
+                                </label>
+                                <textarea id="incidentEquipment" name="incidentEquipment" rows="3"
+                                          placeholder="Listen Sie alle beteiligten Maschinen, Geräte, Werkzeuge oder Materialien auf..."></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="incidentPPE">
+                                        <i class="fas fa-hard-hat"></i> Persönliche Schutzausrüstung (PSA)
+                                    </label>
+                                    <textarea id="incidentPPE" name="incidentPPE" rows="2"
+                                              placeholder="Welche PSA wurde getragen? Was fehlte möglicherweise?"></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="incidentTraining">
+                                        <i class="fas fa-graduation-cap"></i> Vorausgegangene Schulungen/Unterweisungen
+                                    </label>
+                                    <textarea id="incidentTraining" name="incidentTraining" rows="2"
+                                              placeholder="Welche relevanten Schulungen hatte die betroffene Person erhalten?"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Betroffene Personen -->
+                    <div class="incident-tab-content" id="tab-persons">
+                        <div class="form-section">
+                            <h3><i class="fas fa-users"></i> Personen und Zeugen</h3>
+                            
+                            <div class="person-section">
+                                <h4><i class="fas fa-user-injured"></i> Betroffene Person(en)</h4>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="injuredPersonName">
+                                            <i class="fas fa-user"></i> Name der betroffenen Person *
+                                        </label>
+                                        <input type="text" id="injuredPersonName" name="injuredPersonName" required
+                                               placeholder="Vor- und Nachname">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="injuredPersonAge">
+                                            <i class="fas fa-birthday-cake"></i> Alter
+                                        </label>
+                                        <input type="number" id="injuredPersonAge" name="injuredPersonAge" min="16" max="70">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="injuredPersonDepartment">
+                                            <i class="fas fa-building"></i> Abteilung/Bereich
+                                        </label>
+                                        <input type="text" id="injuredPersonDepartment" name="injuredPersonDepartment"
+                                               placeholder="z.B. Produktion, Wartung, Verwaltung...">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="injuredPersonPosition">
+                                            <i class="fas fa-id-badge"></i> Position/Funktion
+                                        </label>
+                                        <input type="text" id="injuredPersonPosition" name="injuredPersonPosition"
+                                               placeholder="z.B. Maschinenbediener, Techniker, Auszubildender...">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="injuredPersonExperience">
+                                            <i class="fas fa-medal"></i> Berufserfahrung in dieser Tätigkeit
+                                        </label>
+                                        <select id="injuredPersonExperience" name="injuredPersonExperience">
+                                            <option value="">-- Bitte wählen --</option>
+                                            <option value="unter-6-monate">Unter 6 Monate</option>
+                                            <option value="6-monate-2-jahre">6 Monate - 2 Jahre</option>
+                                            <option value="2-5-jahre">2 - 5 Jahre</option>
+                                            <option value="5-10-jahre">5 - 10 Jahre</option>
+                                            <option value="ueber-10-jahre">Über 10 Jahre</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="injuredPersonEmployment">
+                                            <i class="fas fa-briefcase"></i> Beschäftigungsverhältnis
+                                        </label>
+                                        <select id="injuredPersonEmployment" name="injuredPersonEmployment">
+                                            <option value="">-- Bitte wählen --</option>
+                                            <option value="festangestellt">Festangestellt</option>
+                                            <option value="zeitarbeiter">Zeitarbeiter</option>
+                                            <option value="auszubildender">Auszubildender</option>
+                                            <option value="praktikant">Praktikant</option>
+                                            <option value="fremdunternehmen">Fremdunternehmen</option>
+                                            <option value="besucher">Besucher</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-question-circle"></i> Weitere betroffene Personen?
+                                    </label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="multiplePersonsInvolved" name="multiplePersonsInvolved">
+                                            <span class="checkbox-custom"></span>
+                                            Es waren weitere Personen betroffen
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="additionalPersonsGroup" style="display: none;">
+                                    <label for="additionalPersonsDetails">
+                                        <i class="fas fa-users"></i> Details zu weiteren betroffenen Personen
+                                    </label>
+                                    <textarea id="additionalPersonsDetails" name="additionalPersonsDetails" rows="3"
+                                              placeholder="Name, Abteilung, Rolle und Art der Betroffenheit für jede weitere Person..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="person-section">
+                                <h4><i class="fas fa-eye"></i> Zeugen</h4>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-users"></i> Gab es Zeugen des Ereignisses?
+                                    </label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="witnessesPresent" value="ja">
+                                            <span class="radio-custom"></span>
+                                            Ja, es gab Zeugen
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="witnessesPresent" value="nein">
+                                            <span class="radio-custom"></span>
+                                            Nein, keine Zeugen
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="witnessesPresent" value="unbekannt">
+                                            <span class="radio-custom"></span>
+                                            Unbekannt
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="witnessDetailsGroup" style="display: none;">
+                                    <label for="witnessDetails">
+                                        <i class="fas fa-eye"></i> Zeugenangaben
+                                    </label>
+                                    <textarea id="witnessDetails" name="witnessDetails" rows="4"
+                                              placeholder="Für jeden Zeugen bitte angeben:
+- Name und Kontaktdaten
+- Position/Abteilung  
+- Was genau wurde beobachtet?
+- Verfügbarkeit für Nachfragen"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Folgen und Schäden -->
+                    <div class="incident-tab-content" id="tab-consequences">
+                        <div class="form-section">
+                            <h3><i class="fas fa-heartbeat"></i> Folgen und Schäden</h3>
+                            
+                            <div class="consequences-section">
+                                <h4><i class="fas fa-user-md"></i> Personenschäden</h4>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-stethoscope"></i> Art der Verletzung/Gesundheitsbeeinträchtigung
+                                    </label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="keine">
+                                            <span class="checkbox-custom"></span>
+                                            Keine Verletzung
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="schnittwunde">
+                                            <span class="checkbox-custom"></span>
+                                            Schnittwunde
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="prellung">
+                                            <span class="checkbox-custom"></span>
+                                            Prellung/Bluterguss
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="bruch">
+                                            <span class="checkbox-custom"></span>
+                                            Knochenbruch
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="verbrennung">
+                                            <span class="checkbox-custom"></span>
+                                            Verbrennung/Verätzung
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="augenverletzung">
+                                            <span class="checkbox-custom"></span>
+                                            Augenverletzung
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="inhalation">
+                                            <span class="checkbox-custom"></span>
+                                            Einatmung schädlicher Stoffe
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="rueckenverletzung">
+                                            <span class="checkbox-custom"></span>
+                                            Rückenverletzung
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="injuryType[]" value="sonstiges">
+                                            <span class="checkbox-custom"></span>
+                                            Sonstiges
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="injuryBodyPart">
+                                            <i class="fas fa-hand-paper"></i> Betroffene Körperstelle(n)
+                                        </label>
+                                        <input type="text" id="injuryBodyPart" name="injuryBodyPart"
+                                               placeholder="z.B. rechte Hand, linkes Knie, Rücken...">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="medicalTreatment">
+                                            <i class="fas fa-ambulance"></i> Medizinische Behandlung
+                                        </label>
+                                        <select id="medicalTreatment" name="medicalTreatment">
+                                            <option value="">-- Nicht erforderlich --</option>
+                                            <option value="erste-hilfe">Erste Hilfe vor Ort</option>
+                                            <option value="betriebsarzt">Behandlung durch Betriebsarzt</option>
+                                            <option value="krankenhaus">Krankenhaus/Notaufnahme</option>
+                                            <option value="niedergelassener-arzt">Niedergelassener Arzt</option>
+                                            <option value="rettungsdienst">Rettungsdienst gerufen</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="workAbsence">
+                                            <i class="fas fa-calendar-times"></i> Voraussichtliche Arbeitsunfähigkeit
+                                        </label>
+                                        <select id="workAbsence" name="workAbsence">
+                                            <option value="">-- Noch nicht bekannt --</option>
+                                            <option value="keine">Keine Arbeitsunfähigkeit</option>
+                                            <option value="wenige-stunden">Wenige Stunden</option>
+                                            <option value="1-tag">1 Tag</option>
+                                            <option value="2-3-tage">2-3 Tage</option>
+                                            <option value="1-woche">1 Woche</option>
+                                            <option value="mehrere-wochen">Mehrere Wochen</option>
+                                            <option value="unbestimmt">Unbestimmt</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="hospitalName">
+                                            <i class="fas fa-hospital"></i> Behandelnde Einrichtung
+                                        </label>
+                                        <input type="text" id="hospitalName" name="hospitalName"
+                                               placeholder="Name des Krankenhauses/Arztes (falls zutreffend)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="consequences-section">
+                                <h4><i class="fas fa-industry"></i> Sach- und Umweltschäden</h4>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-exclamation-triangle"></i> Art der Sachschäden
+                                    </label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="damageType[]" value="keine-sachschaeden">
+                                            <span class="checkbox-custom"></span>
+                                            Keine Sachschäden
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="damageType[]" value="maschinenschaden">
+                                            <span class="checkbox-custom"></span>
+                                            Maschinenschaden
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="damageType[]" value="werkzeugschaden">
+                                            <span class="checkbox-custom"></span>
+                                            Werkzeug-/Geräteschaden
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="damageType[]" value="gebaeudeschaden">
+                                            <span class="checkbox-custom"></span>
+                                            Gebäudeschaden
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="damageType[]" value="materialschaden">
+                                            <span class="checkbox-custom"></span>
+                                            Materialschaden
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="damageType[]" value="produktionsausfall">
+                                            <span class="checkbox-custom"></span>
+                                            Produktionsausfall
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="damageType[]" value="umweltschaden">
+                                            <span class="checkbox-custom"></span>
+                                            Umweltschaden
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="damageDescription">
+                                            <i class="fas fa-clipboard-list"></i> Beschreibung der Schäden
+                                        </label>
+                                        <textarea id="damageDescription" name="damageDescription" rows="3"
+                                                  placeholder="Detaillierte Beschreibung aller entstandenen Schäden..."></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="estimatedCosts">
+                                            <i class="fas fa-euro-sign"></i> Geschätzte Schadenskosten (€)
+                                        </label>
+                                        <select id="estimatedCosts" name="estimatedCosts">
+                                            <option value="">-- Noch nicht abschätzbar --</option>
+                                            <option value="unter-100">Unter 100 €</option>
+                                            <option value="100-500">100 - 500 €</option>
+                                            <option value="500-1000">500 - 1.000 €</option>
+                                            <option value="1000-5000">1.000 - 5.000 €</option>
+                                            <option value="5000-10000">5.000 - 10.000 €</option>
+                                            <option value="ueber-10000">Über 10.000 €</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="consequences-section">
+                                <h4><i class="fas fa-leaf"></i> Umweltauswirkungen</h4>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <i class="fas fa-tree"></i> Gab es Umweltauswirkungen?
+                                    </label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="environmentalImpact" value="nein">
+                                            <span class="radio-custom"></span>
+                                            Nein, keine Umweltauswirkungen
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="environmentalImpact" value="ja">
+                                            <span class="radio-custom"></span>
+                                            Ja, es gab Umweltauswirkungen
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="environmentalImpact" value="moeglich">
+                                            <span class="radio-custom"></span>
+                                            Möglich/Noch unklar
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="environmentalDetailsGroup" style="display: none;">
+                                    <label for="environmentalDetails">
+                                        <i class="fas fa-leaf"></i> Details zu Umweltauswirkungen
+                                    </label>
+                                    <textarea id="environmentalDetails" name="environmentalDetails" rows="3"
+                                              placeholder="Beschreibung der Umweltauswirkungen: Verschmutzung, Freisetzung von Stoffen, betroffene Bereiche, etc."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: Sofortmaßnahmen -->
+                    <div class="incident-tab-content" id="tab-measures">
+                        <div class="form-section">
+                            <h3><i class="fas fa-first-aid"></i> Sofortmaßnahmen und Prävention</h3>
+                            
+                            <div class="measures-section">
+                                <h4><i class="fas fa-heartbeat"></i> Bereits ergriffene Sofortmaßnahmen</h4>
+                                
+                                <div class="form-group">
+                                    <label for="immediateActions">
+                                        <i class="fas fa-running"></i> Welche Maßnahmen wurden sofort ergriffen? *
+                                    </label>
+                                    <textarea id="immediateActions" name="immediateActions" rows="4" required
+                                              placeholder="Beschreiben Sie alle sofort ergriffenen Maßnahmen:
+- Erste Hilfe
+- Absicherung der Unfallstelle
+- Benachrichtigung von Vorgesetzten/Rettungsdienst
+- Stoppmeldung von Maschinen/Anlagen
+- Sicherung von Beweismitteln
+- etc."></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="emergencyServices">
+                                            <i class="fas fa-phone"></i> Benachrichtigte Stellen
+                                        </label>
+                                        <div class="checkbox-group">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="notified[]" value="vorgesetzter">
+                                                <span class="checkbox-custom"></span>
+                                                Direkter Vorgesetzter
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="notified[]" value="betriebsarzt">
+                                                <span class="checkbox-custom"></span>
+                                                Betriebsarzt
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="notified[]" value="rettungsdienst">
+                                                <span class="checkbox-custom"></span>
+                                                Rettungsdienst (112)
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="notified[]" value="feuerwehr">
+                                                <span class="checkbox-custom"></span>
+                                                Feuerwehr
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="notified[]" value="polizei">
+                                                <span class="checkbox-custom"></span>
+                                                Polizei
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="notified[]" value="bsg">
+                                                <span class="checkbox-custom"></span>
+                                                Berufsgenossenschaft
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" name="notified[]" value="behoerde">
+                                                <span class="checkbox-custom"></span>
+                                                Behörde (Gewerbeaufsicht, etc.)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="notificationTime">
+                                            <i class="fas fa-clock"></i> Zeitpunkt der Benachrichtigung
+                                        </label>
+                                        <input type="datetime-local" id="notificationTime" name="notificationTime">
+                                        <small class="form-help">Wann wurden die entsprechenden Stellen informiert?</small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="evidenceSecured">
+                                        <i class="fas fa-camera"></i> Wurden Beweise/Spuren gesichert?
+                                    </label>
+                                    <div class="radio-group">
+                                        <label class="radio-label">
+                                            <input type="radio" name="evidenceSecured" value="ja">
+                                            <span class="radio-custom"></span>
+                                            Ja, Beweise wurden gesichert
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="evidenceSecured" value="nein">
+                                            <span class="radio-custom"></span>
+                                            Nein, keine Sicherung möglich/nötig
+                                        </label>
+                                        <label class="radio-label">
+                                            <input type="radio" name="evidenceSecured" value="teilweise">
+                                            <span class="radio-custom"></span>
+                                            Teilweise gesichert
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="measures-section">
+                                <h4><i class="fas fa-shield-alt"></i> Präventionsmaßnahmen</h4>
+                                
+                                <div class="form-group">
+                                    <label for="preventionSuggestions">
+                                        <i class="fas fa-lightbulb"></i> Vorschläge zur Vermeidung ähnlicher Ereignisse
+                                    </label>
+                                    <textarea id="preventionSuggestions" name="preventionSuggestions" rows="4"
+                                              placeholder="Welche Maßnahmen könnten ähnliche Ereignisse in Zukunft verhindern?
+- Technische Maßnahmen
+- Organisatorische Änderungen  
+- Zusätzliche Schulungen
+- Verbesserung der Arbeitsabläufe
+- etc."></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="urgencyLevel">
+                                            <i class="fas fa-exclamation"></i> Dringlichkeit der Maßnahmen
+                                        </label>
+                                        <select id="urgencyLevel" name="urgencyLevel">
+                                            <option value="">-- Bitte bewerten --</option>
+                                            <option value="sofort">Sofort erforderlich</option>
+                                            <option value="dringend">Dringend (innerhalb 1 Woche)</option>
+                                            <option value="zeitnah">Zeitnah (innerhalb 1 Monat)</option>
+                                            <option value="mittelfristig">Mittelfristig (3-6 Monate)</option>
+                                            <option value="langfristig">Langfristig (über 6 Monate)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="responsiblePerson">
+                                            <i class="fas fa-user-tie"></i> Verantwortlich für Umsetzung
+                                        </label>
+                                        <input type="text" id="responsiblePerson" name="responsiblePerson"
+                                               placeholder="Name/Position der verantwortlichen Person">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="additionalRemarks">
+                                        <i class="fas fa-comment"></i> Zusätzliche Bemerkungen/Anmerkungen
+                                    </label>
+                                    <textarea id="additionalRemarks" name="additionalRemarks" rows="3"
+                                              placeholder="Weitere wichtige Informationen, die noch nicht erwähnt wurden..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 6: Dokumente und Anhänge -->
+                    <div class="incident-tab-content" id="tab-files">
+                        <div class="form-section">
+                            <h3><i class="fas fa-paperclip"></i> Dokumente und Anhänge</h3>
+                            
+                            <div class="file-upload-section">
+                                <div class="form-group">
+                                    <label for="incidentFiles">
+                                        <i class="fas fa-cloud-upload-alt"></i> Dateien anhängen
+                                    </label>
+                                    <div id="incidentFileDropZone" class="file-drop-zone">
+                                        <div class="drop-zone-content">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <h4>Dateien hier hineinziehen</h4>
+                                            <p>oder klicken zum Auswählen</p>
+                                            <small>Unterstützte Formate: JPG, PNG, PDF, DOC, XLS, TXT<br>
+                                                   Max. 10 Dateien, je max. 10 MB</small>
+                                        </div>
+                                        <input type="file" id="incidentFiles" name="incidentFiles[]" multiple 
+                                               accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt" 
+                                               style="display: none;">
+                                    </div>
+                                </div>
+
+                                <div id="incidentFileList" class="file-list">
+                                    <p class="no-files">Keine Dateien ausgewählt</p>
+                                </div>
+
+                                <div class="file-type-info">
+                                    <h4><i class="fas fa-info-circle"></i> Empfohlene Dokumentarten:</h4>
+                                    <ul>
+                                        <li><i class="fas fa-camera"></i> <strong>Fotos:</strong> Unfallstelle, Schäden, beteiligte Gegenstände</li>
+                                        <li><i class="fas fa-file-medical"></i> <strong>Medizinische Unterlagen:</strong> Ersthelfer-Protokoll, Arztberichte</li>
+                                        <li><i class="fas fa-file-contract"></i> <strong>Offizielle Dokumente:</strong> Zeugenaussagen, Polizeiberichte</li>
+                                        <li><i class="fas fa-clipboard-list"></i> <strong>Arbeitsunterlagen:</strong> Arbeitsanweisungen, Checklisten, Prüfprotokolle</li>
+                                        <li><i class="fas fa-chart-line"></i> <strong>Messungen:</strong> Lärm-, Staub-, Schadstoffmessungen</li>
+                                        <li><i class="fas fa-video"></i> <strong>Videos:</strong> Überwachungsaufnahmen (falls vorhanden)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meldende Person -->
+                <div class="form-section reporter-section">
+                    <h3><i class="fas fa-user-edit"></i> Angaben zur meldenden Person</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reporterName">
+                                <i class="fas fa-user"></i> Vollständiger Name *
+                            </label>
+                            <input type="text" id="reporterName" name="reporterName" required
+                                   placeholder="Vor- und Nachname">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reporterPosition">
+                                <i class="fas fa-id-badge"></i> Position/Funktion *
+                            </label>
+                            <input type="text" id="reporterPosition" name="reporterPosition" required
+                                   placeholder="z.B. Abteilungsleiter, Sicherheitsbeauftragter...">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reporterDepartment">
+                                <i class="fas fa-building"></i> Abteilung/Bereich *
+                            </label>
+                            <select id="reporterDepartment" name="reporterDepartment" required>
+                                <option value="">-- Bitte wählen --</option>
+                                <option value="geschaeftsfuehrung">Geschäftsführung</option>
+                                <option value="produktion">Produktion</option>
+                                <option value="wartung">Wartung/Instandhaltung</option>
+                                <option value="qualitaet">Qualitätssicherung</option>
+                                <option value="verwaltung">Verwaltung</option>
+                                <option value="einkauf">Einkauf</option>
+                                <option value="vertrieb">Vertrieb</option>
+                                <option value="personalwesen">Personalwesen</option>
+                                <option value="it">IT</option>
+                                <option value="sonstiges">Sonstiges</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reporterRelation">
+                                <i class="fas fa-link"></i> Bezug zum Ereignis
+                            </label>
+                            <select id="reporterRelation" name="reporterRelation">
+                                <option value="">-- Bitte wählen --</option>
+                                <option value="selbst-betroffen">Selbst betroffen</option>
+                                <option value="zeuge">Augenzeuge</option>
+                                <option value="ersthelfer">Ersthelfer</option>
+                                <option value="vorgesetzter">Vorgesetzter der betroffenen Person</option>
+                                <option value="kollege">Kollege/Kollegin</option>
+                                <option value="sicherheitsbeauftragter">Sicherheitsbeauftragter</option>
+                                <option value="nachtraegliche-kenntnisnahme">Nachträgliche Kenntnisnahme</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reporterEmail">
+                                <i class="fas fa-envelope"></i> E-Mail-Adresse *
+                            </label>
+                            <input type="email" id="reporterEmail" name="reporterEmail" required
+                                   placeholder="ihre.email@hoffmann-voss.de">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reporterPhone">
+                                <i class="fas fa-phone"></i> Telefonnummer
+                            </label>
+                            <input type="tel" id="reporterPhone" name="reporterPhone"
+                                   placeholder="+49 XXX XXXXXXX">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-check-circle"></i> Bestätigungen
+                        </label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="dataProtectionConsent" name="dataProtectionConsent" required>
+                                <span class="checkbox-custom"></span>
+                                Ich stimme der Verarbeitung meiner personenbezogenen Daten gemäß der Datenschutzerklärung zu *
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="accuracyConfirmation" name="accuracyConfirmation" required>
+                                <span class="checkbox-custom"></span>
+                                Ich bestätige, dass alle Angaben nach bestem Wissen und Gewissen gemacht wurden *
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="followUpConsent" name="followUpConsent">
+                                <span class="checkbox-custom"></span>
+                                Ich bin bereit für Rückfragen zur Verfügung zu stehen
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formular-Buttons -->
+                <div class="incident-form-footer">
+                    <div class="form-buttons">
+                        <button type="button" id="cancelIncidentReport" class="btn-cancel">
+                            <i class="fas fa-times"></i> Abbrechen
+                        </button>
+                        <button type="button" id="saveIncidentDraft" class="btn-draft">
+                            <i class="fas fa-save"></i> Als Entwurf speichern
+                        </button>
+                        <button type="submit" id="submitIncidentReport" class="btn-submit">
+                            <i class="fas fa-paper-plane"></i> Meldung senden
+                        </button>
+                    </div>
+                    
+                    <div class="form-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="formProgress"></div>
+                        </div>
+                        <small class="progress-text">Fortschritt: <span id="progressPercentage">0%</span></small>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>

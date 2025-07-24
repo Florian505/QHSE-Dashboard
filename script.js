@@ -72,6 +72,7 @@ class QHSEDashboard {
         this.setupAuditExchange();
         this.setupAuditorManagement();
         this.setupAuditPlanGenerator();
+        this.setupIncidentReporting();
         this.loadCustomLabels();
         
         // Apply saved color theme on load
@@ -80,9 +81,63 @@ class QHSEDashboard {
         // Make dashboard globally available for onclick handlers
         window.qhseDashboard = this;
         
+        // Global navigation function
+        window.navigateToSection = (sectionId) => {
+            console.log('🌐 Global navigation called:', sectionId);
+            this.showSection(sectionId);
+        };
+        
+        // Global test functions
+        window.testUsers = () => {
+            console.log('🧪 Testing users:', this.users.length);
+            this.users.forEach(user => console.log('User:', user.displayName, user.role));
+            this.renderUsersList();
+        };
+        
+        window.forceInitUsers = () => {
+            console.log('🚀 Force initializing users...');
+            this.initializeRootAdmin();
+            this.renderUsersList();
+        };
+        
+        window.refreshUserDisplay = () => {
+            console.log('🔄 Refreshing user display with new sizes...');
+            this.renderUsersList();
+        };
+        
+        window.fixUserSizes = () => {
+            console.log('🔧 Fixing user sizes manually...');
+            const userItems = document.querySelectorAll('.user-item');
+            userItems.forEach(item => {
+                const name = item.querySelector('.user-name');
+                const role = item.querySelector('.user-role');
+                const details = item.querySelector('.user-details');
+                const avatar = item.querySelector('.user-avatar');
+                const buttons = item.querySelectorAll('button');
+                
+                if (name) name.style.fontSize = '1.8rem';
+                if (role) role.style.fontSize = '1.3rem';
+                if (details) details.style.fontSize = '1.2rem';
+                if (avatar) {
+                    avatar.style.width = '4.5rem';
+                    avatar.style.height = '4.5rem';
+                    avatar.style.fontSize = '2rem';
+                }
+                buttons.forEach(btn => {
+                    btn.style.fontSize = '1.1rem';
+                    btn.style.padding = '1rem 2rem';
+                });
+            });
+        };
+        
         this.updateUIForUser();
         this.renderDocumentsInSections();
+        
+        // Force user initialization and rendering
+        console.log('🚀 Force initializing users on startup...');
+        this.initializeRootAdmin();
         this.renderUsersList();
+        
         this.renderAreasList();
         this.renderDepartmentsList();
         this.renderDynamicAreas();
@@ -2288,66 +2343,128 @@ PLZ Ort">${user.address || ''}</textarea>
 
     // Navigation Management
     setupNavigation() {
+        console.log('🔧 Setting up navigation...');
         const menuItems = document.querySelectorAll('.menu-item');
         const sections = document.querySelectorAll('.content-section');
         const pageTitle = document.getElementById('pageTitle');
 
-        menuItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const targetSection = item.getAttribute('data-section');
+        console.log('📋 Found menu items:', menuItems.length);
+        console.log('📋 Found sections:', sections.length);
+
+        menuItems.forEach((item, index) => {
+            const sectionName = item.getAttribute('data-section');
+            console.log(`🔗 Setting up menu item ${index}: ${sectionName}`);
+            
+            // Remove any existing listeners
+            const newItem = item.cloneNode(true);
+            item.parentNode.replaceChild(newItem, item);
+            
+            newItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Check if this is an incident report menu item
+                if (newItem.classList.contains('incident-report')) {
+                    const incidentType = newItem.getAttribute('data-type');
+                    console.log('🚨 Incident report clicked:', incidentType);
+                    this.openIncidentModal(incidentType);
+                    return;
+                }
+                
+                const targetSection = newItem.getAttribute('data-section');
+                console.log('🖱️ Menu clicked:', targetSection);
+                
+                if (!targetSection) return;
                 
                 // Check if user has access to this section
                 const currentUser = this.getCurrentUser();
                 if (!currentUser) {
-                    this.showAccessDenied();
+                    console.error('❌ No current user found');
                     return;
                 }
+                
+                console.log('👤 Current user:', currentUser.displayName, currentUser.role);
                 
                 const roleDefinition = this.roleDefinitions[currentUser.role];
                 const allowedSections = roleDefinition ? roleDefinition.allowedSections : [];
                 
-                // Add dynamic areas to allowed sections
-                const dynamicAreaIds = this.areas.filter(area => 
-                    area.allowedRoles.includes(currentUser.role)
-                ).map(area => area.id);
+                console.log('🔐 Allowed sections:', allowedSections);
                 
-                const allAllowedSections = [...allowedSections, ...dynamicAreaIds];
-                
-                // Check access permissions with special handling for Gefahrstoffe
-                let hasAccess = false;
-                if (targetSection === 'gefahrstoffe') {
-                    const moduleSettings = this.loadModuleSettingsFromStorage();
-                    hasAccess = this.userHasGefahrstoffeAccess(currentUser, moduleSettings);
-                } else {
-                    hasAccess = this.userHasAccessToSection(currentUser, targetSection, allAllowedSections);
-                }
-                
-                if (!hasAccess) {
-                    this.showAccessDenied();
+                // Check access permissions
+                if (!allowedSections.includes(targetSection)) {
+                    console.log('❌ Access denied to section:', targetSection);
+                    alert('Zugriff verweigert. Sie haben keine Berechtigung für diesen Bereich.');
                     return;
                 }
 
                 // Update active menu item
-                menuItems.forEach(mi => mi.classList.remove('active'));
-                item.classList.add('active');
+                document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active'));
+                newItem.classList.add('active');
 
                 // Show target section
-                sections.forEach(section => section.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
                 const targetSectionElement = document.getElementById(targetSection + '-section');
                 
-                console.log('🔍 Navigation debug:', {
-                    targetSection,
-                    elementId: targetSection + '-section',
-                    elementFound: !!targetSectionElement,
-                    elementClasses: targetSectionElement ? targetSectionElement.className : 'not found'
-                });
+                console.log('🎯 Looking for section:', targetSection + '-section');
+                console.log('🎯 Section found:', !!targetSectionElement);
                 
                 if (targetSectionElement) {
                     targetSectionElement.classList.add('active');
                     console.log('✅ Section activated:', targetSection);
                     
+                    // Update page title
+                    const sectionTitles = {
+                        dashboard: localStorage.getItem('qhse_dashboard_name') || 'Dashboard',
+                        arbeitsschutz: 'Arbeitsschutz',
+                        qualitaet: 'Qualitätsmanagement',
+                        umwelt: 'Umweltmanagement',
+                        datenschutz: 'Datenschutz',
+                        gesundheit: 'Gesundheitsmanagement',
+                        nutzerverwaltung: 'Nutzerverwaltung',
+                        bereichsverwaltung: 'Bereichsverwaltung',
+                        abteilungsverwaltung: 'Abteilungsverwaltung',
+                        zeiterfassung: 'Zeiterfassung',
+                        zeitauswertung: 'Zeitauswertung',
+                        maschinen: 'Maschinenmanagement',
+                        wartungsplanung: 'Wartungsplanung',
+                        'safety-corner': 'Safety Corner',
+                        'audit-verwaltung': 'Audit-Verwaltung',
+                        'audit-zertifizierungen': 'Audit-Zertifizierungen',
+                        'gefahr-stoffe': 'Gefahrstoffe',
+                        schulungen: 'Schulungen',
+                        lieferanten: 'Lieferanten',
+                        urlaub: 'Urlaubsmanagement',
+                        benutzerprofile: 'Benutzerprofile',
+                        'risiko-bewertung': 'Risikobewertung',
+                        'audit-tauschboerse': 'Audit-Tauschbörse',
+                        auditoren: 'Auditoren',
+                        'auditplan-generator': 'Auditplan-Generator',
+                        einstellungen: 'Einstellungen'
+                    };
+                    
+                    if (pageTitle) {
+                        pageTitle.textContent = sectionTitles[targetSection] || targetSection;
+                    }
+                    
+                    // Store current section
+                    this.currentSection = targetSection;
+                    
                     // Special handling for specific sections
-                    if (targetSection === 'gefahrstoffe') {
+                    if (targetSection === 'nutzerverwaltung') {
+                        console.log('🔧 Initializing user management...');
+                        setTimeout(() => {
+                            this.renderUsersList();
+                            // Force fix sizes after navigation
+                            setTimeout(() => {
+                                if (window.fixUserSizes) {
+                                    window.fixUserSizes();
+                                }
+                            }, 200);
+                        }, 100);
+                    } else if (targetSection === 'gefahrstoffe') {
                         console.log('🧪 Gefahrstoffe section activated - re-initializing...');
                         setTimeout(() => {
                             this.setupHazardousSubstances();
@@ -2355,55 +2472,14 @@ PLZ Ort">${user.address || ''}</textarea>
                     }
                 } else {
                     console.error('❌ Section element not found:', targetSection + '-section');
-                }
-
-                // Update page title
-                const sectionTitles = {
-                    dashboard: localStorage.getItem('qhse_dashboard_name') || 'Dashboard',
-                    arbeitsschutz: 'Arbeitsschutz',
-                    qualitaet: 'Qualitätsmanagement',
-                    umwelt: 'Umweltmanagement',
-                    datenschutz: 'Datenschutz',
-                    gesundheit: 'Gesundheitsmanagement',
-                    arbeitsanweisungen: 'Arbeitsanweisungen',
-                    verfahrensanweisungen: 'Verfahrensanweisungen',
-                    audits: 'Auditauswertungen',
-                    kundenzufriedenheit: 'Kundenzufriedenheit',
-                    dokumente: 'Dokumentenverwaltung',
-                    nutzerverwaltung: 'Nutzerverwaltung',
-                    bereichsverwaltung: 'Bereichsverwaltung',
-                    abteilungsverwaltung: 'Abteilungsverwaltung',
-                    zeiterfassung: 'Zeiterfassung',
-                    zeitauswertung: 'Zeitauswertung',
-                    maschinen: 'Maschinenmanagement',
-                    wartungsplanung: 'Wartungsplanung',
-                    stoerungen: 'Störungsmeldungen',
-                    'instandhaltung-auswertung': 'Instandhaltungs-Auswertung',
-                    gefahrstoffe: 'Gefahrstoffverzeichnis',
-                    schulungen: 'Schulungsmanagement',
-                    lieferanten: 'Lieferantenbewertung',
-                    urlaubsplanung: 'Urlaubsplanung & Abwesenheitsmanagement',
-                    einstellungen: 'System-Einstellungen'
-                };
-                
-                pageTitle.textContent = sectionTitles[targetSection] || (localStorage.getItem('qhse_dashboard_name') || 'Dashboard');
-                this.currentSection = targetSection;
-                
-                // Section-specific initialization
-                this.handleSectionChange(targetSection);
-                
-                // Section-specific initialization
-                if (targetSection === 'einstellungen') {
-                    this.populatePermissionUserDropdown();
-                } else if (targetSection === 'mein-profil') {
-                    // Show profile modal when navigating to profile section
-                    setTimeout(() => this.showCurrentUserProfile(false), 100);
-                } else if (targetSection === 'lieferanten') {
-                    // Initialize supplier management when section is accessed
-                    setTimeout(() => this.renderSupplierDashboard(), 100);
+                    console.log('📋 Available sections:', 
+                        Array.from(document.querySelectorAll('.content-section')).map(s => s.id)
+                    );
                 }
             });
         });
+
+        console.log('✅ Navigation setup complete');
     }
 
     handleSectionChange(targetSection) {
@@ -3594,25 +3670,135 @@ PLZ Ort">${user.address || ''}</textarea>
 
     // User Management
     initializeRootAdmin() {
-        console.log('Initializing root admin and default users...');
-        console.log('Current users count:', this.users.length);
+        console.log('🔧 Initializing root admin and default users...');
+        console.log('📊 Current users count:', this.users.length);
         
-        const existingRootAdmin = this.users.find(user => user.id === 'root-admin');
-        if (!existingRootAdmin) {
-            console.log('Creating root admin user...');
-            this.createDefaultUserForRole('root-admin');
-        } else {
-            console.log('Root admin already exists:', existingRootAdmin.displayName);
-        }
+        // Force clear and recreate all users
+        console.log('🗑️ Clearing existing users and recreating...');
+        this.users = [
+            {
+                id: 'root-admin',
+                displayName: 'Root Administrator',
+                email: 'admin@hoffmann-voss.de',
+                phone: '+49 2162 12345-000',
+                mobile: '+49 171 1234567',
+                department: 'administration',
+                position: 'System Administrator',
+                role: 'root-admin',
+                isActive: true,
+                canBeDeleted: false,
+                startDate: '2020-01-01',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'admin-default',
+                displayName: 'Administrator',
+                email: 'admin@hoffmann-voss.de',
+                phone: '+49 2162 12345-001',
+                mobile: '+49 171 1111111',
+                department: 'administration',
+                position: 'Administrator',
+                role: 'admin',
+                isActive: true,
+                canBeDeleted: true,
+                startDate: '2021-01-01',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'gf-default',
+                displayName: 'Dr. Michael Hoffmann',
+                email: 'm.hoffmann@hoffmann-voss.de',
+                phone: '+49 2162 12345-100',
+                mobile: '+49 171 2222222',
+                department: 'geschaeftsfuehrung',
+                position: 'Geschäftsführer',
+                role: 'geschaeftsfuehrung',
+                isActive: true,
+                canBeDeleted: true,
+                startDate: '2010-01-01',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'bl-default',
+                displayName: 'Thomas Müller',
+                email: 't.mueller@hoffmann-voss.de',
+                phone: '+49 2162 12345-200',
+                department: 'produktion',
+                position: 'Betriebsleiter',
+                role: 'betriebsleiter',
+                isActive: true,
+                canBeDeleted: true,
+                startDate: '2015-03-01',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'qhse-default',
+                displayName: 'Sarah Schmidt',
+                email: 's.schmidt@hoffmann-voss.de',
+                phone: '+49 2162 12345-300',
+                department: 'qualitaet',
+                position: 'QHSE-Managerin',
+                role: 'qhse',
+                isActive: true,
+                canBeDeleted: true,
+                startDate: '2018-01-15',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'al-default',
+                displayName: 'Klaus Weber',
+                email: 'k.weber@hoffmann-voss.de',
+                phone: '+49 2162 12345-400',
+                department: 'logistik',
+                position: 'Abteilungsleiter Logistik',
+                role: 'abteilungsleiter',
+                isActive: true,
+                canBeDeleted: true,
+                startDate: '2016-09-01',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'ma-default',
+                displayName: 'Anna Fischer',
+                email: 'a.fischer@hoffmann-voss.de',
+                phone: '+49 2162 12345-500',
+                department: 'produktion',
+                position: 'Mitarbeiterin',
+                role: 'mitarbeiter',
+                isActive: true,
+                canBeDeleted: true,
+                startDate: '2019-05-01',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'tech-default',
+                displayName: 'Marc Zimmermann',
+                email: 'm.zimmermann@hoffmann-voss.de',
+                phone: '+49 2162 12345-600',
+                department: 'wartung',
+                position: 'Techniker',
+                role: 'techniker',
+                isActive: true,
+                canBeDeleted: true,
+                startDate: '2017-11-01',
+                createdAt: new Date().toISOString()
+            }
+        ];
         
-        // Ensure we have default users for demonstration
-        this.initializeDefaultUsers();
+        // Force save to storage
+        this.saveUsersToStorage();
         
         // Final verification
-        console.log('After initialization, total users:', this.users.length);
+        console.log('✅ After initialization, total users:', this.users.length);
         this.users.forEach(user => {
-            console.log('User initialized:', user.id, user.displayName, user.isActive);
+            console.log('👤 User created:', user.id, user.displayName, user.role);
         });
+        
+        // Force render the users list if we're in user management section
+        if (this.currentSection === 'nutzerverwaltung') {
+            console.log('🔄 Auto-rendering users list...');
+            setTimeout(() => this.renderUsersList(), 200);
+        }
     }
 
     initializeDefaultUsers() {
@@ -3649,10 +3835,20 @@ PLZ Ort">${user.address || ''}</textarea>
         const saveUserBtn = document.getElementById('saveUserBtn');
         const cancelUserBtn = document.getElementById('cancelUserBtn');
         const closeUserModal = document.getElementById('closeUserModal');
+        const initializeUsersBtn = document.getElementById('initializeUsersBtn');
         
         addUserBtn.addEventListener('click', () => {
             this.openUserEditor();
         });
+        
+        // Initialize users button
+        if (initializeUsersBtn) {
+            initializeUsersBtn.addEventListener('click', () => {
+                console.log('🚀 Manual user initialization triggered');
+                this.initializeRootAdmin();
+                alert('Nutzer wurden neu initialisiert!');
+            });
+        }
         
         saveUserBtn.addEventListener('click', () => {
             this.saveUser();
@@ -10133,12 +10329,47 @@ ${newTraining.aiAdaptiveLearning || newTraining.experimentalFeatures ?
         const usersList = document.getElementById('usersList');
         if (!usersList) return;
         
+        // Debug: Check users array
+        console.log('renderUsersList called - Users count:', this.users.length);
+        
+        // If no users, force initialization
+        if (this.users.length === 0) {
+            console.log('No users found, initializing default users...');
+            this.initializeRootAdmin();
+        }
+        
         usersList.innerHTML = '';
         
-        this.users.filter(user => user.isActive).forEach(user => {
+        // Show all users (not just active ones) for debugging
+        const usersToShow = this.users.length > 0 ? this.users : [];
+        console.log('Users to show:', usersToShow.length);
+        
+        if (usersToShow.length === 0) {
+            console.log('⚠️ No users found, showing initialization message');
+            usersList.innerHTML = `
+                <div class="no-users-message">
+                    <h3>Keine Benutzer gefunden!</h3>
+                    <p>Klicken Sie auf "Nutzer initialisieren" um die Standard-Benutzer zu erstellen.</p>
+                    <button onclick="window.qhseDashboard.initializeRootAdmin(); alert('Nutzer initialisiert!');" class="btn-primary">
+                        <i class="fas fa-sync-alt"></i> Jetzt initialisieren
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        usersToShow.forEach(user => {
+            console.log('Rendering user:', user.displayName, user.role, user.isActive);
             const userElement = this.createUserElement(user);
             usersList.appendChild(userElement);
         });
+        
+        // Force fix user sizes after rendering
+        setTimeout(() => {
+            if (window.fixUserSizes) {
+                window.fixUserSizes();
+            }
+        }, 100);
         
         // Update dropdown after rendering list
         this.populateUserDropdown();
@@ -10154,28 +10385,28 @@ ${newTraining.aiAdaptiveLearning || newTraining.experimentalFeatures ?
         const departmentInfo = this.getDepartmentInfo(user.department);
         
         userDiv.innerHTML = `
-            <div class="user-avatar">${initials}</div>
+            <div class="user-avatar" style="width: 4rem; height: 4rem; font-size: 1.8rem;">${initials}</div>
             <div class="user-info">
-                <div class="user-name">${user.displayName}</div>
-                <div class="user-role">
+                <div class="user-name" style="font-size: 1.5rem; font-weight: 600;">${user.displayName}</div>
+                <div class="user-role" style="font-size: 1.2rem;">
                     <span class="role-badge ${user.role}">${roleName}</span>
                 </div>
-                <div class="user-details">
+                <div class="user-details" style="font-size: 1.1rem;">
                     <div>📧 ${user.email}</div>
                     <div>📱 ${user.phone || 'Nicht angegeben'}</div>
                     <div>🏢 ${departmentInfo}</div>
                 </div>
             </div>
             <div class="user-item-actions">
-                <button class="edit-user-btn" onclick="window.qhseDashboard.editUser('${user.id}')">
+                <button class="edit-user-btn" style="font-size: 1rem; padding: 0.8rem 1.5rem;" onclick="window.qhseDashboard.editUser('${user.id}')">
                     <i class="fas fa-edit"></i> Bearbeiten
                 </button>
                 ${user.canBeDeleted !== false ? `
-                    <button class="delete-user-btn" onclick="window.qhseDashboard.deleteUser('${user.id}')">
+                    <button class="delete-user-btn" style="font-size: 1rem; padding: 0.8rem 1.5rem;" onclick="window.qhseDashboard.deleteUser('${user.id}')">
                         <i class="fas fa-trash"></i> Löschen
                     </button>
                 ` : `
-                    <button class="delete-user-btn" disabled title="Root-Admin kann nicht gelöscht werden">
+                    <button class="delete-user-btn" style="font-size: 1rem; padding: 0.8rem 1.5rem;" disabled title="Root-Admin kann nicht gelöscht werden">
                         <i class="fas fa-shield-alt"></i> Geschützt
                     </button>
                 `}
@@ -20582,11 +20813,81 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
     }
 
     showSection(sectionId) {
-        // Find the menu item for this section
-        const menuItem = document.querySelector(`.menu-item[data-section="${sectionId}"]`);
-        if (menuItem) {
-            // Trigger the click event to use existing navigation logic
-            menuItem.click();
+        console.log('🔄 showSection called with:', sectionId);
+        
+        // Hide all sections
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Show target section
+        const targetSection = document.getElementById(sectionId + '-section');
+        if (targetSection) {
+            targetSection.classList.add('active');
+            console.log('✅ Section activated:', sectionId);
+        } else {
+            console.error('❌ Section not found:', sectionId + '-section');
+        }
+        
+        // Update active menu item
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => item.classList.remove('active'));
+        
+        const activeMenuItem = document.querySelector(`.menu-item[data-section="${sectionId}"]`);
+        if (activeMenuItem) {
+            activeMenuItem.classList.add('active');
+        }
+        
+        // Update page title
+        const pageTitle = document.getElementById('pageTitle');
+        if (pageTitle) {
+            const sectionTitles = {
+                dashboard: localStorage.getItem('qhse_dashboard_name') || 'Dashboard',
+                arbeitsschutz: 'Arbeitsschutz',
+                qualitaet: 'Qualitätsmanagement',
+                umwelt: 'Umweltmanagement',
+                datenschutz: 'Datenschutz',
+                gesundheit: 'Gesundheitsmanagement',
+                nutzerverwaltung: 'Nutzerverwaltung',
+                bereichsverwaltung: 'Bereichsverwaltung',
+                abteilungsverwaltung: 'Abteilungsverwaltung',
+                zeiterfassung: 'Zeiterfassung',
+                zeitauswertung: 'Zeitauswertung',
+                maschinen: 'Maschinenmanagement',
+                wartungsplanung: 'Wartungsplanung',
+                'safety-corner': 'Safety Corner',
+                'audit-verwaltung': 'Audit-Verwaltung',
+                'audit-zertifizierungen': 'Audit-Zertifizierungen',
+                'gefahr-stoffe': 'Gefahrstoffe',
+                schulungen: 'Schulungen',
+                lieferanten: 'Lieferanten',
+                urlaub: 'Urlaubsmanagement',
+                benutzerprofile: 'Benutzerprofile',
+                'risiko-bewertung': 'Risikobewertung',
+                'audit-tauschboerse': 'Audit-Tauschbörse',
+                auditoren: 'Auditoren',
+                'auditplan-generator': 'Auditplan-Generator',
+                einstellungen: 'Einstellungen'
+            };
+            
+            pageTitle.textContent = sectionTitles[sectionId] || sectionId;
+        }
+        
+        // Store current section
+        this.currentSection = sectionId;
+        
+        // Trigger specific section initialization if needed
+        if (sectionId === 'nutzerverwaltung') {
+            console.log('🔧 Initializing user management...');
+            setTimeout(() => {
+                this.renderUsersList();
+            }, 100);
+        } else if (sectionId === 'gefahrstoffe') {
+            console.log('🧪 Gefahrstoffe section activated - re-initializing...');
+            setTimeout(() => {
+                this.setupHazardousSubstances();
+            }, 100);
         }
     }
 
@@ -43491,4 +43792,910 @@ QHSEDashboard.prototype.printAuditPlan = function() {
 };
 
 // Removed duplicate functions - now integrated into QHSE Dashboard class
+
+// ===========================
+// QHSE INCIDENT REPORTING MODULE
+// ===========================
+
+QHSEDashboard.prototype.setupIncidentReporting = function() {
+    console.log('🚨 Setting up QHSE Incident Reporting module...');
+    
+    // Initialize incident data storage
+    this.incidents = this.loadIncidentsFromStorage();
+    this.incidentFiles = [];
+    this.dragCounter = 0;
+    
+    // Setup event listeners after DOM is ready
+    setTimeout(() => {
+        this.initializeIncidentReporting();
+    }, 100);
+};
+
+QHSEDashboard.prototype.loadIncidentsFromStorage = function() {
+    try {
+        const stored = localStorage.getItem('qhse_incidents');
+        return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+        console.error('❌ Error loading incidents from storage:', error);
+        return [];
+    }
+};
+
+QHSEDashboard.prototype.saveIncidentsToStorage = function() {
+    try {
+        localStorage.setItem('qhse_incidents', JSON.stringify(this.incidents));
+        console.log('💾 Incidents saved to storage successfully');
+    } catch (error) {
+        console.error('❌ Error saving incidents to storage:', error);
+    }
+};
+
+QHSEDashboard.prototype.initializeIncidentReporting = function() {
+    console.log('🔧 Initializing incident reporting functionality...');
+    
+    // Setup sidebar buttons
+    this.setupIncidentButtons();
+    
+    // Setup modal event listeners
+    this.setupIncidentModal();
+    
+    // Setup tab functionality
+    this.setupIncidentTabs();
+    
+    // Setup drag & drop functionality
+    this.setupIncidentFileUpload();
+    
+    // Setup form submission
+    this.setupIncidentFormSubmission();
+    
+    // Setup conditional fields
+    this.setupConditionalFields();
+    
+    // Setup form progress tracking
+    this.setupFormProgress();
+    
+    console.log('✅ Incident reporting module initialized successfully');
+};
+
+QHSEDashboard.prototype.setupIncidentButtons = function() {
+    // Incident reporting menu items are now handled by setupNavigation()
+    console.log('✅ Incident reporting menu items integrated into main navigation');
+};
+
+QHSEDashboard.prototype.setupIncidentModal = function() {
+    const modal = document.getElementById('incidentReportModal');
+    const closeBtn = document.getElementById('closeIncidentModal');
+    const cancelBtn = document.getElementById('cancelIncidentReport');
+    const draftBtn = document.getElementById('saveIncidentDraft');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            this.closeIncidentModal();
+        });
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            this.closeIncidentModal();
+        });
+    }
+    
+    if (draftBtn) {
+        draftBtn.addEventListener('click', () => {
+            this.saveIncidentDraft();
+        });
+    }
+    
+    // Close modal when clicking outside
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeIncidentModal();
+            }
+        });
+    }
+};
+
+QHSEDashboard.prototype.setupIncidentFileUpload = function() {
+    const fileInput = document.getElementById('incidentFiles');
+    const dropZone = document.getElementById('incidentFileDropZone');
+    const fileList = document.getElementById('incidentFileList');
+    
+    if (!fileInput || !dropZone) return;
+    
+    // File input change handler
+    fileInput.addEventListener('change', (e) => {
+        this.handleIncidentFiles(Array.from(e.target.files));
+    });
+    
+    // Drag & drop handlers
+    dropZone.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        this.dragCounter++;
+        dropZone.classList.add('drag-over');
+    });
+    
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+    
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        this.dragCounter--;
+        if (this.dragCounter === 0) {
+            dropZone.classList.remove('drag-over');
+        }
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        this.dragCounter = 0;
+        dropZone.classList.remove('drag-over');
+        
+        const files = Array.from(e.dataTransfer.files);
+        this.handleIncidentFiles(files);
+    });
+    
+    // Click to select files
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+};
+
+QHSEDashboard.prototype.handleIncidentFiles = function(files) {
+    const maxFiles = 10;
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 
+                         'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                         'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         'text/plain'];
+    
+    let validFiles = [];
+    let errorMessages = [];
+    
+    // Check total file count
+    if (this.incidentFiles.length + files.length > maxFiles) {
+        errorMessages.push(`Maximal ${maxFiles} Dateien erlaubt. Sie haben bereits ${this.incidentFiles.length} Dateien ausgewählt.`);
+        return;
+    }
+    
+    files.forEach((file, index) => {
+        // Size check
+        if (file.size > maxSize) {
+            errorMessages.push(`${file.name}: Datei zu groß (max. 10MB)`);
+            return;
+        }
+        
+        // Type check
+        if (!allowedTypes.includes(file.type)) {
+            errorMessages.push(`${file.name}: Dateityp nicht erlaubt`);
+            return;
+        }
+        
+        // Check for duplicates
+        if (this.incidentFiles.some(f => f.name === file.name && f.size === file.size)) {
+            errorMessages.push(`${file.name}: Datei bereits ausgewählt`);
+            return;
+        }
+        
+        validFiles.push(file);
+    });
+    
+    // Show errors if any
+    if (errorMessages.length > 0) {
+        alert('Folgende Probleme wurden festgestellt:\\n\\n' + errorMessages.join('\\n'));
+    }
+    
+    // Add valid files
+    if (validFiles.length > 0) {
+        this.incidentFiles.push(...validFiles);
+        this.updateIncidentFileDisplay();
+        this.showNotification(`${validFiles.length} Datei(en) erfolgreich hinzugefügt`, 'success');
+    }
+};
+
+QHSEDashboard.prototype.updateIncidentFileDisplay = function() {
+    const fileList = document.getElementById('incidentFileList');
+    if (!fileList) return;
+    
+    if (this.incidentFiles.length === 0) {
+        fileList.innerHTML = '<p class="no-files">Keine Dateien ausgewählt</p>';
+        return;
+    }
+    
+    fileList.innerHTML = this.incidentFiles.map((file, index) => {
+        const fileIcon = this.getFileIcon(file.type);
+        const fileSize = this.formatFileSize(file.size);
+        
+        return `
+            <div class="file-item" data-index="${index}">
+                <div class="file-info">
+                    <i class="${fileIcon}"></i>
+                    <div class="file-details">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${fileSize}</div>
+                    </div>
+                </div>
+                <button type="button" class="remove-file-btn" onclick="qhseDashboard.removeIncidentFile(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+    }).join('');
+};
+
+QHSEDashboard.prototype.removeIncidentFile = function(index) {
+    if (index >= 0 && index < this.incidentFiles.length) {
+        const fileName = this.incidentFiles[index].name;
+        this.incidentFiles.splice(index, 1);
+        this.updateIncidentFileDisplay();
+        this.showNotification(`Datei "${fileName}" entfernt`, 'info');
+    }
+};
+
+QHSEDashboard.prototype.getFileIcon = function(mimeType) {
+    const iconMap = {
+        'image/jpeg': 'fas fa-image text-success',
+        'image/png': 'fas fa-image text-success', 
+        'image/gif': 'fas fa-image text-success',
+        'application/pdf': 'fas fa-file-pdf text-danger',
+        'application/msword': 'fas fa-file-word text-primary',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'fas fa-file-word text-primary',
+        'application/vnd.ms-excel': 'fas fa-file-excel text-success',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'fas fa-file-excel text-success',
+        'text/plain': 'fas fa-file-alt text-secondary'
+    };
+    
+    return iconMap[mimeType] || 'fas fa-file text-secondary';
+};
+
+QHSEDashboard.prototype.formatFileSize = function(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+QHSEDashboard.prototype.setupIncidentFormSubmission = function() {
+    const form = document.getElementById('incidentReportForm');
+    if (!form) return;
+    
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.submitIncidentReport();
+    });
+};
+
+QHSEDashboard.prototype.openIncidentModal = function(type) {
+    const modal = document.getElementById('incidentReportModal');
+    const title = document.getElementById('incidentModalTitle');
+    const typeField = document.getElementById('incidentType');
+    
+    if (!modal) return;
+    
+    // Reset form and files
+    this.resetIncidentForm();
+    
+    // Set incident type
+    if (typeField) {
+        typeField.value = type;
+    }
+    
+    // Update modal title
+    if (title) {
+        if (type === 'accident') {
+            title.textContent = 'Unfall melden';
+        } else if (type === 'near_miss') {
+            title.textContent = 'Beinaheunfall melden';
+        } else {
+            title.textContent = 'Ereignis melden';
+        }
+    }
+    
+    // Show modal with animation
+    modal.style.display = 'block';
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+    
+    // Focus first input
+    const firstInput = modal.querySelector('input, textarea, select');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    console.log(`📝 Opened incident modal for type: ${type}`);
+};
+
+QHSEDashboard.prototype.closeIncidentModal = function() {
+    const modal = document.getElementById('incidentReportModal');
+    if (!modal) return;
+    
+    // Confirm if form has data
+    if (this.hasIncidentFormData()) {
+        if (!confirm('Möchten Sie das Formular wirklich schließen? Alle eingegebenen Daten gehen verloren.')) {
+            return;
+        }
+    }
+    
+    // Hide modal with animation
+    modal.classList.remove('show');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        this.resetIncidentForm();
+    }, 300);
+    
+    console.log('✅ Incident modal closed');
+};
+
+QHSEDashboard.prototype.hasIncidentFormData = function() {
+    const form = document.getElementById('incidentReportForm');
+    if (!form) return false;
+    
+    const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea, select');
+    
+    for (let input of inputs) {
+        if (input.value.trim() !== '' && input.id !== 'incidentType') {
+            return true;
+        }
+    }
+    
+    return this.incidentFiles.length > 0;
+};
+
+QHSEDashboard.prototype.resetIncidentForm = function() {
+    const form = document.getElementById('incidentReportForm');
+    if (form) {
+        form.reset();
+    }
+    
+    // Clear file list
+    this.incidentFiles = [];
+    this.updateIncidentFileDisplay();
+    
+    // Reset datetime to current
+    const datetimeField = document.getElementById('incidentDateTime');
+    if (datetimeField) {
+        const now = new Date();
+        const localDateTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+        datetimeField.value = localDateTime.toISOString().slice(0, 16);
+    }
+    
+    console.log('🔄 Incident form reset');
+};
+
+QHSEDashboard.prototype.submitIncidentReport = function() {
+    const form = document.getElementById('incidentReportForm');
+    if (!form) return;
+    
+    // Collect form data
+    const formData = new FormData(form);
+    const incidentData = {
+        id: this.generateIncidentId(),
+        type: formData.get('incidentType'),
+        datetime: formData.get('incidentDateTime'),
+        location: formData.get('incidentLocation'),
+        description: formData.get('incidentDescription'),
+        reporter: {
+            name: formData.get('reporterName'),
+            email: formData.get('reporterEmail'),
+            phone: formData.get('reporterPhone'),
+            department: formData.get('reporterDepartment')
+        },
+        involved_persons: formData.get('involvedPersons'),
+        immediate_actions: formData.get('immediateActions'),
+        severity: formData.get('incidentSeverity'),
+        category: formData.get('incidentCategory'),
+        files: this.incidentFiles.map(file => ({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            // In a real implementation, files would be uploaded to server
+            data: URL.createObjectURL(file) // Temporary local URL
+        })),
+        created_at: new Date().toISOString(),
+        status: 'submitted',
+        user_id: this.currentUserId
+    };
+    
+    // Validate required fields
+    const validation = this.validateIncidentData(incidentData);
+    if (!validation.valid) {
+        alert('Bitte füllen Sie alle Pflichtfelder aus:\\n\\n' + validation.errors.join('\\n'));
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitIncidentReport');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wird gesendet...';
+    }
+    
+    // Simulate API call delay
+    setTimeout(() => {
+        try {
+            // Save to local storage (in production, send to backend)
+            this.incidents.push(incidentData);
+            this.saveIncidentsToStorage();
+            
+            // Show success message
+            this.showNotification('Meldung erfolgreich übermittelt!', 'success');
+            
+            // Close modal
+            this.closeIncidentModal();
+            
+            console.log('✅ Incident report submitted successfully:', incidentData);
+            
+            // In production, you would make an API call here:
+            // this.submitIncidentToBackend(incidentData);
+            
+        } catch (error) {
+            console.error('❌ Error submitting incident report:', error);
+            this.showNotification('Fehler beim Übermitteln der Meldung', 'error');
+        } finally {
+            // Reset button
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Meldung senden';
+            }
+        }
+    }, 1500);
+};
+
+QHSEDashboard.prototype.validateIncidentData = function(data) {
+    const errors = [];
+    
+    if (!data.datetime) errors.push('- Datum und Uhrzeit');
+    if (!data.location) errors.push('- Ort des Ereignisses');
+    if (!data.description) errors.push('- Beschreibung des Ereignisses');
+    if (!data.reporter.name) errors.push('- Name des Meldenden');
+    if (!data.reporter.email) errors.push('- E-Mail des Meldenden');
+    if (!data.severity) errors.push('- Schweregrad');
+    if (!data.category) errors.push('- Kategorie');
+    
+    return {
+        valid: errors.length === 0,
+        errors: errors
+    };
+};
+
+QHSEDashboard.prototype.generateIncidentId = function() {
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    return `INC-${timestamp}-${random}`;
+};
+
+// Backend API simulation (would be replaced with actual API calls)
+QHSEDashboard.prototype.submitIncidentToBackend = function(incidentData) {
+    // This would be an actual API call in production
+    console.log('🌐 Submitting incident to backend API...');
+    
+    // Example API call structure:
+    /*
+    fetch('/api/incidents', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            ...incidentData,
+            files: this.incidentFiles // Would handle file upload separately
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            this.showNotification('Meldung erfolgreich übermittelt!', 'success');
+            this.closeIncidentModal();
+        } else {
+            throw new Error(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('API Error:', error);
+        this.showNotification('Fehler beim Übermitteln der Meldung', 'error');
+    });
+    */
+};
+
+QHSEDashboard.prototype.showNotification = function(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${this.getNotificationIcon(type)}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+    
+    console.log(`📢 Notification: ${type} - ${message}`);
+};
+
+QHSEDashboard.prototype.getNotificationIcon = function(type) {
+    const icons = {
+        success: 'check-circle',
+        error: 'exclamation-circle',
+        warning: 'exclamation-triangle',
+        info: 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+};
+
+// Enhanced Incident Reporting - Tab Functionality
+QHSEDashboard.prototype.setupIncidentTabs = function() {
+    const tabButtons = document.querySelectorAll('.incident-tab-btn');
+    const tabContents = document.querySelectorAll('.incident-tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetTab = button.getAttribute('data-tab');
+            
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding content
+            button.classList.add('active');
+            const targetContent = document.getElementById(`tab-${targetTab}`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+            
+            // Update form progress
+            this.updateFormProgress();
+        });
+    });
+};
+
+// Enhanced Incident Reporting - Conditional Fields
+QHSEDashboard.prototype.setupConditionalFields = function() {
+    // Show/hide additional persons details
+    const multiplePersonsCheckbox = document.getElementById('multiplePersonsInvolved');
+    const additionalPersonsGroup = document.getElementById('additionalPersonsGroup');
+    
+    if (multiplePersonsCheckbox && additionalPersonsGroup) {
+        multiplePersonsCheckbox.addEventListener('change', () => {
+            additionalPersonsGroup.style.display = multiplePersonsCheckbox.checked ? 'block' : 'none';
+        });
+    }
+    
+    // Show/hide witness details
+    const witnessRadios = document.querySelectorAll('input[name="witnessesPresent"]');
+    const witnessDetailsGroup = document.getElementById('witnessDetailsGroup');
+    
+    witnessRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (witnessDetailsGroup) {
+                witnessDetailsGroup.style.display = radio.value === 'ja' ? 'block' : 'none';
+            }
+        });
+    });
+    
+    // Show/hide environmental details
+    const environmentalRadios = document.querySelectorAll('input[name="environmentalImpact"]');
+    const environmentalDetailsGroup = document.getElementById('environmentalDetailsGroup');
+    
+    environmentalRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (environmentalDetailsGroup) {
+                environmentalDetailsGroup.style.display = 
+                    (radio.value === 'ja' || radio.value === 'moeglich') ? 'block' : 'none';
+            }
+        });
+    });
+};
+
+// Enhanced Incident Reporting - Form Progress Tracking
+QHSEDashboard.prototype.setupFormProgress = function() {
+    const form = document.getElementById('incidentReportForm');
+    if (!form) return;
+    
+    const requiredFields = form.querySelectorAll('[required]');
+    const progressFill = document.getElementById('formProgress');
+    const progressText = document.getElementById('progressPercentage');
+    
+    const updateProgress = () => {
+        let filledFields = 0;
+        let totalFields = requiredFields.length;
+        
+        requiredFields.forEach(field => {
+            if (field.type === 'checkbox' || field.type === 'radio') {
+                if (field.checked) filledFields++;
+            } else if (field.value.trim() !== '') {
+                filledFields++;
+            }
+        });
+        
+        // Add file uploads to progress
+        if (this.incidentFiles && this.incidentFiles.length > 0) {
+            filledFields += 1;
+            totalFields += 1;
+        } else {
+            totalFields += 1; // Count files as optional but contributing to progress
+        }
+        
+        const percentage = Math.round((filledFields / totalFields) * 100);
+        
+        if (progressFill) {
+            progressFill.style.width = `${percentage}%`;
+        }
+        if (progressText) {
+            progressText.textContent = `${percentage}%`;
+        }
+        
+        // Enable/disable submit button based on required fields
+        const submitBtn = document.getElementById('submitIncidentReport');
+        if (submitBtn) {
+            const requiredFilled = Array.from(requiredFields).every(field => {
+                if (field.type === 'checkbox') {
+                    // For required checkboxes, check if at least one in the group is checked
+                    const name = field.name;
+                    if (name) {
+                        const group = form.querySelectorAll(`[name="${name}"][required]`);
+                        return Array.from(group).some(cb => cb.checked);
+                    }
+                    return field.checked;
+                } else if (field.type === 'radio') {
+                    const name = field.name;
+                    const group = form.querySelectorAll(`[name="${name}"]`);
+                    return Array.from(group).some(radio => radio.checked);
+                } else {
+                    return field.value.trim() !== '';
+                }
+            });
+            
+            submitBtn.disabled = !requiredFilled;
+        }
+    };
+    
+    // Add event listeners to all form fields
+    requiredFields.forEach(field => {
+        ['input', 'change', 'blur'].forEach(event => {
+            field.addEventListener(event, updateProgress);
+        });
+    });
+    
+    // Initial progress update
+    updateProgress();
+};
+
+QHSEDashboard.prototype.updateFormProgress = function() {
+    // Trigger progress update when switching tabs
+    setTimeout(() => {
+        const form = document.getElementById('incidentReportForm');
+        if (form) {
+            const event = new Event('input', { bubbles: true });
+            form.dispatchEvent(event);
+        }
+    }, 100);
+};
+
+// Enhanced Incident Reporting - Draft Saving
+QHSEDashboard.prototype.saveIncidentDraft = function() {
+    const form = document.getElementById('incidentReportForm');
+    if (!form) return;
+    
+    const formData = new FormData(form);
+    const draftData = {};
+    
+    // Collect all form data
+    for (let [key, value] of formData.entries()) {
+        if (draftData[key]) {
+            // Handle multiple values (checkboxes)
+            if (!Array.isArray(draftData[key])) {
+                draftData[key] = [draftData[key]];
+            }
+            draftData[key].push(value);
+        } else {
+            draftData[key] = value;
+        }
+    }
+    
+    // Add files
+    draftData.files = this.incidentFiles.map(file => ({
+        name: file.name,
+        size: file.size,
+        type: file.type
+    }));
+    
+    // Save to localStorage
+    const draftId = `incident_draft_${Date.now()}`;
+    localStorage.setItem(draftId, JSON.stringify({
+        ...draftData,
+        savedAt: new Date().toISOString(),
+        incidentType: document.getElementById('incidentType')?.value
+    }));
+    
+    this.showNotification('Entwurf erfolgreich gespeichert', 'success');
+    console.log('📄 Incident draft saved:', draftId);
+};
+
+// Enhanced Incident Reporting - Auto-save functionality
+QHSEDashboard.prototype.setupAutoSave = function() {
+    let autoSaveTimer;
+    const form = document.getElementById('incidentReportForm');
+    
+    if (!form) return;
+    
+    const triggerAutoSave = () => {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            this.saveIncidentDraft();
+        }, 30000); // Auto-save every 30 seconds
+    };
+    
+    // Add event listeners for auto-save
+    form.addEventListener('input', triggerAutoSave);
+    form.addEventListener('change', triggerAutoSave);
+};
+
+// Enhanced form reset with confirmation
+QHSEDashboard.prototype.resetIncidentForm = function() {
+    const form = document.getElementById('incidentReportForm');
+    if (form) {
+        form.reset();
+    }
+    
+    // Clear file list
+    this.incidentFiles = [];
+    this.updateIncidentFileDisplay();
+    
+    // Reset to first tab
+    const firstTab = document.querySelector('.incident-tab-btn[data-tab="basic"]');
+    const firstContent = document.getElementById('tab-basic');
+    
+    if (firstTab && firstContent) {
+        // Remove active class from all tabs
+        document.querySelectorAll('.incident-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.incident-tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Activate first tab
+        firstTab.classList.add('active');
+        firstContent.classList.add('active');
+    }
+    
+    // Reset datetime to current
+    const datetimeField = document.getElementById('incidentDateTime');
+    const reportDateField = document.getElementById('incidentReportDate');
+    
+    if (datetimeField) {
+        const now = new Date();
+        const localDateTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+        datetimeField.value = localDateTime.toISOString().slice(0, 16);
+    }
+    
+    if (reportDateField) {
+        const now = new Date();
+        const localDateTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+        reportDateField.value = localDateTime.toISOString().slice(0, 16);
+    }
+    
+    // Reset progress
+    const progressFill = document.getElementById('formProgress');
+    const progressText = document.getElementById('progressPercentage');
+    
+    if (progressFill) progressFill.style.width = '0%';
+    if (progressText) progressText.textContent = '0%';
+    
+    console.log('🔄 Enhanced incident form reset completed');
+};
+
+// Enhanced modal opening with auto-fill
+QHSEDashboard.prototype.openIncidentModal = function(type) {
+    const modal = document.getElementById('incidentReportModal');
+    const title = document.getElementById('incidentModalTitle');
+    const typeField = document.getElementById('incidentType');
+    
+    if (!modal) return;
+    
+    // Reset form and files
+    this.resetIncidentForm();
+    
+    // Set incident type
+    if (typeField) {
+        typeField.value = type;
+    }
+    
+    // Update modal title and icon
+    if (title) {
+        const icon = title.querySelector('i');
+        if (type === 'accident') {
+            title.innerHTML = '<i class="fas fa-ambulance"></i> Unfall melden';
+        } else if (type === 'near_miss') {
+            title.innerHTML = '<i class="fas fa-shield-alt"></i> Beinaheunfall melden';
+        } else {
+            title.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Ereignis melden';
+        }
+    }
+    
+    // Pre-fill current user data
+    this.prefillReporterData();
+    
+    // Show modal with animation
+    modal.style.display = 'block';
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+    
+    // Focus first input
+    const firstInput = modal.querySelector('input[type="datetime-local"]:not([readonly])');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Setup auto-save
+    this.setupAutoSave();
+    
+    console.log(`📝 Enhanced incident modal opened for type: ${type}`);
+};
+
+// Pre-fill reporter data from current user
+QHSEDashboard.prototype.prefillReporterData = function() {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser) return;
+    
+    const reporterName = document.getElementById('reporterName');
+    const reporterPosition = document.getElementById('reporterPosition');
+    const reporterEmail = document.getElementById('reporterEmail');
+    const reporterDepartment = document.getElementById('reporterDepartment');
+    
+    if (reporterName && currentUser.displayName) {
+        reporterName.value = currentUser.displayName;
+    }
+    
+    if (reporterPosition && currentUser.role) {
+        const roleNames = {
+            'root-admin': 'Root Administrator',
+            'admin': 'Administrator',
+            'geschaeftsfuehrung': 'Geschäftsführung',
+            'betriebsleiter': 'Betriebsleiter',
+            'abteilungsleiter': 'Abteilungsleiter',
+            'qhse': 'QHSE-Beauftragter',
+            'mitarbeiter': 'Mitarbeiter',
+            'techniker': 'Techniker'
+        };
+        reporterPosition.value = roleNames[currentUser.role] || currentUser.role;
+    }
+    
+    if (reporterEmail && currentUser.email) {
+        reporterEmail.value = currentUser.email;
+    }
+    
+    if (reporterDepartment && currentUser.department) {
+        reporterDepartment.value = currentUser.department;
+    }
+};
+
+console.log('✅ QHSE Enhanced Incident Reporting Module loaded successfully');
+
+// Global helper functions for incident modal
+window.closeIncidentModal = function() {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.closeIncidentModal();
+    }
+};
+
+window.openIncidentModal = function(type) {
+    if (window.qhseDashboard) {
+        window.qhseDashboard.openIncidentModal(type);
+    }
+};
 
