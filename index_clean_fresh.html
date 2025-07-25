@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Management System</title>
+    <link rel="stylesheet" href="styles.css?v=2024070505">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* CLEAN FRESH LOGIN - NO CONFLICTS */
+        #freshLogin {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .fresh-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .fresh-logo {
+            width: 70px;
+            height: 70px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 28px;
+        }
+        
+        .fresh-title { font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 30px; }
+        .fresh-group { margin-bottom: 20px; text-align: left; }
+        .fresh-label { display: block; font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 14px; }
+        .fresh-input { 
+            width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 10px; 
+            font-size: 16px; box-sizing: border-box; 
+        }
+        .fresh-input:focus { outline: none; border-color: #3b82f6; }
+        .fresh-btn { 
+            width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; 
+            border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; 
+        }
+        .fresh-btn:hover { background: #2563eb; }
+        .fresh-demo { 
+            margin-top: 25px; padding: 15px; background: #f8fafc; border-radius: 8px; 
+            font-size: 13px; text-align: left; 
+        }
+        .fresh-demo-item { margin: 5px 0; color: #475569; }
+        .fresh-msg { 
+            margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 14px; display: none; 
+        }
+        .fresh-msg.error { background: #fee2e2; color: #dc2626; }
+        .fresh-msg.success { background: #dcfce7; color: #16a34a; }
+        .fresh-msg.show { display: block; }
+        
+        .app-container { display: none; }
+        .app-container.active { display: flex; }
+        body.login-active { overflow: hidden; }
+        
+        /* User actions */
+        .user-actions { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+        .edit-profile-btn, .logout-btn {
+            background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0.25rem;
+            border-radius: 0.25rem; transition: color 0.2s, background-color 0.2s; display: flex;
+            align-items: center; justify-content: center; font-size: 0.85rem;
+        }
+        .edit-profile-btn:hover { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .logout-btn:hover { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+    </style>
+</head>
+<body class="login-active">
+    <!-- FRESH LOGIN -->
+    <div id="freshLogin">
+        <div class="fresh-card">
+            <div class="fresh-logo"><i class="fas fa-industry"></i></div>
+            <h1 class="fresh-title">QHSE Management System</h1>
+            
+            <form id="freshForm">
+                <div class="fresh-group">
+                    <label class="fresh-label">Firmenname</label>
+                    <input type="text" id="freshCompany" class="fresh-input" placeholder="Firmenname" required>
+                </div>
+                <div class="fresh-group">
+                    <label class="fresh-label">Passwort</label>
+                    <input type="password" id="freshPassword" class="fresh-input" placeholder="Passwort" required>
+                </div>
+                <button type="submit" id="freshBtn" class="fresh-btn">
+                    <i class="fas fa-sign-in-alt"></i> Anmelden
+                </button>
+                <div id="freshMsg" class="fresh-msg"></div>
+            </form>
+            
+            <div class="fresh-demo">
+                <strong>Demo-Zugangsdaten:</strong><br>
+                <div class="fresh-demo-item"><strong>Admin:</strong> QHSE GFT / SecureQHSE2024!</div>
+                <div class="fresh-demo-item"><strong>Demo:</strong> Demo Company / Demo123!</div>
+                <div class="fresh-demo-item"><strong>H&V:</strong> Hoffmann & Voss GmbH / HoffmannVoss2024!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
+    <!-- MAIN APPLICATION -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="company-logo">
+                    <i class="fas fa-industry"></i>
+                    <div class="company-info">
+                        <div class="company-name-container">
+                            <h2 id="companyName" class="editable-company-name">QHSE GFT</h2>
+                            <button class="edit-company-btn" id="editCompanyBtn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <p>QHSE Management</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Max Mustermann</span>
+                        <span class="user-role" id="userRole">Geschäftsführung</span>
+                        <div class="user-actions">
+                            <button class="edit-profile-btn" id="editProfileBtn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="logout-btn" onclick="freshLogout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <main class="main-content"></main>
+    </div>
+
+    <script>
+        console.log('🔐 FRESH Login System - KONFLIKTFREI');
+        
+        // CLEAR ALL POSSIBLE CONFLICTS
+        if (window.QHSEDashboard) { 
+            console.log('⚠️ QHSEDashboard bereits vorhanden - wird gelöscht');
+            delete window.QHSEDashboard; 
+        }
+        if (window.qhseDashboard) { 
+            console.log('⚠️ qhseDashboard bereits vorhanden - wird gelöscht');
+            delete window.qhseDashboard; 
+        }
+        
+        const FRESH_CREDS = {
+            'QHSE GFT': { password: 'SecureQHSE2024!', userId: 'root-admin' },
+            'Demo Company': { password: 'Demo123!', userId: 'demo-user' },
+            'Hoffmann & Voss GmbH': { password: 'HoffmannVoss2024!', userId: 'root-admin' }
+        };
+        
+        let freshState = { authenticated: false, user: null };
+        
+        const freshLogin = document.getElementById('freshLogin');
+        const freshForm = document.getElementById('freshForm');
+        const freshCompany = document.getElementById('freshCompany');
+        const freshPassword = document.getElementById('freshPassword');
+        const freshBtn = document.getElementById('freshBtn');
+        const freshMsg = document.getElementById('freshMsg');
+        const freshApp = document.querySelector('.app-container');
+        
+        function freshShowMsg(text, type = 'error') {
+            freshMsg.textContent = text;
+            freshMsg.className = `fresh-msg ${type} show`;
+        }
+        
+        function freshClearMsg() { freshMsg.classList.remove('show'); }
+        
+        freshForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const company = freshCompany.value.trim();
+            const password = freshPassword.value;
+            
+            freshClearMsg();
+            freshBtn.disabled = true;
+            
+            if (!company || !password) {
+                freshShowMsg('Bitte alle Felder ausfüllen.');
+                freshBtn.disabled = false;
+                return;
+            }
+            
+            const creds = FRESH_CREDS[company];
+            if (!creds || creds.password !== password) {
+                freshShowMsg('Ungültige Anmeldedaten.');
+                freshBtn.disabled = false;
+                return;
+            }
+            
+            freshShowMsg('✅ Anmeldung erfolgreich! System wird geladen...', 'success');
+            
+            localStorage.setItem('qhse_current_user', creds.userId);
+            localStorage.setItem('fresh_session', JSON.stringify({
+                company: company,
+                userId: creds.userId,
+                loginTime: Date.now(),
+                expiresAt: Date.now() + (60 * 60 * 1000)
+            }));
+            
+            freshState.authenticated = true;
+            freshState.user = { company, userId: creds.userId };
+            
+            setTimeout(freshShowApp, 2000);
+        });
+        
+        function freshShowApp() {
+            console.log('🚀 Zeige QHSE App');
+            
+            freshLogin.style.display = 'none';
+            freshApp.classList.add('active');
+            document.body.classList.remove('login-active');
+            
+            setTimeout(freshLoadDashboard, 200);
+        }
+        
+        function freshLoadDashboard() {
+            console.log('📊 Lade Dashboard...');
+            
+            // COMPLETELY CLEAN APPROACH - Load script without conflicts
+            try {
+                // Remove any existing scripts
+                const existingScripts = document.querySelectorAll('script[src*="script.js"]');
+                existingScripts.forEach(s => s.remove());
+                
+                // Create completely fresh script element
+                const freshScript = document.createElement('script');
+                freshScript.src = `script.js?fresh=${Date.now()}${Math.random()}`;
+                freshScript.type = 'text/javascript';
+                
+                freshScript.onload = function() {
+                    console.log('📁 Script.js frisch geladen');
+                    
+                    // Wait and then initialize
+                    setTimeout(() => {
+                        try {
+                            if (typeof QHSEDashboard === 'function') {
+                                console.log('✅ QHSEDashboard Klasse verfügbar');
+                                
+                                // Create fresh instance
+                                window.qhseDashboard = new QHSEDashboard();
+                                console.log('🎉 Dashboard erfolgreich initialisiert');
+                                
+                                if (window.qhseDashboard.showNotification) {
+                                    window.qhseDashboard.showNotification(
+                                        `Willkommen ${freshState.user.company}!`, 
+                                        'success'
+                                    );
+                                }
+                                
+                            } else {
+                                throw new Error('QHSEDashboard ist keine Funktion');
+                            }
+                            
+                        } catch (error) {
+                            console.error('❌ Dashboard Init Fehler:', error);
+                        }
+                    }, 1500);
+                };
+                
+                freshScript.onerror = function(error) {
+                    console.error('❌ Script Load Fehler:', error);
+                };
+                
+                // Append to head
+                document.head.appendChild(freshScript);
+                
+            } catch (error) {
+                console.error('❌ Load Dashboard Fehler:', error);
+            }
+        }
+        
+        function freshShowLogin() {
+            console.log('🔐 Zeige Login');
+            
+            freshLogin.style.display = 'flex';
+            freshApp.classList.remove('active');
+            document.body.classList.add('login-active');
+            
+            freshForm.reset();
+            freshClearMsg();
+            freshBtn.disabled = false;
+            
+            freshState.authenticated = false;
+            freshState.user = null;
+        }
+        
+        window.freshLogout = function() {
+            if (confirm('Wirklich abmelden?')) {
+                console.log('👋 Logout');
+                
+                localStorage.removeItem('qhse_current_user');
+                localStorage.removeItem('fresh_session');
+                
+                location.reload(); // Complete clean reload
+            }
+        };
+        
+        function freshCheckSession() {
+            try {
+                const sessionData = localStorage.getItem('fresh_session');
+                if (sessionData) {
+                    const session = JSON.parse(sessionData);
+                    
+                    if (session.expiresAt && session.expiresAt > Date.now()) {
+                        console.log('🔄 Session OK für:', session.company);
+                        
+                        localStorage.setItem('qhse_current_user', session.userId);
+                        freshState.authenticated = true;
+                        freshState.user = session;
+                        
+                        freshShowApp();
+                        return true;
+                    } else {
+                        localStorage.removeItem('fresh_session');
+                        localStorage.removeItem('qhse_current_user');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Session Check:', error);
+            }
+            
+            return false;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏁 Fresh System startet...');
+            
+            if (!freshCheckSession()) {
+                freshShowLogin();
+            }
+            
+            console.log('✅ Fresh Login bereit');
+        });
+        
+        console.log('🔐 FRESH Login System vollständig geladen - KONFLIKTFREI');
+    </script>
+</body>
+</html>

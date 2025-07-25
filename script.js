@@ -73,6 +73,7 @@ class QHSEDashboard {
         this.setupAuditorManagement();
         this.setupAuditPlanGenerator();
         this.setupIncidentReporting();
+        this.setupIncidentOverview();
         this.loadCustomLabels();
         
         // Apply saved color theme on load
@@ -2160,7 +2161,7 @@ PLZ Ort">${user.address || ''}</textarea>
         this.roleDefinitions = {
             'root-admin': {
                 name: 'Root Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'einstellungen', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'einstellungen', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung', 'accident', 'near-miss', 'incident-overview'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2168,7 +2169,7 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             admin: {
                 name: 'Administrator',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'nutzerverwaltung', 'bereichsverwaltung', 'abteilungsverwaltung', 'zeiterfassung', 'zeitauswertung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung', 'accident', 'near-miss', 'incident-overview'],
                 canManageUsers: true,
                 canManageAreas: true,
                 canManageDepartments: true,
@@ -2176,40 +2177,40 @@ PLZ Ort">${user.address || ''}</textarea>
             },
             geschaeftsfuehrung: {
                 name: 'Geschäftsführung',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung', 'accident', 'near-miss', 'incident-overview'],
                 hierarchyLevel: 1,
                 canSupervise: ['betriebsleiter', 'qhse']
             },
             betriebsleiter: {
                 name: 'Betriebsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung', 'accident', 'near-miss', 'incident-overview'],
                 hierarchyLevel: 2,
                 canSupervise: ['abteilungsleiter'],
                 mustHaveSupervisor: ['geschaeftsfuehrung']
             },
             abteilungsleiter: {
                 name: 'Abteilungsleiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung', 'accident', 'near-miss', 'incident-overview'],
                 hierarchyLevel: 3,
                 canSupervise: ['mitarbeiter'],
                 mustHaveSupervisor: ['betriebsleiter']
             },
             qhse: {
                 name: 'QHSE-Mitarbeiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'verfahrensanweisungen', 'gefaehrdungsbeurteilung', 'audits', 'kundenzufriedenheit', 'dokumente', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'lieferanten', 'urlaubsplanung', 'mein-profil', 'audit-tauschboerse', 'auditor-verwaltung', 'accident', 'near-miss', 'incident-overview'],
                 hierarchyLevel: 2,
                 isStaffPosition: true,
                 mustHaveSupervisor: ['geschaeftsfuehrung']
             },
             mitarbeiter: {
                 name: 'Mitarbeiter',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'gefahrstoffe', 'schulungen', 'urlaubsplanung', 'mein-profil', 'accident', 'near-miss'],
                 hierarchyLevel: 4,
                 mustHaveSupervisor: ['abteilungsleiter']
             },
             techniker: {
                 name: 'Techniker',
-                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'urlaubsplanung', 'mein-profil'],
+                allowedSections: ['dashboard', 'sicherheitsecke', 'arbeitsanweisungen', 'audits', 'zeiterfassung', 'maschinen', 'wartungsplanung', 'stoerungen', 'instandhaltung-auswertung', 'gefahrstoffe', 'schulungen', 'urlaubsplanung', 'mein-profil', 'accident', 'near-miss'],
                 hierarchyLevel: 4,
                 canManageMachines: true,
                 canReportIssues: true,
@@ -20861,6 +20862,9 @@ Angewandte Normen: ${machine?.compliance?.appliedStandards || 'N/A'}
                 'audit-zertifizierungen': 'Audit-Zertifizierungen',
                 'gefahr-stoffe': 'Gefahrstoffe',
                 schulungen: 'Schulungen',
+                accident: 'Unfall-Management',
+                'near-miss': 'Beinahe-Unfall Management',
+                'incident-overview': 'Vorfälle verwalten',
                 lieferanten: 'Lieferanten',
                 urlaub: 'Urlaubsmanagement',
                 benutzerprofile: 'Benutzerprofile',
@@ -43805,11 +43809,337 @@ QHSEDashboard.prototype.setupIncidentReporting = function() {
     this.incidentFiles = [];
     this.dragCounter = 0;
     
+    // Initialize Smart Suggestions
+    if (typeof IncidentSmartSuggestions !== 'undefined') {
+        this.smartSuggestions = new IncidentSmartSuggestions();
+        console.log('🧠 Smart Suggestions initialized');
+    }
+    
     // Setup event listeners after DOM is ready
     setTimeout(() => {
         this.initializeIncidentReporting();
         this.initializeMandatoryReportingChecker();
+        this.setupSmartSuggestions();
     }, 100);
+};
+
+// DGUV Helper Functions for Compliance Integration
+QHSEDashboard.prototype.mapFormDataToIncident = function(formData) {
+    console.log('🔄 Mapping form data to incident structure...');
+    
+    return {
+        incidentDateTime: formData.get('incidentDateTime') || new Date().toISOString(),
+        incidentLocation: formData.get('incidentLocation') || '',
+        incidentDescription: formData.get('incidentDescription') || '',
+        incidentSeverity: formData.get('incidentSeverity') || 'niedrig',
+        reporterName: formData.get('reporterName') || this.getCurrentUser().displayName,
+        reporterDepartment: formData.get('reporterDepartment') || '',
+        reporterPosition: formData.get('reporterPosition') || this.getCurrentUser().role,
+        reporterPhone: formData.get('reporterPhone') || '',
+        reporterEmail: formData.get('reporterEmail') || '',
+        workProcess: formData.get('workProcess') || '',
+        accidentCause: formData.get('accidentCause') || formData.get('incidentDescription'),
+        witnesses: formData.get('witnesses') || '',
+        persons: {
+            lastName: formData.get('personLastName') || '',
+            firstName: formData.get('personFirstName') || '',
+            birthDate: formData.get('personBirthDate') || '',
+            gender: formData.get('personGender') || 'd',
+            nationality: formData.get('personNationality') || 'deutsch',
+            address: formData.get('personAddress') || '',
+            postalCode: formData.get('personPostalCode') || '',
+            city: formData.get('personCity') || '',
+            personnelNumber: formData.get('personnelNumber') || '',
+            jobTitle: formData.get('personJobTitle') || '',
+            employmentStart: formData.get('employmentStart') || '',
+            workingHoursPerWeek: formData.get('workingHoursPerWeek') || '40'
+        },
+        consequences: {
+            bodyPart: formData.get('injuryBodyPart') || '',
+            injuryType: formData.get('injuryType') || '',
+            injuries: formData.get('injuryDescription') || '',
+            firstAid: formData.get('firstAid') === 'true',
+            doctorTreatment: formData.get('doctorTreatment') === 'true',
+            hospitalTreatment: formData.get('hospitalTreatment') === 'true',
+            workIncapacity: formData.get('workIncapacity') === 'true',
+            workdaysLost: parseInt(formData.get('workdaysLost')) || 0
+        }
+    };
+};
+
+QHSEDashboard.prototype.attachDGUVPDFToIncident = function(incidentId, pdfBlob) {
+    console.log('📎 Attaching DGUV PDF to incident:', incidentId);
+    
+    try {
+        // Find the incident
+        const incident = this.incidents.find(inc => inc.id === incidentId);
+        if (!incident) {
+            console.error('Incident not found:', incidentId);
+            return false;
+        }
+        
+        // Create file reference for PDF
+        const pdfFile = {
+            name: `DGUV_Form1_${incident.reporterName}_${new Date().toISOString().split('T')[0]}.pdf`,
+            type: 'application/pdf',
+            size: pdfBlob.size,
+            blob: pdfBlob,
+            category: 'dguv_export',
+            uploadDate: new Date().toISOString()
+        };
+        
+        // Add to incident files
+        if (!incident.files) incident.files = [];
+        incident.files.push(pdfFile);
+        
+        // Save updated incidents
+        this.saveIncidentsToStorage();
+        
+        console.log('✅ DGUV PDF attached to incident');
+        return true;
+        
+    } catch (error) {
+        console.error('Error attaching DGUV PDF:', error);
+        return false;
+    }
+};
+
+QHSEDashboard.prototype.exportIncidentToDGUV = function(incidentId) {
+    console.log('📋 Exporting incident to DGUV format:', incidentId);
+    
+    try {
+        const incident = this.incidents.find(inc => inc.id === incidentId);
+        if (!incident) {
+            console.error('Incident not found for DGUV export');
+            return;
+        }
+        
+        // Generate DGUV Form 1
+        const dguvData = this.dguvGenerator.generateDGUVForm1(incident, this.getCompanyData());
+        
+        if (dguvData && !dguvData.error) {
+            // Generate and download PDF
+            this.dguvPDFGenerator.generatePDF(dguvData, { download: true })
+                .then(result => {
+                    console.log('✅ DGUV PDF exportiert:', result.filename);
+                    this.showNotification('DGUV Form 1 wurde erfolgreich exportiert', 'success');
+                })
+                .catch(error => {
+                    console.error('PDF-Export-Fehler:', error);
+                    this.showNotification('Fehler beim PDF-Export: ' + error.message, 'error');
+                });
+        } else {
+            console.error('DGUV-Generierung fehlgeschlagen:', dguvData.message);
+            this.showNotification('DGUV-Generierung fehlgeschlagen: ' + dguvData.message, 'error');
+        }
+        
+    } catch (error) {
+        console.error('DGUV-Export-Fehler:', error);
+        this.showNotification('Fehler beim DGUV-Export: ' + error.message, 'error');
+    }
+};
+
+// Smart Suggestions Setup
+QHSEDashboard.prototype.setupSmartSuggestions = function() {
+    if (!this.smartSuggestions) return;
+    
+    console.log('🧠 Setting up Smart Suggestions integration...');
+    
+    // Add wizard mode button to incident form
+    this.addWizardModeButton();
+    
+    // Add smart suggestions toggle
+    this.addSmartSuggestionsToggle();
+    
+    // Setup event category change handler
+    this.setupEventCategoryHandler();
+    
+    // Setup field focus handlers for contextual help
+    this.setupContextualHelpHandlers();
+};
+
+QHSEDashboard.prototype.addWizardModeButton = function() {
+    const incidentForm = document.getElementById('incidentReportForm');
+    if (!incidentForm) return;
+    
+    const wizardBtn = document.createElement('button');
+    wizardBtn.type = 'button';
+    wizardBtn.className = 'wizard-mode-btn';
+    wizardBtn.innerHTML = '<i class="fas fa-magic"></i> Geführter Modus (Anfänger)';
+    wizardBtn.onclick = () => {
+        this.smartSuggestions.enableWizardMode();
+    };
+    
+    // Insert at the beginning of the form
+    incidentForm.insertBefore(wizardBtn, incidentForm.firstChild);
+};
+
+QHSEDashboard.prototype.addSmartSuggestionsToggle = function() {
+    const incidentForm = document.getElementById('incidentReportForm');
+    if (!incidentForm) return;
+    
+    const toggleDiv = document.createElement('div');
+    toggleDiv.className = 'smart-suggestions-toggle';
+    toggleDiv.innerHTML = `
+        <input type="checkbox" id="smartSuggestionsEnabled" checked>
+        <label for="smartSuggestionsEnabled">
+            <i class="fas fa-lightbulb"></i>
+            Intelligente Vorschläge aktivieren
+        </label>
+    `;
+    
+    // Insert after wizard button
+    const wizardBtn = incidentForm.querySelector('.wizard-mode-btn');
+    if (wizardBtn) {
+        wizardBtn.parentNode.insertBefore(toggleDiv, wizardBtn.nextSibling);
+    }
+    
+    // Add change handler
+    const checkbox = toggleDiv.querySelector('#smartSuggestionsEnabled');
+    checkbox.addEventListener('change', (e) => {
+        this.smartSuggestionsEnabled = e.target.checked;
+        console.log('Smart Suggestions:', this.smartSuggestionsEnabled ? 'Enabled' : 'Disabled');
+    });
+    
+    this.smartSuggestionsEnabled = true;
+};
+
+QHSEDashboard.prototype.setupEventCategoryHandler = function() {
+    const eventCategoryField = document.getElementById('eventCategory');
+    if (!eventCategoryField) return;
+    
+    eventCategoryField.addEventListener('change', (e) => {
+        if (this.smartSuggestionsEnabled && this.smartSuggestions) {
+            const category = e.target.value;
+            console.log('🎯 Event category changed to:', category);
+            this.smartSuggestions.applySuggestions(category);
+        }
+    });
+};
+
+QHSEDashboard.prototype.setupContextualHelpHandlers = function() {
+    const helpFields = [
+        'incidentDescription',
+        'severity',
+        'cause',
+        'preventiveMeasures'
+    ];
+    
+    helpFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('focus', () => {
+                if (this.smartSuggestionsEnabled && this.smartSuggestions) {
+                    // Show contextual help for this field
+                    const help = this.getContextualHelpForField(fieldId);
+                    if (help) {
+                        this.showFieldHelp(field, help);
+                    }
+                }
+            });
+        }
+    });
+};
+
+QHSEDashboard.prototype.getContextualHelpForField = function(fieldId) {
+    const helpTexts = {
+        'incidentDescription': {
+            title: 'Ereignisbeschreibung',
+            text: 'Beschreiben Sie das Ereignis so detailliert wie möglich.',
+            tips: [
+                'Was ist genau passiert?',
+                'Welche Umstände führten dazu?',
+                'Welche Faktoren waren beteiligt?'
+            ]
+        },
+        'severity': {
+            title: 'Schweregrad bestimmen',
+            text: 'Bewerten Sie die Schwere basierend auf tatsächlichen oder potenziellen Folgen.',
+            levels: {
+                'niedrig': 'Keine oder minimale Auswirkungen',
+                'mittel': 'Moderate Auswirkungen, behandelbar',
+                'hoch': 'Ernste Auswirkungen, signifikante Folgen',
+                'kritisch': 'Schwerwiegende oder lebensbedrohliche Folgen'
+            }
+        },
+        'cause': {
+            title: 'Ursachenanalyse',
+            text: 'Identifizieren Sie die Hauptursache des Ereignisses.',
+            categories: [
+                'Menschliche Faktoren (Verhalten, Wissen)',
+                'Technische Faktoren (Ausrüstung, Anlagen)',
+                'Organisatorische Faktoren (Verfahren, Management)',
+                'Umgebungsfaktoren (Bedingungen, Umstände)'
+            ]
+        },
+        'preventiveMeasures': {
+            title: 'Präventionsmaßnahmen',
+            text: 'Schlagen Sie konkrete Maßnahmen vor, um ähnliche Ereignisse zu verhindern.',
+            approach: [
+                'Sofortmaßnahmen (kurzfristig)',
+                'Korrekturmaßnahmen (mittelfristig)',
+                'Präventivmaßnahmen (langfristig)',
+                'Systemverbesserungen (dauerhaft)'
+            ]
+        }
+    };
+    
+    return helpTexts[fieldId];
+};
+
+QHSEDashboard.prototype.showFieldHelp = function(field, help) {
+    // Remove existing help
+    const existingHelp = field.parentNode.querySelector('.field-help-tooltip');
+    if (existingHelp) {
+        existingHelp.remove();
+    }
+    
+    const helpTooltip = document.createElement('div');
+    helpTooltip.className = 'field-help-tooltip';
+    helpTooltip.innerHTML = `
+        <div class="help-content">
+            <h4>${help.title}</h4>
+            <p>${help.text}</p>
+            ${help.tips ? `
+                <div class="help-tips">
+                    <strong>Hilfreiche Fragen:</strong>
+                    <ul>${help.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>
+                </div>
+            ` : ''}
+            ${help.levels ? `
+                <div class="help-levels">
+                    <strong>Schweregrade:</strong>
+                    ${Object.entries(help.levels).map(([level, desc]) => `
+                        <div class="level-item">
+                            <strong>${level}:</strong> ${desc}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+            ${help.categories ? `
+                <div class="help-categories">
+                    <strong>Kategorien:</strong>
+                    <ul>${help.categories.map(cat => `<li>${cat}</li>`).join('')}</ul>
+                </div>
+            ` : ''}
+            ${help.approach ? `
+                <div class="help-approach">
+                    <strong>Ansatz:</strong>
+                    <ul>${help.approach.map(item => `<li>${item}</li>`).join('')}</ul>
+                </div>
+            ` : ''}
+        </div>
+        <button class="close-help" onclick="this.parentNode.remove()">✕</button>
+    `;
+    
+    field.parentNode.appendChild(helpTooltip);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+        if (helpTooltip.parentNode) {
+            helpTooltip.remove();
+        }
+    }, 10000);
 };
 
 QHSEDashboard.prototype.loadIncidentsFromStorage = function() {
@@ -44712,8 +45042,23 @@ QHSEDashboard.prototype.initializeMandatoryReportingChecker = function() {
     this.mandatoryChecker = new MandatoryReportingChecker();
     console.log('✅ Meldepflicht-Checker initialisiert');
 
+    // DGUV Module initialisieren
+    this.initializeDGUVModules();
+
     // Event-Listener für Formular-Eingaben hinzufügen
     this.setupMandatoryReportingChecks();
+};
+
+QHSEDashboard.prototype.initializeDGUVModules = function() {
+    if (typeof DGUVForm1Generator !== 'undefined') {
+        this.dguvGenerator = new DGUVForm1Generator();
+        console.log('✅ DGUV Form 1 Generator initialisiert');
+    }
+
+    if (typeof DGUVPDFGenerator !== 'undefined') {
+        this.dguvPDFGenerator = new DGUVPDFGenerator();
+        console.log('✅ DGUV PDF Generator initialisiert');
+    }
 };
 
 QHSEDashboard.prototype.setupMandatoryReportingChecks = function() {
@@ -44836,6 +45181,24 @@ QHSEDashboard.prototype.displayMandatoryReportingAlert = function(warning, manda
             this.showDeadlinesModal(mandatoryResult);
         };
     }
+
+    // DGUV Export Button Event-Listener
+    const dguvBtn = document.getElementById('exportDGUV');
+    if (dguvBtn) {
+        // DGUV Button nur bei BG-Meldepflicht anzeigen
+        const requiresBGReporting = mandatoryResult.authorities.some(auth => 
+            auth.authorityCode === 'berufsgenossenschaft'
+        );
+        
+        if (requiresBGReporting && this.dguvGenerator) {
+            dguvBtn.style.display = 'flex';
+            dguvBtn.onclick = () => {
+                this.generateDGUVForm1();
+            };
+        } else {
+            dguvBtn.style.display = 'none';
+        }
+    }
 };
 
 QHSEDashboard.prototype.showDeadlinesModal = function(mandatoryResult) {
@@ -44941,5 +45304,249 @@ QHSEDashboard.prototype.showDeadlinesModal = function(mandatoryResult) {
         `;
         document.head.appendChild(style);
     }
+};
+
+/**
+ * DGUV Form 1 Generation und Export
+ */
+QHSEDashboard.prototype.generateDGUVForm1 = function() {
+    if (!this.dguvGenerator) {
+        alert('DGUV Generator ist nicht verfügbar.');
+        return;
+    }
+
+    try {
+        // Formulardaten sammeln
+        const incidentData = this.collectIncidentFormData();
+        const companyData = this.getCompanyData();
+
+        // DGUV Form 1 generieren
+        const dguvForm = this.dguvGenerator.generateDGUVForm1(incidentData, companyData);
+
+        if (dguvForm.error) {
+            alert(`Fehler bei DGUV-Generierung: ${dguvForm.message}`);
+            return;
+        }
+
+        // Validierung prüfen
+        if (!dguvForm.validation.isValid) {
+            const proceed = confirm(
+                `DGUV Form 1 ist unvollständig (${dguvForm.validation.completeness}%):\n\n` +
+                dguvForm.validation.errors.join('\n') +
+                '\n\nTrotzdem PDF erstellen?'
+            );
+            if (!proceed) return;
+        }
+
+        // DGUV Modal mit Vorschau anzeigen
+        this.showDGUVPreviewModal(dguvForm);
+
+    } catch (error) {
+        console.error('Fehler bei DGUV Form 1 Generation:', error);
+        alert(`Fehler: ${error.message}`);
+    }
+};
+
+QHSEDashboard.prototype.getCompanyData = function() {
+    // Beispiel-Unternehmensdaten - in Produktion aus System laden
+    return {
+        name: this.loadCustomLabels().companyName || 'QHSE GFT',
+        address: 'Musterstraße 123',
+        postalCode: '12345',
+        city: 'Musterstadt',
+        phone: '+49 123 456789',
+        email: 'qhse@unternehmen.de',
+        membershipNumber: 'BG01123456', // Beispiel BG BAU
+        industryCode: '88999'
+    };
+};
+
+QHSEDashboard.prototype.showDGUVPreviewModal = function(dguvForm) {
+    let modalContent = `
+        <div class="dguv-preview-modal">
+            <h3>📋 DGUV Form 1 - Unfallanzeige</h3>
+            <div class="dguv-info">
+                <div class="validation-status ${dguvForm.validation.isValid ? 'valid' : 'warning'}">
+                    <strong>Status:</strong> ${dguvForm.validation.isValid ? '✅ Vollständig' : '⚠️ Unvollständig'} 
+                    (${dguvForm.validation.completeness}%)
+                </div>
+                
+                ${dguvForm.berufsgenossenschaft ? `
+                    <div class="bg-info">
+                        <strong>Berufsgenossenschaft:</strong> ${dguvForm.berufsgenossenschaft.name}
+                    </div>
+                ` : ''}
+            </div>
+
+            <div class="dguv-preview">
+                <h4>📊 Formular-Vorschau:</h4>
+                
+                <div class="preview-section">
+                    <h5>1. Unternehmen</h5>
+                    <p><strong>Name:</strong> ${dguvForm.sections.company['1.1']}</p>
+                    <p><strong>Anschrift:</strong> ${dguvForm.sections.company['1.2']}</p>
+                    <p><strong>Mitgliedsnummer:</strong> ${dguvForm.sections.company['1.6']}</p>
+                </div>
+
+                <div class="preview-section">
+                    <h5>2. Verunfallte Person</h5>
+                    <p><strong>Name:</strong> ${dguvForm.sections.person['2.2']} ${dguvForm.sections.person['2.1']}</p>
+                    <p><strong>Tätigkeit:</strong> ${dguvForm.sections.person['2.9']}</p>
+                </div>
+
+                <div class="preview-section">
+                    <h5>3. Unfall</h5>
+                    <p><strong>Datum:</strong> ${dguvForm.sections.accident['3.1']} um ${dguvForm.sections.accident['3.2']}</p>
+                    <p><strong>Ort:</strong> ${dguvForm.sections.accident['3.3']}</p>
+                    <p><strong>Hergang:</strong> ${dguvForm.sections.accident['3.6']}</p>
+                </div>
+
+                <div class="preview-section">
+                    <h5>4. Verletzung</h5>
+                    <p><strong>Körperteil:</strong> ${dguvForm.sections.injury['4.1']}</p>
+                    <p><strong>Art:</strong> ${dguvForm.sections.injury['4.2']}</p>
+                    <p><strong>Schwere:</strong> ${dguvForm.sections.injury['4.3']}</p>
+                </div>
+            </div>
+
+            ${dguvForm.validation.warnings.length > 0 ? `
+                <div class="validation-warnings">
+                    <h5>⚠️ Warnungen:</h5>
+                    <ul>
+                        ${dguvForm.validation.warnings.map(w => `<li>${w}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : ''}
+
+            <div class="modal-actions">
+                <button onclick="window.qhseDashboard.exportDGUVPDF(arguments[0])" class="btn-primary" data-dguv='${JSON.stringify(dguvForm).replace(/'/g, "\\'")}'>
+                    <i class="fas fa-file-pdf"></i> PDF herunterladen
+                </button>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="btn-secondary">
+                    Abbrechen
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Modal erstellen und anzeigen
+    const modal = document.createElement('div');
+    modal.className = 'compliance-modal dguv-modal';
+    modal.innerHTML = `
+        <div class="compliance-modal-content">
+            ${modalContent}
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // CSS für DGUV Modal hinzufügen
+    this.addDGUVModalStyles();
+};
+
+QHSEDashboard.prototype.exportDGUVPDF = function(event) {
+    if (!this.dguvPDFGenerator) {
+        alert('PDF Generator ist nicht verfügbar.');
+        return;
+    }
+
+    try {
+        // DGUV-Daten aus Button-Attribut extrahieren
+        const dguvData = JSON.parse(event.target.getAttribute('data-dguv'));
+        
+        // PDF generieren
+        this.dguvPDFGenerator.generatePDF(dguvData, { download: true })
+            .then(result => {
+                if (result.success) {
+                    // Erfolg anzeigen
+                    this.showNotification(
+                        `DGUV Form 1 PDF erfolgreich erstellt: ${result.filename}`, 
+                        'success'
+                    );
+                    
+                    // Modal schließen
+                    const modal = event.target.closest('.compliance-modal');
+                    if (modal) modal.remove();
+                }
+            })
+            .catch(error => {
+                console.error('PDF Export Fehler:', error);
+                alert(`PDF-Export fehlgeschlagen: ${error.message}`);
+            });
+            
+    } catch (error) {
+        console.error('DGUV PDF Export Fehler:', error);
+        alert(`Fehler beim PDF-Export: ${error.message}`);
+    }
+};
+
+QHSEDashboard.prototype.addDGUVModalStyles = function() {
+    if (document.getElementById('dguv-modal-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'dguv-modal-styles';
+    style.textContent = `
+        .dguv-modal .compliance-modal-content {
+            max-width: 800px;
+        }
+        .dguv-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .validation-status.valid {
+            color: #28a745;
+        }
+        .validation-status.warning {
+            color: #ffc107;
+        }
+        .bg-info {
+            background: #e3f2fd;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+        .dguv-preview {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .preview-section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        .preview-section:last-child {
+            border-bottom: none;
+        }
+        .preview-section h5 {
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+        .preview-section p {
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+        }
+        .validation-warnings {
+            background: #fff3cd;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .validation-warnings ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+    `;
+    document.head.appendChild(style);
 };
 

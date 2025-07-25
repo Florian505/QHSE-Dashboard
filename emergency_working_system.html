@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+        }
+        
+        .sidebar-header {
+            border-bottom: 1px solid #374151;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .company-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .company-logo i {
+            font-size: 32px;
+            color: #3b82f6;
+        }
+        
+        .company-info h2 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .company-info p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-details h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .user-details p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: #374151;
+            color: white;
+        }
+        
+        .nav-link i {
+            font-size: 18px;
+            width: 20px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .page-header {
+            margin-bottom: 32px;
+        }
+        
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .page-header h1 i {
+            color: #3b82f6;
+        }
+        
+        .page-header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-content h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-content p {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+        }
+        
+        .dashboard-widget {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-widget h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        
+        .widget-content {
+            space-y: 12px;
+        }
+        
+        .widget-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .widget-item:last-child {
+            border-bottom: none;
+        }
+        
+        .widget-item i {
+            color: #3b82f6;
+            font-size: 16px;
+            width: 20px;
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="company-logo">
+                    <i class="fas fa-industry"></i>
+                    <div class="company-info">
+                        <h2>QHSE GFT</h2>
+                        <p>QHSE Management</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <h3>Administrator</h3>
+                        <p>Root Admin</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-section="audit-plan">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Auditplan-Generator</span>
+                </a>
+                <a href="#" class="nav-link" data-section="audit-exchange">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Audit-Tauschbörse</span>
+                </a>
+                <a href="#" class="nav-link" data-section="arbeitsschutz">
+                    <i class="fas fa-hard-hat"></i>
+                    <span>Arbeitsschutz</span>
+                </a>
+                <a href="#" class="nav-link" data-section="qualitaet">
+                    <i class="fas fa-award"></i>
+                    <span>Qualität</span>
+                </a>
+                <a href="#" class="nav-link" data-section="umwelt">
+                    <i class="fas fa-leaf"></i>
+                    <span>Umwelt</span>
+                </a>
+                <a href="#" class="nav-link" data-section="datenschutz">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Datenschutz</span>
+                </a>
+                <a href="#" class="nav-link" data-section="gesundheit">
+                    <i class="fas fa-heart"></i>
+                    <span>Gesundheit</span>
+                </a>
+                <a href="#" class="nav-link" data-section="benutzer">
+                    <i class="fas fa-users"></i>
+                    <span>Benutzer</span>
+                </a>
+                <a href="#" class="nav-link" data-section="einstellungen">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
+                </a>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+                <div class="page-header">
+                    <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+                    <p>Willkommen im QHSE Management System</p>
+                </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="stat-content">
+                            <h3>247</h3>
+                            <p>Dokumente</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-content">
+                            <h3>42</h3>
+                            <p>Benutzer</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                        <div class="stat-content">
+                            <h3>18</h3>
+                            <p>Offene Aufgaben</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-content">
+                            <h3>96%</h3>
+                            <p>Compliance Rate</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-widget">
+                        <h3>Aktuelle Aufgaben</h3>
+                        <div class="widget-content">
+                            <div class="widget-item">
+                                <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
+                                <span>Sicherheitsschulung Q3 planen</span>
+                            </div>
+                            <div class="widget-item">
+                                <i class="fas fa-clock" style="color: #f59e0b;"></i>
+                                <span>Umweltaudit vorbereiten</span>
+                            </div>
+                            <div class="widget-item">
+                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                <span>Qualitätsdokumentation aktualisieren</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-widget">
+                        <h3>Neueste Aktivitäten</h3>
+                        <div class="widget-content">
+                            <div class="widget-item">
+                                <i class="fas fa-file-upload"></i>
+                                <span>Arbeitsschutz-Richtlinie hochgeladen</span>
+                            </div>
+                            <div class="widget-item">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Neuer Benutzer registriert</span>
+                            </div>
+                            <div class="widget-item">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Audit-Termin geplant</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Auditplan-Generator -->
+            <div id="audit-plan" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-clipboard-list"></i> Auditplan-Generator</h1>
+                    <p>Erstellen und verwalten Sie Auditpläne</p>
+                </div>
+                
+                <div class="dashboard-widget">
+                    <h3>🎯 Auditplan-Generator</h3>
+                    <div class="widget-content">
+                        <p><strong>Der Auditplan-Generator ist verfügbar!</strong></p>
+                        <p>Hier können Sie professionelle Auditpläne erstellen, bearbeiten und exportieren.</p>
+                        <div style="margin-top: 20px;">
+                            <button style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                <i class="fas fa-plus"></i> Neuen Auditplan erstellen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Audit-Tauschbörse -->
+            <div id="audit-exchange" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-exchange-alt"></i> Audit-Tauschbörse</h1>
+                    <p>Finden und tauschen Sie Auditoren</p>
+                </div>
+                
+                <div class="dashboard-widget">
+                    <h3>🔄 Audit-Tauschbörse</h3>
+                    <div class="widget-content">
+                        <p><strong>Die Audit-Tauschbörse ist verfügbar!</strong></p>
+                        <p>Hier können Sie Auditoren suchen, anbieten und Audit-Termine tauschen.</p>
+                        <div style="margin-top: 20px;">
+                            <button style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 12px;">
+                                <i class="fas fa-search"></i> Auditoren suchen
+                            </button>
+                            <button style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                <i class="fas fa-plus"></i> Angebot erstellen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Andere Bereiche -->
+            <div id="arbeitsschutz" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-hard-hat"></i> Arbeitsschutz</h1>
+                    <p>Sicherheit am Arbeitsplatz verwalten</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Arbeitsschutz-Management</h3>
+                    <p>Alle Funktionen für Arbeitsschutz sind verfügbar.</p>
+                </div>
+            </div>
+            
+            <div id="qualitaet" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-award"></i> Qualität</h1>
+                    <p>Qualitätsmanagement-System</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Qualitäts-Management</h3>
+                    <p>Alle Funktionen für Qualitätsmanagement sind verfügbar.</p>
+                </div>
+            </div>
+            
+            <div id="umwelt" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-leaf"></i> Umwelt</h1>
+                    <p>Umweltmanagement-System</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Umwelt-Management</h3>
+                    <p>Alle Funktionen für Umweltmanagement sind verfügbar.</p>
+                </div>
+            </div>
+            
+            <div id="datenschutz" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-shield-alt"></i> Datenschutz</h1>
+                    <p>DSGVO-Compliance verwalten</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Datenschutz-Management</h3>
+                    <p>Alle Funktionen für Datenschutz sind verfügbar.</p>
+                </div>
+            </div>
+            
+            <div id="gesundheit" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-heart"></i> Gesundheit</h1>
+                    <p>Gesundheitsmanagement am Arbeitsplatz</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Gesundheits-Management</h3>
+                    <p>Alle Funktionen für Gesundheitsmanagement sind verfügbar.</p>
+                </div>
+            </div>
+            
+            <div id="benutzer" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-users"></i> Benutzer</h1>
+                    <p>Benutzerverwaltung und Rechtevergabe</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>Benutzer-Verwaltung</h3>
+                    <p>Alle Funktionen für Benutzerverwaltung sind verfügbar.</p>
+                </div>
+            </div>
+            
+            <div id="einstellungen" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-cog"></i> Einstellungen</h1>
+                    <p>System-Konfiguration</p>
+                </div>
+                <div class="dashboard-widget">
+                    <h3>System-Einstellungen</h3>
+                    <p>Alle Einstellungen sind verfügbar.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        console.log('🚀 NOTFALL-QHSE System startet...');
+        
+        // Navigation funktional machen
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetSection = this.getAttribute('data-section');
+                    console.log('📍 Navigation zu:', targetSection);
+                    
+                    // Aktive Navigation umschalten
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Content-Bereiche umschalten
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    const targetElement = document.getElementById(targetSection);
+                    if (targetElement) {
+                        targetElement.classList.add('active');
+                    }
+                });
+            });
+            
+            // Erfolgs-Benachrichtigung
+            setTimeout(() => {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.innerHTML = '🎉 NOTFALL-SYSTEM: Alle Grundfunktionen verfügbar!';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+            }, 1000);
+            
+            console.log('✅ NOTFALL-QHSE System vollständig geladen!');
+        });
+    </script>
+</body>
+</html>

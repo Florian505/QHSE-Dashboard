@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
+    <!-- MAIN APPLICATION -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="company-logo">
+                    <i class="fas fa-industry"></i>
+                    <div class="company-info">
+                        <div class="company-name-container">
+                            <h2 id="companyName" class="editable-company-name">QHSE GFT</h2>
+                            <button class="edit-company-btn" id="editCompanyBtn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <p>QHSE Management</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Administrator</span>
+                        <span class="user-role" id="userRole">Root Admin</span>
+                        <div class="user-actions">
+                            <button class="edit-profile-btn" id="editProfileBtn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Menu - wird von script.js aufgebaut -->
+            <div class="nav-menu"></div>
+        </nav>
+        
+        <!-- Main Content - wird von script.js aufgebaut -->
+        <main class="main-content"></main>
+    </div>
+
+    <!-- Alle Modals - werden von script.js aufgebaut -->
+    
+    <!-- SCRIPT -->
+    <script src="script.js"></script>
+    
+    <script>
+        // SOFORT NACH DEM LADEN INITIALISIEREN
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏁 QHSE System startet OHNE Login...');
+            
+            // QHSE-Benutzer setzen
+            localStorage.setItem('qhse_current_user', 'root-admin');
+            console.log('👤 Root Admin Benutzer gesetzt');
+            
+            // Warten bis QHSEDashboard verfügbar ist
+            setTimeout(() => {
+                if (typeof QHSEDashboard !== 'undefined') {
+                    console.log('✅ QHSEDashboard Klasse verfügbar');
+                    
+                    try {
+                        // Dashboard initialisieren
+                        window.qhseDashboard = new QHSEDashboard();
+                        console.log('🎉 QHSE Dashboard erfolgreich initialisiert!');
+                        
+                        // Erfolgsmeldung anzeigen
+                        setTimeout(() => {
+                            const notification = document.createElement('div');
+                            notification.style.cssText = `
+                                position: fixed; top: 20px; right: 20px; z-index: 1000000;
+                                background: #10b981; color: white; padding: 15px 20px;
+                                border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                                font-family: Inter, sans-serif; font-weight: 600;
+                            `;
+                            notification.innerHTML = '🎉 QHSE System vollständig geladen! Alle Funktionen verfügbar.';
+                            document.body.appendChild(notification);
+                            setTimeout(() => notification.remove(), 4000);
+                        }, 1000);
+                        
+                    } catch (error) {
+                        console.error('❌ QHSE Dashboard Initialisierung Fehler:', error);
+                    }
+                } else {
+                    console.error('❌ QHSEDashboard Klasse nicht verfügbar');
+                }
+            }, 500);
+        });
+        
+        console.log('✅ QHSE System ohne Login bereit');
+    </script>
+</body>
+</html>

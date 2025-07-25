@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DGUV Compliance Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 DGUV Compliance Integration Test</h1>
+    <p>Diese Seite testet die Integration der DGUV-Module in das QHSE-System.</p>
+
+    <div class="test-container">
+        <h2>🔍 Modul-Tests</h2>
+        <button onclick="testModuleLoading()">Module laden testen</button>
+        <button onclick="testDGUVGeneration()">DGUV Form 1 Generation</button>
+        <button onclick="testPDFGeneration()">PDF Generation testen</button>
+        <button onclick="testCompanyData()">Firmendaten testen</button>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📋 Dummy Incident Test</h2>
+        <button onclick="createTestIncident()">Test-Unfall erstellen</button>
+        <button onclick="exportTestToDGUV()">Test zu DGUV exportieren</button>
+        <div id="incidentResults"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 Systemstatus</h2>
+        <div id="systemStatus"></div>
+    </div>
+
+    <!-- Load dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="compliance-dguv-form1.js"></script>
+    <script src="compliance-dguv-pdf.js"></script>
+
+    <script>
+        let testIncident = null;
+        let dguvGenerator = null;
+        let pdfGenerator = null;
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function testModuleLoading() {
+            log('🔄 Teste Modul-Loading...', 'info');
+            
+            // Test jsPDF
+            if (typeof window.jsPDF !== 'undefined') {
+                log('✅ jsPDF erfolgreich geladen', 'success');
+            } else {
+                log('❌ jsPDF nicht verfügbar', 'error');
+                return;
+            }
+
+            // Test DGUV Form 1 Generator
+            if (typeof window.DGUVForm1Generator !== 'undefined') {
+                dguvGenerator = new DGUVForm1Generator();
+                log('✅ DGUV Form 1 Generator erfolgreich geladen', 'success');
+            } else {
+                log('❌ DGUV Form 1 Generator nicht verfügbar', 'error');
+            }
+
+            // Test DGUV PDF Generator
+            if (typeof window.DGUVPDFGenerator !== 'undefined') {
+                pdfGenerator = new DGUVPDFGenerator();
+                log('✅ DGUV PDF Generator erfolgreich geladen', 'success');
+            } else {
+                log('❌ DGUV PDF Generator nicht verfügbar', 'error');
+            }
+
+            updateSystemStatus();
+        }
+
+        function testCompanyData() {
+            log('🏢 Teste Firmendaten...', 'info');
+            
+            const companyData = {
+                name: 'QHSE GFT Testfirma',
+                address: 'Teststraße 123',
+                postalCode: '12345',
+                city: 'Teststadt',
+                phone: '+49 123 456789',
+                email: 'info@qhse-gft.de',
+                membershipNumber: 'BG01123456',
+                industryCode: '88999'
+            };
+
+            log(`Firmendaten: ${JSON.stringify(companyData, null, 2)}`, 'info');
+            return companyData;
+        }
+
+        function createTestIncident() {
+            log('🚨 Erstelle Test-Unfall...', 'info');
+            
+            testIncident = {
+                id: 'test-incident-' + Date.now(),
+                incidentDateTime: new Date().toISOString(),
+                incidentLocation: 'Produktionshalle A',
+                incidentDescription: 'Sturz von der Leiter während Wartungsarbeiten',
+                incidentSeverity: 'mittel',
+                reporterName: 'Max Mustermann',
+                reporterDepartment: 'Produktion',
+                reporterPosition: 'Abteilungsleiter',
+                reporterPhone: '+49 123 456789',
+                reporterEmail: 'max.mustermann@qhse-gft.de',
+                workProcess: 'Wartung der Produktionsanlage',
+                accidentCause: 'Rutschige Sprossen der Leiter',
+                witnesses: 'Anna Schmidt, Peter Müller',
+                persons: {
+                    lastName: 'Mustermann',
+                    firstName: 'Max',
+                    birthDate: '15.03.1985',
+                    gender: 'm',
+                    nationality: 'deutsch',
+                    address: 'Musterstraße 45',
+                    postalCode: '12345',
+                    city: 'Teststadt',
+                    personnelNumber: 'P001234',
+                    jobTitle: 'Abteilungsleiter',
+                    employmentStart: '01.01.2020',
+                    workingHoursPerWeek: '40'
+                },
+                consequences: {
+                    bodyPart: 'Linker Arm',
+                    injuryType: 'Prellung und Schürfwunden',
+                    injuries: 'Prellung am linken Unterarm mit oberflächlichen Schürfwunden',
+                    firstAid: true,
+                    doctorTreatment: true,
+                    hospitalTreatment: false,
+                    workIncapacity: true,
+                    workdaysLost: 3
+                }
+            };
+
+            const incidentResults = document.getElementById('incidentResults');
+            incidentResults.innerHTML = `
+                <div class="test-result success">
+                    ✅ Test-Unfall erstellt: ${testIncident.id}
+                    <pre>${JSON.stringify(testIncident, null, 2)}</pre>
+                </div>
+            `;
+
+            log('✅ Test-Unfall erfolgreich erstellt', 'success');
+        }
+
+        function testDGUVGeneration() {
+            if (!dguvGenerator) {
+                log('❌ DGUV Generator nicht verfügbar', 'error');
+                return;
+            }
+
+            if (!testIncident) {
+                log('⚠️ Erstelle erst einen Test-Unfall', 'error');
+                return;
+            }
+
+            log('📋 Teste DGUV Form 1 Generierung...', 'info');
+
+            try {
+                const companyData = testCompanyData();
+                const dguvData = dguvGenerator.generateDGUVForm1(testIncident, companyData);
+
+                if (dguvData && !dguvData.error) {
+                    log('✅ DGUV Form 1 erfolgreich generiert', 'success');
+                    log(`Validierung: ${dguvData.validation.isValid ? 'Gültig' : 'Ungültig'}`, dguvData.validation.isValid ? 'success' : 'error');
+                    log(`Vollständigkeit: ${dguvData.validation.completeness}%`, 'info');
+                    
+                    if (dguvData.validation.errors.length > 0) {
+                        log(`Fehler: ${dguvData.validation.errors.join(', ')}`, 'error');
+                    }
+                    
+                    if (dguvData.validation.warnings.length > 0) {
+                        log(`Warnungen: ${dguvData.validation.warnings.join(', ')}`, 'info');
+                    }
+
+                    // Show generated data
+                    const pre = document.createElement('pre');
+                    pre.textContent = JSON.stringify(dguvData, null, 2);
+                    document.getElementById('testResults').appendChild(pre);
+
+                } else {
+                    log('❌ DGUV Generierung fehlgeschlagen: ' + (dguvData.message || 'Unbekannter Fehler'), 'error');
+                }
+            } catch (error) {
+                log('❌ Fehler bei DGUV Generierung: ' + error.message, 'error');
+            }
+        }
+
+        function testPDFGeneration() {
+            if (!pdfGenerator || !dguvGenerator) {
+                log('❌ PDF Generator oder DGUV Generator nicht verfügbar', 'error');
+                return;
+            }
+
+            if (!testIncident) {
+                log('⚠️ Erstelle erst einen Test-Unfall', 'error');
+                return;
+            }
+
+            log('📄 Teste PDF Generierung...', 'info');
+
+            try {
+                const companyData = testCompanyData();
+                const dguvData = dguvGenerator.generateDGUVForm1(testIncident, companyData);
+
+                if (dguvData && !dguvData.error && dguvData.validation.isValid) {
+                    pdfGenerator.generatePDF(dguvData, { download: true })
+                        .then(result => {
+                            log('✅ PDF erfolgreich generiert und heruntergeladen: ' + result.filename, 'success');
+                        })
+                        .catch(error => {
+                            log('❌ PDF-Generierung fehlgeschlagen: ' + error.message, 'error');
+                        });
+                } else {
+                    log('❌ Kann PDF nicht generieren - DGUV Daten ungültig', 'error');
+                }
+            } catch (error) {
+                log('❌ Fehler bei PDF Generierung: ' + error.message, 'error');
+            }
+        }
+
+        function exportTestToDGUV() {
+            if (!testIncident || !dguvGenerator || !pdfGenerator) {
+                log('❌ Test-Unfall oder DGUV Module nicht verfügbar', 'error');
+                return;
+            }
+
+            log('📋 Exportiere Test-Unfall zu DGUV...', 'info');
+
+            try {
+                const companyData = testCompanyData();
+                const dguvData = dguvGenerator.generateDGUVForm1(testIncident, companyData);
+
+                if (dguvData && !dguvData.error) {
+                    pdfGenerator.generatePDF(dguvData, { download: true })
+                        .then(result => {
+                            log('✅ DGUV Export erfolgreich: ' + result.filename, 'success');
+                            
+                            const incidentResults = document.getElementById('incidentResults');
+                            incidentResults.innerHTML += `
+                                <div class="test-result success">
+                                    📄 DGUV PDF exportiert: ${result.filename}
+                                </div>
+                            `;
+                        })
+                        .catch(error => {
+                            log('❌ DGUV Export fehlgeschlagen: ' + error.message, 'error');
+                        });
+                } else {
+                    log('❌ DGUV Export fehlgeschlagen: ' + (dguvData.message || 'Unbekannter Fehler'), 'error');
+                }
+            } catch (error) {
+                log('❌ Fehler beim DGUV Export: ' + error.message, 'error');
+            }
+        }
+
+        function updateSystemStatus() {
+            const status = document.getElementById('systemStatus');
+            const modules = [
+                { name: 'jsPDF', available: typeof window.jsPDF !== 'undefined' },
+                { name: 'DGUV Form 1 Generator', available: typeof window.DGUVForm1Generator !== 'undefined' },
+                { name: 'DGUV PDF Generator', available: typeof window.DGUVPDFGenerator !== 'undefined' }
+            ];
+
+            let html = '<h3>Module Status:</h3>';
+            modules.forEach(module => {
+                html += `<div class="test-result ${module.available ? 'success' : 'error'}">
+                    ${module.available ? '✅' : '❌'} ${module.name}
+                </div>`;
+            });
+
+            status.innerHTML = html;
+        }
+
+        // Auto-load modules on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testModuleLoading();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

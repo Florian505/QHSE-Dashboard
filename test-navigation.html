@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Navigation Test für Incident-Bereiche</h1>
+    
+    <div class="test-container">
+        <h2>Test der neuen Incident-Bereiche</h2>
+        <p>Teste die Navigation zu den neuen Unfall- und Beinahe-Unfall-Bereichen.</p>
+        
+        <button onclick="testAccidentSection()">🚑 Test Unfall-Bereich</button>
+        <button onclick="testNearMissSection()">🛡️ Test Beinahe-Unfall-Bereich</button>
+        <button onclick="testIncidentOverview()">📋 Test Vorfälle-Übersicht</button>
+        <button onclick="openMainSystem()">🏠 Hauptsystem öffnen</button>
+        
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        function testAccidentSection() {
+            log('🚑 Teste Unfall-Bereich...');
+            
+            // Check if sections exist
+            const accidentSection = document.getElementById('accident-section');
+            if (accidentSection) {
+                log('✅ accident-section gefunden');
+            } else {
+                log('❌ accident-section NICHT gefunden');
+            }
+            
+            // Check menu item
+            const menuItem = document.querySelector('[data-section="accident"]');
+            if (menuItem) {
+                log('✅ Menu-Item mit data-section="accident" gefunden');
+            } else {
+                log('❌ Menu-Item mit data-section="accident" NICHT gefunden');
+            }
+            
+            // Test opening main system with direct navigation
+            window.open('index.html#accident', '_blank');
+        }
+        
+        function testNearMissSection() {
+            log('🛡️ Teste Beinahe-Unfall-Bereich...');
+            
+            // Check if sections exist
+            const nearMissSection = document.getElementById('near-miss-section');
+            if (nearMissSection) {
+                log('✅ near-miss-section gefunden');
+            } else {
+                log('❌ near-miss-section NICHT gefunden');
+            }
+            
+            // Check menu item
+            const menuItem = document.querySelector('[data-section="near-miss"]');
+            if (menuItem) {
+                log('✅ Menu-Item mit data-section="near-miss" gefunden');
+            } else {
+                log('❌ Menu-Item mit data-section="near-miss" NICHT gefunden');
+            }
+            
+            // Test opening main system with direct navigation
+            window.open('index.html#near-miss', '_blank');
+        }
+        
+        function testIncidentOverview() {
+            log('📋 Teste Vorfälle-Übersicht...');
+            window.open('index.html#incident-overview', '_blank');
+        }
+        
+        function openMainSystem() {
+            window.open('index.html', '_blank');
+        }
+        
+        function log(message) {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = message.includes('✅') ? 'success' : 
+                            message.includes('❌') ? 'error' : 'info';
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+            console.log(message);
+            
+            // Keep only last 10 entries
+            while (results.children.length > 10) {
+                results.removeChild(results.firstChild);
+            }
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            log('🔄 Lade Test-Seite...');
+            
+            // Try to access main system elements (will fail since we're on test page)
+            try {
+                const accidentSection = parent.document?.getElementById('accident-section');
+                if (accidentSection) {
+                    log('✅ Kann auf accident-section im Hauptsystem zugreifen');
+                } else {
+                    log('ℹ️ Test läuft isoliert - öffne Hauptsystem für vollständigen Test');
+                }
+            } catch (e) {
+                log('ℹ️ Test läuft isoliert - öffne Hauptsystem für vollständigen Test');
+            }
+        });
+    </script>
+</body>
+</html>

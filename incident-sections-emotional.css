@@ -1,0 +1,469 @@
+/* 🌟 EMOTIONAL DESIGN ELEMENTS - BEGEISTERUNG PUR */
+
+/* ===== CELEBRATION EFFECTS ===== */
+.celebration-burst {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.celebration-burst::before,
+.celebration-burst::after {
+    content: '🎉';
+    position: absolute;
+    font-size: 0;
+    animation: celebrationPop 0.6s ease-out;
+}
+
+.celebration-burst::after {
+    content: '✨';
+    animation-delay: 0.2s;
+}
+
+@keyframes celebrationPop {
+    0% {
+        font-size: 0;
+        transform: translate(-50%, -50%) rotate(0deg) scale(0);
+        opacity: 1;
+    }
+    50% {
+        font-size: 24px;
+        transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        font-size: 32px;
+        transform: translate(-50%, -50%) rotate(360deg) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ===== SUCCESS FEEDBACK ANIMATIONS ===== */
+.success-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(76, 175, 80, 0.4) 0%, transparent 70%);
+    animation: successWave 0.8s ease-out;
+    pointer-events: none;
+}
+
+@keyframes successWave {
+    from {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    to {
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+    }
+}
+
+/* ===== HEARTBEAT FOR CRITICAL ITEMS ===== */
+.incident-severity.kritisch::before {
+    content: '💔';
+    position: absolute;
+    left: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% { 
+        transform: translateY(-50%) scale(1);
+        opacity: 0.7;
+    }
+    50% { 
+        transform: translateY(-50%) scale(1.3);
+        opacity: 1;
+    }
+}
+
+/* ===== MOTIVATIONAL HOVER MESSAGES ===== */
+.action-header .btn-primary::after {
+    content: attr(data-motivation);
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.action-header .btn-primary:hover::after {
+    opacity: 1;
+    animation: motivationBounce 0.5s ease-out;
+}
+
+@keyframes motivationBounce {
+    0% { transform: translateX(-50%) translateY(10px) scale(0.8); }
+    70% { transform: translateX(-50%) translateY(0) scale(1.1); }
+    100% { transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* ===== PROGRESS CELEBRATION ===== */
+.stat-card div span.milestone {
+    position: relative;
+}
+
+.stat-card div span.milestone::after {
+    content: '🏆';
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    font-size: 20px;
+    animation: trophyShine 2s ease-in-out infinite;
+}
+
+@keyframes trophyShine {
+    0%, 100% { 
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 5px gold);
+    }
+    50% { 
+        transform: rotate(-10deg) scale(1.1);
+        filter: drop-shadow(0 0 15px gold);
+    }
+}
+
+/* ===== EMOTION-DRIVEN CARD INTERACTIONS ===== */
+.incident-card.compact.positive-vibe {
+    border-left: 4px solid #4caf50;
+}
+
+.incident-card.compact.positive-vibe::before {
+    content: '🌟';
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    font-size: 16px;
+    animation: starTwinkle 2s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ===== ENCOURAGING EMPTY STATES ===== */
+.no-data-message.encouraging {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border-radius: 20px;
+    padding: 40px;
+    margin: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.no-data-message.encouraging::before {
+    content: '🚀';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    animation: rocketFloat 3s ease-in-out infinite;
+}
+
+@keyframes rocketFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.no-data-message.encouraging h3::after {
+    content: ' 💪';
+    animation: flex 2s ease-in-out infinite;
+}
+
+@keyframes flex {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ===== ACHIEVEMENT UNLOCKED STYLE ===== */
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transform: translateX(400px);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+
+.achievement-notification.show {
+    transform: translateX(0);
+    animation: achievementCelebration 3s ease-out;
+}
+
+@keyframes achievementCelebration {
+    0% { transform: translateX(400px) scale(0.8); }
+    10% { transform: translateX(0) scale(1.1); }
+    20% { transform: translateX(0) scale(1); }
+    90% { transform: translateX(0) scale(1); opacity: 1; }
+    100% { transform: translateX(400px) scale(0.8); opacity: 0; }
+}
+
+.achievement-notification::before {
+    content: '🏅';
+    font-size: 24px;
+    animation: medalSpin 1s ease-out;
+}
+
+@keyframes medalSpin {
+    from { transform: rotate(0deg) scale(0); }
+    to { transform: rotate(360deg) scale(1); }
+}
+
+/* ===== ENGAGEMENT PARTICLES ===== */
+.particle-system {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #667eea 0%, transparent 70%);
+    border-radius: 50%;
+    animation: particleFloat 4s linear infinite;
+}
+
+.particle:nth-child(odd) {
+    background: radial-gradient(circle, #764ba2 0%, transparent 70%);
+    animation-duration: 6s;
+}
+
+.particle:nth-child(3n) {
+    background: radial-gradient(circle, #f093fb 0%, transparent 70%);
+    animation-duration: 5s;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translateY(100vh) translateX(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-10px) translateX(100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* ===== EMOTIONAL COLOR PSYCHOLOGY ===== */
+.mood-boost {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    transition: all 0.3s ease;
+}
+
+.mood-boost:hover {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    transform: scale(1.02);
+}
+
+.confidence-builder {
+    background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+}
+
+.energy-booster {
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+}
+
+/* ===== SURPRISE DELIGHT ELEMENTS ===== */
+.surprise-element {
+    position: relative;
+}
+
+.surprise-element::after {
+    content: '🎁';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0;
+    transition: font-size 0.3s ease;
+}
+
+.surprise-element:hover::after {
+    font-size: 16px;
+    animation: giftBounce 0.6s ease-out;
+}
+
+@keyframes giftBounce {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.2) rotate(-10deg); }
+    75% { transform: scale(1.1) rotate(10deg); }
+}
+
+/* ===== INSPIRATIONAL QUOTES ON HOVER ===== */
+.inspirational-container {
+    position: relative;
+}
+
+.inspirational-container::before {
+    content: attr(data-inspiration);
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-style: italic;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+}
+
+.inspirational-container:hover::before {
+    opacity: 1;
+    animation: inspirationFadeIn 0.5s ease-out;
+}
+
+@keyframes inspirationFadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ===== GAMIFICATION ELEMENTS ===== */
+.progress-ring {
+    position: relative;
+    display: inline-block;
+}
+
+.progress-ring::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: 2px solid transparent;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: progressSpin 2s linear infinite;
+}
+
+@keyframes progressSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ===== MOOD-RESPONSIVE INTERACTIONS ===== */
+.happy-interaction {
+    transition: all 0.3s ease;
+}
+
+.happy-interaction:hover {
+    animation: happyBounce 0.6s ease-out;
+}
+
+@keyframes happyBounce {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.05) rotate(1deg); }
+    50% { transform: scale(1.1) rotate(-1deg); }
+    75% { transform: scale(1.05) rotate(1deg); }
+}
+
+/* ===== CELEBRATION CONFETTI ===== */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #667eea;
+    animation: confettiFall 3s linear infinite;
+}
+
+.confetti:nth-child(odd) { background: #764ba2; }
+.confetti:nth-child(3n) { background: #f093fb; }
+.confetti:nth-child(4n) { background: #fa709a; }
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* ===== EMOTIONAL TYPOGRAPHY ===== */
+.emotional-heading {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: emotionalShimmer 4s ease-in-out infinite;
+    font-weight: 800;
+    position: relative;
+}
+
+.emotional-heading::after {
+    content: '💖';
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: heartPulse 2s ease-in-out infinite;
+}
+
+@keyframes emotionalShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes heartPulse {
+    0%, 100% { transform: translateY(-50%) scale(1); }
+    50% { transform: translateY(-50%) scale(1.2); }
+}

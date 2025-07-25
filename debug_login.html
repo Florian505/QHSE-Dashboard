@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>QHSE Login System Debug</h1>
+    <div id="debugResults"></div>
+    
+    <script>
+        const debugResults = document.getElementById('debugResults');
+        
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            debugResults.appendChild(div);
+        }
+        
+        // Test 1: Prüfe ob alle Dateien geladen werden
+        addResult('🔍 Teste Login-System Komponenten...', 'warning');
+        
+        // Test Login-Styles
+        const loginStylesLink = document.createElement('link');
+        loginStylesLink.rel = 'stylesheet';
+        loginStylesLink.href = 'login-styles.css';
+        loginStylesLink.onload = () => addResult('✅ login-styles.css erfolgreich geladen', 'success');
+        loginStylesLink.onerror = () => addResult('❌ login-styles.css konnte nicht geladen werden', 'error');
+        document.head.appendChild(loginStylesLink);
+        
+        // Test Login-Security Script
+        const securityScript = document.createElement('script');
+        securityScript.src = 'login-security.js';
+        securityScript.onload = () => {
+            addResult('✅ login-security.js erfolgreich geladen', 'success');
+            
+            // Test ob QHSELoginSecurity verfügbar ist
+            setTimeout(() => {
+                if (window.QHSELoginSecurity) {
+                    addResult('✅ QHSELoginSecurity Klasse verfügbar', 'success');
+                    if (window.qhseSecurity) {
+                        addResult('✅ qhseSecurity Instanz verfügbar', 'success');
+                    } else {
+                        addResult('❌ qhseSecurity Instanz nicht verfügbar', 'error');
+                    }
+                } else {
+                    addResult('❌ QHSELoginSecurity Klasse nicht verfügbar', 'error');
+                }
+            }, 100);
+        };
+        securityScript.onerror = () => addResult('❌ login-security.js konnte nicht geladen werden', 'error');
+        document.body.appendChild(securityScript);
+        
+        // Test Login-App Script
+        const appScript = document.createElement('script');
+        appScript.src = 'login-app.js';
+        appScript.onload = () => {
+            addResult('✅ login-app.js erfolgreich geladen', 'success');
+            
+            setTimeout(() => {
+                if (window.QHSELoginApp) {
+                    addResult('✅ QHSELoginApp Klasse verfügbar', 'success');
+                    if (window.qhseLoginApp) {
+                        addResult('✅ qhseLoginApp Instanz verfügbar', 'success');
+                    } else {
+                        addResult('❌ qhseLoginApp Instanz nicht verfügbar', 'error');
+                    }
+                } else {
+                    addResult('❌ QHSELoginApp Klasse nicht verfügbar', 'error');
+                }
+            }, 100);
+        };
+        appScript.onerror = () => addResult('❌ login-app.js konnte nicht geladen werden', 'error');
+        document.body.appendChild(appScript);
+        
+        // Test QHSE Script
+        const qhseScript = document.createElement('script');
+        qhseScript.src = 'script.js';
+        qhseScript.onload = () => {
+            addResult('✅ script.js erfolgreich geladen', 'success');
+            
+            setTimeout(() => {
+                if (window.QHSEDashboard) {
+                    addResult('✅ QHSEDashboard Klasse verfügbar', 'success');
+                } else {
+                    addResult('❌ QHSEDashboard Klasse nicht verfügbar', 'error');
+                }
+            }, 100);
+        };
+        qhseScript.onerror = () => addResult('❌ script.js konnte nicht geladen werden', 'error');
+        document.body.appendChild(qhseScript);
+        
+        // Test LocalStorage
+        try {
+            localStorage.setItem('test', 'test');
+            localStorage.removeItem('test');
+            addResult('✅ LocalStorage funktioniert', 'success');
+        } catch (e) {
+            addResult('❌ LocalStorage nicht verfügbar: ' + e.message, 'error');
+        }
+        
+        // Test Crypto API
+        if (window.crypto && window.crypto.subtle) {
+            addResult('✅ Crypto API verfügbar', 'success');
+        } else {
+            addResult('❌ Crypto API nicht verfügbar (HTTPS erforderlich)', 'error');
+        }
+        
+        // Test ob Login-Overlay existiert
+        setTimeout(() => {
+            const loginOverlay = document.getElementById('loginOverlay');
+            if (loginOverlay) {
+                addResult('✅ Login-Overlay Element gefunden', 'success');
+            } else {
+                addResult('❌ Login-Overlay Element nicht gefunden', 'error');
+            }
+            
+            // Test Session Check
+            try {
+                const sessionInfo = JSON.parse(localStorage.getItem('qhse_session_info') || '{}');
+                addResult('ℹ️ Session Info: ' + JSON.stringify(sessionInfo), 'warning');
+            } catch (e) {
+                addResult('ℹ️ Keine Session-Info verfügbar', 'warning');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

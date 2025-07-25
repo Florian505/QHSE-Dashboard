@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-ancestors 'none';">
+    <title>QHSE - Sicherer Zugang</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="login-styles.css">
+</head>
+<body>
+    <!-- Login Container -->
+    <div class="login-container">
+        <!-- Security Background -->
+        <div class="security-background">
+            <div class="security-pattern"></div>
+        </div>
+
+        <!-- Login Card -->
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h1>QHSE Management System</h1>
+                <p class="login-subtitle">Sicherer Zugang für Qualität, Gesundheit, Sicherheit & Umwelt</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="login-form" novalidate>
+                <!-- Firmenname Field -->
+                <div class="form-group">
+                    <label for="companyName" class="form-label">
+                        <i class="fas fa-building"></i>
+                        Firmenname
+                    </label>
+                    <input 
+                        type="text" 
+                        id="companyName" 
+                        name="companyName"
+                        class="form-input"
+                        placeholder="Ihr Firmenname eingeben"
+                        required
+                        autocomplete="organization"
+                        aria-describedby="companyNameError"
+                        maxlength="100"
+                    >
+                    <div id="companyNameError" class="error-message" role="alert" aria-live="polite"></div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock"></i>
+                        Passwort
+                    </label>
+                    <div class="password-input-container">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            class="form-input"
+                            placeholder="Sicheres Passwort eingeben"
+                            required
+                            autocomplete="current-password"
+                            aria-describedby="passwordError"
+                            minlength="8"
+                            maxlength="128"
+                        >
+                        <button 
+                            type="button" 
+                            class="password-toggle"
+                            id="passwordToggle"
+                            aria-label="Passwort anzeigen/verbergen"
+                            tabindex="-1"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div id="passwordError" class="error-message" role="alert" aria-live="polite"></div>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            id="rememberMe" 
+                            name="rememberMe"
+                            class="checkbox-input"
+                        >
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-text">Anmeldung merken (30 Tage)</span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="login-button" id="loginButton">
+                    <span class="button-text">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sicher anmelden
+                    </span>
+                    <div class="button-loader" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Authentifizierung...
+                    </div>
+                </button>
+
+                <!-- General Error Message -->
+                <div id="generalError" class="error-message general-error" role="alert" aria-live="assertive"></div>
+            </form>
+
+            <!-- Security Info -->
+            <div class="security-info">
+                <div class="security-features">
+                    <div class="security-feature">
+                        <i class="fas fa-shield-check"></i>
+                        <span>256-Bit Verschlüsselung</span>
+                    </div>
+                    <div class="security-feature">
+                        <i class="fas fa-user-shield"></i>
+                        <span>TÜV-konforme Sicherheit</span>
+                    </div>
+                    <div class="security-feature">
+                        <i class="fas fa-clock"></i>
+                        <span>Sichere Session-Verwaltung</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="login-footer">
+                <p class="footer-text">
+                    © 2024 QHSE GFT. Alle Rechte vorbehalten.
+                    <br>
+                    <small>Bei Problemen wenden Sie sich an Ihren System-Administrator.</small>
+                </p>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner">
+                <i class="fas fa-cog fa-spin"></i>
+                <p>Sicherheitsprüfung läuft...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="login-security.js"></script>
+    <script src="login-app.js"></script>
+</body>
+</html>

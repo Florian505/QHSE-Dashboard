@@ -24,7 +24,12 @@
       "Bash(git checkout:*)",
       "WebFetch(domain:localhost)",
       "Bash(curl:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(for:*)",
+      "Bash(do if ! grep -q \"href=.*\\.css\\|src=.*\\.js\" \"$file\")",
+      "Bash(then ls -la \"$file\")",
+      "Bash(fi)",
+      "Bash(done)"
     ],
     "deny": []
   }

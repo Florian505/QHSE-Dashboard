@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Management System</title>
+    <link rel="stylesheet" href="styles.css?v=2024070504">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    
+    <style>
+        /* NO CONFLICT LOGIN SYSTEM */
+        .no-conflict-login {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 9999999 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        .no-conflict-card {
+            background: white !important;
+            border-radius: 20px !important;
+            padding: 40px !important;
+            width: 90% !important;
+            max-width: 400px !important;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3) !important;
+            text-align: center !important;
+        }
+        
+        .no-conflict-logo {
+            width: 70px !important;
+            height: 70px !important;
+            background: #3b82f6 !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 auto 20px !important;
+            color: white !important;
+            font-size: 28px !important;
+        }
+        
+        .no-conflict-title {
+            font-size: 24px !important;
+            font-weight: 700 !important;
+            color: #1e293b !important;
+            margin-bottom: 30px !important;
+        }
+        
+        .no-conflict-group {
+            margin-bottom: 20px !important;
+            text-align: left !important;
+        }
+        
+        .no-conflict-label {
+            display: block !important;
+            font-weight: 600 !important;
+            color: #374151 !important;
+            margin-bottom: 8px !important;
+            font-size: 14px !important;
+        }
+        
+        .no-conflict-input {
+            width: 100% !important;
+            padding: 14px 16px !important;
+            border: 2px solid #e5e7eb !important;
+            border-radius: 10px !important;
+            font-size: 16px !important;
+            box-sizing: border-box !important;
+        }
+        
+        .no-conflict-input:focus {
+            outline: none !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        .no-conflict-btn {
+            width: 100% !important;
+            padding: 14px !important;
+            background: #3b82f6 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 10px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+        }
+        
+        .no-conflict-btn:hover {
+            background: #2563eb !important;
+        }
+        
+        .no-conflict-demo {
+            margin-top: 25px !important;
+            padding: 15px !important;
+            background: #f8fafc !important;
+            border-radius: 8px !important;
+            font-size: 13px !important;
+            text-align: left !important;
+        }
+        
+        .no-conflict-item {
+            margin: 5px 0 !important;
+            color: #475569 !important;
+        }
+        
+        .no-conflict-msg {
+            margin-top: 15px !important;
+            padding: 10px !important;
+            border-radius: 6px !important;
+            font-size: 14px !important;
+            display: none !important;
+        }
+        
+        .no-conflict-msg.error {
+            background: #fee2e2 !important;
+            color: #dc2626 !important;
+        }
+        
+        .no-conflict-msg.success {
+            background: #dcfce7 !important;
+            color: #16a34a !important;
+        }
+        
+        .no-conflict-msg.show {
+            display: block !important;
+        }
+        
+        .app-container {
+            display: none !important;
+        }
+        
+        .app-container.ready {
+            display: flex !important;
+        }
+        
+        body.needs-login {
+            overflow: hidden !important;
+        }
+        
+        /* User actions styling */
+        .user-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+        }
+        
+        .edit-profile-btn,
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: color 0.2s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+        
+        .edit-profile-btn:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .logout-btn:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+    </style>
+</head>
+<body class="needs-login">
+    <!-- NO CONFLICT LOGIN -->
+    <div id="noConflictLogin" class="no-conflict-login">
+        <div class="no-conflict-card">
+            <div class="no-conflict-logo">
+                <i class="fas fa-industry"></i>
+            </div>
+            
+            <h1 class="no-conflict-title">QHSE Management System</h1>
+            
+            <form id="noConflictForm">
+                <div class="no-conflict-group">
+                    <label class="no-conflict-label">Firmenname</label>
+                    <input type="text" id="noConflictCompany" class="no-conflict-input" placeholder="Firmenname" required>
+                </div>
+                
+                <div class="no-conflict-group">
+                    <label class="no-conflict-label">Passwort</label>
+                    <input type="password" id="noConflictPassword" class="no-conflict-input" placeholder="Passwort" required>
+                </div>
+                
+                <button type="submit" id="noConflictBtn" class="no-conflict-btn">
+                    <i class="fas fa-sign-in-alt"></i> Anmelden
+                </button>
+                
+                <div id="noConflictMsg" class="no-conflict-msg"></div>
+            </form>
+            
+            <div class="no-conflict-demo">
+                <strong>Demo-Zugangsdaten:</strong><br>
+                <div class="no-conflict-item"><strong>Admin:</strong> QHSE GFT / SecureQHSE2024!</div>
+                <div class="no-conflict-item"><strong>Demo:</strong> Demo Company / Demo123!</div>
+                <div class="no-conflict-item"><strong>H&V:</strong> Hoffmann & Voss GmbH / HoffmannVoss2024!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
+    <!-- MAIN APPLICATION -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="company-logo">
+                    <i class="fas fa-industry"></i>
+                    <div class="company-info">
+                        <div class="company-name-container">
+                            <h2 id="companyName" class="editable-company-name" title="Klicken zum Bearbeiten">QHSE GFT</h2>
+                            <button class="edit-company-btn" id="editCompanyBtn" title="Firmennamen bearbeiten">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <p>QHSE Management</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Max Mustermann</span>
+                        <span class="user-role" id="userRole">Geschäftsführung</span>
+                        <div class="user-actions">
+                            <button class="edit-profile-btn" id="editProfileBtn" title="Profil bearbeiten">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="logout-btn" onclick="noConflictLogout()" title="Sicher abmelden">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Rest populated by script.js -->
+        </nav>
+        
+        <main class="main-content">
+            <!-- Content populated by script.js -->
+        </main>
+    </div>
+
+    <!-- NO CONFLICT LOGIN SCRIPT -->
+    <script>
+        console.log('🔐 NO CONFLICT Login System startet...');
+        
+        // COMPLETELY BLOCK ANY AUTOMATIC SCRIPT LOADING
+        window.addEventListener('beforeunload', function() {
+            // Clear any cached scripts
+            const scripts = document.querySelectorAll('script[src*="script.js"]');
+            scripts.forEach(script => script.remove());
+        });
+        
+        // Login data
+        const NO_CONFLICT_CREDS = {
+            'QHSE GFT': { password: 'SecureQHSE2024!', userId: 'root-admin' },
+            'Demo Company': { password: 'Demo123!', userId: 'demo-user' },
+            'Hoffmann & Voss GmbH': { password: 'HoffmannVoss2024!', userId: 'root-admin' }
+        };
+        
+        // State
+        let noConflictState = {
+            loggedIn: false,
+            user: null,
+            scriptLoaded: false
+        };
+        
+        // Elements
+        const ncLogin = document.getElementById('noConflictLogin');
+        const ncForm = document.getElementById('noConflictForm');
+        const ncCompany = document.getElementById('noConflictCompany');
+        const ncPassword = document.getElementById('noConflictPassword');
+        const ncBtn = document.getElementById('noConflictBtn');
+        const ncMsg = document.getElementById('noConflictMsg');
+        const ncApp = document.querySelector('.app-container');
+        
+        // Show message
+        function ncShowMsg(text, type = 'error') {
+            ncMsg.textContent = text;
+            ncMsg.className = `no-conflict-msg ${type} show`;
+        }
+        
+        // Clear message
+        function ncClearMsg() {
+            ncMsg.classList.remove('show');
+        }
+        
+        // Handle form
+        ncForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const company = ncCompany.value.trim();
+            const password = ncPassword.value;
+            
+            ncClearMsg();
+            ncBtn.disabled = true;
+            
+            if (!company || !password) {
+                ncShowMsg('Bitte alle Felder ausfüllen.');
+                ncBtn.disabled = false;
+                return;
+            }
+            
+            const creds = NO_CONFLICT_CREDS[company];
+            if (!creds || creds.password !== password) {
+                ncShowMsg('Ungültige Anmeldedaten.');
+                ncBtn.disabled = false;
+                return;
+            }
+            
+            ncShowMsg('Anmeldung erfolgreich! Lade System...', 'success');
+            
+            // Store session
+            localStorage.setItem('qhse_current_user', creds.userId);
+            localStorage.setItem('no_conflict_session', JSON.stringify({
+                company: company,
+                userId: creds.userId,
+                loginTime: Date.now(),
+                expiresAt: Date.now() + (60 * 60 * 1000)
+            }));
+            
+            noConflictState.loggedIn = true;
+            noConflictState.user = { company, userId: creds.userId };
+            
+            setTimeout(ncShowApp, 2000);
+        });
+        
+        // Show app
+        function ncShowApp() {
+            console.log('🚀 Zeige App');
+            
+            ncLogin.style.display = 'none';
+            ncApp.classList.add('ready');
+            document.body.classList.remove('needs-login');
+            
+            // Load QHSE system with unique timestamp
+            setTimeout(ncLoadSystem, 500);
+        }
+        
+        // Load system
+        function ncLoadSystem() {
+            console.log('📊 Lade QHSE System...');
+            
+            // Remove any existing script
+            const existingScripts = document.querySelectorAll('script[src*="script.js"]');
+            existingScripts.forEach(script => script.remove());
+            
+            // Clear any global references
+            if (window.qhseDashboard) {
+                window.qhseDashboard = null;
+                delete window.qhseDashboard;
+            }
+            
+            // Force browser to reload script
+            const timestamp = Date.now() + Math.random();
+            const script = document.createElement('script');
+            script.src = `script.js?nc=${timestamp}`;
+            script.type = 'text/javascript';
+            
+            script.onload = function() {
+                console.log('📁 Script geladen');
+                setTimeout(ncInitDashboard, 1000);
+            };
+            
+            script.onerror = function() {
+                console.error('❌ Script Fehler');
+                ncShowMsg('System konnte nicht geladen werden.');
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // Initialize dashboard
+        function ncInitDashboard() {
+            console.log('🎯 Dashboard Init...');
+            
+            try {
+                if (typeof QHSEDashboard !== 'undefined') {
+                    console.log('✅ QHSEDashboard verfügbar');
+                    
+                    // Clear any existing instance
+                    window.qhseDashboard = null;
+                    
+                    // Create new instance
+                    window.qhseDashboard = new QHSEDashboard();
+                    noConflictState.scriptLoaded = true;
+                    
+                    console.log('🎉 Dashboard erfolgreich initialisiert');
+                    
+                    // Show success
+                    if (window.qhseDashboard.showNotification) {
+                        window.qhseDashboard.showNotification(
+                            `Willkommen ${noConflictState.user.company}!`, 
+                            'success'
+                        );
+                    }
+                    
+                } else {
+                    console.error('❌ QHSEDashboard nicht verfügbar');
+                    throw new Error('QHSEDashboard not available');
+                }
+                
+            } catch (error) {
+                console.error('❌ Dashboard Init Fehler:', error);
+                
+                // Force reload as last resort
+                if (confirm('Dashboard konnte nicht geladen werden. Seite neu laden?')) {
+                    location.reload();
+                }
+            }
+        }
+        
+        // Show login
+        function ncShowLogin() {
+            console.log('🔐 Zeige Login');
+            
+            ncLogin.style.display = 'flex';
+            ncApp.classList.remove('ready');
+            document.body.classList.add('needs-login');
+            
+            ncForm.reset();
+            ncClearMsg();
+            ncBtn.disabled = false;
+            
+            noConflictState.loggedIn = false;
+            noConflictState.user = null;
+            noConflictState.scriptLoaded = false;
+            
+            // Clean up
+            window.qhseDashboard = null;
+        }
+        
+        // Global logout
+        window.noConflictLogout = function() {
+            if (confirm('Wirklich abmelden?')) {
+                console.log('👋 Logout');
+                
+                localStorage.removeItem('qhse_current_user');
+                localStorage.removeItem('no_conflict_session');
+                
+                // Force reload to ensure clean state
+                location.reload();
+            }
+        };
+        
+        // Check session
+        function ncCheckSession() {
+            try {
+                const sessionData = localStorage.getItem('no_conflict_session');
+                if (sessionData) {
+                    const session = JSON.parse(sessionData);
+                    
+                    if (session.expiresAt && session.expiresAt > Date.now()) {
+                        console.log('🔄 Session OK:', session.company);
+                        
+                        localStorage.setItem('qhse_current_user', session.userId);
+                        noConflictState.loggedIn = true;
+                        noConflictState.user = session;
+                        
+                        ncShowApp();
+                        return true;
+                    } else {
+                        localStorage.removeItem('no_conflict_session');
+                        localStorage.removeItem('qhse_current_user');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Session Check:', error);
+            }
+            
+            return false;
+        }
+        
+        // Init
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏁 System startet...');
+            
+            if (!ncCheckSession()) {
+                ncShowLogin();
+            }
+            
+            console.log('✅ Login bereit');
+        });
+        
+        console.log('🔐 NO CONFLICT System geladen');
+    </script>
+</body>
+</html>

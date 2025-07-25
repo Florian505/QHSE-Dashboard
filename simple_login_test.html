@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE - Simple Login Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .submit-button:hover {
+            background: #2563eb;
+        }
+        
+        .demo-credentials {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .demo-account {
+            margin: 5px 0;
+        }
+        
+        .hidden { display: none !important; }
+        
+        .main-app {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            margin: 20px;
+        }
+        
+        .success-message {
+            color: #059669;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="fas fa-industry"></i>
+            </div>
+            <h1>QHSE Management System</h1>
+            <p>Sichere Anmeldung</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-building"></i> Firmenname
+                </label>
+                <input type="text" id="companyName" class="form-input" placeholder="Firmenname eingeben" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-lock"></i> Passwort
+                </label>
+                <input type="password" id="password" class="form-input" placeholder="Passwort eingeben" required>
+            </div>
+            
+            <button type="submit" class="submit-button">
+                <i class="fas fa-sign-in-alt"></i> Anmelden
+            </button>
+        </form>
+        
+        <div class="demo-credentials">
+            <h4><i class="fas fa-info-circle"></i> Demo-Zugangsdaten</h4>
+            <div class="demo-account"><strong>Admin:</strong> QHSE GFT / SecureQHSE2024!</div>
+            <div class="demo-account"><strong>Demo:</strong> Demo Company / Demo123!</div>
+            <div class="demo-account"><strong>Hoffmann & Voss:</strong> Hoffmann & Voss GmbH / HoffmannVoss2024!</div>
+        </div>
+        
+        <div id="loginError" class="success-message" style="color: #dc2626; display: none;"></div>
+        <div id="loginSuccess" class="success-message" style="display: none;"></div>
+    </div>
+    
+    <!-- Main Application (Your QHSE System) -->
+    <div id="mainApp" class="main-app">
+        <button onclick="logout()" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Abmelden
+        </button>
+        <h2>🎉 Erfolgreich angemeldet!</h2>
+        <p>Willkommen im QHSE Management System.</p>
+        <p><strong>Angemeldet als:</strong> <span id="loggedInUser"></span></p>
+        
+        <!-- Hier würde Ihr vollständiges QHSE-Dashboard eingefügt -->
+        <div style="margin-top: 30px; padding: 20px; background: #f1f5f9; border-radius: 8px;">
+            <h3>🏭 QHSE Dashboard</h3>
+            <p>Hier würde Ihr vollständiges QHSE Management System angezeigt werden.</p>
+            <p>Das Login-System ist jetzt aktiv und funktioniert!</p>
+        </div>
+    </div>
+    
+    <script>
+        // Einfaches Login-System ohne komplexe Verschlüsselung
+        const validCredentials = {
+            'QHSE GFT': 'SecureQHSE2024!',
+            'Demo Company': 'Demo123!',
+            'Hoffmann & Voss GmbH': 'HoffmannVoss2024!'
+        };
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const companyName = document.getElementById('companyName').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            const successDiv = document.getElementById('loginSuccess');
+            
+            // Reset messages
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            // Validate credentials
+            if (validCredentials[companyName] && validCredentials[companyName] === password) {
+                // Success
+                successDiv.textContent = 'Anmeldung erfolgreich! Weiterleitung...';
+                successDiv.style.display = 'block';
+                
+                // Store session
+                localStorage.setItem('qhse_session', JSON.stringify({
+                    companyName: companyName,
+                    loginTime: Date.now(),
+                    expiresAt: Date.now() + (60 * 60 * 1000) // 1 hour
+                }));
+                
+                // Show main app after 1 second
+                setTimeout(() => {
+                    showMainApp(companyName);
+                }, 1000);
+                
+            } else {
+                // Error
+                errorDiv.textContent = 'Ungültige Anmeldedaten. Bitte prüfen Sie Firmenname und Passwort.';
+                errorDiv.style.display = 'block';
+            }
+        });
+        
+        function showMainApp(companyName) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('loggedInUser').textContent = companyName;
+            document.body.style.background = '#f8fafc';
+        }
+        
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            document.getElementById('companyName').value = '';
+            document.getElementById('password').value = '';
+        }
+        
+        function logout() {
+            if (confirm('Möchten Sie sich wirklich abmelden?')) {
+                localStorage.removeItem('qhse_session');
+                showLoginScreen();
+            }
+        }
+        
+        // Check for existing session on page load
+        function checkSession() {
+            try {
+                const session = JSON.parse(localStorage.getItem('qhse_session') || '{}');
+                if (session.companyName && session.expiresAt > Date.now()) {
+                    showMainApp(session.companyName);
+                    return true;
+                }
+            } catch (e) {
+                console.log('No valid session found');
+            }
+            return false;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkSession()) {
+                showLoginScreen();
+            }
+            
+            // Auto-logout on session expiry
+            setInterval(checkSession, 60000); // Check every minute
+        });
+        
+        console.log('🚀 Simple QHSE Login System loaded successfully');
+    </script>
+</body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Management System</title>
+    <link rel="stylesheet" href="styles.css?v=2024070506">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* LOGIN SYSTEM */
+        #loginOverlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 999999 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        .login-card {
+            background: white !important;
+            border-radius: 20px !important;
+            padding: 40px !important;
+            width: 90% !important;
+            max-width: 400px !important;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3) !important;
+            text-align: center !important;
+        }
+        
+        .login-logo {
+            width: 70px !important;
+            height: 70px !important;
+            background: #3b82f6 !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 auto 20px !important;
+            color: white !important;
+            font-size: 28px !important;
+        }
+        
+        .login-title { font-size: 24px !important; font-weight: 700 !important; color: #1e293b !important; margin-bottom: 30px !important; }
+        .login-group { margin-bottom: 20px !important; text-align: left !important; }
+        .login-label { display: block !important; font-weight: 600 !important; color: #374151 !important; margin-bottom: 8px !important; font-size: 14px !important; }
+        .login-input { 
+            width: 100% !important; padding: 14px 16px !important; border: 2px solid #e5e7eb !important; border-radius: 10px !important; 
+            font-size: 16px !important; box-sizing: border-box !important; 
+        }
+        .login-input:focus { outline: none !important; border-color: #3b82f6 !important; }
+        .login-btn { 
+            width: 100% !important; padding: 14px !important; background: #3b82f6 !important; color: white !important; border: none !important; 
+            border-radius: 10px !important; font-size: 16px !important; font-weight: 600 !important; cursor: pointer !important; 
+        }
+        .login-btn:hover { background: #2563eb !important; }
+        .login-demo { 
+            margin-top: 25px !important; padding: 15px !important; background: #f8fafc !important; border-radius: 8px !important; 
+            font-size: 13px !important; text-align: left !important; 
+        }
+        .login-demo-item { margin: 5px 0 !important; color: #475569 !important; }
+        .login-msg { 
+            margin-top: 15px !important; padding: 10px !important; border-radius: 6px !important; font-size: 14px !important; display: none !important; 
+        }
+        .login-msg.error { background: #fee2e2 !important; color: #dc2626 !important; }
+        .login-msg.success { background: #dcfce7 !important; color: #16a34a !important; }
+        .login-msg.show { display: block !important; }
+        
+        .app-container { display: none !important; }
+        .app-container.loaded { display: flex !important; }
+        body.login-active { overflow: hidden !important; }
+        
+        /* User actions */
+        .user-actions { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+        .edit-profile-btn, .logout-btn {
+            background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0.25rem;
+            border-radius: 0.25rem; transition: color 0.2s, background-color 0.2s; display: flex;
+            align-items: center; justify-content: center; font-size: 0.85rem;
+        }
+        .edit-profile-btn:hover { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .logout-btn:hover { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+    </style>
+</head>
+<body class="login-active">
+    <!-- LOGIN OVERLAY -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <div class="login-logo"><i class="fas fa-industry"></i></div>
+            <h1 class="login-title">QHSE Management System</h1>
+            
+            <form id="loginForm">
+                <div class="login-group">
+                    <label class="login-label">Firmenname</label>
+                    <input type="text" id="companyInput" class="login-input" placeholder="Firmenname" required>
+                </div>
+                <div class="login-group">
+                    <label class="login-label">Passwort</label>
+                    <input type="password" id="passwordInput" class="login-input" placeholder="Passwort" required>
+                </div>
+                <button type="submit" id="loginBtn" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Anmelden
+                </button>
+                <div id="loginMsg" class="login-msg"></div>
+            </form>
+            
+            <div class="login-demo">
+                <strong>Demo-Zugangsdaten:</strong><br>
+                <div class="login-demo-item"><strong>Admin:</strong> QHSE GFT / SecureQHSE2024!</div>
+                <div class="login-demo-item"><strong>Demo:</strong> Demo Company / Demo123!</div>
+                <div class="login-demo-item"><strong>H&V:</strong> Hoffmann & Voss GmbH / HoffmannVoss2024!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
+    <!-- MAIN APPLICATION -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="company-logo">
+                    <i class="fas fa-industry"></i>
+                    <div class="company-info">
+                        <div class="company-name-container">
+                            <h2 id="companyName" class="editable-company-name">QHSE GFT</h2>
+                            <button class="edit-company-btn" id="editCompanyBtn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <p>QHSE Management</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Max Mustermann</span>
+                        <span class="user-role" id="userRole">Geschäftsführung</span>
+                        <div class="user-actions">
+                            <button class="edit-profile-btn" id="editProfileBtn">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="logout-btn" onclick="performLogout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <div class="nav-menu">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-section="arbeitsschutz">
+                    <i class="fas fa-hard-hat"></i>
+                    <span>Arbeitsschutz</span>
+                </a>
+                <a href="#" class="nav-link" data-section="qualitaet">
+                    <i class="fas fa-award"></i>
+                    <span>Qualität</span>
+                </a>
+                <a href="#" class="nav-link" data-section="umwelt">
+                    <i class="fas fa-leaf"></i>
+                    <span>Umwelt</span>
+                </a>
+                <a href="#" class="nav-link" data-section="datenschutz">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Datenschutz</span>
+                </a>
+                <a href="#" class="nav-link" data-section="gesundheit">
+                    <i class="fas fa-heart"></i>
+                    <span>Gesundheit</span>
+                </a>
+                <a href="#" class="nav-link" data-section="benutzer">
+                    <i class="fas fa-users"></i>
+                    <span>Benutzer</span>
+                </a>
+                <a href="#" class="nav-link" data-section="bereiche">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Bereiche</span>
+                </a>
+                <a href="#" class="nav-link" data-section="abteilungen">
+                    <i class="fas fa-sitemap"></i>
+                    <span>Abteilungen</span>
+                </a>
+                <a href="#" class="nav-link" data-section="einstellungen">
+                    <i class="fas fa-cog"></i>
+                    <span>Einstellungen</span>
+                </a>
+            </div>
+        </nav>
+        
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+                <div class="page-header">
+                    <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+                    <p>Willkommen im QHSE Management System</p>
+                </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="stat-content">
+                            <h3 id="documentsCount">0</h3>
+                            <p>Dokumente</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-content">
+                            <h3 id="usersCount">0</h3>
+                            <p>Benutzer</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                        <div class="stat-content">
+                            <h3 id="tasksCount">0</h3>
+                            <p>Aufgaben</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-content">
+                            <h3>98%</h3>
+                            <p>Compliance</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-widget">
+                        <h3>Neueste Dokumente</h3>
+                        <div id="recentDocuments">
+                            <p>Lade Dokumente...</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-widget">
+                        <h3>Aktuelle Aufgaben</h3>
+                        <div id="currentTasks">
+                            <p>Lade Aufgaben...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other sections will be populated by script.js -->
+            <div id="arbeitsschutz" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-hard-hat"></i> Arbeitsschutz</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+            
+            <div id="qualitaet" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-award"></i> Qualität</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+            
+            <div id="umwelt" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-leaf"></i> Umwelt</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+            
+            <div id="datenschutz" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-shield-alt"></i> Datenschutz</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+            
+            <div id="gesundheit" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-heart"></i> Gesundheit</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+            
+            <div id="benutzer" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-users"></i> Benutzer</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+            
+            <div id="bereiche" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-layer-group"></i> Bereiche</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+            
+            <div id="abteilungen" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-sitemap"></i> Abteilungen</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+            
+            <div id="einstellungen" class="content-section">
+                <div class="page-header">
+                    <h1><i class="fas fa-cog"></i> Einstellungen</h1>
+                </div>
+                <div class="content-loading">Wird geladen...</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        console.log('🔐 Vollständiges QHSE Login System startet...');
+        
+        // Login-Daten
+        const LOGIN_CREDENTIALS = {
+            'QHSE GFT': { password: 'SecureQHSE2024!', userId: 'root-admin' },
+            'Demo Company': { password: 'Demo123!', userId: 'demo-user' },
+            'Hoffmann & Voss GmbH': { password: 'HoffmannVoss2024!', userId: 'root-admin' }
+        };
+        
+        // Globaler Zustand
+        let loginState = {
+            authenticated: false,
+            user: null,
+            dashboardLoaded: false
+        };
+        
+        // DOM-Elemente
+        const loginOverlay = document.getElementById('loginOverlay');
+        const loginForm = document.getElementById('loginForm');
+        const companyInput = document.getElementById('companyInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginMsg = document.getElementById('loginMsg');
+        const appContainer = document.querySelector('.app-container');
+        
+        // Nachricht anzeigen
+        function showLoginMessage(text, type = 'error') {
+            loginMsg.textContent = text;
+            loginMsg.className = `login-msg ${type} show`;
+        }
+        
+        // Nachricht löschen
+        function clearLoginMessage() {
+            loginMsg.classList.remove('show');
+        }
+        
+        // Login verarbeiten
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const company = companyInput.value.trim();
+            const password = passwordInput.value;
+            
+            clearLoginMessage();
+            loginBtn.disabled = true;
+            
+            if (!company || !password) {
+                showLoginMessage('Bitte alle Felder ausfüllen.');
+                loginBtn.disabled = false;
+                return;
+            }
+            
+            const creds = LOGIN_CREDENTIALS[company];
+            if (!creds || creds.password !== password) {
+                showLoginMessage('Ungültige Anmeldedaten.');
+                loginBtn.disabled = false;
+                return;
+            }
+            
+            showLoginMessage('✅ Anmeldung erfolgreich! Dashboard wird geladen...', 'success');
+            
+            // Session speichern
+            localStorage.setItem('qhse_current_user', creds.userId);
+            localStorage.setItem('qhse_session', JSON.stringify({
+                company: company,
+                userId: creds.userId,
+                loginTime: Date.now(),
+                expiresAt: Date.now() + (60 * 60 * 1000)
+            }));
+            
+            loginState.authenticated = true;
+            loginState.user = { company, userId: creds.userId };
+            
+            setTimeout(showMainApp, 2000);
+        });
+        
+        // Haupt-App anzeigen
+        function showMainApp() {
+            console.log('🚀 Zeige Haupt-App');
+            
+            loginOverlay.style.display = 'none';
+            appContainer.classList.add('loaded');
+            document.body.classList.remove('login-active');
+            
+            // Dashboard laden
+            setTimeout(loadQHSEDashboard, 500);
+        }
+        
+        // QHSE Dashboard laden
+        function loadQHSEDashboard() {
+            console.log('📊 Lade QHSE Dashboard...');
+            
+            try {
+                // Script.js dynamisch laden
+                const existingScripts = document.querySelectorAll('script[src*="script.js"]');
+                existingScripts.forEach(s => s.remove());
+                
+                const script = document.createElement('script');
+                script.src = `script.js?t=${Date.now()}`;
+                script.onload = function() {
+                    console.log('📁 Script.js geladen');
+                    
+                    setTimeout(() => {
+                        if (typeof QHSEDashboard !== 'undefined') {
+                            console.log('✅ QHSEDashboard verfügbar');
+                            
+                            // Dashboard initialisieren
+                            window.qhseDashboard = new QHSEDashboard();
+                            
+                            // UI vollständig aktualisieren
+                            setTimeout(() => {
+                                console.log('🔄 Aktualisiere komplettes UI...');
+                                
+                                // Benutzer-Info aktualisieren
+                                updateUserDisplay();
+                                
+                                // Dashboard-Statistiken aktualisieren
+                                updateDashboardStats();
+                                
+                                // Navigation aktivieren
+                                setupNavigation();
+                                
+                                console.log('✅ Dashboard vollständig geladen!');
+                                
+                                if (window.qhseDashboard.showNotification) {
+                                    window.qhseDashboard.showNotification(
+                                        `🎉 Willkommen ${loginState.user.company}! Alle Inhalte geladen.`, 
+                                        'success'
+                                    );
+                                }
+                                
+                            }, 1000);
+                            
+                        } else {
+                            console.error('❌ QHSEDashboard nicht verfügbar');
+                            showLoginMessage('System konnte nicht geladen werden.');
+                        }
+                    }, 1500);
+                };
+                
+                script.onerror = function() {
+                    console.error('❌ Script-Fehler');
+                    showLoginMessage('System konnte nicht geladen werden.');
+                };
+                
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                console.error('❌ Dashboard-Fehler:', error);
+                showLoginMessage('Unerwarteter Fehler beim Laden.');
+            }
+        }
+        
+        // Benutzer-Anzeige aktualisieren
+        function updateUserDisplay() {
+            const userName = document.getElementById('userName');
+            const userRole = document.getElementById('userRole');
+            const companyName = document.getElementById('companyName');
+            
+            if (userName) userName.textContent = loginState.user.company;
+            if (userRole) userRole.textContent = loginState.user.userId === 'root-admin' ? 'Administrator' : 'Benutzer';
+            if (companyName) companyName.textContent = loginState.user.company;
+        }
+        
+        // Dashboard-Statistiken aktualisieren
+        function updateDashboardStats() {
+            if (window.qhseDashboard) {
+                const documentsCount = document.getElementById('documentsCount');
+                const usersCount = document.getElementById('usersCount');
+                const tasksCount = document.getElementById('tasksCount');
+                
+                if (documentsCount) documentsCount.textContent = Object.keys(window.qhseDashboard.documents || {}).length;
+                if (usersCount) usersCount.textContent = Object.keys(window.qhseDashboard.users || {}).length;
+                if (tasksCount) tasksCount.textContent = '5'; // Beispielwert
+            }
+        }
+        
+        // Navigation einrichten
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const section = this.dataset.section;
+                    
+                    // Aktive Klasse umschalten
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Inhalt umschalten
+                    contentSections.forEach(s => s.classList.remove('active'));
+                    const targetSection = document.getElementById(section);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                        
+                        // Dashboard-spezifische Initialisierung
+                        if (section === 'dashboard') {
+                            updateDashboardStats();
+                        }
+                    }
+                    
+                    console.log(`📍 Navigiert zu: ${section}`);
+                });
+            });
+        }
+        
+        // Login anzeigen
+        function showLogin() {
+            console.log('🔐 Zeige Login');
+            
+            loginOverlay.style.display = 'flex';
+            appContainer.classList.remove('loaded');
+            document.body.classList.add('login-active');
+            
+            loginForm.reset();
+            clearLoginMessage();
+            loginBtn.disabled = false;
+            
+            loginState.authenticated = false;
+            loginState.user = null;
+            loginState.dashboardLoaded = false;
+        }
+        
+        // Globale Logout-Funktion
+        window.performLogout = function() {
+            if (confirm('Wirklich abmelden?')) {
+                console.log('👋 Logout');
+                
+                localStorage.removeItem('qhse_current_user');
+                localStorage.removeItem('qhse_session');
+                
+                location.reload();
+            }
+        };
+        
+        // Session prüfen
+        function checkSession() {
+            try {
+                const sessionData = localStorage.getItem('qhse_session');
+                if (sessionData) {
+                    const session = JSON.parse(sessionData);
+                    
+                    if (session.expiresAt && session.expiresAt > Date.now()) {
+                        console.log('🔄 Gültige Session:', session.company);
+                        
+                        localStorage.setItem('qhse_current_user', session.userId);
+                        loginState.authenticated = true;
+                        loginState.user = session;
+                        
+                        showMainApp();
+                        return true;
+                    } else {
+                        localStorage.removeItem('qhse_session');
+                        localStorage.removeItem('qhse_current_user');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Session-Fehler:', error);
+            }
+            
+            return false;
+        }
+        
+        // Initialisierung
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏁 System startet...');
+            
+            if (!checkSession()) {
+                showLogin();
+            }
+            
+            console.log('✅ Login-System bereit');
+        });
+        
+        console.log('🔐 Vollständiges Login System geladen');
+    </script>
+</body>
+</html>

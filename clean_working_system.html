@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1e3a8a; display: flex; align-items: center; justify-content: center; z-index: 9999; color: white; font-family: Inter, sans-serif;">
+        <div style="text-align: center;">
+            <div style="width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3); border-top: 5px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+            <h2>QHSE System wird geladen...</h2>
+            <p>Bitte warten Sie einen Moment</p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="app-container" id="mainApp" style="display: none;">
+        <nav class="sidebar"></nav>
+        <main class="main-content"></main>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script src="script.js"></script>
+    <script>
+        console.log('🚀 SAUBERES QHSE System startet...');
+        
+        // Setze Root-Admin Benutzer
+        localStorage.setItem('qhse_current_user', 'root-admin');
+        
+        function initializeSystem() {
+            console.log('🔧 Initialisiere System...');
+            
+            // Warte bis script.js geladen ist
+            if (typeof QHSEDashboard === 'undefined') {
+                console.log('⏳ Warte auf QHSEDashboard...');
+                setTimeout(initializeSystem, 100);
+                return;
+            }
+            
+            try {
+                console.log('✅ QHSEDashboard verfügbar - initialisiere...');
+                
+                // Erstelle Dashboard
+                window.qhseDashboard = new QHSEDashboard();
+                
+                console.log('🎉 QHSE Dashboard erfolgreich erstellt!');
+                
+                // Verstecke Loading Screen
+                document.getElementById('loadingScreen').style.display = 'none';
+                
+                // Zeige Hauptanwendung
+                document.getElementById('mainApp').style.display = 'flex';
+                
+                // Erfolg-Notification
+                setTimeout(() => {
+                    if (window.qhseDashboard && window.qhseDashboard.showNotification) {
+                        window.qhseDashboard.showNotification('🎉 QHSE System erfolgreich geladen! Alle Funktionen verfügbar.', 'success');
+                    }
+                }, 1000);
+                
+                console.log('✅ System vollständig initialisiert!');
+                
+            } catch (error) {
+                console.error('❌ Initialisierung fehlgeschlagen:', error);
+                
+                // Fehler anzeigen
+                document.getElementById('loadingScreen').innerHTML = `
+                    <div style="text-align: center; color: #ff6b6b;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">❌</div>
+                        <h2>Fehler beim Laden</h2>
+                        <p>Das System konnte nicht geladen werden.</p>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: white; color: #1e3a8a; border: none; border-radius: 5px; cursor: pointer;">Neu laden</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Starte Initialisierung wenn DOM bereit ist
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM geladen - starte Initialisierung');
+            setTimeout(initializeSystem, 500);
+        });
+        
+        console.log('📋 System-Script geladen');
+    </script>
+</body>
+</html>

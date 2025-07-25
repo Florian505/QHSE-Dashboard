@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Suggestions Test</title>
+    <link rel="stylesheet" href="incident-suggestions.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .test-status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🧠 Smart Suggestions Test</h1>
+    
+    <div class="test-container">
+        <h2>Test-Formular</h2>
+        <div id="testStatus"></div>
+        
+        <!-- Wizard Mode Button -->
+        <button type="button" class="wizard-mode-btn" onclick="testWizardMode()">
+            <i class="fas fa-magic"></i> Geführter Modus (Anfänger)
+        </button>
+        
+        <!-- Smart Suggestions Toggle -->
+        <div class="smart-suggestions-toggle">
+            <input type="checkbox" id="smartSuggestionsEnabled" checked>
+            <label for="smartSuggestionsEnabled">
+                <i class="fas fa-lightbulb"></i>
+                Intelligente Vorschläge aktivieren
+            </label>
+        </div>
+        
+        <form id="testForm">
+            <div class="form-group">
+                <label for="eventCategory">Ereigniskategorie *</label>
+                <select id="eventCategory" name="eventCategory" required>
+                    <option value="">Bitte wählen...</option>
+                    <option value="sturz-absturz">Sturz/Absturz</option>
+                    <option value="schnitt-stichverletzung">Schnitt-/Stichverletzung</option>
+                    <option value="quetschung-einklemmung">Quetschung/Einklemmung</option>
+                    <option value="beinahe-sturz">Beinahe-Sturz</option>
+                    <option value="technischer-defekt">Technischer Defekt</option>
+                    <option value="chemikalienaustritt">Chemikalienaustritt</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="incidentLocation">Ort des Ereignisses *</label>
+                <input type="text" id="incidentLocation" name="incidentLocation" placeholder="Genauer Ort..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="activity">Ausgeführte Tätigkeit</label>
+                <input type="text" id="activity" name="activity" placeholder="Was wurde gemacht?">
+            </div>
+            
+            <div class="form-group">
+                <label for="severity">Schweregrad *</label>
+                <select id="severity" name="severity" required>
+                    <option value="">Bitte wählen...</option>
+                    <option value="niedrig">Niedrig</option>
+                    <option value="mittel">Mittel</option>
+                    <option value="hoch">Hoch</option>
+                    <option value="kritisch">Kritisch</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="cause">Vermutete Ursache</label>
+                <select id="cause" name="cause">
+                    <option value="">Bitte wählen...</option>
+                    <option value="rutschige-oberflaeche">Rutschige Oberfläche</option>
+                    <option value="defekte-ausruestung">Defekte Ausrüstung</option>
+                    <option value="unzureichende-sicherung">Unzureichende Sicherung</option>
+                    <option value="stumpfes-werkzeug">Stumpfes Werkzeug</option>
+                    <option value="unsachgemaesse-handhabung">Unsachgemäße Handhabung</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="incidentDescription">Ereignisbeschreibung *</label>
+                <textarea id="incidentDescription" name="incidentDescription" placeholder="Detaillierte Beschreibung des Ereignisses..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="preventiveMeasures">Präventionsmaßnahmen</label>
+                <textarea id="preventiveMeasures" name="preventiveMeasures" placeholder="Vorgeschlagene Maßnahmen zur Verhinderung ähnlicher Ereignisse..."></textarea>
+            </div>
+        </form>
+        
+        <div class="test-controls">
+            <button onclick="testSmartSuggestions()">Smart Suggestions testen</button>
+            <button onclick="testContextualHelp()">Kontextuelle Hilfe testen</button>
+            <button onclick="clearForm()">Formular leeren</button>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test-Ergebnisse</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="incident-smart-suggestions.js"></script>
+    
+    <script>
+        let smartSuggestions;
+        let smartSuggestionsEnabled = true;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Initializing Smart Suggestions Test...', 'info');
+            
+            try {
+                smartSuggestions = new IncidentSmartSuggestions();
+                log('✅ Smart Suggestions initialized successfully', 'success');
+                
+                setupEventHandlers();
+                updateStatus('Smart Suggestions Test bereit');
+                
+            } catch (error) {
+                log('❌ Error initializing Smart Suggestions: ' + error.message, 'error');
+                updateStatus('Initialisierung fehlgeschlagen');
+            }
+        });
+        
+        function setupEventHandlers() {
+            // Event category change handler
+            const eventCategoryField = document.getElementById('eventCategory');
+            eventCategoryField.addEventListener('change', (e) => {
+                if (smartSuggestionsEnabled && smartSuggestions) {
+                    log(`🎯 Event category changed to: ${e.target.value}`, 'info');
+                    smartSuggestions.applySuggestions(e.target.value);
+                }
+            });
+            
+            // Smart suggestions toggle
+            const toggleCheckbox = document.getElementById('smartSuggestionsEnabled');
+            toggleCheckbox.addEventListener('change', (e) => {
+                smartSuggestionsEnabled = e.target.checked;
+                log(`Smart Suggestions: ${smartSuggestionsEnabled ? 'Enabled' : 'Disabled'}`, 'info');
+            });
+            
+            // Focus handlers for contextual help
+            const helpFields = ['incidentDescription', 'severity', 'cause', 'preventiveMeasures'];
+            helpFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('focus', () => {
+                        if (smartSuggestionsEnabled) {
+                            log(`💡 Showing help for field: ${fieldId}`, 'info');
+                            showContextualHelp(fieldId);
+                        }
+                    });
+                }
+            });
+        }
+        
+        function testWizardMode() {
+            log('🧙‍♂️ Testing Wizard Mode...', 'info');
+            
+            if (smartSuggestions) {
+                smartSuggestions.enableWizardMode();
+                log('✅ Wizard Mode activated', 'success');
+            } else {
+                log('❌ Smart Suggestions not available', 'error');
+            }
+        }
+        
+        function testSmartSuggestions() {
+            log('🧠 Testing Smart Suggestions...', 'info');
+            
+            const category = document.getElementById('eventCategory').value;
+            if (!category) {
+                log('⚠️ Please select an event category first', 'error');
+                return;
+            }
+            
+            if (smartSuggestions && smartSuggestionsEnabled) {
+                smartSuggestions.applySuggestions(category);
+                log(`✅ Smart Suggestions applied for category: ${category}`, 'success');
+            } else {
+                log('❌ Smart Suggestions not available or disabled', 'error');
+            }
+        }
+        
+        function testContextualHelp() {
+            log('📚 Testing Contextual Help...', 'info');
+            
+            const helpFields = ['incidentDescription', 'severity', 'cause', 'preventiveMeasures'];
+            let tested = 0;
+            
+            helpFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    showContextualHelp(fieldId);
+                    tested++;
+                }
+            });
+            
+            log(`✅ Contextual help shown for ${tested} fields`, 'success');
+        }
+        
+        function showContextualHelp(fieldId) {
+            const helpTexts = {
+                'incidentDescription': {
+                    title: 'Ereignisbeschreibung',
+                    text: 'Beschreiben Sie das Ereignis so detailliert wie möglich.',
+                    tips: [
+                        'Was ist genau passiert?',
+                        'Welche Umstände führten dazu?',
+                        'Welche Faktoren waren beteiligt?'
+                    ]
+                },
+                'severity': {
+                    title: 'Schweregrad bestimmen',
+                    text: 'Bewerten Sie die Schwere basierend auf tatsächlichen oder potenziellen Folgen.',
+                    levels: {
+                        'niedrig': 'Keine oder minimale Auswirkungen',
+                        'mittel': 'Moderate Auswirkungen, behandelbar',
+                        'hoch': 'Ernste Auswirkungen, signifikante Folgen',
+                        'kritisch': 'Schwerwiegende oder lebensbedrohliche Folgen'
+                    }
+                },
+                'cause': {
+                    title: 'Ursachenanalyse',
+                    text: 'Identifizieren Sie die Hauptursache des Ereignisses.',
+                    categories: [
+                        'Menschliche Faktoren (Verhalten, Wissen)',
+                        'Technische Faktoren (Ausrüstung, Anlagen)',
+                        'Organisatorische Faktoren (Verfahren, Management)',
+                        'Umgebungsfaktoren (Bedingungen, Umstände)'
+                    ]
+                },
+                'preventiveMeasures': {
+                    title: 'Präventionsmaßnahmen',
+                    text: 'Schlagen Sie konkrete Maßnahmen vor, um ähnliche Ereignisse zu verhindern.',
+                    approach: [
+                        'Sofortmaßnahmen (kurzfristig)',
+                        'Korrekturmaßnahmen (mittelfristig)',
+                        'Präventivmaßnahmen (langfristig)',
+                        'Systemverbesserungen (dauerhaft)'
+                    ]
+                }
+            };
+            
+            const help = helpTexts[fieldId];
+            if (!help) return;
+            
+            const field = document.getElementById(fieldId);
+            if (!field) return;
+            
+            // Remove existing help
+            const existingHelp = field.parentNode.querySelector('.field-help-tooltip');
+            if (existingHelp) {
+                existingHelp.remove();
+            }
+            
+            const helpTooltip = document.createElement('div');
+            helpTooltip.className = 'field-help-tooltip';
+            helpTooltip.innerHTML = `
+                <div class="help-content">
+                    <h4>${help.title}</h4>
+                    <p>${help.text}</p>
+                    ${help.tips ? `
+                        <div class="help-tips">
+                            <strong>Hilfreiche Fragen:</strong>
+                            <ul>${help.tips.map(tip => `<li>${tip}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
+                    ${help.levels ? `
+                        <div class="help-levels">
+                            <strong>Schweregrade:</strong>
+                            ${Object.entries(help.levels).map(([level, desc]) => `
+                                <div class="level-item">
+                                    <strong>${level}:</strong> ${desc}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    ${help.categories ? `
+                        <div class="help-categories">
+                            <strong>Kategorien:</strong>
+                            <ul>${help.categories.map(cat => `<li>${cat}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
+                    ${help.approach ? `
+                        <div class="help-approach">
+                            <strong>Ansatz:</strong>
+                            <ul>${help.approach.map(item => `<li>${item}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
+                </div>
+                <button class="close-help" onclick="this.parentNode.remove()">✕</button>
+            `;
+            
+            field.parentNode.appendChild(helpTooltip);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (helpTooltip.parentNode) {
+                    helpTooltip.remove();
+                }
+            }, 10000);
+        }
+        
+        function clearForm() {
+            document.getElementById('testForm').reset();
+            
+            // Remove all suggestions and help tooltips
+            document.querySelectorAll('.suggestion-dropdown, .measure-suggestions, .field-help-tooltip').forEach(el => {
+                el.remove();
+            });
+            
+            log('🧹 Form cleared', 'info');
+        }
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-status ${type}`;
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+            console.log(message);
+            
+            // Keep only last 10 entries
+            while (results.children.length > 10) {
+                results.removeChild(results.firstChild);
+            }
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('testStatus').innerHTML = `
+                <div class="test-status info">
+                    <strong>Status:</strong> ${message}
+                </div>
+            `;
+        }
+        
+        // Test automatic suggestions on page load
+        setTimeout(() => {
+            log('🔬 Running automatic tests...', 'info');
+            
+            // Test 1: Select category and trigger suggestions
+            document.getElementById('eventCategory').value = 'sturz-absturz';
+            document.getElementById('eventCategory').dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+                // Test 2: Focus on description field
+                document.getElementById('incidentDescription').focus();
+                
+                log('✅ Automatic tests completed', 'success');
+            }, 1000);
+        }, 2000);
+    </script>
+</body>
+</html>

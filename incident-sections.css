@@ -1,0 +1,351 @@
+/* Incident Sections Styles - Kompakte Bereiche für Unfall/Beinahe-Unfall Management */
+
+/* Action Header */
+.action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.action-header .btn-primary {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.action-header .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+/* Quick Stats */
+.quick-stats {
+    display: flex;
+    gap: 16px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 10px;
+    border-left: 4px solid #3b82f6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    min-width: 140px;
+}
+
+.stat-card.accident {
+    border-left-color: #dc2626;
+}
+
+.stat-card.accident i {
+    color: #dc2626;
+}
+
+.stat-card.near-miss {
+    border-left-color: #f59e0b;
+}
+
+.stat-card.near-miss i {
+    color: #f59e0b;
+}
+
+.stat-card.pending {
+    border-left-color: #6366f1;
+}
+
+.stat-card.pending i {
+    color: #6366f1;
+}
+
+.stat-card i {
+    font-size: 24px;
+}
+
+.stat-card div span {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.stat-card div small {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Compact Filter Bar */
+.incidents-filter-compact {
+    display: flex;
+    gap: 16px;
+    align-items: end;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.incidents-filter-compact .filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+}
+
+.incidents-filter-compact .filter-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.incidents-filter-compact .search-input {
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 220px;
+    transition: all 0.2s ease;
+}
+
+.incidents-filter-compact .search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.incidents-filter-compact select {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.incidents-filter-compact select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.filter-actions .btn-sm {
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+/* Incident Containers */
+.accidents-container,
+.near-miss-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-height: 300px;
+    position: relative;
+}
+
+/* Kompakte Incident Cards */
+.incident-card.compact {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+.incident-card.compact:hover {
+    background: #f8fafc;
+    transform: translateX(4px);
+}
+
+.incident-card.compact:last-child {
+    border-bottom: none;
+}
+
+.incident-card.compact .incident-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.incident-card.compact .incident-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.incident-card.compact .incident-description {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.incident-card.compact .incident-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.incident-card.compact .incident-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.incident-card.compact .incident-action-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 4px;
+}
+
+/* Quick action buttons for sections */
+.section-quick-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.section-quick-actions .btn-outline {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.section-quick-actions .btn-outline:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #f0f9ff;
+}
+
+/* Responsive Design für kompakte Bereiche */
+@media (max-width: 768px) {
+    .action-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+    }
+    
+    .quick-stats {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .incidents-filter-compact {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .incidents-filter-compact .filter-group {
+        min-width: auto;
+    }
+    
+    .filter-actions {
+        margin-left: 0;
+        margin-top: 12px;
+    }
+    
+    .incident-card.compact .incident-header,
+    .incident-card.compact .incident-meta,
+    .incident-card.compact .incident-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* Smooth transitions for section switching */
+.content-section {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.content-section.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+/* Loading states */
+.accidents-container .loading-spinner,
+.near-miss-container .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.accidents-container .loading-spinner i,
+.near-miss-container .loading-spinner i {
+    margin-right: 8px;
+    color: #3b82f6;
+}
+
+/* Empty states */
+.accidents-container .no-data-message,
+.near-miss-container .no-data-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+}
+
+.accidents-container .no-data-message i,
+.near-miss-container .no-data-message i {
+    font-size: 32px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+}
+
+.accidents-container .no-data-message h3,
+.near-miss-container .no-data-message h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #334155;
+}
+
+.accidents-container .no-data-message p,
+.near-miss-container .no-data-message p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}

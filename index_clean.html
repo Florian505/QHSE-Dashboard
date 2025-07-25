@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; frame-ancestors 'none';">
+    <title>QHSE Management System</title>
+    <link rel="stylesheet" href="styles.css?v=2024070502">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    
+    <style>
+        /* === LOGIN SYSTEM STYLES === */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .login-logo {
+            width: 70px;
+            height: 70px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 28px;
+        }
+        
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 30px;
+        }
+        
+        .security-badge {
+            background: #10b981;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .submit-btn:hover {
+            background: #2563eb;
+        }
+        
+        .demo-creds {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: left;
+        }
+        
+        .demo-account {
+            margin: 5px 0;
+            color: #475569;
+        }
+        
+        .login-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .login-message.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .login-message.success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .login-message.show {
+            display: block;
+        }
+        
+        /* Hide main app initially */
+        .app-container {
+            display: none !important;
+        }
+        
+        .app-container.show {
+            display: flex !important;
+        }
+        
+        body.login-mode {
+            overflow: hidden;
+        }
+        
+        /* Logout button styling */
+        .user-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+        }
+        
+        .edit-profile-btn,
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: color 0.2s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+        
+        .edit-profile-btn:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .logout-btn:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+    </style>
+</head>
+<body class="login-mode">
+    <!-- === LOGIN SCREEN === -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i>
+                TÜV-zertifiziert
+            </div>
+            
+            <div class="login-logo">
+                <i class="fas fa-industry"></i>
+            </div>
+            
+            <h1 class="login-title">QHSE Management System</h1>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-building"></i> Firmenname
+                    </label>
+                    <input type="text" id="companyName" class="form-input" placeholder="Firmenname eingeben" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Passwort
+                    </label>
+                    <input type="password" id="password" class="form-input" placeholder="Passwort eingeben" required>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-sign-in-alt"></i> Sicher anmelden
+                </button>
+                
+                <div id="loginMessage" class="login-message"></div>
+            </form>
+            
+            <div class="demo-creds">
+                <strong>Demo-Zugangsdaten:</strong><br>
+                <div class="demo-account"><strong>Admin:</strong> QHSE GFT / SecureQHSE2024!</div>
+                <div class="demo-account"><strong>Demo:</strong> Demo Company / Demo123!</div>
+                <div class="demo-account"><strong>H&V:</strong> Hoffmann & Voss GmbH / HoffmannVoss2024!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MAIN APPLICATION === -->
+    <div id="notificationContainer" class="notification-container"></div>
+    
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="company-logo">
+                    <i class="fas fa-industry"></i>
+                    <div class="company-info">
+                        <div class="company-name-container">
+                            <h2 id="companyName" class="editable-company-name" title="Klicken zum Bearbeiten">QHSE GFT</h2>
+                            <button class="edit-company-btn" id="editCompanyBtn" title="Firmennamen bearbeiten">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <p>QHSE Management</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Max Mustermann</span>
+                        <span class="user-role" id="userRole">Geschäftsführung</span>
+                        <div class="user-actions">
+                            <button class="edit-profile-btn" id="editProfileBtn" title="Profil bearbeiten">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="logout-btn" onclick="performLogout()" title="Sicher abmelden">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Rest will be populated by script.js -->
+        </nav>
+        
+        <main class="main-content">
+            <!-- Content will be populated by script.js -->
+        </main>
+    </div>
+
+    <!-- === CLEAN LOGIN SYSTEM === -->
+    <script>
+        console.log('🔐 Clean QHSE Login System wird initialisiert...');
+        
+        // Login credentials
+        const LOGIN_CREDENTIALS = {
+            'QHSE GFT': { password: 'SecureQHSE2024!', userId: 'root-admin' },
+            'Demo Company': { password: 'Demo123!', userId: 'demo-user' },
+            'Hoffmann & Voss GmbH': { password: 'HoffmannVoss2024!', userId: 'root-admin' }
+        };
+        
+        let loginState = {
+            isLoggedIn: false,
+            currentUser: null
+        };
+        
+        // DOM references
+        const loginScreen = document.getElementById('loginScreen');
+        const loginForm = document.getElementById('loginForm');
+        const companyNameInput = document.getElementById('companyName');
+        const passwordInput = document.getElementById('password');
+        const messageDiv = document.getElementById('loginMessage');
+        const appContainer = document.querySelector('.app-container');
+        
+        // Show message
+        function showMessage(text, type = 'error') {
+            messageDiv.textContent = text;
+            messageDiv.className = `login-message ${type} show`;
+        }
+        
+        // Clear message
+        function clearMessage() {
+            messageDiv.classList.remove('show');
+        }
+        
+        // Login form handler
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const companyName = companyNameInput.value.trim();
+            const password = passwordInput.value;
+            
+            clearMessage();
+            
+            // Validate
+            if (!companyName || !password) {
+                showMessage('Bitte füllen Sie alle Felder aus.');
+                return;
+            }
+            
+            // Check credentials
+            const creds = LOGIN_CREDENTIALS[companyName];
+            if (!creds || creds.password !== password) {
+                showMessage('Ungültige Anmeldedaten.');
+                return;
+            }
+            
+            // Success
+            showMessage('Anmeldung erfolgreich! Lade Dashboard...', 'success');
+            
+            // Store session
+            localStorage.setItem('qhse_current_user', creds.userId);
+            localStorage.setItem('qhse_clean_session', JSON.stringify({
+                companyName: companyName,
+                userId: creds.userId,
+                loginTime: Date.now(),
+                expiresAt: Date.now() + (60 * 60 * 1000) // 1 hour
+            }));
+            
+            loginState.isLoggedIn = true;
+            loginState.currentUser = { companyName, userId: creds.userId };
+            
+            // Show app after delay
+            setTimeout(showApp, 1500);
+        });
+        
+        // Show main app
+        function showApp() {
+            console.log('🚀 Zeige QHSE App');
+            
+            loginScreen.style.display = 'none';
+            appContainer.classList.add('show');
+            document.body.classList.remove('login-mode');
+            
+            // Initialize QHSE Dashboard
+            setTimeout(() => {
+                if (typeof QHSEDashboard !== 'undefined' && !window.qhseDashboard) {
+                    console.log('📊 Initialisiere QHSE Dashboard...');
+                    try {
+                        window.qhseDashboard = new QHSEDashboard();
+                        console.log('✅ QHSE Dashboard initialisiert');
+                    } catch (error) {
+                        console.error('❌ QHSE Dashboard Fehler:', error);
+                    }
+                }
+            }, 200);
+        }
+        
+        // Show login
+        function showLogin() {
+            console.log('🔐 Zeige Login');
+            
+            loginScreen.style.display = 'flex';
+            appContainer.classList.remove('show');
+            document.body.classList.add('login-mode');
+            
+            loginForm.reset();
+            clearMessage();
+            loginState.isLoggedIn = false;
+            loginState.currentUser = null;
+        }
+        
+        // Global logout function
+        window.performLogout = function() {
+            if (confirm('Möchten Sie sich wirklich abmelden?')) {
+                console.log('👋 Logout');
+                
+                localStorage.removeItem('qhse_current_user');
+                localStorage.removeItem('qhse_clean_session');
+                
+                showLogin();
+            }
+        };
+        
+        // Check existing session
+        function checkSession() {
+            try {
+                const session = JSON.parse(localStorage.getItem('qhse_clean_session') || '{}');
+                if (session.companyName && session.expiresAt > Date.now()) {
+                    console.log('🔄 Bestehende Session:', session.companyName);
+                    
+                    localStorage.setItem('qhse_current_user', session.userId);
+                    loginState.isLoggedIn = true;
+                    loginState.currentUser = session;
+                    
+                    showApp();
+                    return true;
+                }
+            } catch (error) {
+                console.log('ℹ️ Keine gültige Session');
+            }
+            return false;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏁 Login System wird geladen...');
+            
+            if (!checkSession()) {
+                showLogin();
+            }
+            
+            console.log('✅ Login System bereit');
+        });
+        
+        console.log('🔐 Clean Login System geladen');
+    </script>
+    
+    <!-- Load QHSE System -->
+    <script src="script.js?v=2024070502"></script>
+</body>
+</html>

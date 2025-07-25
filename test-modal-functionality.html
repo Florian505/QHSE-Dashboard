@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Modal Functionality Test</h1>
+    
+    <div class="test-container">
+        <h2>Test der Incident-Formulare</h2>
+        <p>Teste, ob die Incident-Modals korrekt geöffnet werden können.</p>
+        
+        <button onclick="testAccidentModal()">🚑 Test Unfall-Formular</button>
+        <button onclick="testNearMissModal()">🛡️ Test Beinahe-Unfall-Formular</button>
+        <button onclick="testModalExists()">🔍 Test Modal-Existenz</button>
+        <button onclick="openMainSystem()">🏠 Hauptsystem öffnen</button>
+        
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        function testAccidentModal() {
+            log('🚑 Teste Unfall-Modal...');
+            
+            // Try to access main system and open modal
+            try {
+                // Test if we can access the parent window's functions
+                if (window.parent && window.parent.qhseDashboard) {
+                    window.parent.qhseDashboard.openIncidentModal('accident');
+                    log('✅ Unfall-Modal über parent.qhseDashboard geöffnet');
+                } else {
+                    // Open in new window with hash parameter
+                    window.open('index.html#accident', '_blank');
+                    log('ℹ️ Hauptsystem in neuem Tab geöffnet - navigiere zu Unfall-Bereich');
+                }
+            } catch (e) {
+                log(`❌ Fehler beim Öffnen des Unfall-Modals: ${e.message}`);
+            }
+        }
+        
+        function testNearMissModal() {
+            log('🛡️ Teste Beinahe-Unfall-Modal...');
+            
+            try {
+                if (window.parent && window.parent.qhseDashboard) {
+                    window.parent.qhseDashboard.openIncidentModal('near_miss');
+                    log('✅ Beinahe-Unfall-Modal über parent.qhseDashboard geöffnet');
+                } else {
+                    window.open('index.html#near-miss', '_blank');
+                    log('ℹ️ Hauptsystem in neuem Tab geöffnet - navigiere zu Beinahe-Unfall-Bereich');
+                }
+            } catch (e) {
+                log(`❌ Fehler beim Öffnen des Beinahe-Unfall-Modals: ${e.message}`);
+            }
+        }
+        
+        function testModalExists() {
+            log('🔍 Teste Modal-Existenz...');
+            
+            try {
+                if (window.parent && window.parent.document) {
+                    const modal = window.parent.document.getElementById('incidentReportModal');
+                    if (modal) {
+                        log('✅ incidentReportModal im Hauptsystem gefunden');
+                        
+                        // Test if modal has required elements
+                        const title = window.parent.document.getElementById('incidentModalTitle');
+                        const form = window.parent.document.getElementById('incidentReportForm');
+                        const closeBtn = window.parent.document.getElementById('closeIncidentModal');
+                        
+                        log(`   • Modal-Titel: ${title ? '✅' : '❌'}`);
+                        log(`   • Modal-Formular: ${form ? '✅' : '❌'}`);
+                        log(`   • Schließen-Button: ${closeBtn ? '✅' : '❌'}`);
+                        
+                        // Test if qhseDashboard exists
+                        if (window.parent.qhseDashboard) {
+                            log('✅ qhseDashboard Objekt gefunden');
+                            
+                            if (typeof window.parent.qhseDashboard.openIncidentModal === 'function') {
+                                log('✅ openIncidentModal Funktion verfügbar');
+                            } else {
+                                log('❌ openIncidentModal Funktion NICHT verfügbar');
+                            }
+                        } else {
+                            log('❌ qhseDashboard Objekt NICHT gefunden');
+                        }
+                        
+                    } else {
+                        log('❌ incidentReportModal NICHT gefunden');
+                    }
+                } else {
+                    log('ℹ️ Test läuft isoliert - öffne Hauptsystem für vollständigen Test');
+                    
+                    // Test if elements exist in this page
+                    const testModal = document.createElement('div');
+                    testModal.id = 'testModal';
+                    testModal.innerHTML = `
+                        <h3>Test Modal</h3>
+                        <p>Dies ist ein Test-Modal</p>
+                        <button onclick="this.parentElement.style.display='none'">Schließen</button>
+                    `;
+                    testModal.style.cssText = `
+                        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                        background: white; padding: 20px; border-radius: 8px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 1000;
+                        border: 2px solid #007bff;
+                    `;
+                    document.body.appendChild(testModal);
+                    
+                    log('✅ Test-Modal erstellt und angezeigt');
+                    
+                    setTimeout(() => {
+                        if (testModal.parentElement) {
+                            testModal.remove();
+                            log('ℹ️ Test-Modal automatisch entfernt');
+                        }
+                    }, 3000);
+                }
+            } catch (e) {
+                log(`❌ Fehler beim Testen der Modal-Existenz: ${e.message}`);
+            }
+        }
+        
+        function openMainSystem() {
+            window.open('index.html', '_blank');
+        }
+        
+        function log(message) {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = message.includes('✅') ? 'success' : 
+                            message.includes('❌') ? 'error' : 'info';
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+            console.log(message);
+            
+            // Keep only last 15 entries
+            while (results.children.length > 15) {
+                results.removeChild(results.firstChild);
+            }
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            log('🔄 Modal-Test lädt...');
+            
+            // Test basic functionality
+            setTimeout(() => {
+                log('ℹ️ Teste grundlegende Modal-Funktionalität...');
+                testModalExists();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
