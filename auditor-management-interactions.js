@@ -403,7 +403,7 @@ if (typeof QHSEDashboard !== 'undefined') {
             this.enhanceLogoUpload(logoUpload);
         }
         
-        // Add section animations
+        // Add section animations (disabled icon rotation)
         const configSections = document.querySelectorAll('.config-section');
         configSections.forEach((section, index) => {
             section.style.animationDelay = `${index * 0.1}s`;

@@ -40377,6 +40377,11 @@ QHSEDashboard.prototype.initializeAuditPlanGenerator = function() {
     window.addAuditBlock = () => this.addAuditBlock();
     window.removeAuditBlock = (blockId) => this.removeAuditBlock(blockId);
     window.duplicateAuditBlock = (blockId) => this.duplicateAuditBlock(blockId);
+    window.moveAuditBlockUp = (blockId) => this.moveAuditBlockUp(blockId);
+    window.moveAuditBlockDown = (blockId) => this.moveAuditBlockDown(blockId);
+    window.selectAllBlocks = () => this.selectAllBlocks();
+    window.deleteSelectedBlocks = () => this.deleteSelectedBlocks();
+    window.duplicateSelectedBlocks = () => this.duplicateSelectedBlocks();
     window.generateAuditPlan = () => this.generateAuditPlan();
     window.toggleAuditDateInputs = () => this.toggleAuditDateInputs();
     window.updateDepartmentField = (selectElement) => this.updateDepartmentField(selectElement);
@@ -40404,15 +40409,25 @@ QHSEDashboard.prototype.addAuditBlock = function() {
         <div class="audit-block" id="${blockId}">
             <div class="block-header">
                 <div class="block-title">
+                    <label class="block-checkbox-label">
+                        <input type="checkbox" class="block-selector" data-block-id="${blockId}">
+                        <span class="checkmark-small"></span>
+                    </label>
                     <i class="fas fa-grip-vertical drag-handle" title="Ziehen zum Verschieben"></i>
                     <i class="fas fa-calendar-alt"></i>
                     Audit-Block #${this.auditBlockCounter}
                 </div>
                 <div class="block-controls">
-                    <button type="button" class="block-btn duplicate" onclick="duplicateAuditBlock('${blockId}')">
+                    <button type="button" class="block-btn move-up" onclick="moveAuditBlockUp('${blockId}')" title="Nach oben">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <button type="button" class="block-btn move-down" onclick="moveAuditBlockDown('${blockId}')" title="Nach unten">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <button type="button" class="block-btn duplicate" onclick="duplicateAuditBlock('${blockId}')" title="Duplizieren">
                         <i class="fas fa-copy"></i>
                     </button>
-                    <button type="button" class="block-btn remove" onclick="removeAuditBlock('${blockId}')">
+                    <button type="button" class="block-btn remove" onclick="removeAuditBlock('${blockId}')" title="Löschen">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -40708,6 +40723,9 @@ QHSEDashboard.prototype.addAuditBlock = function() {
     // Enable drag and drop for the new block
     this.initializeDragAndDrop();
     
+    // Add keyboard shortcuts to the new block
+    this.addKeyboardShortcuts(blockId);
+    
     // Calculate initial time for the new block
     this.calculateBlockTime(blockId);
     
@@ -40849,6 +40867,26 @@ QHSEDashboard.prototype.handleDragStart = function(e) {
 QHSEDashboard.prototype.handleDragOver = function(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    
+    // Entferne alle bestehenden Drop-Indikatoren
+    document.querySelectorAll('.drop-indicator').forEach(indicator => {
+        indicator.remove();
+    });
+    
+    // Finde die beste Einfügeposition
+    const container = document.getElementById('auditBlocksContainer');
+    const afterElement = this.getDragAfterElement(container, e.clientY);
+    
+    // Erstelle Drop-Indikator-Linie
+    const dropIndicator = document.createElement('div');
+    dropIndicator.className = 'drop-indicator';
+    dropIndicator.innerHTML = '<div class="drop-line"></div>';
+    
+    if (afterElement == null) {
+        container.appendChild(dropIndicator);
+    } else {
+        container.insertBefore(dropIndicator, afterElement);
+    }
 };
 
 QHSEDashboard.prototype.handleDragEnter = function(e) {
@@ -40930,11 +40968,89 @@ QHSEDashboard.prototype.moveBlockToPosition = function(draggedBlock, targetBlock
     }
 };
 
+// Move block up in the list
+QHSEDashboard.prototype.moveAuditBlockUp = function(blockId) {
+    const block = document.getElementById(blockId);
+    const container = document.getElementById('auditBlocksContainer');
+    
+    if (!block || !container) return;
+    
+    const previousSibling = block.previousElementSibling;
+    if (previousSibling && previousSibling.classList.contains('audit-block')) {
+        container.insertBefore(block, previousSibling);
+        this.renumberAuditBlocks();
+        
+        // Visual feedback
+        block.style.animation = 'blockMoveUp 0.3s ease-out';
+        setTimeout(() => {
+            block.style.animation = '';
+        }, 300);
+        
+        this.showNotification('Audit-Block nach oben verschoben', 'success');
+    } else {
+        this.showNotification('Block ist bereits an der obersten Position', 'info');
+    }
+};
+
+// Move block down in the list
+QHSEDashboard.prototype.moveAuditBlockDown = function(blockId) {
+    const block = document.getElementById(blockId);
+    const container = document.getElementById('auditBlocksContainer');
+    
+    if (!block || !container) return;
+    
+    const nextSibling = block.nextElementSibling;
+    if (nextSibling && nextSibling.classList.contains('audit-block')) {
+        if (nextSibling.nextSibling) {
+            container.insertBefore(block, nextSibling.nextSibling);
+        } else {
+            container.appendChild(block);
+        }
+        this.renumberAuditBlocks();
+        
+        // Visual feedback
+        block.style.animation = 'blockMoveDown 0.3s ease-out';
+        setTimeout(() => {
+            block.style.animation = '';
+        }, 300);
+        
+        this.showNotification('Audit-Block nach unten verschoben', 'success');
+    } else {
+        this.showNotification('Block ist bereits an der untersten Position', 'info');
+    }
+};
+
+// Hilfsfunktion für präzise Drop-Position
+QHSEDashboard.prototype.getDragAfterElement = function(container, y) {
+    const draggableElements = [...container.querySelectorAll('.audit-block:not(.dragging)')];
+    
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+};
+
 QHSEDashboard.prototype.handleDragEnd = function(e) {
     if (this.draggedElement) {
         this.draggedElement.classList.remove('dragging');
         this.draggedElement.style.display = ''; // Restore visibility
     }
+    
+    // Entferne alle Drop-Indikatoren
+    document.querySelectorAll('.drop-indicator').forEach(indicator => {
+        indicator.remove();
+    });
+    
+    // Entferne alle drag-over Klassen
+    document.querySelectorAll('.audit-block').forEach(block => {
+        block.classList.remove('drag-over');
+    });
     
     // Clean up all drag states
     const allBlocks = document.querySelectorAll('.audit-block');
@@ -40944,6 +41060,114 @@ QHSEDashboard.prototype.handleDragEnd = function(e) {
     });
     
     this.draggedElement = null;
+};
+
+// Keyboard-Shortcuts für Auditblöcke
+QHSEDashboard.prototype.addKeyboardShortcuts = function(blockId) {
+    const block = document.getElementById(blockId);
+    if (!block) return;
+    
+    // Mache Block fokussierbar
+    block.setAttribute('tabindex', '0');
+    
+    block.addEventListener('keydown', (e) => {
+        // Nur wenn der Block fokussiert ist
+        if (document.activeElement !== block) return;
+        
+        switch(e.key) {
+            case 'ArrowUp':
+                e.preventDefault();
+                this.moveAuditBlockUp(blockId);
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                this.moveAuditBlockDown(blockId);
+                break;
+            case 'Delete':
+            case 'Backspace':
+                e.preventDefault();
+                if (confirm('Möchten Sie diesen Audit-Block wirklich löschen?')) {
+                    this.removeAuditBlock(blockId);
+                }
+                break;
+            case 'd':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    this.duplicateAuditBlock(blockId);
+                }
+                break;
+        }
+    });
+    
+    // Visual feedback when focused
+    block.addEventListener('focus', () => {
+        block.style.outline = '2px solid var(--accent-color)';
+        block.style.outlineOffset = '2px';
+    });
+    
+    block.addEventListener('blur', () => {
+        block.style.outline = '';
+        block.style.outlineOffset = '';
+    });
+};
+
+// Bulk-Operations für Mehrfachauswahl
+QHSEDashboard.prototype.selectAllBlocks = function() {
+    const checkboxes = document.querySelectorAll('.block-selector');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = !allChecked;
+    });
+    
+    this.updateBulkOperationsVisibility();
+};
+
+QHSEDashboard.prototype.deleteSelectedBlocks = function() {
+    const selectedBlocks = this.getSelectedBlocks();
+    if (selectedBlocks.length === 0) {
+        this.showNotification('Keine Blöcke ausgewählt', 'warning');
+        return;
+    }
+    
+    if (confirm(`Möchten Sie ${selectedBlocks.length} ausgewählte Audit-Blöcke wirklich löschen?`)) {
+        selectedBlocks.forEach(blockId => {
+            this.removeAuditBlock(blockId);
+        });
+        this.showNotification(`${selectedBlocks.length} Blöcke gelöscht`, 'success');
+    }
+};
+
+QHSEDashboard.prototype.duplicateSelectedBlocks = function() {
+    const selectedBlocks = this.getSelectedBlocks();
+    if (selectedBlocks.length === 0) {
+        this.showNotification('Keine Blöcke ausgewählt', 'warning');
+        return;
+    }
+    
+    selectedBlocks.forEach(blockId => {
+        this.duplicateAuditBlock(blockId);
+    });
+    this.showNotification(`${selectedBlocks.length} Blöcke dupliziert`, 'success');
+};
+
+QHSEDashboard.prototype.getSelectedBlocks = function() {
+    const checkboxes = document.querySelectorAll('.block-selector:checked');
+    return Array.from(checkboxes).map(cb => cb.dataset.blockId);
+};
+
+QHSEDashboard.prototype.updateBulkOperationsVisibility = function() {
+    const selectedCount = this.getSelectedBlocks().length;
+    const bulkOpsContainer = document.querySelector('.bulk-operations');
+    
+    if (bulkOpsContainer) {
+        if (selectedCount > 0) {
+            bulkOpsContainer.style.display = 'flex';
+            bulkOpsContainer.querySelector('.selection-count').textContent = `${selectedCount} ausgewählt`;
+        } else {
+            bulkOpsContainer.style.display = 'none';
+        }
+    }
 };
 
 // Audit Times Management Functions
