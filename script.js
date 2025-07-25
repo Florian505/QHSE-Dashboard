@@ -40487,11 +40487,31 @@ QHSEDashboard.prototype.addAuditBlock = function() {
                 </div>
                 <div class="block-form-group">
                     <label>Auditoren</label>
-                    <input type="text" name="auditors" placeholder="z.B. Dr. Schmidt, M. Müller">
+                    <div class="multi-input-container" id="auditors-${blockId}">
+                        <div class="multi-input-item">
+                            <input type="text" name="auditors[]" placeholder="z.B. Dr. Schmidt">
+                            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-input-btn" onclick="addAuditorInput('${blockId}')">
+                        <i class="fas fa-plus"></i> Weiteren Auditor hinzufügen
+                    </button>
                 </div>
                 <div class="block-form-group">
                     <label>Gesprächspartner</label>
-                    <input type="text" name="contact" placeholder="z.B. Max Müller (QM-Leiter)">
+                    <div class="multi-input-container" id="contacts-${blockId}">
+                        <div class="multi-input-item">
+                            <input type="text" name="contacts[]" placeholder="z.B. Max Müller (QM-Leiter)">
+                            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-input-btn" onclick="addContactInput('${blockId}')">
+                        <i class="fas fa-plus"></i> Weiteren Gesprächspartner hinzufügen
+                    </button>
                 </div>
                 <div class="block-form-group">
                     <label>Norm(en)</label>
@@ -41601,7 +41621,29 @@ QHSEDashboard.prototype.duplicateAuditBlock = function(blockId) {
     const inputs = originalBlock.querySelectorAll('input, select, textarea');
     const blockData = {};
     
+    // Sammle Multi-Input-Arrays separat
+    const auditorInputs = originalBlock.querySelectorAll('input[name="auditors[]"]');
+    const contactInputs = originalBlock.querySelectorAll('input[name="contacts[]"]');
+    
+    blockData.auditorsArray = [];
+    auditorInputs.forEach(input => {
+        if (input.value.trim()) {
+            blockData.auditorsArray.push(input.value.trim());
+        }
+    });
+    
+    blockData.contactsArray = [];
+    contactInputs.forEach(input => {
+        if (input.value.trim()) {
+            blockData.contactsArray.push(input.value.trim());
+        }
+    });
+    
     inputs.forEach(input => {
+        if (input.name === 'auditors[]' || input.name === 'contacts[]') {
+            // Skip these - handled separately above
+            return;
+        }
         if (input.type === 'select-multiple') {
             blockData[input.name] = Array.from(input.selectedOptions).map(option => option.value);
         } else {
@@ -41617,6 +41659,10 @@ QHSEDashboard.prototype.duplicateAuditBlock = function(blockId) {
     const newInputs = newBlock.querySelectorAll('input, select, textarea');
     
     newInputs.forEach(input => {
+        if (input.name === 'auditors[]' || input.name === 'contacts[]') {
+            // Skip these - handled separately below
+            return;
+        }
         if (blockData[input.name] !== undefined) {
             if (input.type === 'select-multiple') {
                 Array.from(input.options).forEach(option => {
@@ -41627,6 +41673,45 @@ QHSEDashboard.prototype.duplicateAuditBlock = function(blockId) {
             }
         }
     });
+    
+    // Kopiere Multi-Input-Arrays
+    const newBlockId = newBlock.id;
+    
+    // Kopiere Auditoren
+    if (blockData.auditorsArray && blockData.auditorsArray.length > 0) {
+        const auditorContainer = newBlock.querySelector(`#auditors-${newBlockId}`);
+        auditorContainer.innerHTML = ''; // Lösche das erste leere Feld
+        
+        blockData.auditorsArray.forEach((auditor, index) => {
+            const newItem = document.createElement('div');
+            newItem.className = 'multi-input-item';
+            newItem.innerHTML = `
+                <input type="text" name="auditors[]" value="${auditor}" placeholder="z.B. Dr. Schmidt">
+                <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="${index === 0 && blockData.auditorsArray.length === 1 ? 'display: none;' : ''}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            auditorContainer.appendChild(newItem);
+        });
+    }
+    
+    // Kopiere Gesprächspartner
+    if (blockData.contactsArray && blockData.contactsArray.length > 0) {
+        const contactContainer = newBlock.querySelector(`#contacts-${newBlockId}`);
+        contactContainer.innerHTML = ''; // Lösche das erste leere Feld
+        
+        blockData.contactsArray.forEach((contact, index) => {
+            const newItem = document.createElement('div');
+            newItem.className = 'multi-input-item';
+            newItem.innerHTML = `
+                <input type="text" name="contacts[]" value="${contact}" placeholder="z.B. Max Müller (QM-Leiter)">
+                <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="${index === 0 && blockData.contactsArray.length === 1 ? 'display: none;' : ''}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            contactContainer.appendChild(newItem);
+        });
+    }
     
     // Adjust times for new block
     const startTime = newBlock.querySelector('input[name="startTime"]');
@@ -41640,6 +41725,62 @@ QHSEDashboard.prototype.duplicateAuditBlock = function(blockId) {
     
     this.showNotification('Audit-Block dupliziert', 'success');
 };
+
+// Multi-Input Funktionen für Auditoren und Gesprächspartner
+window.addAuditorInput = function(blockId) {
+    const container = document.getElementById(`auditors-${blockId}`);
+    const newItem = document.createElement('div');
+    newItem.className = 'multi-input-item';
+    newItem.innerHTML = `
+        <input type="text" name="auditors[]" placeholder="z.B. Dr. Schmidt">
+        <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(newItem);
+    
+    // Zeige Entfernen-Buttons wenn mehr als ein Input vorhanden
+    updateRemoveButtons(container);
+};
+
+window.addContactInput = function(blockId) {
+    const container = document.getElementById(`contacts-${blockId}`);
+    const newItem = document.createElement('div');
+    newItem.className = 'multi-input-item';
+    newItem.innerHTML = `
+        <input type="text" name="contacts[]" placeholder="z.B. Max Müller (QM-Leiter)">
+        <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(newItem);
+    
+    // Zeige Entfernen-Buttons wenn mehr als ein Input vorhanden
+    updateRemoveButtons(container);
+};
+
+window.removeMultiInput = function(button) {
+    const item = button.closest('.multi-input-item');
+    const container = item.closest('.multi-input-container');
+    
+    // Nur entfernen wenn mehr als ein Input vorhanden
+    if (container.children.length > 1) {
+        item.remove();
+        updateRemoveButtons(container);
+    }
+};
+
+function updateRemoveButtons(container) {
+    const items = container.querySelectorAll('.multi-input-item');
+    items.forEach((item, index) => {
+        const removeBtn = item.querySelector('.remove-input-btn');
+        if (items.length > 1) {
+            removeBtn.style.display = 'inline-block';
+        } else {
+            removeBtn.style.display = 'none';
+        }
+    });
+}
 
 QHSEDashboard.prototype.showAuditBlocksEmptyState = function() {
     const container = document.getElementById('auditBlocksContainer');
@@ -42386,6 +42527,32 @@ QHSEDashboard.prototype.generateAuditPlan = function() {
             }
         });
         
+        // Spezielle Behandlung für Multi-Input-Arrays (Auditoren und Gesprächspartner)
+        const auditorInputs = block.querySelectorAll('input[name="auditors[]"]');
+        const contactInputs = block.querySelectorAll('input[name="contacts[]"]');
+        
+        // Sammle alle Auditoren
+        blockData.auditorsArray = [];
+        auditorInputs.forEach(input => {
+            if (input.value.trim()) {
+                blockData.auditorsArray.push(input.value.trim());
+            }
+        });
+        if (blockData.auditorsArray.length === 0) {
+            blockData.auditorsArray.push('Nicht angegeben');
+        }
+        
+        // Sammle alle Gesprächspartner
+        blockData.contactsArray = [];
+        contactInputs.forEach(input => {
+            if (input.value.trim()) {
+                blockData.contactsArray.push(input.value.trim());
+            }
+        });
+        if (blockData.contactsArray.length === 0) {
+            blockData.contactsArray.push('Nicht angegeben');
+        }
+        
         // Handle date display options
         const showBlockDateCheckbox = block.querySelector('input[name="showBlockDate"]');
         const useDifferentDateCheckbox = block.querySelector('input[name="useDifferentDate"]');
@@ -42530,8 +42697,8 @@ QHSEDashboard.prototype.renderAuditPlan = function(planData) {
                 date: blockDate,
                 showDate: block.showDate !== false, // Default to true if not explicitly false
                 department: block.department || 'Nicht angegeben',
-                auditors: block.auditors || 'Nicht angegeben',
-                contact: block.contact || 'Nicht angegeben',
+                auditors: block.auditorsArray ? block.auditorsArray.join(', ') : (block.auditors || 'Nicht angegeben'),
+                contact: block.contactsArray ? block.contactsArray.join(', ') : (block.contact || 'Nicht angegeben'),
                 topics: this.formatTopicsAndProcesses(block.topicsAndProcesses) || block.topics || 'Noch zu definieren',
                 standards: Array.isArray(block.standards) ? block.standards.join(', ') : (block.standards || 'Noch nicht festgelegt'),
                 chapters: block.chapters || '-'
@@ -43087,7 +43254,14 @@ QHSEDashboard.prototype.exportAuditPlanWord = function() {
             
             <!-- Audit Plan Notes and Distribution -->
             <div class="audit-notes-section" style="margin-top: 30px; page-break-inside: avoid;">
-                <h3 style="border-bottom: 1px solid #333; padding-bottom: 5px;">Hinweise und Verteiler</h3>
+                <h3 style="border-bottom: 1px solid #333; padding-bottom: 5px;">Audit-Notizen und Hinweise</h3>
+                
+                ${planData.auditNotes && planData.auditNotes.mainAuditNotes ? `
+                <div style="margin: 15px 0; padding: 12px; background-color: #f8f9fa; border-left: 4px solid #007acc;">
+                    <p><strong>📝 Audit-Notizen & Maßnahmen:</strong></p>
+                    <div style="white-space: pre-wrap; line-height: 1.5;">${planData.auditNotes.mainAuditNotes}</div>
+                </div>
+                ` : ''}
                 
                 ${planData.auditNotes && planData.auditNotes.remoteIndicator ? `
                 <div style="margin: 15px 0;">
@@ -43500,6 +43674,13 @@ QHSEDashboard.prototype.exportAuditNotes = function() {
             <div class="notes-section">
                 <h2>Audit-Hinweise und Besonderheiten</h2>
                 
+                ${notes.mainAuditNotes ? `
+                <div class="note-item">
+                    <div class="note-label">📝 Hauptnotizen - Audit-Notizen & Maßnahmen:</div>
+                    <div class="note-content" style="white-space: pre-wrap;">${notes.mainAuditNotes}</div>
+                </div>
+                ` : ''}
+                
                 ${notes.remoteIndicator ? `
                 <div class="note-item">
                     <div class="note-label">Remote-Teilnahme:</div>
@@ -43726,6 +43907,9 @@ QHSEDashboard.prototype.collectAuditNotesData = function() {
     const confidentialityNote = document.getElementById('confidentialityNote')?.value || '';
     const clientDistribution = document.getElementById('clientDistribution')?.value || '';
     
+    // 📝 Collect main audit notes from textarea
+    const mainAuditNotes = document.getElementById('auditNotes')?.value || '';
+    
     // Collect selected distribution channels
     const distributionChannels = [];
     document.querySelectorAll('input[name="auditPlanDistribution"]:checked').forEach(checkbox => {
@@ -43737,7 +43921,8 @@ QHSEDashboard.prototype.collectAuditNotesData = function() {
         auditorsNote,
         confidentialityNote,
         clientDistribution,
-        distributionChannels
+        distributionChannels,
+        mainAuditNotes  // 📝 Add main audit notes
     };
 };
 

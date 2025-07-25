@@ -1,0 +1,1200 @@
+/* 🎨 ENHANCED AUDITOR MANAGEMENT & AUDIT PLAN GENERATOR */
+/* Premium Design für professionelle Auditor-Verwaltung */
+
+/* ===== PREMIUM DESIGN VARIABLES ===== */
+:root {
+    /* Auditor Management Color Scheme */
+    --auditor-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --auditor-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --auditor-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --auditor-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --auditor-info: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    
+    /* Professional Shadows */
+    --shadow-auditor-light: 0 4px 20px rgba(102, 126, 234, 0.1);
+    --shadow-auditor-medium: 0 8px 30px rgba(102, 126, 234, 0.15);
+    --shadow-auditor-heavy: 0 12px 40px rgba(102, 126, 234, 0.2);
+    --shadow-auditor-glow: 0 0 30px rgba(102, 126, 234, 0.3);
+    
+    /* Modern Spacing */
+    --spacing-auditor-xs: 8px;
+    --spacing-auditor-sm: 16px;
+    --spacing-auditor-md: 24px;
+    --spacing-auditor-lg: 32px;
+    --spacing-auditor-xl: 48px;
+    
+    /* Professional Typography */
+    --font-auditor-heading: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-auditor-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ===== ENHANCED CONTENT HEADER ===== */
+#auditor-verwaltung-section .content-header {
+    background: var(--auditor-primary);
+    color: white;
+    padding: var(--spacing-auditor-xl) var(--spacing-auditor-lg);
+    border-radius: 20px 20px 0 0;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0;
+    box-shadow: var(--shadow-auditor-medium);
+}
+
+#auditor-verwaltung-section .content-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: headerFloat 8s ease-in-out infinite;
+}
+
+@keyframes headerFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+#auditor-verwaltung-section .content-header h1 {
+    font-family: var(--font-auditor-heading);
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 var(--spacing-auditor-sm) 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 2;
+}
+
+#auditor-verwaltung-section .content-header h1 i {
+    margin-right: var(--spacing-auditor-sm);
+    background: linear-gradient(45deg, #fff, #f0f0f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: iconShine 3s ease-in-out infinite;
+}
+
+@keyframes iconShine {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+    50% { filter: drop-shadow(0 0 15px rgba(255,255,255,0.6)); }
+}
+
+#auditor-verwaltung-section .section-description {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+    font-weight: 400;
+}
+
+/* ===== SPECTACULAR TAB SYSTEM ===== */
+.auditor-management-tabs {
+    display: flex;
+    background: white;
+    border-radius: 0 0 20px 20px;
+    box-shadow: var(--shadow-auditor-light);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: var(--spacing-auditor-lg);
+}
+
+.auditor-management-tabs::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--auditor-primary);
+    background-size: 200% 100%;
+    animation: tabUnderlineFlow 3s ease infinite;
+}
+
+@keyframes tabUnderlineFlow {
+    0%, 100% { background-position: -200% 0; }
+    50% { background-position: 200% 0; }
+}
+
+.tab-btn {
+    flex: 1;
+    padding: var(--spacing-auditor-md);
+    border: none;
+    background: transparent;
+    font-family: var(--font-auditor-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #64748b;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.tab-btn:hover::before {
+    left: 100%;
+}
+
+.tab-btn i {
+    margin-right: var(--spacing-auditor-xs);
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: #667eea;
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+}
+
+.tab-btn:hover i {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.tab-btn.active {
+    color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    transform: translateY(-2px);
+    box-shadow: inset 0 -4px 0 #667eea;
+}
+
+.tab-btn.active i {
+    transform: scale(1.2);
+    filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
+}
+
+/* ===== PREMIUM STAT CARDS ===== */
+.auditor-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-auditor-md);
+    margin-bottom: var(--spacing-auditor-lg);
+}
+
+.auditor-stats .stat-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+    padding: var(--spacing-auditor-lg);
+    border-radius: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    box-shadow: var(--shadow-auditor-light);
+}
+
+.auditor-stats .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: var(--auditor-primary);
+    transition: height 0.3s ease;
+}
+
+.auditor-stats .stat-card:nth-child(2)::before {
+    background: var(--auditor-success);
+}
+
+.auditor-stats .stat-card:nth-child(3)::before {
+    background: var(--auditor-warning);
+}
+
+.auditor-stats .stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-auditor-heavy);
+}
+
+.auditor-stats .stat-card:hover::before {
+    height: 12px;
+    box-shadow: var(--shadow-auditor-glow);
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 900;
+    font-family: var(--font-auditor-heading);
+    background: var(--auditor-primary);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: statNumberShimmer 3s ease-in-out infinite;
+    line-height: 1;
+    margin-bottom: var(--spacing-auditor-xs);
+}
+
+@keyframes statNumberShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.auditor-stats .stat-card:hover .stat-label {
+    opacity: 1;
+}
+
+/* ===== MODERN INFO BOXES ===== */
+.info-box {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+    border-radius: 20px;
+    padding: var(--spacing-auditor-xl);
+    margin-bottom: var(--spacing-auditor-lg);
+    border: 1px solid rgba(255,255,255,0.8);
+    backdrop-filter: blur(15px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-auditor-medium);
+    animation: infoBoxFadeIn 0.8s ease-out;
+}
+
+@keyframes infoBoxFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.info-box:hover::before {
+    opacity: 1;
+    animation: infoBoxGlow 2s ease-in-out infinite;
+}
+
+@keyframes infoBoxGlow {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.1) rotate(180deg); }
+}
+
+.info-box h3 {
+    font-family: var(--font-auditor-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: var(--spacing-auditor-md);
+    position: relative;
+    z-index: 2;
+}
+
+/* ===== ENHANCED FORM ELEMENTS ===== */
+.form-section {
+    background: rgba(248, 250, 252, 0.6);
+    border-radius: 16px;
+    padding: var(--spacing-auditor-lg);
+    margin-bottom: var(--spacing-auditor-md);
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+    transition: left 0.6s ease;
+}
+
+.form-section:hover::before {
+    left: 100%;
+}
+
+.form-section h4 {
+    font-family: var(--font-auditor-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: var(--spacing-auditor-md);
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.form-section h4 i {
+    margin-right: var(--spacing-auditor-sm);
+    color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-auditor-md);
+    margin-bottom: var(--spacing-auditor-sm);
+}
+
+.form-group {
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: var(--spacing-auditor-sm);
+    font-size: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Labels im Auditplan-Generator größer */
+#audit-plan-generator-tab .form-group label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-auditor-md);
+    color: #1f2937;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 18px 24px;
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-family: var(--font-auditor-body);
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 2;
+    min-height: 52px;
+}
+
+/* ===== AUDIT PLAN GENERATOR SPECIFIC ENHANCEMENTS ===== */
+#audit-plan-generator-tab .form-group input,
+#audit-plan-generator-tab .form-group select,
+#audit-plan-generator-tab .form-group textarea {
+    padding: 20px 28px;
+    font-size: 1.15rem;
+    min-height: 58px;
+    border-radius: 14px;
+}
+
+#audit-plan-generator-tab .form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* Spezielle Vergrößerungen für wichtige Felder */
+#auditClient,
+#auditLocation,
+#auditTitle,
+#auditNotes {
+    padding: 22px 32px;
+    font-size: 1.2rem;
+    min-height: 64px;
+    font-weight: 500;
+}
+
+#auditNotes {
+    min-height: 140px;
+    line-height: 1.7;
+}
+
+/* Audit Block Inputs vergrößern */
+.audit-block input[type="text"],
+.audit-block select,
+.audit-block textarea {
+    padding: 18px 24px;
+    font-size: 1.1rem;
+    min-height: 54px;
+}
+
+/* Time Inputs größer machen */
+.audit-block input[type="time"] {
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    min-height: 50px;
+}
+
+/* Form Row für Auditplan anpassen */
+#audit-plan-generator-tab .form-row {
+    gap: var(--spacing-auditor-lg);
+    margin-bottom: var(--spacing-auditor-lg);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.1), inset 0 2px 8px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+/* ===== CHECKBOX ENHANCEMENTS ===== */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-auditor-sm);
+    margin-top: var(--spacing-auditor-sm);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: var(--spacing-auditor-sm);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    font-weight: 500;
+}
+
+.checkbox-label:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: translateX(4px);
+}
+
+.checkbox-label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    margin-right: var(--spacing-auditor-sm);
+    position: relative;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+    background: var(--auditor-primary);
+    border-color: #667eea;
+    transform: scale(1.1);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: checkmarkPop 0.3s ease-out;
+}
+
+@keyframes checkmarkPop {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    50% { transform: translate(-50%, -50%) scale(1.3); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ===== BUTTON ENHANCEMENTS ===== */
+.btn {
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    font-family: var(--font-auditor-body);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-auditor-light);
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-auditor-xs);
+}
+
+/* Buttons im Auditplan-Generator größer */
+#audit-plan-generator-tab .btn {
+    padding: 18px 36px;
+    font-size: 1.1rem;
+    min-height: 56px;
+    border-radius: 14px;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: var(--auditor-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: var(--shadow-auditor-heavy);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #475569;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background: var(--auditor-primary);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-outline:hover {
+    background: var(--auditor-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ===== AUDIT PLAN GENERATOR ENHANCEMENTS ===== */
+.audit-plan-generator {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+    border-radius: 20px;
+    padding: var(--spacing-auditor-xl);
+    border: 1px solid rgba(255,255,255,0.8);
+    backdrop-filter: blur(15px);
+    box-shadow: var(--shadow-auditor-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-header {
+    background: var(--auditor-primary);
+    margin: calc(-1 * var(--spacing-auditor-xl)) calc(-1 * var(--spacing-auditor-xl)) var(--spacing-auditor-lg);
+    padding: var(--spacing-auditor-xl);
+    border-radius: 20px 20px 0 0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.plan-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: planHeaderFloat 10s ease-in-out infinite;
+}
+
+@keyframes planHeaderFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-30px) rotate(120deg); }
+    66% { transform: translateY(15px) rotate(240deg); }
+}
+
+.header-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--spacing-auditor-xl);
+    align-items: start;
+    position: relative;
+    z-index: 2;
+}
+
+.header-left h3 {
+    font-family: var(--font-auditor-heading);
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 var(--spacing-auditor-md) 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.header-left h3 i {
+    margin-right: var(--spacing-auditor-sm);
+    animation: planIconPulse 2s ease-in-out infinite;
+}
+
+@keyframes planIconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ===== ZN SELECTION ENHANCEMENTS ===== */
+.zn-selection {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: var(--spacing-auditor-lg);
+    backdrop-filter: blur(10px);
+}
+
+.zn-selection label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: var(--spacing-auditor-sm);
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.zn-input-group {
+    display: flex;
+    gap: var(--spacing-auditor-sm);
+    margin-bottom: var(--spacing-auditor-sm);
+}
+
+.zn-input-group input {
+    flex: 1;
+    padding: 18px 24px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    min-height: 56px;
+}
+
+.zn-input-group input::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+
+.zn-input-group input:focus {
+    outline: none;
+    border-color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.3);
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.1);
+}
+
+.btn-add-zn {
+    padding: 18px 28px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-add-zn:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+}
+
+/* ===== LOGO UPLOAD ENHANCEMENTS ===== */
+.logo-upload-section {
+    text-align: center;
+}
+
+.logo-upload-section label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: var(--spacing-auditor-sm);
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.logo-upload-area {
+    width: 120px;
+    height: 120px;
+    border: 3px dashed rgba(255,255,255,0.4);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+}
+
+.logo-upload-area:hover {
+    border-color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.05);
+}
+
+.logo-upload-area i {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-auditor-xs);
+    opacity: 0.8;
+}
+
+.logo-upload-area p {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.logo-upload-area small {
+    opacity: 0.7;
+    font-size: 0.7rem;
+}
+
+/* ===== CONFIGURATION SECTION ENHANCEMENTS ===== */
+.plan-configuration {
+    margin-top: var(--spacing-auditor-lg);
+}
+
+.config-section {
+    background: rgba(248, 250, 252, 0.6);
+    border-radius: 16px;
+    padding: var(--spacing-auditor-xl);
+    margin-bottom: var(--spacing-auditor-lg);
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.config-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+    transition: left 0.8s ease;
+}
+
+.config-section:hover::before {
+    left: 100%;
+}
+
+.config-section h4 {
+    font-family: var(--font-auditor-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: var(--spacing-auditor-md);
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.config-section h4 i {
+    margin-right: var(--spacing-auditor-sm);
+    color: #667eea;
+    font-size: 1.2rem;
+    animation: configIconSpin 4s ease-in-out infinite;
+}
+
+@keyframes configIconSpin {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(90deg); }
+    50% { transform: rotate(180deg); }
+    75% { transform: rotate(270deg); }
+}
+
+/* ===== RESPONSIVE ENHANCEMENTS ===== */
+@media (max-width: 768px) {
+    .auditor-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .auditor-management-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+        min-width: 150px;
+        padding: var(--spacing-auditor-md);
+    }
+    
+    .header-content {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-auditor-md);
+    }
+    
+    .zn-input-group {
+        flex-direction: column;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Mobile Eingabefeld-Anpassungen */
+    #audit-plan-generator-tab .form-group input,
+    #audit-plan-generator-tab .form-group select,
+    #audit-plan-generator-tab .form-group textarea {
+        padding: 16px 20px;
+        font-size: 1rem;
+        min-height: 52px;
+    }
+    
+    #auditClient,
+    #auditLocation,
+    #auditTitle,
+    #auditNotes {
+        padding: 18px 24px;
+        font-size: 1.1rem;
+        min-height: 56px;
+    }
+    
+    #auditNotes {
+        min-height: 120px;
+    }
+    
+    #audit-plan-generator-tab .btn {
+        padding: 16px 28px;
+        font-size: 1rem;
+        min-height: 52px;
+    }
+    
+    .config-section {
+        padding: var(--spacing-auditor-lg);
+    }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+    .info-box,
+    .form-section,
+    .config-section,
+    .audit-plan-generator {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.9) 100%);
+        border-color: rgba(148, 163, 184, 0.2);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        background: rgba(30, 41, 59, 0.8);
+        border-color: rgba(148, 163, 184, 0.3);
+        color: #e2e8f0;
+    }
+    
+    .info-box h3,
+    .form-section h4,
+    .config-section h4 {
+        color: #e2e8f0;
+    }
+    
+    .form-group label {
+        color: #cbd5e1;
+    }
+    
+    .stat-label {
+        color: #94a3b8;
+    }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .tab-btn,
+    .btn,
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        border-width: 3px;
+    }
+    
+    .auditor-stats .stat-card,
+    .info-box,
+    .form-section,
+    .config-section {
+        border-width: 2px;
+        border-color: #000;
+    }
+}
+
+/* Focus states for keyboard navigation */
+.tab-btn:focus,
+.btn:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.checkbox-label:focus-within {
+    outline: 3px solid rgba(102, 126, 234, 0.6);
+    outline-offset: 2px;
+}
+
+/* ===== LOADING & EMPTY STATES ===== */
+.loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-auditor-xl);
+    color: #64748b;
+}
+
+.loading-state i {
+    margin-right: var(--spacing-auditor-sm);
+    animation: spin 1s linear infinite;
+    background: var(--auditor-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-auditor-xl);
+    color: #64748b;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-auditor-md);
+    background: var(--auditor-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    font-family: var(--font-auditor-heading);
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-auditor-sm);
+    color: #475569;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+.tab-btn,
+.btn,
+.auditor-stats .stat-card,
+.info-box {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* ===== MODAL ENHANCEMENTS - GRÖSSERE FORMULARE ===== */
+/* Generelle Modal-Vergrößerungen */
+.modal-content {
+    max-width: 1600px !important;
+    width: 98% !important;
+    max-height: 95vh !important;
+    margin: 1% auto !important;
+}
+
+/* Auditplan-Generator und Auditor-Verwaltung Modals EXTRA GROß */
+#audit-plan-generator-tab .modal-content,
+.auditor-modal .modal-content,
+.audit-modal .modal-content {
+    max-width: 1800px !important;
+    width: 99% !important;
+    max-height: 98vh !important;
+    margin: 0.5% auto !important;
+}
+
+/* Modal Body größer */
+.modal-body {
+    padding: 3rem !important;
+    max-height: calc(95vh - 200px) !important;
+    overflow-y: auto;
+}
+
+/* Auditplan-Generator Modal Body EXTRA Platz */
+#audit-plan-generator-tab .modal-body,
+.auditor-modal .modal-body,
+.audit-modal .modal-body {
+    padding: 4rem !important;
+    max-height: calc(98vh - 180px) !important;
+}
+
+/* Modal Header größer */
+.modal-header {
+    padding: 2.5rem 3rem !important;
+    min-height: 100px;
+}
+
+.modal-header h2 {
+    font-size: 2rem !important;
+    font-weight: 700;
+}
+
+/* Modal Footer größer */
+.modal-footer {
+    padding: 2.5rem 3rem !important;
+    min-height: 100px;
+}
+
+/* Spezielle Vergrößerungen für wichtige Modals */
+.enterprise-issue-modal .modal-content,
+.professional-machine-modal .modal-content,
+.large-modal .modal-content {
+    max-width: 1900px !important;
+    width: 99% !important;
+    max-height: 98vh !important;
+    margin: 0.5% auto !important;
+}
+
+/* Tab-Container in Modals größer */
+.form-tabs,
+.auditor-management-tabs,
+.professional-tabs {
+    min-height: 80px;
+    padding: 1rem;
+}
+
+.tab-btn,
+.form-tab {
+    padding: 1.5rem 2.5rem !important;
+    font-size: 1.2rem !important;
+    min-height: 60px;
+}
+
+/* Formulare in Modals größer */
+.modal .form-section,
+.modal .config-section,
+.modal .info-box {
+    padding: 3rem !important;
+    margin-bottom: 2rem;
+}
+
+/* Mobile Anpassungen für große Modals */
+@media (max-width: 1024px) {
+    .modal-content {
+        max-width: 98% !important;
+        width: 98% !important;
+        margin: 1% auto !important;
+    }
+    
+    .modal-body {
+        padding: 2rem !important;
+    }
+    
+    .modal-header,
+    .modal-footer {
+        padding: 1.5rem 2rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        max-height: 100vh !important;
+    }
+    
+    .modal-body {
+        padding: 1.5rem !important;
+        max-height: calc(100vh - 160px) !important;
+    }
+    
+    .modal-header,
+    .modal-footer {
+        padding: 1rem !important;
+        min-height: 80px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .auditor-management-tabs,
+    .btn {
+        display: none !important;
+    }
+    
+    .info-box,
+    .form-section,
+    .config-section {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
