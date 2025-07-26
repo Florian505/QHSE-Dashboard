@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Dokumente Test - Neues Design</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f8fafc;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .audit-notes-generator .qhse-documents-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
+            margin-bottom: 16px;
+        }
+
+        .audit-notes-generator .qhse-documents-section label {
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .audit-notes-generator .qhse-documents-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .audit-notes-generator .qhse-document-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(59, 130, 246, 0.15);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .audit-notes-generator .qhse-document-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .audit-notes-generator .document-selection select.qhse-document-select,
+        .audit-notes-generator .document-date-field input.qhse-document-date,
+        .audit-notes-generator .document-notes-field input.qhse-document-notes {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1f2937;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.05);
+            box-sizing: border-box;
+        }
+
+        .audit-notes-generator .document-selection select.qhse-document-select:focus,
+        .audit-notes-generator .document-date-field input.qhse-document-date:focus,
+        .audit-notes-generator .document-notes-field input.qhse-document-notes:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            background: #ffffff;
+            transform: scale(1.02);
+        }
+
+        .audit-notes-generator .document-actions .remove-qhse-document {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .audit-notes-generator .document-actions .remove-qhse-document:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .audit-notes-generator .add-qhse-document-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+        }
+
+        .audit-notes-generator .add-qhse-document-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .audit-notes-generator .add-qhse-document-btn i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .audit-notes-generator .add-qhse-document-btn:hover i {
+            transform: rotate(90deg) scale(1.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 QHSE-Dokumentenmenü Test</h1>
+        <p><strong>So sollte das neue QHSE-Dokumentenmenü aussehen:</strong></p>
+        
+        <div class="audit-notes-generator">
+            <div class="block-form-group qhse-documents-section">
+                <label>📋 QHSE-Dokumente prüfen</label>
+                <div class="qhse-documents-container">
+                    <div class="qhse-document-item">
+                        <div class="document-selection">
+                            <select class="qhse-document-select">
+                                <option value="">-- Dokument auswählen --</option>
+                                <option value="Arbeitsschutzverordnung" selected>Arbeitsschutzverordnung</option>
+                                <option value="Gefährdungsbeurteilung">Gefährdungsbeurteilung</option>
+                                <option value="Notfallplan">Notfallplan</option>
+                                <option value="Qualitätshandbuch">Qualitätshandbuch</option>
+                            </select>
+                        </div>
+                        <div class="document-date-field">
+                            <input type="date" class="qhse-document-date" value="2025-01-26">
+                        </div>
+                        <div class="document-notes-field">
+                            <input type="text" class="qhse-document-notes" value="Version 2.1 geprüft - alle Anforderungen erfüllt">
+                        </div>
+                        <div class="document-actions">
+                            <button type="button" class="remove-qhse-document">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="qhse-document-item">
+                        <div class="document-selection">
+                            <select class="qhse-document-select">
+                                <option value="">-- Dokument auswählen --</option>
+                                <option value="Arbeitsschutzverordnung">Arbeitsschutzverordnung</option>
+                                <option value="Gefährdungsbeurteilung" selected>Gefährdungsbeurteilung</option>
+                                <option value="Notfallplan">Notfallplan</option>
+                                <option value="Qualitätshandbuch">Qualitätshandbuch</option>
+                            </select>
+                        </div>
+                        <div class="document-date-field">
+                            <input type="date" class="qhse-document-date" value="2025-01-25">
+                        </div>
+                        <div class="document-notes-field">
+                            <input type="text" class="qhse-document-notes" value="Aktualisierung erforderlich bis März 2025">
+                        </div>
+                        <div class="document-actions">
+                            <button type="button" class="remove-qhse-document">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="add-qhse-document-btn">
+                    <i class="fas fa-plus"></i> Weiteres Dokument hinzufügen
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #f1f5f9; border-radius: 12px;">
+            <h3>📝 Struktur des Menüs:</h3>
+            <ul>
+                <li><strong>Spalte 1 (breit):</strong> Dokument auswählen (Dropdown)</li>
+                <li><strong>Spalte 2 (schmal):</strong> Datum eingeben</li>
+                <li><strong>Spalte 3 (breit):</strong> Notizen zum Dokument</li>
+                <li><strong>Spalte 4 (minimal):</strong> Löschen-Button</li>
+            </ul>
+            <p><strong>Features:</strong> Hover-Effekte, Validierung, Mobile-responsive, Drag & Drop-Stil</p>
+        </div>
+    </div>
+</body>
+</html>

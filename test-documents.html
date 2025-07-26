@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QHSE Dokumente Test</title>
+    <style>
+        .document-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid rgba(59, 130, 246, 0.15);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            margin-bottom: 12px;
+        }
+        
+        .document-select,
+        .document-date,
+        .document-notes {
+            padding: 12px 16px;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1f2937;
+            font-size: 0.9rem;
+        }
+        
+        .remove-document-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+        }
+        
+        .add-document-row-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔍 QHSE-Dokumente Test</h2>
+        <p><strong>So sollte das Dokumentenmenü aussehen:</strong></p>
+        
+        <div class="documents-selection-container">
+            <div class="document-row">
+                <select class="document-select" name="documents[]">
+                    <option value="">Dokument auswählen...</option>
+                    <option value="Arbeitsschutzverordnung">Arbeitsschutzverordnung</option>
+                    <option value="Betriebsanweisung Maschinen">Betriebsanweisung Maschinen</option>
+                    <option value="Gefährdungsbeurteilung">Gefährdungsbeurteilung</option>
+                    <option value="Notfallplan">Notfallplan</option>
+                    <option value="Erste-Hilfe-Anweisung">Erste-Hilfe-Anweisung</option>
+                    <option value="Umweltmanagement-Handbuch">Umweltmanagement-Handbuch</option>
+                    <option value="Qualitätshandbuch">Qualitätshandbuch</option>
+                </select>
+                <input type="date" class="document-date" name="documentDates[]" title="Dokumentdatum">
+                <input type="text" class="document-notes" name="documentNotes[]" placeholder="Notizen zum Dokument...">
+                <button type="button" class="remove-document-btn">✕</button>
+            </div>
+            
+            <div class="document-row">
+                <select class="document-select" name="documents[]">
+                    <option value="">Dokument auswählen...</option>
+                    <option value="Arbeitsschutzverordnung" selected>Arbeitsschutzverordnung</option>
+                    <option value="Betriebsanweisung Maschinen">Betriebsanweisung Maschinen</option>
+                    <option value="Gefährdungsbeurteilung">Gefährdungsbeurteilung</option>
+                </select>
+                <input type="date" class="document-date" name="documentDates[]" value="2025-01-26" title="Dokumentdatum">
+                <input type="text" class="document-notes" name="documentNotes[]" placeholder="Notizen zum Dokument..." value="Version 2.1 geprüft - OK">
+                <button type="button" class="remove-document-btn">✕</button>
+            </div>
+        </div>
+        
+        <button type="button" class="add-document-row-btn">
+            ➕ Weiteres Dokument hinzufügen
+        </button>
+        
+        <h3>📋 Anleitung:</h3>
+        <ol>
+            <li><strong>Dokument auswählen:</strong> Wählen Sie aus dem Dropdown ein QHSE-Dokument</li>
+            <li><strong>Datum eingeben:</strong> Daneben können Sie das Prüfdatum eingeben</li>
+            <li><strong>Notizen hinzufügen:</strong> Fügen Sie Bemerkungen zum Dokument hinzu</li>
+            <li><strong>Weitere Dokumente:</strong> Klicken Sie auf "+" um weitere Zeilen hinzuzufügen</li>
+        </ol>
+        
+        <p><strong>Grid Layout:</strong> Dokument (breit) → Datum (schmal) → Notizen (breit) → Entfernen</p>
+    </div>
+</body>
+</html>

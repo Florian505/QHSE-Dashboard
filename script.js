@@ -46619,3 +46619,1964 @@ function clearAllISOSelections() {
     console.log('All ISO selections cleared');
 }
 
+// ==================== AUDIT NOTES GENERATOR FUNCTIONS ====================
+
+function toggleNotesStandardsDropdown() {
+    const dropdown = document.getElementById('notesStandardsDropdown');
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateNotesStandardsDisplay() {
+    const checkboxes = document.querySelectorAll('input[name="notesStandards"]:checked');
+    const display = document.getElementById('notesStandardsDisplay');
+    
+    if (checkboxes.length === 0) {
+        display.textContent = 'Bitte wählen Sie Standards aus...';
+    } else {
+        const selected = Array.from(checkboxes).map(cb => cb.value);
+        display.textContent = selected.join(', ');
+    }
+}
+
+function toggleNotesArea(checkbox) {
+    // Optional: Add visual feedback for selected areas
+    const label = checkbox.closest('label');
+    if (checkbox.checked) {
+        label.classList.add('selected');
+    } else {
+        label.classList.remove('selected');
+    }
+}
+
+function generateAuditNotes() {
+    // Collect form data
+    const client = document.getElementById('notesClient').value || 'Nicht angegeben';
+    const auditor = document.getElementById('notesAuditor').value || 'Nicht angegeben';
+    const date = document.getElementById('notesDate').value || new Date().toISOString().split('T')[0];
+    const location = document.getElementById('notesLocation').value || 'Nicht angegeben';
+    
+    // Get selected standards
+    const standards = [];
+    document.querySelectorAll('input[name="notesStandards"]:checked').forEach(checkbox => {
+        standards.push(checkbox.value);
+    });
+    
+    // Get selected areas
+    const areas = [];
+    document.querySelectorAll('input[name="notesAreas"]:checked').forEach(checkbox => {
+        areas.push({
+            value: checkbox.value,
+            label: checkbox.closest('label').textContent.trim()
+        });
+    });
+    
+    // Get audit blocks
+    const auditBlocks = [];
+    const blockElements = document.querySelectorAll('#notesAuditBlocksContainer .audit-block');
+    blockElements.forEach(block => {
+        const blockId = block.id;
+        const blockData = {
+            startTime: block.querySelector('input[name="startTime"]').value,
+            endTime: block.querySelector('input[name="endTime"]').value,
+            department: block.querySelector('input[name="department"]').value || block.querySelector('select[name="departmentSelect"]').value,
+            auditFocus: block.querySelector('textarea[name="auditFocus"]').value,
+            auditors: [],
+            contacts: [],
+            standards: Array.from(block.querySelectorAll('select[name="standards"] option:checked')).map(opt => opt.value),
+            chapters: block.querySelector('textarea[name="chapters"]').value,
+            notesTemplate: block.querySelector('select[name="notesTemplate"]').value,
+            documents: getSelectedDocumentsWithDates(blockId)
+        };
+        
+        // Collect auditors
+        block.querySelectorAll('input[name="auditors[]"]').forEach(input => {
+            if (input.value.trim()) {
+                blockData.auditors.push(input.value.trim());
+            }
+        });
+        
+        // Collect contacts
+        block.querySelectorAll('input[name="contacts[]"]').forEach(input => {
+            if (input.value.trim()) {
+                blockData.contacts.push(input.value.trim());
+            }
+        });
+        
+        auditBlocks.push(blockData);
+    });
+    
+    const template = document.getElementById('notesTemplate').value;
+    const includePositive = document.getElementById('includePositive').checked;
+    const includeRecommendations = document.getElementById('includeRecommendations').checked;
+    
+    // Validate minimum requirements
+    if (standards.length === 0 && auditBlocks.length === 0) {
+        alert('Bitte wählen Sie mindestens einen Standard aus oder fügen Sie Audit-Blöcke hinzu.');
+        return;
+    }
+    
+    if (areas.length === 0 && auditBlocks.length === 0) {
+        alert('Bitte wählen Sie mindestens einen Notizen-Bereich aus oder fügen Sie Audit-Blöcke hinzu.');
+        return;
+    }
+    
+    // Generate notes content
+    const notesContent = generateNotesContent({
+        client,
+        auditor,
+        date,
+        location,
+        standards,
+        areas,
+        auditBlocks,
+        template,
+        includePositive,
+        includeRecommendations
+    });
+    
+    // Display generated notes
+    document.getElementById('notesContent').innerHTML = notesContent;
+    document.getElementById('generatedNotesSection').style.display = 'block';
+    
+    // Scroll to generated content
+    document.getElementById('generatedNotesSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function generateNotesContent(data) {
+    const dateFormatted = new Date(data.date).toLocaleDateString('de-DE');
+    
+    let html = `
+        <div class="notes-document">
+            <div class="notes-header-info">
+                <h2>Auditnotizen</h2>
+                <div class="header-details">
+                    <div class="detail-row">
+                        <span class="label">Auftraggeber:</span>
+                        <span class="value">${data.client}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Auditor:</span>
+                        <span class="value">${data.auditor}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Datum:</span>
+                        <span class="value">${dateFormatted}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Standort:</span>
+                        <span class="value">${data.location}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Standards:</span>
+                        <span class="value">${data.standards.join(', ')}</span>
+                    </div>
+                </div>
+            </div>
+    `;
+    
+    // Generate content for each selected area
+    if (data.areas && data.areas.length > 0) {
+        data.areas.forEach(area => {
+            html += generateAreaContent(area, data.template, data.includePositive, data.includeRecommendations);
+        });
+    }
+    
+    // Generate content for each audit block
+    if (data.auditBlocks && data.auditBlocks.length > 0) {
+        html += `<div class="audit-blocks-section">
+                    <h3><i class="fas fa-list"></i> Audit-Blöcke</h3>`;
+        
+        data.auditBlocks.forEach((block, index) => {
+            html += generateAuditBlockNotesContent(block, index + 1);
+        });
+        
+        html += `</div>`;
+    }
+    
+    html += `</div>`;
+    return html;
+}
+
+function generateAuditBlockNotesContent(block, blockNumber) {
+    let html = `
+        <div class="audit-block-notes">
+            <h4>Block ${blockNumber}: ${block.department || 'Nicht angegeben'}</h4>
+            <div class="block-info">
+                <div class="block-details">
+                    <div class="detail-row">
+                        <span class="label">Zeit:</span>
+                        <span class="value">${block.startTime} - ${block.endTime}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Abteilung/Bereich:</span>
+                        <span class="value">${block.department || 'Nicht angegeben'}</span>
+                    </div>
+                    ${block.auditFocus ? `
+                    <div class="detail-row">
+                        <span class="label">Audit-Fokus:</span>
+                        <span class="value">${block.auditFocus}</span>
+                    </div>` : ''}
+                    ${block.auditors.length > 0 ? `
+                    <div class="detail-row">
+                        <span class="label">Auditoren:</span>
+                        <span class="value">${block.auditors.join(', ')}</span>
+                    </div>` : ''}
+                    ${block.contacts.length > 0 ? `
+                    <div class="detail-row">
+                        <span class="label">Gesprächspartner:</span>
+                        <span class="value">${block.contacts.join(', ')}</span>
+                    </div>` : ''}
+                    ${block.standards.length > 0 ? `
+                    <div class="detail-row">
+                        <span class="label">Standards:</span>
+                        <span class="value">${block.standards.join(', ')}</span>
+                    </div>` : ''}
+                    ${block.chapters ? `
+                    <div class="detail-row">
+                        <span class="label">Normkapitel:</span>
+                        <span class="value">${block.chapters}</span>
+                    </div>` : ''}
+                    ${block.documents && block.documents.length > 0 ? `
+                    <div class="documents-section">
+                        <h5><i class="fas fa-folder-open"></i> Geprüfte Dokumente (${block.documents.length})</h5>
+                        <div class="documents-list">
+                            ${Array.isArray(block.documents) && typeof block.documents[0] === 'object' ? 
+                                block.documents.map(doc => `
+                                    <div class="document-entry">
+                                        <div class="document-header">
+                                            <span class="document-title">${doc.name}</span>
+                                            ${doc.date ? `<span class="document-date">${new Date(doc.date).toLocaleDateString('de-DE')}</span>` : ''}
+                                            <span class="document-status ${doc.status || 'pending'}">${getStatusText(doc.status || 'pending')}</span>
+                                        </div>
+                                        ${doc.notes ? `<div class="document-notes">${doc.notes}</div>` : ''}
+                                    </div>
+                                `).join('') :
+                                `<div class="simple-documents">${block.documents.join(', ')}</div>`
+                            }
+                        </div>
+                    </div>` : ''}
+                </div>
+            </div>
+            
+            <div class="block-notes-content">
+                ${generateBlockNotesTemplate(block)}
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+function generateBlockNotesTemplate(block) {
+    const template = block.notesTemplate || 'standard';
+    
+    switch (template) {
+        case 'standard':
+            return `
+                <div class="template-section">
+                    <h5>Feststellungen</h5>
+                    <div class="notes-input">
+                        <textarea placeholder="Feststellungen für ${block.department}..." rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="template-section">
+                    <h5>Positive Aspekte</h5>
+                    <div class="notes-input">
+                        <textarea placeholder="Positive Aspekte..." rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="template-section">
+                    <h5>Verbesserungsempfehlungen</h5>
+                    <div class="notes-input">
+                        <textarea placeholder="Empfehlungen zur Verbesserung..." rows="3"></textarea>
+                    </div>
+                </div>
+            `;
+        case 'detailed':
+            return `
+                <div class="template-section">
+                    <h5>Befunde</h5>
+                    <div class="notes-input">
+                        <textarea placeholder="Detaillierte Befunde für ${block.department}..." rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="template-section">
+                    <h5>Bewertung</h5>
+                    <div class="rating-section">
+                        <label>Konformitätsbewertung:</label>
+                        <select>
+                            <option value="">Bitte wählen</option>
+                            <option value="konform">Konform</option>
+                            <option value="minor">Geringfügige Nichtkonformität</option>
+                            <option value="major">Schwerwiegende Nichtkonformität</option>
+                            <option value="verbesserung">Verbesserungsmöglichkeit</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="template-section">
+                    <h5>Detaillierte Empfehlungen</h5>
+                    <div class="notes-input">
+                        <textarea placeholder="Konkrete Verbesserungsvorschläge..." rows="4"></textarea>
+                    </div>
+                </div>
+            `;
+        case 'checklist':
+            const checklistItems = [
+                'Dokumentation vollständig und aktuell',
+                'Verfahren werden befolgt',
+                'Aufzeichnungen sind verfügbar',
+                'Verantwortlichkeiten sind definiert',
+                'Schulungen sind durchgeführt'
+            ];
+            
+            let checklistHtml = `<div class="checklist-section">`;
+            checklistItems.forEach((item, index) => {
+                checklistHtml += `
+                    <div class="checklist-item">
+                        <label>
+                            <input type="checkbox" data-item="${index}">
+                            <span class="checkmark"></span>
+                            ${item}
+                        </label>
+                        <textarea placeholder="Notizen zu diesem Punkt..." rows="1"></textarea>
+                    </div>
+                `;
+            });
+            checklistHtml += `</div>`;
+            return checklistHtml;
+        default:
+            return `
+                <div class="template-section">
+                    <h5>Notizen</h5>
+                    <div class="notes-input">
+                        <textarea placeholder="Ihre Notizen für ${block.department}..." rows="5"></textarea>
+                    </div>
+                </div>
+            `;
+    }
+}
+
+function generateAreaContent(area, template, includePositive, includeRecommendations) {
+    const templates = getNotesTemplates();
+    const areaTemplates = templates[area.value] || templates.default;
+    
+    let html = `
+        <div class="notes-area">
+            <h3>${area.label}</h3>
+    `;
+    
+    switch (template) {
+        case 'standard':
+            html += generateStandardTemplate(areaTemplates, includePositive, includeRecommendations);
+            break;
+        case 'detailed':
+            html += generateDetailedTemplate(areaTemplates, includePositive, includeRecommendations);
+            break;
+        case 'checklist':
+            html += generateChecklistTemplate(areaTemplates);
+            break;
+        default:
+            html += generateStandardTemplate(areaTemplates, includePositive, includeRecommendations);
+    }
+    
+    html += `</div>`;
+    return html;
+}
+
+function generateStandardTemplate(templates, includePositive, includeRecommendations) {
+    let html = `
+        <div class="template-section">
+            <h4>Feststellungen</h4>
+            <div class="notes-input">
+                <textarea placeholder="${templates.findings}" rows="3"></textarea>
+            </div>
+        </div>
+    `;
+    
+    if (includePositive) {
+        html += `
+            <div class="template-section">
+                <h4>Positive Aspekte</h4>
+                <div class="notes-input">
+                    <textarea placeholder="${templates.positive}" rows="2"></textarea>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (includeRecommendations) {
+        html += `
+            <div class="template-section">
+                <h4>Verbesserungsempfehlungen</h4>
+                <div class="notes-input">
+                    <textarea placeholder="${templates.recommendations}" rows="3"></textarea>
+                </div>
+            </div>
+        `;
+    }
+    
+    return html;
+}
+
+function generateDetailedTemplate(templates, includePositive, includeRecommendations) {
+    let html = `
+        <div class="template-section">
+            <h4>Befunde</h4>
+            <div class="notes-input">
+                <textarea placeholder="${templates.findings}" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="template-section">
+            <h4>Bewertung</h4>
+            <div class="rating-section">
+                <label>Konformitätsbewertung:</label>
+                <select>
+                    <option value="">Bitte wählen</option>
+                    <option value="konform">Konform</option>
+                    <option value="minor">Geringfügige Nichtkonformität</option>
+                    <option value="major">Schwerwiegende Nichtkonformität</option>
+                    <option value="verbesserung">Verbesserungsmöglichkeit</option>
+                </select>
+            </div>
+        </div>
+    `;
+    
+    if (includePositive) {
+        html += `
+            <div class="template-section">
+                <h4>Positive Aspekte</h4>
+                <div class="notes-input">
+                    <textarea placeholder="${templates.positive}" rows="2"></textarea>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (includeRecommendations) {
+        html += `
+            <div class="template-section">
+                <h4>Detaillierte Empfehlungen</h4>
+                <div class="notes-input">
+                    <textarea placeholder="${templates.detailedRecommendations}" rows="4"></textarea>
+                </div>
+            </div>
+        `;
+    }
+    
+    return html;
+}
+
+function generateChecklistTemplate(templates) {
+    const checklistItems = templates.checklist || [
+        'Dokumentation vollständig und aktuell',
+        'Verfahren werden befolgt',
+        'Aufzeichnungen sind verfügbar',
+        'Verantwortlichkeiten sind definiert',
+        'Schulungen sind durchgeführt'
+    ];
+    
+    let html = `<div class="checklist-section">`;
+    
+    checklistItems.forEach((item, index) => {
+        html += `
+            <div class="checklist-item">
+                <label>
+                    <input type="checkbox" data-item="${index}">
+                    <span class="checkmark"></span>
+                    ${item}
+                </label>
+                <textarea placeholder="Notizen zu diesem Punkt..." rows="1"></textarea>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    return html;
+}
+
+function getNotesTemplates() {
+    return {
+        'management-review': {
+            findings: 'Bewertung der Managementbewertung, Eingaben und Ausgaben...',
+            positive: 'Systematische Durchführung, vollständige Dokumentation...',
+            recommendations: 'Verbesserung der Datenanalyse, Einbeziehung weiterer KPIs...',
+            detailedRecommendations: 'Detaillierte Analyse der Managementbewertung mit konkreten Verbesserungsvorschlägen...',
+            checklist: [
+                'Managementbewertung wird regelmäßig durchgeführt',
+                'Alle erforderlichen Eingaben sind verfügbar',
+                'Ausgaben sind dokumentiert und kommuniziert',
+                'Maßnahmen werden abgeleitet und verfolgt'
+            ]
+        },
+        'document-control': {
+            findings: 'Prüfung der Dokumentenlenkung, Aktualität und Verfügbarkeit...',
+            positive: 'Strukturierte Dokumentenverwaltung, klare Kennzeichnung...',
+            recommendations: 'Digitalisierung der Dokumentenverwaltung, Versionskontrolle...',
+            detailedRecommendations: 'Implementierung eines digitalen Dokumentenmanagementsystems...',
+            checklist: [
+                'Dokumente sind aktuell und genehmigt',
+                'Veraltete Dokumente sind entfernt',
+                'Zugang zu relevanten Dokumenten ist gewährleistet',
+                'Änderungsverfahren ist definiert'
+            ]
+        },
+        'process-management': {
+            findings: 'Bewertung der Prozessabläufe, Schnittstellen und Überwachung...',
+            positive: 'Klare Prozessdefinition, gute Schnittstellenabstimmung...',
+            recommendations: 'Prozessoptimierung, Digitalisierung von Arbeitsabläufen...',
+            detailedRecommendations: 'Analyse und Optimierung der Kernprozesse mit Fokus auf Effizienz...',
+            checklist: [
+                'Prozesse sind definiert und dokumentiert',
+                'Schnittstellen sind geklärt',
+                'Prozessüberwachung findet statt',
+                'Verbesserungen werden umgesetzt'
+            ]
+        },
+        default: {
+            findings: 'Beschreibung der festgestellten Situation...',
+            positive: 'Positive Aspekte und Best Practices...',
+            recommendations: 'Empfehlungen zur Verbesserung...',
+            detailedRecommendations: 'Detaillierte Verbesserungsvorschläge...',
+            checklist: [
+                'Anforderungen werden erfüllt',
+                'Dokumentation ist vorhanden',
+                'Verfahren werden befolgt',
+                'Verbesserungspotenzial identifiziert'
+            ]
+        }
+    };
+}
+
+function clearNotesForm() {
+    if (confirm('Möchten Sie wirklich alle Eingaben zurücksetzen?')) {
+        // Clear all form inputs
+        document.getElementById('notesClient').value = '';
+        document.getElementById('notesAuditor').value = '';
+        document.getElementById('notesDate').value = '';
+        document.getElementById('notesLocation').value = '';
+        
+        // Clear standards checkboxes
+        document.querySelectorAll('input[name="notesStandards"]').forEach(cb => cb.checked = false);
+        updateNotesStandardsDisplay();
+        
+        // Clear areas checkboxes
+        document.querySelectorAll('input[name="notesAreas"]').forEach(cb => {
+            cb.checked = false;
+            cb.closest('label').classList.remove('selected');
+        });
+        
+        // Clear audit blocks
+        document.getElementById('notesAuditBlocksContainer').innerHTML = '';
+        notesAuditBlockCounter = 0;
+        
+        // Reset template selection
+        document.getElementById('notesTemplate').value = 'standard';
+        document.getElementById('includePositive').checked = true;
+        document.getElementById('includeRecommendations').checked = true;
+        
+        // Hide generated content
+        document.getElementById('generatedNotesSection').style.display = 'none';
+    }
+}
+
+function saveAuditNotes() {
+    const notesData = {
+        timestamp: new Date().toISOString(),
+        client: document.getElementById('notesClient').value,
+        auditor: document.getElementById('notesAuditor').value,
+        date: document.getElementById('notesDate').value,
+        location: document.getElementById('notesLocation').value,
+        content: document.getElementById('notesContent').innerHTML
+    };
+    
+    // Save to localStorage
+    const savedNotes = JSON.parse(localStorage.getItem('qhse_audit_notes') || '[]');
+    savedNotes.push(notesData);
+    localStorage.setItem('qhse_audit_notes', JSON.stringify(savedNotes));
+    
+    alert('Auditnotizen wurden erfolgreich gespeichert!');
+}
+
+function exportNotesWord() {
+    const content = document.getElementById('notesContent').innerHTML;
+    const client = document.getElementById('notesClient').value || 'Unbekannt';
+    const date = document.getElementById('notesDate').value || new Date().toISOString().split('T')[0];
+    
+    // Create a simple HTML document for Word export
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Auditnotizen - ${client} - ${date}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h2, h3, h4 { color: #2c3e50; }
+                .detail-row { margin: 5px 0; }
+                .label { font-weight: bold; }
+                .notes-area { margin: 20px 0; border-top: 1px solid #ccc; padding-top: 15px; }
+                textarea { width: 100%; min-height: 60px; border: 1px solid #ccc; }
+            </style>
+        </head>
+        <body>
+            ${content}
+        </body>
+        </html>
+    `;
+    
+    const blob = new Blob([htmlContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Auditnotizen_${client}_${date}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function exportNotesPDF() {
+    alert('PDF-Export wird in einer zukünftigen Version verfügbar sein.');
+}
+
+function printNotes() {
+    const content = document.getElementById('notesContent').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Auditnotizen - Druckversion</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h2, h3, h4 { color: #2c3e50; }
+                .detail-row { margin: 5px 0; }
+                .label { font-weight: bold; }
+                .notes-area { margin: 20px 0; border-top: 1px solid #ccc; padding-top: 15px; }
+                textarea { width: 100%; min-height: 60px; border: 1px solid #ccc; }
+                @media print {
+                    body { margin: 10px; }
+                }
+            </style>
+        </head>
+        <body>
+            ${content}
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// ==================== AUDIT NOTES BLOCKS FUNCTIONS ====================
+
+// Initialize counter for notes audit blocks
+let notesAuditBlockCounter = 0;
+
+function addNotesAuditBlock() {
+    notesAuditBlockCounter++;
+    const blockId = `notes-audit-block-${notesAuditBlockCounter}`;
+    
+    const blockHtml = `
+        <div class="audit-block" id="${blockId}">
+            <div class="block-header">
+                <div class="block-title">
+                    <label class="block-checkbox-label">
+                        <input type="checkbox" class="block-selector" data-block-id="${blockId}">
+                        <span class="checkmark-small"></span>
+                    </label>
+                    <i class="fas fa-grip-vertical drag-handle" title="Ziehen zum Verschieben"></i>
+                    <i class="fas fa-sticky-note"></i>
+                    Notizen-Block #${notesAuditBlockCounter}
+                </div>
+                <div class="block-controls">
+                    <button type="button" class="block-btn move-up" onclick="moveNotesAuditBlockUp('${blockId}')" title="Nach oben">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <button type="button" class="block-btn move-down" onclick="moveNotesAuditBlockDown('${blockId}')" title="Nach unten">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <button type="button" class="block-btn duplicate" onclick="duplicateNotesAuditBlock('${blockId}')" title="Duplizieren">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button type="button" class="block-btn remove" onclick="removeNotesAuditBlock('${blockId}')" title="Löschen">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="block-form">
+                <div class="block-form-group">
+                    <label>Von (Uhrzeit)</label>
+                    <input type="time" name="startTime" value="09:00" onchange="calculateNotesBlockTime('${blockId}')">
+                </div>
+                <div class="block-form-group">
+                    <label>Bis (Uhrzeit)</label>
+                    <input type="time" name="endTime" value="10:00" onchange="calculateNotesBlockTime('${blockId}')">
+                </div>
+                <div class="block-form-group">
+                    <label>Gesprächspartner</label>
+                    <div class="multi-input-container" id="notes-contacts-${blockId}">
+                        <div class="multi-input-item">
+                            <input type="text" name="contacts[]" placeholder="z.B. Max Müller (QM-Leiter)">
+                            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-input-btn" onclick="addNotesContactInput('${blockId}')">
+                        <i class="fas fa-plus"></i> Weiteren Gesprächspartner hinzufügen
+                    </button>
+                </div>
+                <div class="block-form-group">
+                    <label>Norm(en)</label>
+                    <select name="standards" multiple style="height: 80px;">
+                        <option value="ISO 9001">ISO 9001</option>
+                        <option value="ISO 14001">ISO 14001</option>
+                        <option value="ISO 45001">ISO 45001</option>
+                        <option value="ISO 27001">ISO 27001</option>
+                        <option value="IATF 16949">IATF 16949</option>
+                        <option value="AS9100">AS9100</option>
+                        <option value="ISO 13485">ISO 13485</option>
+                        <option value="ISO 22000">ISO 22000</option>
+                        <option value="ISO 50001">ISO 50001</option>
+                    </select>
+                    <small>Strg+Klick für Mehrfachauswahl</small>
+                </div>
+                <div class="block-form-group">
+                    <label>Abteilung/Bereich</label>
+                    <div class="department-input-container">
+                        <select name="departmentSelect" onchange="updateNotesDepartmentField(this)">
+                            <option value="">Bitte wählen oder eigene Eingabe...</option>
+                            <option value="Eröffnungsgespräch">Eröffnungsgespräch</option>
+                            <option value="Mittagspause">Mittagspause</option>
+                            <option value="Kaffeepause">Kaffeepause</option>
+                            <option value="Standortwechsel">Standortwechsel</option>
+                            <option value="Informationsaustausch">Informationsaustausch</option>
+                            <option value="Auditorenzeit">Auditorenzeit</option>
+                            <option value="Abschlussgespräch">Abschlussgespräch</option>
+                            <option value="Geschäftsführung">Geschäftsführung</option>
+                            <option value="Qualitätsmanagement">Qualitätsmanagement</option>
+                            <option value="Produktion">Produktion</option>
+                            <option value="Vertrieb">Vertrieb</option>
+                            <option value="Einkauf">Einkauf</option>
+                            <option value="Personalwesen">Personalwesen</option>
+                            <option value="Buchhaltung">Buchhaltung</option>
+                            <option value="IT">IT</option>
+                            <option value="Lager/Logistik">Lager/Logistik</option>
+                            <option value="Entwicklung">Entwicklung</option>
+                            <option value="Wartung">Wartung</option>
+                            <option value="Arbeitssicherheit">Arbeitssicherheit</option>
+                            <option value="Umweltmanagement">Umweltmanagement</option>
+                            <option value="Kundenservice">Kundenservice</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Administration/Verwaltung">Administration/Verwaltung</option>
+                            <option value="Buchhaltung/Finanzen">Buchhaltung/Finanzen</option>
+                            <option value="Logistik/Lager">Logistik/Lager</option>
+                            <option value="Konstruktion/Entwicklung">Konstruktion/Entwicklung</option>
+                            <option value="Arbeitsvorbereitung">Arbeitsvorbereitung</option>
+                            <option value="Werkzeugbau">Werkzeugbau</option>
+                            <option value="Projektmanagement">Projektmanagement</option>
+                            <option value="Business Development">Business Development</option>
+                            <option value="Category Management">Category Management</option>
+                            <option value="Visual Merchandising">Visual Merchandising</option>
+                            <option value="E-Commerce">E-Commerce</option>
+                            <option value="Risk Management">Risk Management</option>
+                            <option value="Compliance">Compliance</option>
+                            <option value="Eigene Eingabe">→ Eigene Eingabe</option>
+                        </select>
+                        <input type="text" name="department" placeholder="Oder eigene Eingabe..." style="margin-top: 5px;" onchange="updateNotesDepartmentDocuments(this, '${blockId}')">
+                    </div>
+                </div>
+                <div class="block-form-group date-group">
+                    <div class="date-checkbox-container">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="useDifferentDate" onchange="toggleNotesBlockDate(this)">
+                            <span class="checkmark"></span>
+                            Anderes Datum verwenden
+                        </label>
+                    </div>
+                    <div class="date-input-container" style="display: none;">
+                        <label>Datum</label>
+                        <input type="date" name="blockDate" value="">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="block-form-group">
+                        <label>Auditoren</label>
+                        <div class="multi-input-container" id="notes-auditors-${blockId}">
+                            <div class="multi-input-item">
+                                <input type="text" name="auditors[]" placeholder="z.B. Dr. Schmidt">
+                                <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-input-btn" onclick="addNotesAuditorInput('${blockId}')">
+                            <i class="fas fa-plus"></i> Weiteren Auditor hinzufügen
+                        </button>
+                    </div>
+                    <div class="block-form-group">
+                        <label>QHSE-Dokumente</label>
+                        <div class="multi-input-container" id="notes-documents-${blockId}">
+                            <div class="multi-input-item document-with-date">
+                                <input type="text" name="qhseDocuments[]" placeholder="z.B. Arbeitsschutzverordnung">
+                                <input type="date" name="qhseDocumentDates[]" title="Dokumentdatum">
+                                <input type="text" name="qhseDocumentNotes[]" placeholder="Notizen...">
+                                <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-input-btn" onclick="addNotesDocumentInput('${blockId}')">
+                            <i class="fas fa-plus"></i> Weiteres Dokument hinzufügen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const container = document.getElementById('notesAuditBlocksContainer');
+    container.insertAdjacentHTML('beforeend', blockHtml);
+    
+    // Update remove buttons for documents
+    updateDocumentRemoveButtons(blockId);
+    
+    // Show remove buttons if there are multiple inputs
+    updateRemoveButtonsVisibility();
+}
+
+function addDocumentRow(blockId) {
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    
+    const documentRow = document.createElement('div');
+    documentRow.className = 'document-row';
+    documentRow.innerHTML = `
+        <select class="document-select" name="documents[]">
+            <option value="">Dokument auswählen...</option>
+            <option value="Arbeitsschutzverordnung">Arbeitsschutzverordnung</option>
+            <option value="Betriebsanweisung Maschinen">Betriebsanweisung Maschinen</option>
+            <option value="Gefährdungsbeurteilung">Gefährdungsbeurteilung</option>
+            <option value="Notfallplan">Notfallplan</option>
+            <option value="Erste-Hilfe-Anweisung">Erste-Hilfe-Anweisung</option>
+            <option value="Umweltmanagement-Handbuch">Umweltmanagement-Handbuch</option>
+            <option value="Abfallentsorgungsplan">Abfallentsorgungsplan</option>
+            <option value="Energiemanagement-Richtlinie">Energiemanagement-Richtlinie</option>
+            <option value="Qualitätshandbuch">Qualitätshandbuch</option>
+            <option value="Verfahrensanweisung">Verfahrensanweisung</option>
+            <option value="Arbeitsanweisung">Arbeitsanweisung</option>
+            <option value="Prüfanweisung">Prüfanweisung</option>
+            <option value="Datenschutzrichtlinie">Datenschutzrichtlinie</option>
+            <option value="IT-Sicherheitsrichtlinie">IT-Sicherheitsrichtlinie</option>
+            <option value="Gesundheitsschutz-Richtlinie">Gesundheitsschutz-Richtlinie</option>
+        </select>
+        <input type="date" class="document-date" name="documentDates[]" title="Dokumentdatum">
+        <input type="text" class="document-notes" name="documentNotes[]" placeholder="Notizen zum Dokument...">
+        <button type="button" class="remove-document-btn" onclick="removeDocumentRow(this, '${blockId}')">
+            <i class="fas fa-minus"></i>
+        </button>
+    `;
+    
+    container.appendChild(documentRow);
+    updateDocumentRemoveButtons(blockId);
+}
+
+function removeDocumentRow(button, blockId) {
+    const row = button.closest('.document-row');
+    row.remove();
+    updateDocumentRemoveButtons(blockId);
+}
+
+function addDocumentToMultiInput(blockId, documentName = '') {
+    const container = document.getElementById(`documentMultiContainer-${blockId}`);
+    const inputCount = container.children.length;
+    
+    const inputItem = document.createElement('div');
+    inputItem.className = 'multi-input-item document-input-item';
+    inputItem.innerHTML = `
+        <div class="document-main-input">
+            <input type="text" name="documents[]" value="${documentName}" placeholder="z.B. Arbeitsanweisung Fertigung">
+            <button type="button" class="remove-input-btn" onclick="removeDocumentMultiInput(this, '${blockId}')" ${inputCount === 0 ? 'style="display: none;"' : ''}>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="document-details">
+            <div class="document-detail-row">
+                <label class="detail-label">Datum:</label>
+                <input type="date" name="documentDates[]" class="detail-input">
+            </div>
+            <div class="document-detail-row">
+                <label class="detail-label">Status:</label>
+                <select name="documentStatus[]" class="detail-select">
+                    <option value="pending">🔍 Zu prüfen</option>
+                    <option value="in-progress">⏳ In Bearbeitung</option>
+                    <option value="compliant">✅ Konform</option>
+                    <option value="non-compliant">❌ Nicht konform</option>
+                    <option value="observation">⚠️ Beobachtung</option>
+                </select>
+            </div>
+        </div>
+        <div class="document-notes-section">
+            <label class="detail-label">Prüfnotizen:</label>
+            <textarea name="documentNotes[]" placeholder="Befunde, Feststellungen, Bewertungen..." rows="2" class="detail-textarea"></textarea>
+        </div>
+    `;
+    
+    container.appendChild(inputItem);
+    
+    // Show remove buttons if there are multiple inputs
+    updateDocumentRemoveButtons(blockId);
+    updateDocumentCounter(blockId);
+    
+    // Focus on the new input if it was added empty
+    if (!documentName) {
+        inputItem.querySelector('input[name="documents[]"]').focus();
+    }
+}
+
+function removeDocumentMultiInput(button, blockId) {
+    const item = button.closest('.multi-input-item');
+    item.remove();
+    updateDocumentRemoveButtons(blockId);
+    updateDocumentCounter(blockId);
+}
+
+function updateDocumentRemoveButtons(blockId) {
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    const rows = container.querySelectorAll('.document-row');
+    
+    rows.forEach((row, index) => {
+        const removeBtn = row.querySelector('.remove-document-btn');
+        if (rows.length > 1) {
+            removeBtn.style.display = 'block';
+        } else {
+            removeBtn.style.display = 'none';
+        }
+    });
+}
+
+function addDocumentWithEditableDate(blockId, documentName) {
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    
+    // Remove empty class if it exists
+    container.classList.remove('empty');
+    
+    const documentItem = document.createElement('div');
+    documentItem.className = 'document-card';
+    
+    // Create unique ID for this document item
+    const itemId = `doc-${blockId}-${Date.now()}`;
+    
+    documentItem.innerHTML = `
+        <div class="document-card-header">
+            <div class="document-title">
+                <i class="fas fa-file-alt"></i>
+                <span class="document-name">${documentName}</span>
+            </div>
+            <button type="button" class="remove-document" onclick="removeDocumentFromContainer(this, '${blockId}')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="document-card-body">
+            <div class="document-inputs">
+                <div class="input-group">
+                    <label for="${itemId}-date" class="input-label">
+                        <i class="fas fa-calendar"></i> Dokumentdatum
+                    </label>
+                    <input type="date" 
+                           class="document-date-input" 
+                           id="${itemId}-date" 
+                           onchange="updateDocumentDate('${itemId}', this.value)">
+                </div>
+                
+                <div class="input-group">
+                    <label for="${itemId}-notes" class="input-label">
+                        <i class="fas fa-sticky-note"></i> Prüfnotizen
+                    </label>
+                    <textarea class="document-notes-input" 
+                              id="${itemId}-notes"
+                              placeholder="Befunde, Feststellungen, Bewertungen..."
+                              rows="3"
+                              onchange="updateDocumentNotes('${itemId}', this.value)"></textarea>
+                </div>
+            </div>
+            
+            <div class="document-status">
+                <div class="status-group">
+                    <label class="status-label">Prüfstatus:</label>
+                    <select class="status-select" onchange="updateDocumentStatus('${itemId}', this.value)">
+                        <option value="pending">🔍 Zu prüfen</option>
+                        <option value="in-progress">⏳ In Bearbeitung</option>
+                        <option value="compliant">✅ Konform</option>
+                        <option value="non-compliant">❌ Nicht konform</option>
+                        <option value="observation">⚠️ Beobachtung</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Store document data
+    documentItem.dataset.documentName = documentName;
+    documentItem.dataset.documentDate = '';
+    documentItem.dataset.documentNotes = '';
+    documentItem.dataset.documentStatus = 'pending';
+    documentItem.id = itemId;
+    
+    container.appendChild(documentItem);
+    
+    // Update container state and counter
+    updateDocumentContainerState(blockId);
+    updateDocumentCounter(blockId);
+}
+
+function updateDocumentDate(itemId, dateValue) {
+    const documentItem = document.getElementById(itemId);
+    if (documentItem) {
+        documentItem.dataset.documentDate = dateValue || '';
+    }
+}
+
+function updateDocumentNotes(itemId, notesValue) {
+    const documentItem = document.getElementById(itemId);
+    if (documentItem) {
+        documentItem.dataset.documentNotes = notesValue || '';
+    }
+}
+
+function updateDocumentStatus(itemId, statusValue) {
+    const documentItem = document.getElementById(itemId);
+    if (documentItem) {
+        documentItem.dataset.documentStatus = statusValue || 'pending';
+        
+        // Update visual status indicator
+        const statusSelect = documentItem.querySelector('.status-select');
+        if (statusSelect) {
+            statusSelect.className = `status-select status-${statusValue}`;
+        }
+    }
+}
+
+function updateDocumentCounter(blockId) {
+    const multiContainer = document.getElementById(`documentMultiContainer-${blockId}`);
+    const documentCount = multiContainer.querySelectorAll('.multi-input-item').length;
+    
+    // Update counter in info area
+    const counterElement = document.getElementById(`docCount-${blockId}`);
+    if (counterElement) {
+        counterElement.textContent = documentCount;
+    }
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'pending': '🔍 Zu prüfen',
+        'in-progress': '⏳ In Bearbeitung',
+        'compliant': '✅ Konform',
+        'non-compliant': '❌ Nicht konform',
+        'observation': '⚠️ Beobachtung'
+    };
+    return statusMap[status] || '🔍 Zu prüfen';
+}
+
+function addDocumentToContainer(blockId, documentName, documentDate) {
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    
+    // Remove empty class if it exists
+    container.classList.remove('empty');
+    
+    const documentItem = document.createElement('div');
+    documentItem.className = 'document-item';
+    
+    const dateDisplay = documentDate ? 
+        `<div class="document-date"><i class="fas fa-calendar"></i> ${new Date(documentDate).toLocaleDateString('de-DE')}</div>` : 
+        '<div class="document-date"><i class="fas fa-calendar"></i> Kein Datum angegeben</div>';
+    
+    documentItem.innerHTML = `
+        <div class="document-info">
+            <div class="document-name">${documentName}</div>
+            ${dateDisplay}
+        </div>
+        <button type="button" class="remove-document" onclick="removeDocumentFromContainer(this, '${blockId}')">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    
+    // Store document data
+    documentItem.dataset.documentName = documentName;
+    documentItem.dataset.documentDate = documentDate || '';
+    
+    container.appendChild(documentItem);
+    
+    // Update container state
+    updateDocumentContainerState(blockId);
+}
+
+function updateDocumentContainerState(blockId) {
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    const hasDocuments = container.children.length > 0;
+    
+    if (hasDocuments) {
+        container.classList.remove('empty');
+    } else {
+        container.classList.add('empty');
+    }
+    
+    // Update counter
+    updateDocumentCounter(blockId);
+}
+
+function moveNotesAuditBlockUp(blockId) {
+    const block = document.getElementById(blockId);
+    const previousBlock = block.previousElementSibling;
+    if (previousBlock) {
+        block.parentNode.insertBefore(block, previousBlock);
+    }
+}
+
+function moveNotesAuditBlockDown(blockId) {
+    const block = document.getElementById(blockId);
+    const nextBlock = block.nextElementSibling;
+    if (nextBlock) {
+        block.parentNode.insertBefore(nextBlock, block);
+    }
+}
+
+function duplicateNotesAuditBlock(blockId) {
+    const originalBlock = document.getElementById(blockId);
+    notesAuditBlockCounter++;
+    const newBlockId = `notes-audit-block-${notesAuditBlockCounter}`;
+    
+    const newBlockHtml = originalBlock.outerHTML
+        .replace(new RegExp(blockId, 'g'), newBlockId)
+        .replace(/Notizen-Block #\d+/, `Notizen-Block #${notesAuditBlockCounter}`)
+        .replace(/notes-auditors-[^"]+/g, `notes-auditors-${newBlockId}`)
+        .replace(/notes-contacts-[^"]+/g, `notes-contacts-${newBlockId}`);
+    
+    originalBlock.insertAdjacentHTML('afterend', newBlockHtml);
+    updateRemoveButtonsVisibility();
+}
+
+function removeNotesAuditBlock(blockId) {
+    if (confirm('Möchten Sie diesen Audit-Block wirklich löschen?')) {
+        const block = document.getElementById(blockId);
+        block.remove();
+        updateRemoveButtonsVisibility();
+    }
+}
+
+function calculateNotesBlockTime(blockId) {
+    const block = document.getElementById(blockId);
+    const startTime = block.querySelector('input[name="startTime"]').value;
+    const endTime = block.querySelector('input[name="endTime"]').value;
+    
+    if (startTime && endTime) {
+        const start = new Date(`2000-01-01T${startTime}`);
+        const end = new Date(`2000-01-01T${endTime}`);
+        const diffMinutes = (end - start) / (1000 * 60);
+        
+        if (diffMinutes > 0) {
+            const hours = Math.floor(diffMinutes / 60);
+            const minutes = diffMinutes % 60;
+            console.log(`Block ${blockId}: ${hours}h ${minutes}min`);
+        }
+    }
+}
+
+function toggleNotesBlockDate(checkbox) {
+    const dateContainer = checkbox.closest('.date-group').querySelector('.date-input-container');
+    dateContainer.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+function updateNotesDepartmentField(select) {
+    const textInput = select.nextElementSibling;
+    const blockId = select.closest('.audit-block').id;
+    
+    if (select.value === 'Eigene Eingabe') {
+        textInput.focus();
+        textInput.placeholder = 'Eigene Eingabe...';
+    } else if (select.value) {
+        textInput.value = select.value;
+    }
+    
+    // Update documents dropdown based on selected department
+    updateNotesDepartmentDocuments(textInput, blockId);
+}
+
+function updateNotesDepartmentDocuments(input, blockId) {
+    const department = input.value;
+    const documentsGroup = document.getElementById(`departmentDocuments-group-${blockId}`);
+    
+    if (!department || department === '') {
+        // Hide with animation
+        documentsGroup.style.opacity = '0';
+        documentsGroup.style.transform = 'translateY(-10px) scale(0.95)';
+        setTimeout(() => {
+            documentsGroup.style.display = 'none';
+        }, 300);
+        return;
+    }
+    
+    // Get documents for the selected department
+    const documents = getDepartmentDocuments(department);
+    
+    if (documents && documents.length > 0) {
+        // Store available documents for this block
+        if (!window.availableDocuments) {
+            window.availableDocuments = {};
+        }
+        window.availableDocuments[blockId] = documents;
+        
+        // Populate the dropdown
+        const documentSelect = document.getElementById(`documentSelect-${blockId}`);
+        if (documentSelect) {
+            // Clear existing options except the first one
+            documentSelect.innerHTML = '<option value="">Dokument auswählen...</option>';
+            
+            // Add documents as options
+            documents.forEach(doc => {
+                const option = document.createElement('option');
+                option.value = doc;
+                option.textContent = doc;
+                documentSelect.appendChild(option);
+            });
+        }
+        
+        // Update counter badge
+        documentsGroup.setAttribute('data-count', documents.length);
+        
+        // Show with animation
+        documentsGroup.style.display = 'block';
+        documentsGroup.classList.add('show');
+        
+        // Reset animation for next time
+        setTimeout(() => {
+            documentsGroup.classList.remove('show');
+        }, 500);
+        
+        // Animate in
+        setTimeout(() => {
+            documentsGroup.style.opacity = '1';
+            documentsGroup.style.transform = 'translateY(0) scale(1)';
+        }, 50);
+        
+    } else {
+        // Hide if no documents found
+        documentsGroup.style.opacity = '0';
+        documentsGroup.style.transform = 'translateY(-10px) scale(0.95)';
+        setTimeout(() => {
+            documentsGroup.style.display = 'none';
+        }, 300);
+    }
+}
+
+function showDocumentSelection(blockId) {
+    const documents = window.availableDocuments?.[blockId] || [];
+    
+    if (documents.length === 0) {
+        alert('Keine Dokumente für diese Abteilung verfügbar.');
+        return;
+    }
+    
+    // Create modal for document selection
+    createDocumentSelectionModal(blockId, documents);
+}
+
+function createDocumentSelectionModal(blockId, documents) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('documentSelectionModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    const modal = document.createElement('div');
+    modal.id = 'documentSelectionModal';
+    modal.className = 'modal document-selection-modal';
+    modal.style.display = 'block';
+    
+    modal.innerHTML = `
+        <div class="modal-content document-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-alt"></i> Dokument auswählen</h3>
+                <span class="close" onclick="closeDocumentModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="document-search">
+                    <input type="text" id="documentSearch" placeholder="Dokument suchen..." onkeyup="filterDocuments()">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="documents-list" id="documentsList">
+                    ${documents.map((doc, index) => `
+                        <div class="document-item" data-document="${doc}">
+                            <label class="document-label">
+                                <input type="radio" name="selectedDocument" value="${doc}">
+                                <span class="document-name">${index + 1}. ${doc}</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="date-input-section" style="display: none;">
+                    <label for="documentDate">Dokumentdatum (optional):</label>
+                    <input type="date" id="documentDate" placeholder="Datum auswählen...">
+                    <small>Lassen Sie das Feld leer, wenn kein spezifisches Datum erforderlich ist</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="addSelectedDocument('${blockId}')">
+                    <i class="fas fa-plus"></i> Hinzufügen
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeDocumentModal()">
+                    Abbrechen
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listeners for document selection
+    const radioButtons = modal.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                document.querySelector('.date-input-section').style.display = 'block';
+                document.getElementById('documentDate').focus();
+            }
+        });
+    });
+}
+
+function filterDocuments() {
+    const searchTerm = document.getElementById('documentSearch').value.toLowerCase();
+    const documentItems = document.querySelectorAll('.document-item');
+    
+    documentItems.forEach(item => {
+        const documentName = item.querySelector('.document-name').textContent.toLowerCase();
+        if (documentName.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function addSelectedDocument(blockId) {
+    const selectedRadio = document.querySelector('input[name="selectedDocument"]:checked');
+    if (!selectedRadio) {
+        alert('Bitte wählen Sie ein Dokument aus.');
+        return;
+    }
+    
+    const documentName = selectedRadio.value;
+    const documentDate = document.getElementById('documentDate').value;
+    
+    // Check if document already exists
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    const existingDocs = container.querySelectorAll('.document-with-date');
+    for (let doc of existingDocs) {
+        if (doc.dataset.document === documentName) {
+            alert('Dieses Dokument wurde bereits hinzugefügt.');
+            return;
+        }
+    }
+    
+    // Add document with date to container
+    addDocumentWithDate(blockId, documentName, documentDate);
+    
+    // Close modal
+    closeDocumentModal();
+}
+
+function addDocumentWithDate(blockId, documentName, documentDate = '') {
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    const documentId = `doc-${blockId}-${Date.now()}`;
+    
+    const documentElement = document.createElement('div');
+    documentElement.className = 'document-with-date';
+    documentElement.dataset.document = documentName;
+    documentElement.dataset.date = documentDate;
+    
+    documentElement.innerHTML = `
+        <div class="document-item-full">
+            <div class="document-info">
+                <div class="document-title">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="document-name">${documentName}</span>
+                </div>
+                <div class="document-date-input">
+                    <label>Datum:</label>
+                    <input type="date" value="${documentDate}" 
+                           onchange="updateDocumentDate(this, '${documentName}')"
+                           placeholder="Optional">
+                </div>
+            </div>
+            <div class="document-actions">
+                <button type="button" class="btn-remove-document" 
+                        onclick="removeDocumentWithDate(this)" 
+                        title="Dokument entfernen">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(documentElement);
+    
+    // Animate in
+    setTimeout(() => {
+        documentElement.style.opacity = '1';
+        documentElement.style.transform = 'translateY(0)';
+    }, 100);
+    
+    updateDocumentCounter(blockId);
+}
+
+function removeDocumentWithDate(button) {
+    if (confirm('Möchten Sie dieses Dokument wirklich entfernen?')) {
+        const documentElement = button.closest('.document-with-date');
+        const blockId = documentElement.closest('[id*="documentsContainer-"]').id.split('-')[1];
+        
+        documentElement.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => {
+            documentElement.remove();
+            updateDocumentCounter(blockId);
+        }, 300);
+    }
+}
+
+function updateDocumentDate(input, documentName) {
+    const documentElement = input.closest('.document-with-date');
+    documentElement.dataset.date = input.value;
+    
+    // Visual feedback
+    if (input.value) {
+        input.style.borderColor = '#10b981';
+        input.style.boxShadow = '0 0 0 2px rgba(16, 185, 129, 0.2)';
+    } else {
+        input.style.borderColor = '';
+        input.style.boxShadow = '';
+    }
+}
+
+function updateDocumentCounter(blockId) {
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    const count = container.querySelectorAll('.document-with-date').length;
+    const documentsGroup = document.getElementById(`departmentDocuments-group-${blockId}`);
+    
+    if (count > 0) {
+        documentsGroup.setAttribute('data-selected', count);
+    } else {
+        documentsGroup.removeAttribute('data-selected');
+    }
+}
+
+function closeDocumentModal() {
+    const modal = document.getElementById('documentSelectionModal');
+    if (modal) {
+        modal.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+}
+
+function getSelectedDocumentsWithDates(blockId) {
+    const container = document.getElementById(`documentsContainer-${blockId}`);
+    const documents = [];
+    
+    const documentRows = container.querySelectorAll('.document-row');
+    documentRows.forEach(row => {
+        const selectElement = row.querySelector('select[name="documents[]"]');
+        const dateInput = row.querySelector('input[name="documentDates[]"]');
+        const notesInput = row.querySelector('input[name="documentNotes[]"]');
+        
+        if (selectElement && selectElement.value.trim()) {
+            documents.push({
+                name: selectElement.value.trim(),
+                date: dateInput ? dateInput.value || null : null,
+                notes: notesInput ? notesInput.value.trim() || null : null,
+                status: 'pending'
+            });
+        }
+    });
+    
+    return documents;
+}
+
+function addDocumentSelectionFeedback(selectElement) {
+    selectElement.addEventListener('change', function() {
+        const selectedCount = this.selectedOptions.length;
+        const totalCount = this.options.length - 1; // Minus placeholder option
+        
+        // Update visual feedback
+        if (selectedCount > 0) {
+            this.style.borderColor = '#10b981';
+            this.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+            
+            // Show selection count
+            showSelectionCount(this, selectedCount, totalCount);
+        } else {
+            this.style.borderColor = 'rgba(14, 165, 233, 0.3)';
+            this.style.boxShadow = '0 4px 15px rgba(14, 165, 233, 0.1)';
+            hideSelectionCount(this);
+        }
+    });
+}
+
+function showSelectionCount(selectElement, selected, total) {
+    // Remove existing counter
+    const existingCounter = selectElement.parentNode.querySelector('.selection-counter');
+    if (existingCounter) {
+        existingCounter.remove();
+    }
+    
+    // Add new counter
+    const counter = document.createElement('div');
+    counter.className = 'selection-counter';
+    counter.innerHTML = `
+        <span class="counter-badge">
+            <i class="fas fa-check-circle"></i>
+            ${selected} von ${total} ausgewählt
+        </span>
+    `;
+    counter.style.cssText = `
+        position: absolute;
+        top: -10px;
+        right: 10px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75em;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        z-index: 20;
+        animation: bounceIn 0.5s ease-out;
+    `;
+    
+    selectElement.parentNode.style.position = 'relative';
+    selectElement.parentNode.appendChild(counter);
+}
+
+function hideSelectionCount(selectElement) {
+    const counter = selectElement.parentNode.querySelector('.selection-counter');
+    if (counter) {
+        counter.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => {
+            counter.remove();
+        }, 300);
+    }
+}
+
+// Add CSS animations dynamically
+if (!document.querySelector('#notes-animations')) {
+    const style = document.createElement('style');
+    style.id = 'notes-animations';
+    style.textContent = `
+        @keyframes bounceIn {
+            0% { transform: scale(0.3) translateY(-20px); opacity: 0; }
+            50% { transform: scale(1.05) translateY(-5px); opacity: 0.8; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
+        
+        .selection-counter {
+            pointer-events: none;
+            user-select: none;
+        }
+        
+        .counter-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .audit-notes-generator .department-documents select[multiple] option:hover {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%) !important;
+            color: #0369a1 !important;
+        }
+        
+        .audit-notes-generator .department-documents select[multiple] option:checked {
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%) !important;
+            color: white !important;
+            font-weight: 600 !important;
+            position: relative;
+        }
+        
+        .audit-notes-generator .department-documents select[multiple] option:checked::before {
+            content: '✓ ';
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function getDepartmentDocuments(department) {
+    const departmentDocuments = {
+        'Produktion': [
+            'Arbeitsanweisungen Fertigung',
+            'Produktionsplanung und -steuerung',
+            'Qualitätskontrolle Endprodukt',
+            'Maschineneinrichtung und -bedienung',
+            'Wartungsplan Produktionsanlagen',
+            'Produktionskapazität und -auslastung',
+            'Materialfluss und Logistik',
+            'Produktionsdatenerfassung (BDE)',
+            'Rüstzeiten und -prozesse',
+            'Produktionskosten und Kalkulation',
+            'Lean Production Methoden',
+            'Produktionsqualität und Nacharbeit',
+            'Produktionssicherheit und Arbeitschutz',
+            'Produktionseffizienz (OEE)',
+            'Produktionsausfälle und Störungen',
+            'Produktionsdokumentation',
+            'Produktionsoptimierung'
+        ],
+        'Qualitätsmanagement': [
+            'Qualitätshandbuch',
+            'Verfahrensanweisungen QM',
+            'Arbeitsanweisungen Prüfung',
+            'Prüfmittelüberwachung',
+            'Lieferantenbewertung',
+            'Qualitätsziele und -kennzahlen',
+            'Managementbewertung',
+            'Interne Audits',
+            'Korrektur- und Vorbeugemaßnahmen',
+            'Reklamationsbearbeitung',
+            'Qualitätslenkung',
+            'Qualitätssicherung',
+            'Qualitätsplanung',
+            'Dokumentenlenkung',
+            'Qualitätsdatenerfassung',
+            'Qualitätsprüfungen',
+            'Qualitätsfreigaben'
+        ],
+        'Vertrieb': [
+            'Kundenanfragen und Angebotserstellung',
+            'Vertriebsprozesse und -strategien',
+            'Kundenverwaltung (CRM)',
+            'Verkaufsunterlagen und Kataloge',
+            'Preislisten und Konditionen',
+            'Vertragsgestaltung und -abwicklung',
+            'Kundenbetreuung und -service',
+            'Marktanalyse und Wettbewerb',
+            'Vertriebsziele und -kennzahlen',
+            'Kundenzufriedenheit',
+            'Beschwerdemanagement',
+            'After-Sales-Service',
+            'Vertriebsschulung',
+            'Produktpräsentationen',
+            'Messeauftritte und Marketing',
+            'Export-/Importabwicklung',
+            'Vertriebscontrolling'
+        ],
+        'Einkauf': [
+            'Beschaffungsstrategien',
+            'Lieferantenauswahl und -bewertung',
+            'Einkaufsrichtlinien',
+            'Rahmenverträge und Konditionen',
+            'Bestellabwicklung',
+            'Wareneingangskontrolle',
+            'Lieferantengespräche und -audits',
+            'Kosteneinsparungsprogramme',
+            'Materialwirtschaft',
+            'Bestandsmanagement',
+            'Einkaufscontrolling',
+            'Lieferantenentwicklung',
+            'Nachhaltigkeit im Einkauf',
+            'Risikomanagement Beschaffung',
+            'E-Procurement Systeme',
+            'Einkaufsverhandlungen',
+            'Qualitätssicherung Einkauf'
+        ],
+        'Personalwesen': [
+            'Personalplanung und -beschaffung',
+            'Stellenausschreibung und Bewerbungsverfahren',
+            'Arbeitsverträge und Tarifrecht',
+            'Personalentwicklung und Weiterbildung',
+            'Mitarbeitergespräche',
+            'Leistungsbeurteilung',
+            'Entgeltabrechnung',
+            'Arbeitszeit- und Urlaubsmanagement',
+            'Personalakte und Datenschutz',
+            'Betriebliches Gesundheitsmanagement',
+            'Arbeitsschutz und Unfallverhütung',
+            'Mitarbeiterzufriedenheit',
+            'Personalcontrolling',
+            'Organisationsentwicklung',
+            'Konfliktmanagement',
+            'Personalfreisetzung',
+            'Diversity Management'
+        ],
+        'Buchhaltung': [
+            'Finanzbuchhaltung',
+            'Kostenrechnung und Controlling',
+            'Jahresabschluss',
+            'Steuererklärungen',
+            'Debitorenmanagement',
+            'Kreditorenmanagement',
+            'Liquiditätsplanung',
+            'Budgetplanung und -kontrolle',
+            'Rechnungsprüfung und -freigabe',
+            'Mahnwesen',
+            'Bankverkehr und Zahlungsverkehr',
+            'Anlagenbuchhaltung',
+            'Lohnbuchhaltung',
+            'Betriebswirtschaftliche Auswertungen (BWA)',
+            'Finanzcontrolling',
+            'Compliance und Rechtssicherheit',
+            'Digitale Buchführung'
+        ],
+        'IT': [
+            'IT-Sicherheitsrichtlinien',
+            'Systemadministration',
+            'Netzwerk und Infrastruktur',
+            'Software-Lifecycle-Management',
+            'Backup und Disaster Recovery',
+            'Benutzer- und Rechteverwaltung',
+            'IT-Service-Management',
+            'Datenschutz und DSGVO',
+            'IT-Compliance',
+            'Hardware-Management',
+            'Software-Lizenzmanagement',
+            'IT-Projektmanagement',
+            'Help-Desk und Support',
+            'Digitalisierungsprojekte',
+            'Cloud-Services',
+            'IT-Controlling',
+            'Cyber Security'
+        ],
+        'Lager/Logistik': [
+            'Lagerverwaltung und -organisation',
+            'Wareneingang und -ausgang',
+            'Bestandsführung und Inventur',
+            'Kommissionierung und Versand',
+            'Lagertechnik und -systeme',
+            'Transportplanung und -abwicklung',
+            'Verpackung und Kennzeichnung',
+            'Lagerplatzoptimierung',
+            'FIFO/LIFO Verfahren',
+            'Gefahrguttransport',
+            'Retourenmanagement',
+            'Lagerkennzahlen und -controlling',
+            'Lagersicherheit',
+            'Supply Chain Management',
+            'Lagerhygiene',
+            'Lagerdokumentation',
+            'Automatisierung Lager'
+        ],
+        'Entwicklung': [
+            'Produktentwicklungsprozess',
+            'Konstruktionsrichtlinien',
+            'CAD-Standards und -verwaltung',
+            'Prototyping und Testing',
+            'Projektmanagement Entwicklung',
+            'Änderungsmanagement',
+            'Dokumentation Entwicklung',
+            'Patente und Schutzrechte',
+            'Marktforschung und Trends',
+            'Anforderungsmanagement',
+            'Design Reviews',
+            'Freigabeprozesse',
+            'Entwicklungskosten',
+            'Technologiebewertung',
+            'Innovation Management',
+            'Entwicklungspartnerschaften',
+            'Produktvalidierung'
+        ],
+        'Wartung': [
+            'Wartungsplanung und -scheduling',
+            'Präventive Wartung',
+            'Störungsbeseitigung',
+            'Wartungsanweisungen',
+            'Ersatzteilmanagement',
+            'Wartungsdokumentation',
+            'Maschinenhistorie',
+            'Wartungskosten',
+            'Wartungspersonal und Qualifikation',
+            'Wartungstools und -ausrüstung',
+            'Condition Monitoring',
+            'Wartungsverträge',
+            'Sicherheit bei Wartungsarbeiten',
+            'Wartungskennzahlen (MTBF, MTTR)',
+            'Wartungsoptimierung',
+            'Predictive Maintenance',
+            'Wartungsplanung Software'
+        ],
+        'Geschäftsführung': [
+            'Unternehmensstrategie',
+            'Geschäftspolitik',
+            'Managementsysteme',
+            'Compliance Management',
+            'Risikomanagement',
+            'Stakeholder Management',
+            'Corporate Governance',
+            'Geschäftsplanung',
+            'Investitionsentscheidungen',
+            'Unternehmenskultur',
+            'Change Management',
+            'Krisenmanagement',
+            'Nachhaltigkeitsstrategie',
+            'Mergers & Acquisitions',
+            'Investor Relations',
+            'Beirats- und Aufsichtsratsarbeit',
+            'Unternehmensnachfolge'
+        ],
+        'Arbeitssicherheit': [
+            'Gefährdungsbeurteilungen',
+            'Arbeitsschutzunterweisungen',
+            'Persönliche Schutzausrüstung (PSA)',
+            'Sicherheitsdatenblätter',
+            'Unfallmeldungen und -untersuchungen',
+            'Erste-Hilfe-Organisation',
+            'Brandschutz und Evakuierung',
+            'Arbeitssicherheitsausschuss (ASA)',
+            'Betriebsanweisungen',
+            'Arbeitsmedizinische Vorsorge',
+            'Sicherheitskennzeichnung',
+            'Arbeitssicherheitscontrolling',
+            'Maschinensicherheit',
+            'Gefahrstoffmanagement',
+            'Arbeitsplatzgestaltung',
+            'Sicherheitsaudits',
+            'Notfallmanagement'
+        ],
+        'Umweltmanagement': [
+            'Umweltmanagementsystem ISO 14001',
+            'Umweltaspekte und -auswirkungen',
+            'Umweltziele und -programme',
+            'Abfallmanagement',
+            'Energiemanagement',
+            'Emissionsüberwachung',
+            'Wassermanagement',
+            'Chemikalienmanagement',
+            'Umweltrecht und Compliance',
+            'Umweltauditierung',
+            'Umweltberichterstattung',
+            'Nachhaltigkeitsmanagement',
+            'Carbon Footprint',
+            'Kreislaufwirtschaft',
+            'Umweltschutzmaßnahmen',
+            'Umweltkennzahlen',
+            'Biodiversität'
+        ],
+        'Kundenservice': [
+            'Kundenservice-Standards',
+            'Beschwerdemanagement',
+            'Service Level Agreements (SLA)',
+            'Kundenkommunikation',
+            'After-Sales-Service',
+            'Technischer Support',
+            'Garantie- und Gewährleistung',
+            'Kundenzufriedenheitsmessung',
+            'Reparatur- und Instandsetzung',
+            'Ersatzteilservice',
+            'Schulungen für Kunden',
+            'Service-Dokumentation',
+            'Remote-Support',
+            'Service-Controlling',
+            'Kundenbindungsprogramme',
+            'Multichannel-Support',
+            'Service-Innovation'
+        ],
+        'Marketing': [
+            'Marketingstrategie',
+            'Markenmanagement',
+            'Marktforschung',
+            'Produktmarketing',
+            'Digitales Marketing',
+            'Content Marketing',
+            'Social Media Marketing',
+            'Werbung und Promotion',
+            'PR und Öffentlichkeitsarbeit',
+            'Event Marketing',
+            'Trade Marketing',
+            'Marketing Automation',
+            'Customer Journey',
+            'Marketing Controlling',
+            'Markteinführung',
+            'Influencer Marketing',
+            'Marketing Compliance'
+        ]
+    };
+    
+    // Normalize department name for lookup
+    const normalizedDepartment = department.toLowerCase().trim();
+    
+    // Try exact match first
+    if (departmentDocuments[department]) {
+        return departmentDocuments[department];
+    }
+    
+    // Try partial matches
+    for (const [key, docs] of Object.entries(departmentDocuments)) {
+        if (key.toLowerCase().includes(normalizedDepartment) || 
+            normalizedDepartment.includes(key.toLowerCase())) {
+            return docs;
+        }
+    }
+    
+    // Return empty array if no match
+    return [];
+}
+
+function updateNotesChaptersField(select) {
+    const textarea = select.nextElementSibling;
+    const selectedOptions = Array.from(select.selectedOptions).map(option => option.value);
+    if (selectedOptions.length > 0) {
+        textarea.value = selectedOptions.join(', ');
+    }
+}
+
+function addNotesAuditorInput(blockId) {
+    const container = document.getElementById(`notes-auditors-${blockId}`);
+    const inputHtml = `
+        <div class="multi-input-item">
+            <input type="text" name="auditors[]" placeholder="z.B. Dr. Schmidt">
+            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', inputHtml);
+    updateRemoveButtonsVisibility();
+}
+
+function addNotesDocumentInput(blockId) {
+    const container = document.getElementById(`notes-documents-${blockId}`);
+    const inputHtml = `
+        <div class="multi-input-item document-with-date">
+            <input type="text" name="qhseDocuments[]" placeholder="z.B. Arbeitsschutzverordnung">
+            <input type="date" name="qhseDocumentDates[]" title="Dokumentdatum">
+            <input type="text" name="qhseDocumentNotes[]" placeholder="Notizen...">
+            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', inputHtml);
+    updateRemoveButtonsVisibility();
+}
+
+function addNotesContactInput(blockId) {
+    const container = document.getElementById(`notes-contacts-${blockId}`);
+    const inputHtml = `
+        <div class="multi-input-item">
+            <input type="text" name="contacts[]" placeholder="z.B. Max Müller (QM-Leiter)">
+            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', inputHtml);
+    updateRemoveButtonsVisibility();
+}
+
+
