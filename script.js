@@ -47401,37 +47401,22 @@ function addNotesAuditBlock() {
                         <input type="date" name="blockDate" value="">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="block-form-group">
-                        <label>Auditoren</label>
-                        <div class="multi-input-container" id="notes-auditors-${blockId}">
-                            <div class="multi-input-item">
-                                <input type="text" name="auditors[]" placeholder="z.B. Dr. Schmidt">
-                                <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
+                <div class="block-form-group">
+                    <label>QHSE-Dokumente</label>
+                    <div class="multi-input-container" id="notes-documents-${blockId}">
+                        <div class="multi-input-item document-with-date">
+                            <input type="text" name="qhseDocuments[]" placeholder="z.B. Arbeitsschutzverordnung">
+                            <input type="date" name="qhseDocumentDates[]" title="Dokumentdatum">
+                            <input type="checkbox" name="qhseDocumentSelected[]" checked title="Notiz aktiviert" onchange="toggleNotesField(this)" style="width: 25px !important; height: 25px !important; margin: 10px !important; cursor: pointer !important; accent-color: #10b981 !important; transform: scale(1.5) !important; position: relative !important; z-index: 999 !important; display: block !important; visibility: visible !important; opacity: 1 !important;"">
+                            <input type="text" name="qhseDocumentNotes[]" placeholder="Notizen..." class="qhse-notes">
+                            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        <button type="button" class="add-input-btn" onclick="addNotesAuditorInput('${blockId}')">
-                            <i class="fas fa-plus"></i> Weiteren Auditor hinzufügen
-                        </button>
                     </div>
-                    <div class="block-form-group">
-                        <label>QHSE-Dokumente</label>
-                        <div class="multi-input-container" id="notes-documents-${blockId}">
-                            <div class="multi-input-item document-with-date">
-                                <input type="text" name="qhseDocuments[]" placeholder="z.B. Arbeitsschutzverordnung">
-                                <input type="date" name="qhseDocumentDates[]" title="Dokumentdatum">
-                                <input type="text" name="qhseDocumentNotes[]" placeholder="Notizen...">
-                                <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <button type="button" class="add-input-btn" onclick="addNotesDocumentInput('${blockId}')">
-                            <i class="fas fa-plus"></i> Weiteres Dokument hinzufügen
-                        </button>
-                    </div>
+                    <button type="button" class="add-input-btn" onclick="addNotesDocumentInput('${blockId}')">
+                        <i class="fas fa-plus"></i> Weiteres Dokument hinzufügen
+                    </button>
                 </div>
             </div>
         </div>
@@ -48535,19 +48520,6 @@ function updateNotesChaptersField(select) {
     }
 }
 
-function addNotesAuditorInput(blockId) {
-    const container = document.getElementById(`notes-auditors-${blockId}`);
-    const inputHtml = `
-        <div class="multi-input-item">
-            <input type="text" name="auditors[]" placeholder="z.B. Dr. Schmidt">
-            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `;
-    container.insertAdjacentHTML('beforeend', inputHtml);
-    updateRemoveButtonsVisibility();
-}
 
 function addNotesDocumentInput(blockId) {
     const container = document.getElementById(`notes-documents-${blockId}`);
@@ -48555,7 +48527,8 @@ function addNotesDocumentInput(blockId) {
         <div class="multi-input-item document-with-date">
             <input type="text" name="qhseDocuments[]" placeholder="z.B. Arbeitsschutzverordnung">
             <input type="date" name="qhseDocumentDates[]" title="Dokumentdatum">
-            <input type="text" name="qhseDocumentNotes[]" placeholder="Notizen...">
+            <input type="checkbox" name="qhseDocumentSelected[]" checked title="Notiz aktiviert" onchange="toggleNotesField(this)" style="width: 25px !important; height: 25px !important; margin: 10px !important; cursor: pointer !important; accent-color: #10b981 !important; transform: scale(1.5) !important; position: relative !important; z-index: 999 !important; display: block !important; visibility: visible !important; opacity: 1 !important;"">>
+            <input type="text" name="qhseDocumentNotes[]" placeholder="Notizen..." class="qhse-notes">
             <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)">
                 <i class="fas fa-times"></i>
             </button>
@@ -48577,6 +48550,26 @@ function addNotesContactInput(blockId) {
     `;
     container.insertAdjacentHTML('beforeend', inputHtml);
     updateRemoveButtonsVisibility();
+}
+
+function toggleNotesField(checkbox) {
+    // Finde das Notizen-Feld in der gleichen Zeile
+    const notesField = checkbox.parentElement.querySelector('.qhse-notes');
+    
+    if (checkbox.checked) {
+        // Checkbox angekreuzt - Notizen aktivieren
+        notesField.disabled = false;
+        notesField.style.opacity = '1';
+        notesField.style.background = 'white';
+        notesField.placeholder = 'Notizen...';
+    } else {
+        // Checkbox abgewählt - Notizen deaktivieren
+        notesField.disabled = true;
+        notesField.style.opacity = '0.5';
+        notesField.style.background = '#f5f5f5';
+        notesField.placeholder = 'Notizen deaktiviert';
+        notesField.value = ''; // Notizen leeren
+    }
 }
 
 
