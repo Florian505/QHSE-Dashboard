@@ -1,6 +1,585 @@
 // QHSE Management System JavaScript
 console.log('🔄 QHSE Script wird geladen... Version 2024-07-05-02');
 
+// Loading Screen Controller
+class LoadingScreen {
+    constructor() {
+        this.duration = 2000; // 2 seconds
+        this.loadingScreen = null;
+        this.initialized = false;
+        this.currentStep = 0;
+        this.steps = [
+            { message: 'Initialisiere System...', duration: 300, progress: 25 },
+            { message: 'Lade Datenbank...', duration: 250, progress: 50 },
+            { message: 'Prüfe TÜV-Zertifikate...', duration: 350, progress: 75 },
+            { message: 'System bereit!', duration: 200, progress: 100 }
+        ];
+    }
+
+    init() {
+        if (this.initialized) return;
+        
+        this.loadingScreen = document.getElementById('loadingScreen');
+        if (!this.loadingScreen) return;
+
+        // Show loading screen initially
+        this.loadingScreen.classList.add('active');
+
+        // Start dynamic loading sequence
+        this.startLoadingSequence();
+
+        this.initialized = true;
+        console.log('🎨 Loading Screen initialized - Dynamic loading sequence started');
+    }
+
+    startLoadingSequence() {
+        const progressBar = document.getElementById('progressBar');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const currentTask = document.getElementById('currentTask');
+        const estimatedTime = document.getElementById('estimatedTime');
+        const loadingStatus = document.getElementById('loadingStatus');
+
+        let totalElapsed = 0;
+
+        const processStep = (stepIndex) => {
+            if (stepIndex >= this.steps.length) {
+                // All steps completed, hide loading screen
+                setTimeout(() => this.hide(), 300);
+                return;
+            }
+
+            const step = this.steps[stepIndex];
+            const remainingTime = this.duration - totalElapsed;
+            
+            // Update UI elements
+            if (currentTask) currentTask.textContent = step.message;
+            if (estimatedTime) estimatedTime.textContent = `Geschätzter Rest: ${Math.max(1, Math.ceil(remainingTime / 1000))}s`;
+            
+            // Animate progress bar
+            if (progressBar) {
+                progressBar.style.width = step.progress + '%';
+            }
+            
+            // Animate percentage counter
+            if (progressPercentage) {
+                this.animatePercentage(progressPercentage, step.progress);
+            }
+
+            // Update status for key milestones
+            if (stepIndex === 2 && loadingStatus) {
+                loadingStatus.textContent = 'TÜV-Compliance wird geprüft...';
+            } else if (stepIndex === 3 && loadingStatus) {
+                loadingStatus.textContent = 'Login-System wird vorbereitet...';
+            }
+
+            totalElapsed += step.duration;
+
+            // Process next step
+            setTimeout(() => {
+                processStep(stepIndex + 1);
+            }, step.duration);
+        };
+
+        // Start with first step after initial delay
+        setTimeout(() => {
+            processStep(0);
+        }, 800); // Wait for initial animations
+    }
+
+    animatePercentage(element, targetPercentage) {
+        const currentPercentage = parseInt(element.textContent) || 0;
+        const increment = targetPercentage > currentPercentage ? 1 : -1;
+        const duration = Math.abs(targetPercentage - currentPercentage) * 20; // 20ms per percent
+        
+        let current = currentPercentage;
+        const timer = setInterval(() => {
+            current += increment;
+            element.textContent = current + '%';
+            
+            if (current === targetPercentage) {
+                clearInterval(timer);
+            }
+        }, duration / Math.abs(targetPercentage - currentPercentage));
+    }
+
+    hide() {
+        if (!this.loadingScreen) return;
+
+        // Final success message
+        const currentTask = document.getElementById('currentTask');
+        const loadingStatus = document.getElementById('loadingStatus');
+        if (currentTask) currentTask.textContent = 'QHSE System erfolgreich geladen!';
+        if (loadingStatus) loadingStatus.textContent = 'Willkommen im TÜV-konformen QHSE Management System';
+
+        setTimeout(() => {
+            // Fade out loading screen
+            this.loadingScreen.style.opacity = '0';
+            this.loadingScreen.style.transition = 'opacity 0.8s ease-out';
+            
+            // Remove loading screen from DOM after fade completes
+            setTimeout(() => {
+                if (this.loadingScreen && this.loadingScreen.parentNode) {
+                    this.loadingScreen.parentNode.removeChild(this.loadingScreen);
+                }
+                
+                // Show login screen after loading screen is gone
+                this.showLoginScreen();
+            }, 800);
+
+            console.log('✨ Loading Screen hidden - Login screen ready');
+        }, 500);
+    }
+
+    showLoginScreen() {
+        const loginScreen = new LoginScreen();
+        loginScreen.init();
+    }
+}
+
+// Login Screen Controller
+class LoginScreen {
+    constructor() {
+        this.loginScreen = null;
+        this.initialized = false;
+        this.loginReady = false;
+    }
+
+    init() {
+        if (this.initialized) return;
+        
+        this.loginScreen = document.getElementById('loginScreen');
+        if (!this.loginScreen) return;
+
+        // Show login screen
+        this.loginScreen.classList.add('active');
+        
+        // Setup event listeners
+        this.setupEventListeners();
+        
+        // Auto-focus username field
+        setTimeout(() => {
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) {
+                usernameInput.focus();
+            }
+        }, 500);
+
+        this.initialized = true;
+        console.log('🔐 Login Screen initialized - Waiting for user input');
+    }
+
+    setupEventListeners() {
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const languageSelect = document.getElementById('language');
+        const companyInput = document.getElementById('company');
+        const loginButton = document.getElementById('loginButton');
+        const loginStatusText = document.getElementById('loginStatusText');
+
+        // Setup custom language dropdown
+        this.setupCustomLanguageDropdown();
+
+        // Input validation
+        const validateInputs = () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            const language = languageSelect ? languageSelect.value : 'de';
+            const company = companyInput ? companyInput.value.trim() : '';
+            
+            if (username.length > 0 && password.length > 0 && language && company.length > 0) {
+                if (!this.loginReady) {
+                    loginButton.disabled = false;
+                    loginButton.classList.add('ready');
+                    loginButton.innerHTML = '<i class="fas fa-check"></i> Bereit zum Anmelden';
+                    loginStatusText.textContent = 'Anmeldung bereit - Klicken Sie auf "Anmelden"';
+                    loginStatusText.style.color = '#22c55e';
+                    this.loginReady = true;
+                }
+            } else {
+                if (this.loginReady) {
+                    loginButton.disabled = true;
+                    loginButton.classList.remove('ready');
+                    loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Anmelden';
+                    loginStatusText.textContent = 'Bitte geben Sie alle Anmeldedaten ein';
+                    loginStatusText.style.color = '#666';
+                    this.loginReady = false;
+                }
+            }
+        };
+
+        // Event listeners for input fields
+        usernameInput.addEventListener('input', validateInputs);
+        passwordInput.addEventListener('input', validateInputs);
+        if (languageSelect) {
+            // Listen for changes on hidden input
+            languageSelect.addEventListener('change', validateInputs);
+        }
+        if (companyInput) companyInput.addEventListener('input', validateInputs);
+        
+        // Enter key support
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (this.loginReady) {
+                    this.performLogin();
+                } else {
+                    passwordInput.focus();
+                }
+            }
+        });
+        
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && this.loginReady) {
+                this.performLogin();
+            }
+        });
+
+        // Login button click
+        loginButton.addEventListener('click', () => {
+            if (this.loginReady) {
+                this.performLogin();
+            }
+        });
+
+        // Forgot password link
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showForgotPassword();
+        });
+    }
+
+    setupCustomLanguageDropdown() {
+        const dropdown = document.querySelector('.custom-language-dropdown');
+        const selected = document.getElementById('languageSelected');
+        const options = document.getElementById('languageOptions');
+        const hiddenInput = document.getElementById('language');
+        
+        if (!dropdown || !selected || !options || !hiddenInput) return;
+
+        // Toggle dropdown
+        selected.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+
+        // Handle option selection
+        const languageOptions = options.querySelectorAll('.language-option');
+        languageOptions.forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                const value = option.dataset.value;
+                const flag = option.querySelector('.flag').textContent;
+                const flagClass = option.querySelector('.flag').className;
+                const name = option.querySelector('.language-name').textContent;
+                
+                // Update selected display
+                const selectedFlag = selected.querySelector('.flag');
+                selectedFlag.textContent = flag;
+                selectedFlag.className = flagClass;
+                selected.querySelector('.language-name').textContent = name;
+                
+                // Update hidden input
+                hiddenInput.value = value;
+                
+                // Update selected state
+                languageOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                
+                // Close dropdown
+                dropdown.classList.remove('open');
+                
+                // Trigger change event for validation
+                hiddenInput.dispatchEvent(new Event('change'));
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        // Set initial selected state
+        const defaultOption = options.querySelector('[data-value="de"]');
+        if (defaultOption) {
+            defaultOption.classList.add('selected');
+        }
+    }
+
+    performLogin() {
+        const loginButton = document.getElementById('loginButton');
+        const loginStatusText = document.getElementById('loginStatusText');
+        
+        // Show loading state
+        loginButton.disabled = true;
+        loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Anmeldung läuft...';
+        loginStatusText.textContent = 'Anmeldedaten werden geprüft...';
+        loginStatusText.style.color = '#0056b3';
+        
+        // Simulate login process
+        setTimeout(() => {
+            loginButton.innerHTML = '<i class="fas fa-check-circle"></i> Erfolgreich angemeldet!';
+            loginStatusText.textContent = 'Anmeldung erfolgreich - System wird geladen...';
+            loginStatusText.style.color = '#22c55e';
+            
+            // Hide login screen and start loading screen
+            setTimeout(() => {
+                this.hide();
+                
+                // Start loading screen after login
+                if (window.loadingScreen) {
+                    console.log('🚀 Starting loading screen after login...');
+                    // Reset initialization flag to allow re-showing
+                    window.loadingScreen.initialized = false;
+                    window.loadingScreen.init();
+                    
+                    // Initialize dashboard after loading is complete
+                    setTimeout(() => {
+                        if (window.initializeDashboard) {
+                            window.initializeDashboard();
+                        }
+                    }, window.loadingScreen.duration + 1000);
+                }
+            }, 1500);
+        }, 1000);
+    }
+
+    showForgotPassword() {
+        const loginContent = document.querySelector('.login-content');
+        
+        // Create forgot password content
+        const forgotPasswordHtml = `
+            <div class="forgot-password-content">
+                <div class="login-header">
+                    <div class="login-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h1 class="login-title">Passwort zurücksetzen</h1>
+                    <p class="login-subtitle">Geben Sie Ihren Benutzernamen ein</p>
+                </div>
+                
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="resetUsername">Benutzername</label>
+                        <input type="text" id="resetUsername" placeholder="Ihr Benutzername">
+                    </div>
+                    
+                    <button class="login-btn" type="button" id="resetButton" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                        Reset-Link senden
+                    </button>
+                    
+                    <div class="login-links">
+                        <a href="#" class="forgot-password-link" id="backToLoginLink">
+                            <i class="fas fa-arrow-left"></i>
+                            Zurück zur Anmeldung
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="login-footer">
+                    <p class="login-status" id="resetStatusText">Geben Sie Ihren Benutzernamen ein</p>
+                </div>
+            </div>
+        `;
+        
+        // Animate transition
+        loginContent.style.opacity = '0';
+        loginContent.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+            loginContent.innerHTML = forgotPasswordHtml;
+            loginContent.style.opacity = '1';
+            loginContent.style.transform = 'scale(1)';
+            
+            // Setup forgot password event listeners
+            this.setupForgotPasswordListeners();
+            
+            // Auto-focus reset username field
+            setTimeout(() => {
+                const resetUsernameInput = document.getElementById('resetUsername');
+                if (resetUsernameInput) {
+                    resetUsernameInput.focus();
+                }
+            }, 200);
+        }, 300);
+    }
+
+    setupForgotPasswordListeners() {
+        const resetUsernameInput = document.getElementById('resetUsername');
+        const resetButton = document.getElementById('resetButton');
+        const resetStatusText = document.getElementById('resetStatusText');
+        const backToLoginLink = document.getElementById('backToLoginLink');
+        
+        // Reset username validation
+        resetUsernameInput.addEventListener('input', () => {
+            const username = resetUsernameInput.value.trim();
+            
+            if (username.length > 0) {
+                resetButton.disabled = false;
+                resetButton.classList.add('ready');
+                resetButton.innerHTML = '<i class="fas fa-check"></i> Reset-Link senden';
+                resetStatusText.textContent = 'Bereit zum Senden des Reset-Links';
+                resetStatusText.style.color = '#22c55e';
+            } else {
+                resetButton.disabled = true;
+                resetButton.classList.remove('ready');
+                resetButton.innerHTML = '<i class="fas fa-paper-plane"></i> Reset-Link senden';
+                resetStatusText.textContent = 'Geben Sie Ihren Benutzernamen ein';
+                resetStatusText.style.color = '#666';
+            }
+        });
+        
+        // Enter key support
+        resetUsernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !resetButton.disabled) {
+                this.performPasswordReset();
+            }
+        });
+        
+        // Reset button click
+        resetButton.addEventListener('click', () => {
+            if (!resetButton.disabled) {
+                this.performPasswordReset();
+            }
+        });
+        
+        // Back to login link
+        backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showLoginForm();
+        });
+    }
+
+    performPasswordReset() {
+        const resetButton = document.getElementById('resetButton');
+        const resetStatusText = document.getElementById('resetStatusText');
+        const resetUsernameInput = document.getElementById('resetUsername');
+        const username = resetUsernameInput.value.trim();
+        
+        // Show loading state
+        resetButton.disabled = true;
+        resetButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sende Reset-Link...';
+        resetStatusText.textContent = 'Reset-Link wird versendet...';
+        resetStatusText.style.color = '#0056b3';
+        
+        // Simulate password reset process
+        setTimeout(() => {
+            resetButton.innerHTML = '<i class="fas fa-check-circle"></i> Reset-Link gesendet!';
+            resetStatusText.innerHTML = `Reset-Link wurde an die E-Mail-Adresse von <strong>${username}</strong> gesendet.<br>Prüfen Sie Ihr Postfach.`;
+            resetStatusText.style.color = '#22c55e';
+            
+            // Show back to login after success
+            setTimeout(() => {
+                this.showLoginForm();
+            }, 3000);
+        }, 1500);
+    }
+
+    showLoginForm() {
+        const loginContent = document.querySelector('.login-content');
+        
+        // Create original login content
+        const originalLoginHtml = `
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1 class="login-title">QHSE Secure Access</h1>
+                <p class="login-subtitle">TÜV-konforme Benutzeranmeldung</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="username">Benutzername</label>
+                    <input type="text" id="username" placeholder="Ihr Benutzername">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input type="password" id="password" placeholder="Ihr Passwort">
+                </div>
+                
+                <button class="login-btn" type="button" id="loginButton" disabled>
+                    <i class="fas fa-sign-in-alt"></i>
+                    Anmelden
+                </button>
+                
+                <div class="login-links">
+                    <a href="#" class="forgot-password-link" id="forgotPasswordLink">
+                        <i class="fas fa-key"></i>
+                        Passwort vergessen?
+                    </a>
+                </div>
+            </div>
+            
+            <div class="login-footer">
+                <p class="login-status" id="loginStatusText">Bitte geben Sie Ihre Anmeldedaten ein</p>
+            </div>
+        `;
+        
+        // Animate transition
+        loginContent.style.opacity = '0';
+        loginContent.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+            loginContent.innerHTML = originalLoginHtml;
+            loginContent.style.opacity = '1';
+            loginContent.style.transform = 'scale(1)';
+            
+            // Re-setup original event listeners
+            this.setupEventListeners();
+            
+            // Auto-focus username field
+            setTimeout(() => {
+                const usernameInput = document.getElementById('username');
+                if (usernameInput) {
+                    usernameInput.focus();
+                }
+            }, 200);
+        }, 300);
+    }
+
+    hide() {
+        if (!this.loginScreen) return;
+
+        // Fade out login screen
+        this.loginScreen.style.opacity = '0';
+        this.loginScreen.style.transition = 'opacity 0.8s ease-out';
+        
+        // Show main app
+        setTimeout(() => {
+            this.loginScreen.classList.remove('active');
+            this.showMainApp();
+            
+            // Remove from DOM after animation
+            setTimeout(() => {
+                if (this.loginScreen && this.loginScreen.parentNode) {
+                    this.loginScreen.parentNode.removeChild(this.loginScreen);
+                }
+            }, 800);
+        }, 800);
+
+        console.log('✨ Login Screen hidden - Main app ready');
+    }
+
+    showMainApp() {
+        const appContainer = document.querySelector('.app-container');
+        if (appContainer) {
+            appContainer.classList.add('loaded');
+            appContainer.style.background = '#f8fafc';
+            appContainer.style.minHeight = '100vh';
+        }
+        
+        // Change background and allow scrolling
+        document.documentElement.classList.add('loaded');
+        document.body.classList.remove('loading');
+        document.body.style.overflow = '';
+    }
+}
+
 class QHSEDashboard {
     constructor() {
         this.currentUserId = 'root-admin';
