@@ -613,6 +613,7 @@ class QHSEDashboard {
         this.exchangeRequests = this.loadExchangeRequestsFromStorage();
         this.auditors = this.loadAuditorsFromStorage();
         this.znNumbers = [];
+        this.selectedISO = new Set(); // Selected ISO standards storage
         this.initializeRootAdmin();
         this.initializeDefaultAreas();
         this.initializeDefaultDepartments();
@@ -46537,4 +46538,84 @@ QHSEDashboard.prototype.addDGUVModalStyles = function() {
     `;
     document.head.appendChild(style);
 };
+
+// ISO Selection Functions
+function toggleISOSelection(badge) {
+    const isoNumber = badge.dataset.iso;
+    const isSelected = badge.classList.contains('selected');
+    
+    if (isSelected) {
+        // Deselect
+        badge.classList.remove('selected');
+        if (window.qhseDashboard) {
+            window.qhseDashboard.selectedISO.delete(isoNumber);
+        }
+        
+        // Add deselection animation
+        badge.style.animation = 'isoDeselect 0.3s ease-out';
+        setTimeout(() => {
+            badge.style.animation = '';
+        }, 300);
+        
+        console.log(`ISO ${isoNumber} deselected`);
+    } else {
+        // Select
+        badge.classList.add('selected');
+        if (window.qhseDashboard) {
+            window.qhseDashboard.selectedISO.add(isoNumber);
+        }
+        
+        // Add selection animation
+        badge.style.animation = 'isoSelect 0.3s ease-out';
+        setTimeout(() => {
+            badge.style.animation = '';
+        }, 300);
+        
+        console.log(`ISO ${isoNumber} selected`);
+    }
+    
+    // Update display of selected standards
+    updateSelectedISODisplay();
+}
+
+function updateSelectedISODisplay() {
+    if (window.qhseDashboard) {
+        const selectedCount = window.qhseDashboard.selectedISO.size;
+        const selectedStandards = Array.from(window.qhseDashboard.selectedISO);
+        
+        console.log(`Selected ISO Standards (${selectedCount}):`, selectedStandards);
+        
+        // You can add visual feedback here, like updating a counter or list
+        // For example, show selected count in header
+        const header = document.querySelector('.iso-standards-header h3');
+        if (header) {
+            if (selectedCount > 0) {
+                header.textContent = `Wählen Sie eine oder mehrere Normen aus (${selectedCount} ausgewählt)`;
+            } else {
+                header.textContent = 'Wählen Sie eine oder mehrere Normen aus';
+            }
+        }
+    }
+}
+
+function getSelectedISOStandards() {
+    if (window.qhseDashboard) {
+        return Array.from(window.qhseDashboard.selectedISO);
+    }
+    return [];
+}
+
+function clearAllISOSelections() {
+    const badges = document.querySelectorAll('.iso-badge.selected');
+    badges.forEach(badge => {
+        badge.classList.remove('selected');
+    });
+    
+    if (window.qhseDashboard) {
+        window.qhseDashboard.selectedISO.clear();
+    }
+    
+    updateSelectedISODisplay();
+    console.log('All ISO selections cleared');
+}
 

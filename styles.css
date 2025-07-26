@@ -1577,6 +1577,27 @@
     display: flex;
 }
 
+/* Main Header Text über alles */
+.main-header-text {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+    z-index: 1001;
+}
+
+.main-header-text h2 {
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.3px;
+    line-height: 1.4;
+}
+
 /* ISO Standards Grid Layout */
 .iso-standards-grid {
     position: absolute;
@@ -1589,6 +1610,8 @@
     z-index: 1000;
     animation: isoFadeIn 1.5s ease-out 0.5s both;
 }
+
+
 
 .iso-row {
     display: flex;
@@ -1612,6 +1635,7 @@
     align-items: center;
     transition: all 0.3s ease;
     cursor: pointer;
+    position: relative;
     flex-shrink: 0;
 }
 
@@ -1620,6 +1644,42 @@
     border-color: rgba(255, 255, 255, 0.5);
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.iso-badge.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    transform: scale(1.1);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+}
+
+.iso-badge.selected:hover {
+    transform: translateY(-3px) scale(1.15);
+}
+
+.selection-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #22c55e;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.iso-badge.selected .selection-indicator {
+    opacity: 1;
+    transform: scale(1);
 }
 
 .iso-badge i {
@@ -1697,6 +1757,30 @@
     }
 }
 
+@keyframes isoSelect {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes isoDeselect {
+    0% {
+        transform: scale(1.1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
 /* Responsive Design für ISO Grid */
 @media (max-width: 1400px) {
     .iso-standards-grid {
@@ -1766,10 +1850,10 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     border-radius: 20px;
-    padding: 40px;
+    padding: 80px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     text-align: center;
-    max-width: 400px;
+    max-width: 700px;
     width: 90%;
     animation: loginSlideIn 0.8s ease-out;
 }
@@ -1963,6 +2047,80 @@
 
 .flag-nl {
     background: linear-gradient(to bottom, #21468b 33.33%, #ffffff 33.33%, #ffffff 66.66%, #ae1c28 66.66%);
+}
+
+.flag-pt {
+    background: linear-gradient(to right, #046a38 50%, #d52b1e 50%);
+}
+
+.flag-ru {
+    background: linear-gradient(to bottom, #ffffff 33.33%, #0039a6 33.33%, #0039a6 66.66%, #d52b1e 66.66%);
+}
+
+.flag-zh {
+    background: #de2910;
+}
+
+.flag-ja {
+    background: radial-gradient(circle at center, #bc002d 25%, #ffffff 25%);
+}
+
+.flag-ar {
+    background: linear-gradient(to bottom, #000000 33.33%, #ffffff 33.33%, #ffffff 66.66%, #007a3d 66.66%);
+}
+
+.flag-pl {
+    background: linear-gradient(to bottom, #ffffff 50%, #dc143c 50%);
+}
+
+.flag-tr {
+    background: #e30a17;
+}
+
+.flag-sv {
+    background: linear-gradient(to bottom, #006aa7 25%, #fecc00 25%, #fecc00 75%, #006aa7 75%);
+}
+
+.flag-no {
+    background: 
+        linear-gradient(to bottom, #ef2b2d 40%, #ffffff 40%, #ffffff 60%, #ef2b2d 60%),
+        linear-gradient(to right, #002868 30%, #ffffff 30%, #ffffff 40%, #002868 40%);
+}
+
+.flag-da {
+    background: 
+        linear-gradient(to bottom, #c8102e 40%, #ffffff 40%, #ffffff 60%, #c8102e 60%),
+        linear-gradient(to right, #c8102e 30%, #ffffff 30%, #ffffff 40%, #c8102e 40%);
+}
+
+.flag-fi {
+    background: 
+        linear-gradient(to bottom, #003580 40%, #ffffff 40%, #ffffff 60%, #003580 60%),
+        linear-gradient(to right, #003580 30%, #ffffff 30%, #ffffff 40%, #003580 40%);
+}
+
+.flag-cs {
+    background: linear-gradient(to bottom, #ffffff 50%, #d7141a 50%);
+}
+
+.flag-hu {
+    background: linear-gradient(to bottom, #cd212a 33.33%, #ffffff 33.33%, #ffffff 66.66%, #436f4d 66.66%);
+}
+
+.flag-ro {
+    background: linear-gradient(to right, #002b7f 33.33%, #fcd116 33.33%, #fcd116 66.66%, #ce1126 66.66%);
+}
+
+.flag-bg {
+    background: linear-gradient(to bottom, #ffffff 33.33%, #00966e 33.33%, #00966e 66.66%, #d62612 66.66%);
+}
+
+.flag-hr {
+    background: linear-gradient(to bottom, #ff0000 33.33%, #ffffff 33.33%, #ffffff 66.66%, #171796 66.66%);
+}
+
+.flag-sk {
+    background: linear-gradient(to bottom, #ffffff 33.33%, #0b4ea2 33.33%, #0b4ea2 66.66%, #ee1c25 66.66%);
 }
 
 .language-option .language-name {
