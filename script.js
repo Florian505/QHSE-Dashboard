@@ -47417,6 +47417,29 @@ function addNotesAuditBlock() {
                     <button type="button" class="add-input-btn" onclick="addNotesDocumentInput('${blockId}')">
                         <i class="fas fa-plus"></i> Weiteres Dokument hinzufügen
                     </button>
+                    
+                    <div class="additional-fields-section">
+                        <label>Zusätzliche Eingabefelder</label>
+                        <div class="multi-input-container" id="notes-additional-${blockId}">
+                            <div class="multi-input-item">
+                                <select name="additionalFieldTypes[]" style="width: 300px; margin-right: 10px; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; font-weight: 500;">
+                                    <option value="">-- Typ auswählen --</option>
+                                    <option value="Hinweis zur Verbesserung">Hinweis zur Verbesserung</option>
+                                    <option value="Positiver Hinweis">Positiver Hinweis</option>
+                                    <option value="Abweichung">Abweichung</option>
+                                    <option value="Kritische Abweichung">Kritische Abweichung</option>
+                                    <option value="Sonstiges">Sonstiges</option>
+                                </select>
+                                <textarea name="additionalFields[]" placeholder="Beschreibung eingeben..."></textarea>
+                                <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)" style="display: none;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-input-btn" onclick="addNotesAdditionalInput('${blockId}')">
+                            <i class="fas fa-plus"></i> Weiteres Feld hinzufügen
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -48570,6 +48593,28 @@ function toggleNotesField(checkbox) {
         notesField.placeholder = 'Notizen deaktiviert';
         notesField.value = ''; // Notizen leeren
     }
+}
+
+function addNotesAdditionalInput(blockId) {
+    const container = document.getElementById(`notes-additional-${blockId}`);
+    const inputHtml = `
+        <div class="multi-input-item">
+            <select name="additionalFieldTypes[]" style="width: 300px; margin-right: 10px; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; font-weight: 500;">
+                <option value="">-- Typ auswählen --</option>
+                <option value="Hinweis zur Verbesserung">Hinweis zur Verbesserung</option>
+                <option value="Positiver Hinweis">Positiver Hinweis</option>
+                <option value="Abweichung">Abweichung</option>
+                <option value="Kritische Abweichung">Kritische Abweichung</option>
+                <option value="Sonstiges">Sonstiges</option>
+            </select>
+            <textarea name="additionalFields[]" placeholder="Beschreibung eingeben..."></textarea>
+            <button type="button" class="remove-input-btn" onclick="removeMultiInput(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', inputHtml);
+    updateRemoveButtonsVisibility();
 }
 
 
