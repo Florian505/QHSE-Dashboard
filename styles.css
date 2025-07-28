@@ -1844,6 +1844,10 @@
     .iso-standards-grid {
         display: none;
     }
+    
+    .login-side-text {
+        display: none;
+    }
 }
 
 .login-content {
