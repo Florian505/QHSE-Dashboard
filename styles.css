@@ -1585,7 +1585,7 @@
     transform: translateX(-50%);
     width: 100%;
     text-align: center;
-    z-index: 50003;
+    z-index: 50002;
 }
 
 .main-header-text h2 {
@@ -1861,7 +1861,7 @@
     width: 90%;
     animation: loginSlideIn 0.8s ease-out;
     position: relative;
-    z-index: 50002;
+    z-index: 50001;
 }
 
 .login-side-text {
