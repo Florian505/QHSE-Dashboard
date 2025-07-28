@@ -1858,6 +1858,62 @@
     animation: loginSlideIn 0.8s ease-out;
 }
 
+.login-side-text {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 400;
+    width: 800px;
+    padding: 45px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 25px;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.login-side-text h3 {
+    color: white;
+    font-size: 2.0rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.login-side-text ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.login-side-text li {
+    margin-bottom: 18px;
+    padding-left: 30px;
+    position: relative;
+    line-height: 1.4;
+    font-size: 1.15rem;
+}
+
+.login-side-text li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 1.4rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.login-side-text strong {
+    color: #E8F4FD;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
 .login-header {
     margin-bottom: 30px;
 }

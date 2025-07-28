@@ -46670,55 +46670,59 @@ function generateAuditNotes() {
         });
     });
     
-    // Get audit blocks
+    // Get audit blocks with new QHSE structure
     const auditBlocks = [];
-    const blockElements = document.querySelectorAll('#notesAuditBlocksContainer .audit-block');
-    blockElements.forEach(block => {
-        const blockId = block.id;
+    const blockElements = document.querySelectorAll('.audit-block');
+    blockElements.forEach((block, index) => {
+        const blockTitle = block.querySelector('.block-title input').value || `Audit-Block ${index + 1}`;
+        const blockDescription = block.querySelector('.block-description textarea').value || '';
+        
         const blockData = {
-            startTime: block.querySelector('input[name="startTime"]').value,
-            endTime: block.querySelector('input[name="endTime"]').value,
-            department: block.querySelector('input[name="department"]').value || block.querySelector('select[name="departmentSelect"]').value,
-            auditFocus: block.querySelector('textarea[name="auditFocus"]').value,
-            auditors: [],
-            contacts: [],
-            standards: Array.from(block.querySelectorAll('select[name="standards"] option:checked')).map(opt => opt.value),
-            chapters: block.querySelector('textarea[name="chapters"]').value,
-            notesTemplate: block.querySelector('select[name="notesTemplate"]').value,
-            documents: getSelectedDocumentsWithDates(blockId)
+            title: blockTitle,
+            description: blockDescription,
+            qhseDocuments: [],
+            additionalFields: []
         };
         
-        // Collect auditors
-        block.querySelectorAll('input[name="auditors[]"]').forEach(input => {
-            if (input.value.trim()) {
-                blockData.auditors.push(input.value.trim());
+        // Collect QHSE documents
+        const qhseDocuments = block.querySelectorAll('.document-with-date');
+        qhseDocuments.forEach(docRow => {
+            const docName = docRow.querySelector('input[name="qhseDocuments[]"]').value || '';
+            const docDate = docRow.querySelector('input[name="qhseDocumentDates[]"]').value || '';
+            const docNotes = docRow.querySelector('input[name="qhseDocumentNotes[]"]').value || '';
+            const isChecked = docRow.querySelector('input[name="qhseDocumentSelected[]"]').checked;
+            
+            if (docName && isChecked) {
+                blockData.qhseDocuments.push({
+                    name: docName,
+                    date: docDate,
+                    notes: docNotes
+                });
             }
         });
         
-        // Collect contacts
-        block.querySelectorAll('input[name="contacts[]"]').forEach(input => {
-            if (input.value.trim()) {
-                blockData.contacts.push(input.value.trim());
+        // Collect additional fields
+        const additionalFields = block.querySelectorAll('.additional-fields-section .multi-input-item');
+        additionalFields.forEach(fieldRow => {
+            const fieldType = fieldRow.querySelector('select[name="additionalFieldTypes[]"]').value || '';
+            const fieldDescription = fieldRow.querySelector('textarea[name="additionalFields[]"]').value || '';
+            
+            if (fieldType && fieldDescription) {
+                blockData.additionalFields.push({
+                    type: fieldType,
+                    description: fieldDescription
+                });
             }
         });
         
-        auditBlocks.push(blockData);
+        if (blockData.qhseDocuments.length > 0 || blockData.additionalFields.length > 0) {
+            auditBlocks.push(blockData);
+        }
     });
     
-    const template = document.getElementById('notesTemplate').value;
+    const template = document.getElementById('notesTemplate').value || 'standard';
     const includePositive = document.getElementById('includePositive').checked;
     const includeRecommendations = document.getElementById('includeRecommendations').checked;
-    
-    // Validate minimum requirements
-    if (standards.length === 0 && auditBlocks.length === 0) {
-        alert('Bitte wählen Sie mindestens einen Standard aus oder fügen Sie Audit-Blöcke hinzu.');
-        return;
-    }
-    
-    if (areas.length === 0 && auditBlocks.length === 0) {
-        alert('Bitte wählen Sie mindestens einen Notizen-Bereich aus oder fügen Sie Audit-Blöcke hinzu.');
-        return;
-    }
     
     // Generate notes content
     const notesContent = generateNotesContent({
@@ -46740,6 +46744,8 @@ function generateAuditNotes() {
     
     // Scroll to generated content
     document.getElementById('generatedNotesSection').scrollIntoView({ behavior: 'smooth' });
+    
+    alert('Auditnotizen wurden erfolgreich generiert!');
 }
 
 function generateNotesContent(data) {
@@ -46781,13 +46787,69 @@ function generateNotesContent(data) {
         });
     }
     
-    // Generate content for each audit block
+    // Generate content for each audit block with new QHSE structure
     if (data.auditBlocks && data.auditBlocks.length > 0) {
         html += `<div class="audit-blocks-section">
-                    <h3><i class="fas fa-list"></i> Audit-Blöcke</h3>`;
+                    <h3><i class="fas fa-list"></i> Audit-Bereiche</h3>`;
         
         data.auditBlocks.forEach((block, index) => {
-            html += generateAuditBlockNotesContent(block, index + 1);
+            html += `
+                <div class="audit-block-content" style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 10px;">${block.title}</h4>
+                    ${block.description ? `<p style="margin: 10px 0; color: #666;"><strong>Beschreibung:</strong> ${block.description}</p>` : ''}
+                    
+                    ${block.qhseDocuments.length > 0 ? `
+                        <div class="qhse-documents-section" style="margin: 15px 0;">
+                            <h5 style="color: #34495e;">QHSE-Dokumente:</h5>
+                            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                                <thead>
+                                    <tr style="background-color: #f8f9fa;">
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Dokument</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Datum</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Notizen</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${block.qhseDocuments.map(doc => `
+                                        <tr>
+                                            <td style="border: 1px solid #ddd; padding: 8px;">${doc.name}</td>
+                                            <td style="border: 1px solid #ddd; padding: 8px;">${doc.date}</td>
+                                            <td style="border: 1px solid #ddd; padding: 8px;">${doc.notes}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : ''}
+                    
+                    ${block.additionalFields.length > 0 ? `
+                        <div class="additional-fields-section" style="margin: 15px 0;">
+                            <h5 style="color: #34495e;">Zusätzliche Hinweise:</h5>
+                            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                                <thead>
+                                    <tr style="background-color: #f8f9fa;">
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Typ</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Beschreibung</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${block.additionalFields.map(field => `
+                                        <tr>
+                                            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; color: ${getFieldTypeColor(field.type)};">${field.type}</td>
+                                            <td style="border: 1px solid #ddd; padding: 8px;">${field.description}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="notes-area" style="margin: 20px 0; border-top: 1px solid #ccc; padding-top: 15px;">
+                        <h5 style="color: #34495e;">Notizen:</h5>
+                        <textarea style="width: 100%; min-height: 60px; border: 1px solid #ccc; padding: 8px; border-radius: 4px;" placeholder="Weitere Notizen zu diesem Bereich..."></textarea>
+                    </div>
+                </div>
+            `;
         });
         
         html += `</div>`;
@@ -46795,6 +46857,23 @@ function generateNotesContent(data) {
     
     html += `</div>`;
     return html;
+}
+
+function getFieldTypeColor(fieldType) {
+    switch(fieldType) {
+        case 'Kritische Abweichung':
+            return '#e74c3c';
+        case 'Abweichung':
+            return '#f39c12';
+        case 'Hinweis zur Verbesserung':
+            return '#3498db';
+        case 'Positiver Hinweis':
+            return '#27ae60';
+        case 'Sonstiges':
+            return '#9b59b6';
+        default:
+            return '#2c3e50';
+    }
 }
 
 function generateAuditBlockNotesContent(block, blockNumber) {
@@ -47198,11 +47277,156 @@ function saveAuditNotes() {
 }
 
 function exportNotesWord() {
-    const content = document.getElementById('notesContent').innerHTML;
+    // Get all audit data
     const client = document.getElementById('notesClient').value || 'Unbekannt';
+    const auditor = document.getElementById('notesAuditor').value || 'Unbekannt';
     const date = document.getElementById('notesDate').value || new Date().toISOString().split('T')[0];
+    const location = document.getElementById('notesLocation').value || 'Unbekannt';
     
-    // Create a simple HTML document for Word export
+    // Get selected standards
+    const selectedStandards = Array.from(document.querySelectorAll('input[name="notesStandards"]:checked'))
+        .map(cb => cb.value).join(', ') || 'Nicht angegeben';
+    
+    // Get selected areas
+    const selectedAreas = Array.from(document.querySelectorAll('input[name="notesAreas"]:checked'))
+        .map(cb => cb.closest('label').textContent.trim()).join(', ') || 'Nicht angegeben';
+    
+    // Collect all audit blocks data
+    let auditBlocksContent = '';
+    const auditBlocks = document.querySelectorAll('.audit-block');
+    
+    if (auditBlocks.length === 0) {
+        auditBlocksContent = `
+            <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f8f9fa;">
+                <h3 style="color: #2c3e50;">Notizen-Vorlage</h3>
+                <p>Keine spezifischen Audit-Blöcke erstellt. Hier können manuelle Notizen hinzugefügt werden:</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background-color: #3498db;">
+                            <th style="border: 1px solid #ddd; padding: 12px; color: white; text-align: left;">Bereich</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; color: white; text-align: left;">Notizen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Allgemeine Feststellungen</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; height: 60px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Positive Punkte</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; height: 60px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Verbesserungspotential</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; height: 60px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Abweichungen</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; height: 60px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Empfehlungen</td>
+                            <td style="border: 1px solid #ddd; padding: 12px; height: 60px;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } else {
+        auditBlocks.forEach((block, index) => {
+            const blockTitle = block.querySelector('.block-title input').value || `Audit-Block ${index + 1}`;
+            const blockDescription = block.querySelector('.block-description textarea').value || 'Keine Beschreibung';
+            
+            auditBlocksContent += `
+                <div style="margin: 20px 0; page-break-inside: avoid;">
+                    <h3 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px;">${blockTitle}</h3>
+                    <p style="margin: 10px 0;"><strong>Beschreibung:</strong> ${blockDescription}</p>
+                    
+                    <h4 style="color: #34495e; margin-top: 15px;">QHSE-Dokumente:</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Dokument</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Datum</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Notizen</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            // Get QHSE documents from this block
+            const qhseDocuments = block.querySelectorAll('.document-with-date');
+            let hasDocuments = false;
+            qhseDocuments.forEach(docRow => {
+                const docName = docRow.querySelector('input[name="qhseDocuments[]"]').value || '';
+                const docDate = docRow.querySelector('input[name="qhseDocumentDates[]"]').value || '';
+                const docNotes = docRow.querySelector('input[name="qhseDocumentNotes[]"]').value || '';
+                const isChecked = docRow.querySelector('input[name="qhseDocumentSelected[]"]').checked;
+                
+                if (docName && isChecked) {
+                    hasDocuments = true;
+                    auditBlocksContent += `
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${docName}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${docDate}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${docNotes}</td>
+                        </tr>`;
+                }
+            });
+            
+            if (!hasDocuments) {
+                auditBlocksContent += `
+                    <tr>
+                        <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: center; color: #666;">Keine QHSE-Dokumente ausgewählt</td>
+                    </tr>`;
+            }
+            
+            auditBlocksContent += `
+                        </tbody>
+                    </table>
+                    
+                    <h4 style="color: #34495e; margin-top: 15px;">Zusätzliche Hinweise:</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                        <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Typ</th>
+                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Beschreibung</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            // Get additional fields from this block
+            const additionalFields = block.querySelectorAll('.additional-fields-section .multi-input-item');
+            let hasAdditionalFields = false;
+            additionalFields.forEach(fieldRow => {
+                const fieldType = fieldRow.querySelector('select[name="additionalFieldTypes[]"]').value || '';
+                const fieldDescription = fieldRow.querySelector('textarea[name="additionalFields[]"]').value || '';
+                
+                if (fieldType && fieldDescription) {
+                    hasAdditionalFields = true;
+                    auditBlocksContent += `
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; color: #e74c3c;">${fieldType}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${fieldDescription}</td>
+                        </tr>`;
+                }
+            });
+            
+            if (!hasAdditionalFields) {
+                auditBlocksContent += `
+                    <tr>
+                        <td colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: center; color: #666;">Keine zusätzlichen Hinweise vorhanden</td>
+                    </tr>`;
+            }
+            
+            auditBlocksContent += `
+                        </tbody>
+                    </table>
+                </div>`;
+        });
+    }
+    
+    // Create comprehensive Word document
     const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -47210,16 +47434,128 @@ function exportNotesWord() {
             <meta charset="UTF-8">
             <title>Auditnotizen - ${client} - ${date}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                h2, h3, h4 { color: #2c3e50; }
-                .detail-row { margin: 5px 0; }
-                .label { font-weight: bold; }
-                .notes-area { margin: 20px 0; border-top: 1px solid #ccc; padding-top: 15px; }
-                textarea { width: 100%; min-height: 60px; border: 1px solid #ccc; }
+                body { 
+                    font-family: 'Calibri', Arial, sans-serif; 
+                    margin: 30px; 
+                    line-height: 1.6;
+                    color: #333;
+                }
+                .header {
+                    text-align: center;
+                    border-bottom: 3px solid #3498db;
+                    padding-bottom: 20px;
+                    margin-bottom: 30px;
+                }
+                .header h1 {
+                    color: #2c3e50;
+                    margin: 0;
+                    font-size: 28px;
+                }
+                .header p {
+                    color: #7f8c8d;
+                    margin: 5px 0;
+                    font-size: 14px;
+                }
+                .info-section {
+                    background-color: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin: 20px 0;
+                }
+                .info-row {
+                    display: table;
+                    width: 100%;
+                    margin: 8px 0;
+                }
+                .info-label {
+                    display: table-cell;
+                    font-weight: bold;
+                    width: 150px;
+                    color: #2c3e50;
+                }
+                .info-value {
+                    display: table-cell;
+                    color: #34495e;
+                }
+                h2, h3, h4 { 
+                    color: #2c3e50; 
+                    margin-top: 25px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 15px 0;
+                }
+                th {
+                    background-color: #3498db;
+                    color: white;
+                    padding: 12px 8px;
+                    text-align: left;
+                    font-weight: bold;
+                }
+                td {
+                    border: 1px solid #bdc3c7;
+                    padding: 10px 8px;
+                    vertical-align: top;
+                }
+                tr:nth-child(even) {
+                    background-color: #f8f9fa;
+                }
+                .footer {
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    border-top: 1px solid #bdc3c7;
+                    text-align: center;
+                    color: #7f8c8d;
+                    font-size: 12px;
+                }
+                @media print {
+                    body { margin: 20px; }
+                    .header { page-break-after: avoid; }
+                    .audit-block { page-break-inside: avoid; }
+                }
             </style>
         </head>
         <body>
-            ${content}
+            <div class="header">
+                <h1>🔍 QHSE Auditnotizen</h1>
+                <p>Erstellt am: ${new Date().toLocaleDateString('de-DE')}</p>
+            </div>
+            
+            <div class="info-section">
+                <h2>📋 Audit-Informationen</h2>
+                <div class="info-row">
+                    <div class="info-label">Auftraggeber:</div>
+                    <div class="info-value">${client}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Auditor:</div>
+                    <div class="info-value">${auditor}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Audit-Datum:</div>
+                    <div class="info-value">${date}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Standort:</div>
+                    <div class="info-value">${location}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Standards:</div>
+                    <div class="info-value">${selectedStandards}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Ausgewählte Bereiche:</div>
+                    <div class="info-value">${selectedAreas}</div>
+                </div>
+            </div>
+            
+            <h2>📝 Audit-Bereiche und Feststellungen</h2>
+            ${auditBlocksContent}
+            
+            <div class="footer">
+                <p>Generiert mit QHSE Dashboard | © ${new Date().getFullYear()}</p>
+            </div>
         </body>
         </html>
     `;
@@ -47228,15 +47564,227 @@ function exportNotesWord() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Auditnotizen_${client}_${date}.doc`;
+    a.download = `Auditnotizen_${client}_${date.replace(/-/g, '')}.doc`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    alert('Word-Dokument wurde erfolgreich generiert und heruntergeladen!');
 }
 
 function exportNotesPDF() {
-    alert('PDF-Export wird in einer zukünftigen Version verfügbar sein.');
+    // Get all audit data
+    const client = document.getElementById('notesClient').value || 'Unbekannt';
+    const auditor = document.getElementById('notesAuditor').value || 'Unbekannt';
+    const date = document.getElementById('notesDate').value || new Date().toISOString().split('T')[0];
+    const location = document.getElementById('notesLocation').value || 'Unbekannt';
+    
+    // Get selected standards
+    const selectedStandards = Array.from(document.querySelectorAll('input[name="notesStandards"]:checked'))
+        .map(cb => cb.value).join(', ') || 'Nicht angegeben';
+    
+    // Collect all audit blocks data
+    let auditBlocksContent = '';
+    const auditBlocks = document.querySelectorAll('.audit-block');
+    
+    auditBlocks.forEach((block, index) => {
+        const blockTitle = block.querySelector('.block-title input').value || `Audit-Block ${index + 1}`;
+        const blockDescription = block.querySelector('.block-description textarea').value || 'Keine Beschreibung';
+        
+        auditBlocksContent += `
+            <div style="margin: 20px 0; page-break-inside: avoid;">
+                <h3 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px;">${blockTitle}</h3>
+                <p style="margin: 10px 0;"><strong>Beschreibung:</strong> ${blockDescription}</p>
+                
+                <h4 style="color: #34495e; margin-top: 15px;">QHSE-Dokumente:</h4>
+                <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="border: 1px solid #666; padding: 8px; text-align: left;">Dokument</th>
+                            <th style="border: 1px solid #666; padding: 8px; text-align: left;">Datum</th>
+                            <th style="border: 1px solid #666; padding: 8px; text-align: left;">Notizen</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        // Get QHSE documents from this block
+        const qhseDocuments = block.querySelectorAll('.document-with-date');
+        qhseDocuments.forEach(docRow => {
+            const docName = docRow.querySelector('input[name="qhseDocuments[]"]').value || '';
+            const docDate = docRow.querySelector('input[name="qhseDocumentDates[]"]').value || '';
+            const docNotes = docRow.querySelector('input[name="qhseDocumentNotes[]"]').value || '';
+            const isChecked = docRow.querySelector('input[name="qhseDocumentSelected[]"]').checked;
+            
+            if (docName && isChecked) {
+                auditBlocksContent += `
+                    <tr>
+                        <td style="border: 1px solid #666; padding: 8px;">${docName}</td>
+                        <td style="border: 1px solid #666; padding: 8px;">${docDate}</td>
+                        <td style="border: 1px solid #666; padding: 8px;">${docNotes}</td>
+                    </tr>`;
+            }
+        });
+        
+        auditBlocksContent += `
+                    </tbody>
+                </table>
+                
+                <h4 style="color: #34495e; margin-top: 15px;">Zusätzliche Hinweise:</h4>
+                <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="border: 1px solid #666; padding: 8px; text-align: left;">Typ</th>
+                            <th style="border: 1px solid #666; padding: 8px; text-align: left;">Beschreibung</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        // Get additional fields from this block
+        const additionalFields = block.querySelectorAll('.additional-fields-section .multi-input-item');
+        additionalFields.forEach(fieldRow => {
+            const fieldType = fieldRow.querySelector('select[name="additionalFieldTypes[]"]').value || '';
+            const fieldDescription = fieldRow.querySelector('textarea[name="additionalFields[]"]').value || '';
+            
+            if (fieldType && fieldDescription) {
+                auditBlocksContent += `
+                    <tr>
+                        <td style="border: 1px solid #666; padding: 8px; font-weight: bold; color: #e74c3c;">${fieldType}</td>
+                        <td style="border: 1px solid #666; padding: 8px;">${fieldDescription}</td>
+                    </tr>`;
+            }
+        });
+        
+        auditBlocksContent += `
+                    </tbody>
+                </table>
+            </div>`;
+    });
+    
+    // Create HTML content for PDF conversion
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Auditnotizen - ${client} - ${date}</title>
+            <style>
+                body { 
+                    font-family: Arial, sans-serif; 
+                    margin: 20px; 
+                    line-height: 1.4;
+                    color: #000;
+                }
+                .header {
+                    text-align: center;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 15px;
+                    margin-bottom: 25px;
+                }
+                .header h1 {
+                    margin: 0;
+                    font-size: 24px;
+                }
+                .info-section {
+                    border: 1px solid #666;
+                    padding: 15px;
+                    margin: 15px 0;
+                }
+                .info-row {
+                    margin: 5px 0;
+                }
+                .info-label {
+                    font-weight: bold;
+                    display: inline-block;
+                    width: 120px;
+                }
+                h2, h3, h4 { 
+                    color: #000; 
+                    margin-top: 20px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 10px 0;
+                }
+                th {
+                    background-color: #e0e0e0;
+                    padding: 8px;
+                    text-align: left;
+                    font-weight: bold;
+                    border: 1px solid #666;
+                }
+                td {
+                    border: 1px solid #666;
+                    padding: 6px;
+                    vertical-align: top;
+                }
+                .footer {
+                    margin-top: 30px;
+                    padding-top: 15px;
+                    border-top: 1px solid #666;
+                    text-align: center;
+                    font-size: 11px;
+                }
+                @page {
+                    margin: 20mm;
+                    size: A4;
+                }
+                @media print {
+                    body { margin: 0; }
+                    .header { page-break-after: avoid; }
+                    .audit-block { page-break-inside: avoid; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>QHSE Auditnotizen</h1>
+                <p>Erstellt am: ${new Date().toLocaleDateString('de-DE')}</p>
+            </div>
+            
+            <div class="info-section">
+                <h2>Audit-Informationen</h2>
+                <div class="info-row">
+                    <span class="info-label">Auftraggeber:</span> ${client}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Auditor:</span> ${auditor}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Audit-Datum:</span> ${date}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Standort:</span> ${location}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Standards:</span> ${selectedStandards}
+                </div>
+            </div>
+            
+            <h2>Audit-Bereiche und Feststellungen</h2>
+            ${auditBlocksContent}
+            
+            <div class="footer">
+                <p>Generiert mit QHSE Dashboard | © ${new Date().getFullYear()}</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    // Open print dialog which allows saving as PDF
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    
+    // Wait for content to load then trigger print dialog
+    printWindow.onload = function() {
+        setTimeout(() => {
+            printWindow.print();
+        }, 500);
+    };
+    
+    alert('PDF wird über den Druckdialog erstellt. Wählen Sie "Als PDF speichern" als Ziel aus.');
 }
 
 function printNotes() {

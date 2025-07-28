@@ -53,122 +53,6 @@
 
     <!-- Login Screen -->
     <div id="loginScreen" class="login-screen" style="display: flex !important;">
-        <!-- Epic 3D TÜV Robot -->
-        <div class="flying-robot-bot">
-            <!-- Robot Container with 3D perspective -->
-            <div class="robot-3d-container">
-                <!-- Robot Head -->
-                <div class="robot-head-3d">
-                    <div class="head-face front"></div>
-                    <div class="head-face back"></div>
-                    <div class="head-face left"></div>
-                    <div class="head-face right"></div>
-                    <div class="head-face top"></div>
-                    <div class="head-face bottom"></div>
-                    
-                    <!-- Eyes -->
-                    <div class="robot-eye left"></div>
-                    <div class="robot-eye right"></div>
-                    
-                    <!-- Antenna -->
-                    <div class="robot-antenna"></div>
-                </div>
-                
-                <!-- Robot Torso -->
-                <div class="robot-torso-3d">
-                    <div class="torso-face front">
-                        <div class="tuv-logo">TÜV</div>
-                        <div class="robot-screen">
-                            <div class="screen-line"></div>
-                            <div class="screen-line"></div>
-                            <div class="screen-line"></div>
-                        </div>
-                    </div>
-                    <div class="torso-face back"></div>
-                    <div class="torso-face left"></div>
-                    <div class="torso-face right"></div>
-                    <div class="torso-face top"></div>
-                    <div class="torso-face bottom"></div>
-                </div>
-                
-                <!-- Robot Arms -->
-                <div class="robot-arms-3d">
-                    <div class="robot-arm-3d left">
-                        <div class="arm-face front"></div>
-                        <div class="arm-face back"></div>
-                        <div class="arm-face left"></div>
-                        <div class="arm-face right"></div>
-                        <div class="arm-face top"></div>
-                        <div class="arm-face bottom"></div>
-                        <div class="robot-hand"></div>
-                    </div>
-                    
-                    <div class="robot-arm-3d right">
-                        <div class="arm-face front"></div>
-                        <div class="arm-face back"></div>
-                        <div class="arm-face left"></div>
-                        <div class="arm-face right"></div>
-                        <div class="arm-face top"></div>
-                        <div class="arm-face bottom"></div>
-                        <div class="robot-hand"></div>
-                    </div>
-                </div>
-                
-                <!-- Robot Propeller -->
-                <div class="robot-propeller-3d">
-                    <div class="propeller-center">
-                        <div class="center-face front"></div>
-                        <div class="center-face back"></div>
-                        <div class="center-face sides"></div>
-                    </div>
-                    
-                    <div class="propeller-blade-3d blade1">
-                        <div class="blade-face top"></div>
-                        <div class="blade-face bottom"></div>
-                        <div class="blade-face front"></div>
-                        <div class="blade-face back"></div>
-                    </div>
-                    
-                    <div class="propeller-blade-3d blade2">
-                        <div class="blade-face top"></div>
-                        <div class="blade-face bottom"></div>
-                        <div class="blade-face front"></div>
-                        <div class="blade-face back"></div>
-                    </div>
-                    
-                    <div class="propeller-blade-3d blade3">
-                        <div class="blade-face top"></div>
-                        <div class="blade-face bottom"></div>
-                        <div class="blade-face front"></div>
-                        <div class="blade-face back"></div>
-                    </div>
-                    
-                    <div class="propeller-blade-3d blade4">
-                        <div class="blade-face top"></div>
-                        <div class="blade-face bottom"></div>
-                        <div class="blade-face front"></div>
-                        <div class="blade-face back"></div>
-                    </div>
-                </div>
-                
-                <!-- Legacy arms for compatibility -->
-                <div class="robot-arms">
-                    <div class="robot-arm left"></div>
-                    <div class="robot-arm right"></div>
-                </div>
-                
-                <!-- Legacy propeller for compatibility -->
-                <div class="robot-propeller">
-                    <div class="propeller-blade"></div>
-                    <div class="propeller-blade"></div>
-                    <div class="propeller-blade"></div>
-                    <div class="propeller-blade"></div>
-                </div>
-            </div>
-            
-            <!-- Professional Speech Bubble -->
-            <div class="robot-speech-bubble">Willkommen beim TÜV QHSE System! ✨</div>
-        </div>
         
         <!-- Header Text über gesamten Bereich -->
         <div class="main-header-text">
@@ -459,6 +343,23 @@
             <div class="login-footer">
                 <p class="login-status" id="loginStatusText">Bitte geben Sie Ihre Anmeldedaten ein</p>
             </div>
+        </div>
+        
+        <div class="login-side-text">
+            <h3>QHSE Management Features</h3>
+            <ul>
+                <li><strong>TÜV-konforme Audits</strong> – Professionelle Auditdurchführung nach Standards</li>
+                <li><strong>QHSE-Integration</strong> – Qualität, Sicherheit & Umwelt vereint</li>
+                <li><strong>Digitale Dokumentation</strong> – Automatisierte Reports & Archivierung</li>
+                <li><strong>Auditplanung</strong> – Terminierung und Ressourcenverwaltung</li>
+                <li><strong>Mängelmanagement</strong> – Erfassung bis zur finalen Behebung</li>
+                <li><strong>Risikobewertung</strong> – Integrierte Analyse- und Bewertungstools</li>
+                <li><strong>Compliance-Checklisten</strong> – ISO 9001, 14001, 45001 Standards</li>
+                <li><strong>Workflow-Automatisierung</strong> – Intelligente Aufgabenverteilung</li>
+                <li><strong>Mobile App</strong> – Offline-Audits direkt vor Ort möglich</li>
+                <li><strong>Live-Dashboards</strong> – Echtzeit-KPIs und Monitoring</li>
+                <li><strong>Mehrsprachig</strong> – Internationale Teams & Standorte</li>
+            </ul>
         </div>
     </div>
 
@@ -5193,6 +5094,10 @@
                             <i class="fas fa-calendar-check"></i>
                             Auditplan-Generator
                         </button>
+                        <button class="tab-btn" data-tab="audit-notes-generator">
+                            <i class="fas fa-sticky-note"></i>
+                            Auditnotizen Generator
+                        </button>
                     </div>
 
                     <!-- Overview Tab -->
@@ -6245,6 +6150,250 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                 
                                 <div id="auditPlanTable" class="audit-plan-table">
                                     <!-- Generated table will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit Notes Generator Tab -->
+                    <div id="audit-notes-generator-tab" class="tab-content">
+                        <div class="audit-notes-generator">
+                            <div class="notes-header">
+                                <div class="header-content">
+                                    <h3><i class="fas fa-sticky-note"></i> Auditnotizen Generator</h3>
+                                    <p class="section-description">
+                                        Erstellen Sie strukturierte Auditnotizen für verschiedene Audit-Bereiche und Standards
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Configuration Section -->
+                            <div class="notes-configuration">
+                                <!-- Grunddaten -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-info-circle"></i> Grunddaten</h4>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="notesClient">Auftraggeber:</label>
+                                            <input type="text" id="notesClient" placeholder="Name des Auftraggebers">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="notesAuditor">Auditor:</label>
+                                            <input type="text" id="notesAuditor" placeholder="Name des Auditors">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="notesDate">Audit-Datum:</label>
+                                            <input type="date" id="notesDate">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="notesLocation">Standort:</label>
+                                            <input type="text" id="notesLocation" placeholder="z.B. Hauptwerk Hamburg">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="notesStandards">Standards:</label>
+                                        <div class="multi-select-container">
+                                            <div class="multi-select-display" onclick="toggleNotesStandardsDropdown()">
+                                                <span id="notesStandardsDisplay">Bitte wählen Sie Standards aus...</span>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                            <div id="notesStandardsDropdown" class="multi-select-dropdown" style="display: none;">
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="notesStandards" value="ISO 9001:2015" onchange="updateNotesStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 9001:2015 (Qualitätsmanagement)
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="notesStandards" value="ISO 14001:2015" onchange="updateNotesStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 14001:2015 (Umweltmanagement)
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="notesStandards" value="ISO 45001:2018" onchange="updateNotesStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 45001:2018 (Arbeitsschutzmanagement)
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="notesStandards" value="ISO 50001:2018" onchange="updateNotesStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 50001:2018 (Energiemanagement)
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="notesStandards" value="ISO 27001" onchange="updateNotesStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 27001 (Informationssicherheit)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Notizen-Bereiche -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-clipboard-list"></i> Notizen-Bereiche</h4>
+                                    
+                                    <div class="notes-areas">
+                                        <div class="area-selection">
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="management-review" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Managementbewertung
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="document-control" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Dokumentenlenkung
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="process-management" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Prozessmanagement
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="risk-opportunities" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Risiken & Chancen
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="objectives" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Ziele & Programme
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="competence" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Kompetenz & Schulung
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="communication" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Kommunikation
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="operational-planning" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Betriebsplanung
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="monitoring" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Überwachung & Messung
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="internal-audit" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Interne Audits
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="nonconformity" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Nichtkonformitäten
+                                            </label>
+                                            <label class="area-option">
+                                                <input type="checkbox" name="notesAreas" value="improvement" onchange="toggleNotesArea(this)">
+                                                <span class="checkmark"></span>
+                                                Kontinuierliche Verbesserung
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Template-Optionen -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-file-alt"></i> Template-Optionen</h4>
+                                    
+                                    <div class="form-group">
+                                        <label for="notesTemplate">Notizen-Template:</label>
+                                        <select id="notesTemplate">
+                                            <option value="standard">Standard (Befunde, Feststellungen, Verbesserungen)</option>
+                                            <option value="detailed">Detailliert (mit Bewertung und Empfehlungen)</option>
+                                            <option value="checklist">Checkliste (strukturierte Prüfpunkte)</option>
+                                            <option value="custom">Benutzerdefiniert</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="includePositive" checked>
+                                            Positive Feststellungen einbeziehen
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="includeRecommendations" checked>
+                                            Verbesserungsempfehlungen einbeziehen
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Audit-Blöcke Konfiguration -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-list"></i> Audit Notizen konfigurieren <small>(optional)</small></h4>
+                                    
+                                    <div class="audit-blocks-section">
+                                        <div class="blocks-header">
+                                            <button type="button" class="btn btn-primary" onclick="addNotesAuditBlock()">
+                                                <i class="fas fa-plus"></i>
+                                                Block hinzufügen
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="info-notice">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>Audit-Notizen sind optional. Sie helfen bei der strukturierten Erstellung von Notizen für spezifische Audit-Bereiche.</span>
+                                        </div>
+                                        
+                                        <div id="notesAuditBlocksContainer" class="audit-blocks">
+                                            <!-- Audit blocks will be dynamically added here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Aktionen -->
+                                <div class="notes-actions">
+                                    <button type="button" class="btn btn-success" onclick="generateAuditNotes()">
+                                        <i class="fas fa-sticky-note"></i>
+                                        Auditnotizen generieren
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearNotesForm()">
+                                        <i class="fas fa-trash"></i>
+                                        Formular zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Generated Notes Display -->
+                            <div id="generatedNotesSection" class="generated-notes-section" style="display: none;">
+                                <div class="notes-header">
+                                    <h4><i class="fas fa-file-alt"></i> Generierte Auditnotizen</h4>
+                                    <div class="notes-actions">
+                                        <button type="button" class="btn btn-success" onclick="saveAuditNotes()">
+                                            <i class="fas fa-save"></i>
+                                            Speichern
+                                        </button>
+                                        <button type="button" class="btn btn-primary" onclick="exportNotesWord()">
+                                            <i class="fas fa-file-word"></i>
+                                            Word Export
+                                        </button>
+                                        <button type="button" class="btn btn-primary" onclick="exportNotesPDF()">
+                                            <i class="fas fa-file-pdf"></i>
+                                            PDF Export
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="printNotes()">
+                                            <i class="fas fa-print"></i>
+                                            Drucken
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="notesContent" class="notes-content">
+                                    <!-- Generated notes will be inserted here -->
                                 </div>
                             </div>
                         </div>
