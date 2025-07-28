@@ -5094,6 +5094,10 @@
                             <i class="fas fa-calendar-check"></i>
                             Auditplan-Generator
                         </button>
+                        <button class="tab-btn" data-tab="audit-report-generator">
+                            <i class="fas fa-file-alt"></i>
+                            Auditbericht Generator
+                        </button>
                         <button class="tab-btn" data-tab="audit-notes-generator">
                             <i class="fas fa-sticky-note"></i>
                             Auditnotizen Generator
@@ -6150,6 +6154,190 @@ Feststellung der Wirksamkeit des Managementsystems in Bezug auf eine begründete
                                 
                                 <div id="auditPlanTable" class="audit-plan-table">
                                     <!-- Generated table will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit Report Generator Tab -->
+                    <div id="audit-report-generator-tab" class="tab-content">
+                        <div class="audit-report-generator">
+                            <div class="report-header">
+                                <div class="header-content">
+                                    <h3><i class="fas fa-file-alt"></i> Auditbericht Generator</h3>
+                                    <p class="section-description">
+                                        Erstellen Sie professionelle Auditberichte basierend auf durchgeführten Audits und Feststellungen
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Configuration Section -->
+                            <div class="report-configuration">
+                                <div class="config-section">
+                                    <h4><i class="fas fa-info-circle"></i> Berichtsdaten</h4>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="reportTitle">Berichtstitel:</label>
+                                            <input type="text" id="reportTitle" placeholder="z.B. ISO 9001:2015 Überwachungsaudit">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reportAuditor">Leitender Auditor:</label>
+                                            <input type="text" id="reportAuditor" placeholder="Name des leitenden Auditors">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="reportClient">Auditierte Organisation:</label>
+                                            <input type="text" id="reportClient" placeholder="Name der Organisation">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reportDate">Auditdatum:</label>
+                                            <input type="date" id="reportDate">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="reportStandards">Audit-Standards:</label>
+                                        <div class="multi-select-container">
+                                            <div class="multi-select-display" onclick="toggleReportStandardsDropdown()">
+                                                <span id="reportStandardsDisplay">Standards auswählen...</span>
+                                                <i class="fas fa-chevron-down"></i>
+                                            </div>
+                                            <div id="reportStandardsDropdown" class="multi-select-dropdown" style="display: none;">
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="reportStandards" value="ISO 9001:2015" onchange="updateReportStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 9001:2015 (Qualitätsmanagement)
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="reportStandards" value="ISO 14001:2015" onchange="updateReportStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 14001:2015 (Umweltmanagement)
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="reportStandards" value="ISO 45001:2018" onchange="updateReportStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 45001:2018 (Arbeitsschutzmanagement)
+                                                </label>
+                                                <label class="multi-select-option">
+                                                    <input type="checkbox" name="reportStandards" value="ISO 50001:2018" onchange="updateReportStandardsDisplay()">
+                                                    <span class="checkmark"></span>
+                                                    ISO 50001:2018 (Energiemanagement)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Report Structure -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-list-ol"></i> Berichtsstruktur</h4>
+                                    
+                                    <div class="report-sections">
+                                        <label class="section-option">
+                                            <input type="checkbox" name="reportSections" value="executive-summary" checked>
+                                            <span class="checkmark"></span>
+                                            Zusammenfassung
+                                        </label>
+                                        <label class="section-option">
+                                            <input type="checkbox" name="reportSections" value="audit-scope" checked>
+                                            <span class="checkmark"></span>
+                                            Audit-Umfang und -Ziele
+                                        </label>
+                                        <label class="section-option">
+                                            <input type="checkbox" name="reportSections" value="methodology" checked>
+                                            <span class="checkmark"></span>
+                                            Audit-Methodik
+                                        </label>
+                                        <label class="section-option">
+                                            <input type="checkbox" name="reportSections" value="findings" checked>
+                                            <span class="checkmark"></span>
+                                            Audit-Feststellungen
+                                        </label>
+                                        <label class="section-option">
+                                            <input type="checkbox" name="reportSections" value="nonconformities" checked>
+                                            <span class="checkmark"></span>
+                                            Nichtkonformitäten
+                                        </label>
+                                        <label class="section-option">
+                                            <input type="checkbox" name="reportSections" value="recommendations" checked>
+                                            <span class="checkmark"></span>
+                                            Empfehlungen
+                                        </label>
+                                        <label class="section-option">
+                                            <input type="checkbox" name="reportSections" value="conclusion">
+                                            <span class="checkmark"></span>
+                                            Schlussfolgerung
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Template Options -->
+                                <div class="config-section">
+                                    <h4><i class="fas fa-file-contract"></i> Berichtsvorlage</h4>
+                                    
+                                    <div class="form-group">
+                                        <label for="reportTemplate">Vorlage:</label>
+                                        <select id="reportTemplate">
+                                            <option value="standard">Standard-Auditbericht</option>
+                                            <option value="certification">Zertifizierungsaudit</option>
+                                            <option value="surveillance">Überwachungsaudit</option>
+                                            <option value="internal">Internes Audit</option>
+                                            <option value="custom">Benutzerdefiniert</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="reportLanguage">Sprache:</label>
+                                        <select id="reportLanguage">
+                                            <option value="de">Deutsch</option>
+                                            <option value="en">English</option>
+                                            <option value="fr">Français</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="report-actions">
+                                    <button type="button" class="btn btn-success" onclick="generateAuditReport()">
+                                        <i class="fas fa-file-alt"></i>
+                                        Auditbericht generieren
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearReportForm()">
+                                        <i class="fas fa-trash"></i>
+                                        Formular zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Generated Report Display -->
+                            <div id="generatedReportSection" class="generated-report-section" style="display: none;">
+                                <div class="report-display-header">
+                                    <h4><i class="fas fa-file-contract"></i> Generierter Auditbericht</h4>
+                                    <div class="report-actions">
+                                        <button type="button" class="btn btn-success" onclick="saveAuditReport()">
+                                            <i class="fas fa-save"></i>
+                                            Speichern
+                                        </button>
+                                        <button type="button" class="btn btn-primary" onclick="exportReportWord()">
+                                            <i class="fas fa-file-word"></i>
+                                            Word Export
+                                        </button>
+                                        <button type="button" class="btn btn-primary" onclick="exportReportPDF()">
+                                            <i class="fas fa-file-pdf"></i>
+                                            PDF Export
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="printReport()">
+                                            <i class="fas fa-print"></i>
+                                            Drucken
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="reportContent" class="report-content">
+                                    <!-- Generated report will be inserted here -->
                                 </div>
                             </div>
                         </div>
